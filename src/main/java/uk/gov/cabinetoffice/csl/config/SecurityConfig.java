@@ -4,18 +4,20 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -23,7 +25,6 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -36,6 +37,8 @@ import java.util.UUID;
 
 @Configuration
 public class SecurityConfig {
+	@Value("${oauth2.redirectUri}")
+	String redirectUri;
 
 	@Bean
 	@Order(1)
@@ -43,7 +46,8 @@ public class SecurityConfig {
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 		http.exceptionHandling(e -> e
-				.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")));
+				.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 		return http.build();
 	}
 
@@ -58,9 +62,8 @@ public class SecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		UserDetails user1 = User.withUsername("user")
-				//.password(passwordEncoder().encode("password"))
-				.password("password")
+		var user1 = User.withUsername("user")
+				.password(passwordEncoder().encode("password"))
 				.authorities("read")
 				.build();
 		return new InMemoryUserDetailsManager(user1);
@@ -68,31 +71,22 @@ public class SecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance();
+		return new BCryptPasswordEncoder();
 	}
 
-//	@Bean
-//	public PasswordEncoder passwordEncoder() {
-//		return new BCryptPasswordEncoder();
-//	}
-	
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
 		RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("client")
-//				.clientSecret(passwordEncoder().encode("secret"))
-				.clientSecret("secret")
+				.clientSecret(passwordEncoder().encode("secret"))
 				.scope("read")
-				.redirectUri("https://oidcdebugger.com/debug")
-				.redirectUri("https://oauthdebugger.com/debug")
-				.redirectUri("https://springone.io/authorized")
-//				.redirectUri("http://127.0.0.1:8080/login/oauth2/code/myoauth2")
+				.scope(OidcScopes.OPENID)
+				.scope(OidcScopes.PROFILE)
+				.redirectUri(redirectUri)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//				.scope(OidcScopes.OPENID)
-//				.scope(OidcScopes.PROFILE)
-//				.clientSettings(clientSettings())
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.clientSettings(clientSettings())
 				.build();
 
 		return new InMemoryRegisteredClientRepository(registeredClient);
@@ -103,23 +97,23 @@ public class SecurityConfig {
 		return AuthorizationServerSettings.builder().build();
 	}
 
-	@Bean
-	TokenSettings tokenSettings() {
-		return TokenSettings.builder().build();
-	}
+//	@Bean
+//	TokenSettings tokenSettings() {
+//		return TokenSettings.builder().build();
+//	}
 		
 	@Bean
 	ClientSettings clientSettings() {
 		return ClientSettings.builder()
 				.requireAuthorizationConsent(false)
-				.requireProofKey(false)
+				.requireProofKey(true)
 				.build();
 	}
-	
-//	@Bean
-//	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-//		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-//	}
+
+	@Bean
+	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+	}
 	
 	@Bean
 	public JWKSource<SecurityContext> jwkSource() {
