@@ -3,10 +3,9 @@ trigger:
     include:
       - master
       - develop
-      - release-v*
-      - idt-release-v*
-      - idt-hotfix-v*
-      - idt-feature-LC-*
+      - release/v*
+      - hotfix/v*
+      - feature/LC-*
   tags:
     include:
       - '*'
