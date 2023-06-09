@@ -21,8 +21,6 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -41,12 +39,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Duration;
 import java.util.UUID;
-
-//import com.nimbusds.jose.jwk.RSAKey;
-//import java.security.KeyPair;
-//import java.security.KeyPairGenerator;
-//import java.security.interfaces.RSAPrivateKey;
-//import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 public class SecurityConfig {
@@ -134,11 +126,6 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public JwtEncoder jwtEncoder() {
-		return new NimbusJwtEncoder(jwkSource());
-	}
-
-	@Bean
 	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
 		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
 	}
@@ -157,28 +144,7 @@ public class SecurityConfig {
 	}
 
 //	@Bean
-//	public JWKSource<SecurityContext> jwkSource() {
-//		RSAKey rsaKey = generateRsa();
-//		JWKSet jwkSet = new JWKSet(rsaKey);
-//		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-//	}
-//
-//	public static RSAKey generateRsa() {
-//		KeyPair keyPair = generateRsaKey();
-//		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-//		RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-//		return new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
-//	}
-//
-//	static KeyPair generateRsaKey() {
-//		KeyPair keyPair;
-//		try {
-//			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-//			keyPairGenerator.initialize(2048);
-//			keyPair = keyPairGenerator.generateKeyPair();
-//		} catch (Exception ex) {
-//			throw new IllegalStateException(ex);
-//		}
-//		return keyPair;
+//	public JwtEncoder jwtEncoder() {
+//		return new NimbusJwtEncoder(jwkSource());
 //	}
 }
