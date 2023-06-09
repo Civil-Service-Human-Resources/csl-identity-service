@@ -4,7 +4,6 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
-//import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,12 +39,14 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.time.Duration;
+import java.util.UUID;
+
+//import com.nimbusds.jose.jwk.RSAKey;
 //import java.security.KeyPair;
 //import java.security.KeyPairGenerator;
 //import java.security.interfaces.RSAPrivateKey;
 //import java.security.interfaces.RSAPublicKey;
-import java.time.Duration;
-import java.util.UUID;
 
 @Configuration
 public class SecurityConfig {
@@ -73,20 +74,6 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
 				.formLogin(Customizer.withDefaults())
 				.build();
-	}
-
-	@Bean
-	public UserDetailsService userDetailsService() {
-		var user1 = User.withUsername("user")
-				.password(passwordEncoder().encode("password"))
-				.authorities("read")
-				.build();
-		return new InMemoryUserDetailsManager(user1);
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
@@ -130,6 +117,20 @@ public class SecurityConfig {
 				.requireAuthorizationConsent(false)
 				.requireProofKey(true)
 				.build();
+	}
+
+	@Bean
+	public UserDetailsService userDetailsService() {
+		var user1 = User.withUsername("user")
+				.password(passwordEncoder().encode("password"))
+				.authorities("read")
+				.build();
+		return new InMemoryUserDetailsManager(user1);
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
