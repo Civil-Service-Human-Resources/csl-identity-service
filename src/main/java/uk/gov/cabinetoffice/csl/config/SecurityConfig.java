@@ -18,9 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -53,46 +54,76 @@ public class SecurityConfig {
 	public SecurityFilterChain asSecurityFilterChain(HttpSecurity http) throws Exception {
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
-		http.exceptionHandling(e -> e
-				.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+		http
+//			.cors(Customizer.withDefaults())
+//			.csrf(AbstractHttpConfigurer::disable)
+//			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.exceptionHandling(e -> e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 		return http.build();
 	}
 
 	@Bean
 	@Order(2)
 	public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
-		return http
-				.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-				.formLogin(Customizer.withDefaults())
-				.build();
+		http
+//			.cors(Customizer.withDefaults())
+//			.csrf(AbstractHttpConfigurer::disable)
+//			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+			.formLogin(Customizer.withDefaults());
+		return http.build();
 	}
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
-		RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("client")
-				.clientSecret(passwordEncoder().encode("secret"))
-				.scope("read")
-				.scope(OidcScopes.OPENID)
-				.scope(OidcScopes.PROFILE)
-				.redirectUri(redirectUri)
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
-				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-				.clientSettings(clientSettings())
-				.tokenSettings(tokenSettings())
-				.build();
-
+		RegisteredClient registeredClient =
+			RegisteredClient.withId(UUID.randomUUID().toString())
+			.clientId("client")
+			.clientSecret(passwordEncoder().encode("secret"))
+			.scope("read")
+//			.scope(OidcScopes.OPENID)
+//			.scope(OidcScopes.PROFILE)
+			.redirectUri(redirectUri)
+			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
+			.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+			.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+			.authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
+//			.authorizationGrantType(AuthorizationGrantType.PASSWORD)
+			.clientSettings(clientSettings())
+			.tokenSettings(tokenSettings())
+			.build();
 		return new InMemoryRegisteredClientRepository(registeredClient);
 	}
 
 	@Bean
 	public AuthorizationServerSettings authorizationServerSettings() {
 		return AuthorizationServerSettings.builder().build();
+	}
+
+	@Bean
+	public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
+		return context -> context.getJwsHeader().algorithm(MacAlgorithm.HS256);
+	}
+
+	@Bean
+	public JWKSource<SecurityContext> jwkSource() {
+		SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HmacSHA256");
+		JWK jwk = new OctetSequenceKey.Builder(secretKey).algorithm(JWSAlgorithm.HS256).build();
+		JWKSet jwkSet = new JWKSet(jwk);
+		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+	}
+
+	@Bean
+	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+	}
+
+	@Bean
+	public JwtEncoder jwtEncoder() {
+		return new NimbusJwtEncoder(jwkSource());
 	}
 
 	@Bean
@@ -124,27 +155,4 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
-	@Bean
-	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-	}
-
-	@Bean
-	public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-		return context -> context.getJwsHeader().algorithm(MacAlgorithm.HS256);
-	}
-
-	@Bean
-	public JWKSource<SecurityContext> jwkSource() {
-		SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HmacSHA256");
-		JWK jwk = new OctetSequenceKey.Builder(secretKey).algorithm(JWSAlgorithm.HS256).build();
-		JWKSet jwkSet = new JWKSet(jwk);
-		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-	}
-
-//	@Bean
-//	public JwtEncoder jwtEncoder() {
-//		return new NimbusJwtEncoder(jwkSource());
-//	}
 }
