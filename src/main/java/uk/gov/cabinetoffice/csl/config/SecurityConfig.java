@@ -6,12 +6,17 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +27,7 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -35,13 +41,17 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Configuration
+@Slf4j
 public class SecurityConfig {
 	@Value("${oauth2.redirectUri}")
 	String redirectUri;
@@ -58,7 +68,12 @@ public class SecurityConfig {
 //			.cors(Customizer.withDefaults())
 //			.csrf(AbstractHttpConfigurer::disable)
 //			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.exceptionHandling(e -> e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+			.exceptionHandling((exceptions) -> exceptions
+				.defaultAuthenticationEntryPointFor(
+					new LoginUrlAuthenticationEntryPoint("/login"),
+					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+				)
+			)
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 		return http.build();
 	}
@@ -70,9 +85,20 @@ public class SecurityConfig {
 //			.cors(Customizer.withDefaults())
 //			.csrf(AbstractHttpConfigurer::disable)
 //			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-			.formLogin(Customizer.withDefaults());
+			.authorizeHttpRequests((authorize) -> authorize
+				.requestMatchers("/error").permitAll()
+				.anyRequest().authenticated())
+			.formLogin(formLogin -> formLogin
+				.loginPage("/login").permitAll()
+			);
 		return http.build();
+	}
+
+	@Bean
+	WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web.debug(false)
+				.ignoring()
+				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
 	}
 
 	@Bean
@@ -104,8 +130,18 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-		return context -> context.getJwsHeader().algorithm(MacAlgorithm.HS256);
+	public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+		return context -> {
+			context.getJwsHeader().algorithm(MacAlgorithm.HS256);
+			Authentication principal = context.getPrincipal();
+			log.debug("principal: {}", principal);
+			if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+				Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+						.collect(Collectors.toSet());
+				log.debug("authorities: {}", authorities);
+				context.getClaims().claim("authorities", authorities);
+			}
+		};
 	}
 
 	@Bean
@@ -129,8 +165,8 @@ public class SecurityConfig {
 	@Bean
 	TokenSettings tokenSettings() {
 		return TokenSettings.builder()
-				.accessTokenTimeToLive(Duration.ofMinutes(3))
-				.refreshTokenTimeToLive(Duration.ofMinutes(5))
+				.accessTokenTimeToLive(Duration.ofMinutes(15))
+				.refreshTokenTimeToLive(Duration.ofMinutes(20))
 				.build();
 	}
 
@@ -147,8 +183,14 @@ public class SecurityConfig {
 		var user1 = User.withUsername("user")
 				.password(passwordEncoder().encode("password"))
 				.authorities("read")
+				.roles("USER")
 				.build();
-		return new InMemoryUserDetailsManager(user1);
+		var user2 = User.withUsername("admin")
+				.password(passwordEncoder().encode("password"))
+				.authorities("read","write")
+				.roles("USER", "ADMIN")
+				.build();
+		return new InMemoryUserDetailsManager(user1, user2);
 	}
 
 	@Bean
