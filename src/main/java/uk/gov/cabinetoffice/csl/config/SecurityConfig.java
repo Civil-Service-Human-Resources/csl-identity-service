@@ -91,7 +91,7 @@ public class SecurityConfig {
 			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 			.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 			.authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-//			.authorizationGrantType(AuthorizationGrantType.PASSWORD)
+			.authorizationGrantType(AuthorizationGrantType.PASSWORD)
 			.clientSettings(clientSettings())
 			.tokenSettings(tokenSettings())
 			.build();
@@ -110,7 +110,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JWKSource<SecurityContext> jwkSource() {
-		SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HmacSHA256");
+		SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HMACSHA256");
 		JWK jwk = new OctetSequenceKey.Builder(secretKey).algorithm(JWSAlgorithm.HS256).build();
 		JWKSet jwkSet = new JWKSet(jwk);
 		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
