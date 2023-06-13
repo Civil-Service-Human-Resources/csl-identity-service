@@ -1,0 +1,44 @@
+trigger:
+  branches:
+    include:
+      - master
+      - develop
+      - release/v*
+      - hotfix/v*
+      - feature/LC-*
+  tags:
+    include:
+      - '*'
+
+variables:
+  - name: acr_repo_suffix
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags') }}:
+      value: 'prod'
+    ${{ else }}:
+      value: 'test'
+
+name: '$(SourceBranchName)-$(Rev:r)'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Maven@4
+    inputs:
+      mavenPOMFile: 'pom.xml'
+      mavenVersionOption: 'Default'
+      jdkVersionOption: '1.17'
+      javaHomeOption: 'JDKVersion'
+      jdkArchitectureOption: 'x64'
+      publishJUnitResults: false
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      goals: 'package'
+    displayName: 'Install Maven@4 and Java@17 and package'
+
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'lpgregistry ACR'
+      repository: 'csl-identity-service/${{ variables.acr_repo_suffix }}'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: '$(Build.SourceBranchName)'
