@@ -110,8 +110,8 @@ public class SecurityConfig {
 			.scopes(scopes -> {
 				scopes.add("read");
 				scopes.add("write");
-//				scopes.add(OidcScopes.OPENID);
-//				scopes.add(OidcScopes.PROFILE);
+				//scopes.add(OidcScopes.OPENID);
+				//scopes.add(OidcScopes.PROFILE);
 			})
 			.redirectUri(redirectUri)
 			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
@@ -136,9 +136,7 @@ public class SecurityConfig {
 	public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
 		OAuth2TokenCustomizer<JwtEncodingContext> customToken = context -> {
 			context.getJwsHeader().algorithm(MacAlgorithm.HS256);
-
 			context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
-
 			Authentication principal = context.getPrincipal();
 			log.debug("principal: {}", principal);
 			if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
@@ -149,7 +147,6 @@ public class SecurityConfig {
 				//if authorities are not blank then set the authorities
 				context.getClaims().claim("authorities", authorities);
 				//if authorities are not blank then set the user_name (extract it from the principal)
-
 				//check if else of principal instanceof UsernamePasswordAuthenticationToken can be used here OR use below if condition
 				//if authorities are blank then set the authorities as CLIENT
 			}
@@ -196,12 +193,12 @@ public class SecurityConfig {
 		var learnerUser = User.withUsername("user@test.com")
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER")
-				//.roles("USER")
+				//.roles("LEARNER")
 				.build();
 		var superUser = User.withUsername("admin@test.com")
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
-				//.roles("USER", "ADMIN")
+				//.roles("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
 				.build();
 		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
