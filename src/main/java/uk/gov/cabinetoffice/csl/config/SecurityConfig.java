@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
@@ -106,9 +107,12 @@ public class SecurityConfig {
 			RegisteredClient.withId(UUID.randomUUID().toString())
 			.clientId("client")
 			.clientSecret(passwordEncoder().encode("secret"))
-			.scope("read")
-//			.scope(OidcScopes.OPENID)
-//			.scope(OidcScopes.PROFILE)
+			.scopes(scopes -> {
+				scopes.add("read");
+				scopes.add("write");
+//				scopes.add(OidcScopes.OPENID);
+//				scopes.add(OidcScopes.PROFILE);
+			})
 			.redirectUri(redirectUri)
 			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
@@ -130,17 +134,27 @@ public class SecurityConfig {
 
 	@Bean
 	public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
-		return context -> {
+		OAuth2TokenCustomizer<JwtEncodingContext> customToken = context -> {
 			context.getJwsHeader().algorithm(MacAlgorithm.HS256);
+
+			context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
+
 			Authentication principal = context.getPrincipal();
 			log.debug("principal: {}", principal);
 			if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+				//check if principal instanceof UsernamePasswordAuthenticationToken
 				Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 						.collect(Collectors.toSet());
 				log.debug("authorities: {}", authorities);
+				//if authorities are not blank then set the authorities
 				context.getClaims().claim("authorities", authorities);
+				//if authorities are not blank then set the user_name (extract it from the principal)
+
+				//check if else of principal instanceof UsernamePasswordAuthenticationToken can be used here OR use below if condition
+				//if authorities are blank then set the authorities as CLIENT
 			}
 		};
+		return customToken;
 	}
 
 	@Bean
@@ -179,17 +193,17 @@ public class SecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		var user1 = User.withUsername("user")
+		var learnerUser = User.withUsername("user@test.com")
 				.password(passwordEncoder().encode("password"))
-				.authorities("read")
-				.roles("USER")
+				.authorities("LEARNER")
+				//.roles("USER")
 				.build();
-		var user2 = User.withUsername("admin")
+		var superUser = User.withUsername("admin@test.com")
 				.password(passwordEncoder().encode("password"))
-				.authorities("read","write")
-				.roles("USER", "ADMIN")
+				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
+				//.roles("USER", "ADMIN")
 				.build();
-		return new InMemoryUserDetailsManager(user1, user2);
+		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
 
 	@Bean
