@@ -22,8 +22,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -51,6 +49,12 @@ import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.springframework.security.oauth2.core.AuthorizationGrantType.*;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_JWT;
+import static org.springframework.security.oauth2.core.oidc.OidcScopes.OPENID;
+import static org.springframework.security.oauth2.core.oidc.OidcScopes.PROFILE;
 
 @Configuration
 @Slf4j
@@ -110,17 +114,17 @@ public class SecurityConfig {
 			.scopes(scopes -> {
 				scopes.add("read");
 				scopes.add("write");
-				//scopes.add(OidcScopes.OPENID);
-				//scopes.add(OidcScopes.PROFILE);
+				scopes.add(OPENID);
+				scopes.add(PROFILE);
 			})
 			.redirectUri(redirectUri)
-			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
-			.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-			.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-			.authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-			.authorizationGrantType(AuthorizationGrantType.PASSWORD)
+			.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+			.clientAuthenticationMethod(CLIENT_SECRET_JWT)
+			.authorizationGrantType(CLIENT_CREDENTIALS)
+			.authorizationGrantType(AUTHORIZATION_CODE)
+			.authorizationGrantType(REFRESH_TOKEN)
+			.authorizationGrantType(JWT_BEARER)
+			.authorizationGrantType(PASSWORD)
 			.clientSettings(clientSettings())
 			.tokenSettings(tokenSettings())
 			.build();
@@ -193,12 +197,10 @@ public class SecurityConfig {
 		var learnerUser = User.withUsername("user@test.com")
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER")
-				//.roles("LEARNER")
 				.build();
 		var superUser = User.withUsername("admin@test.com")
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
-				//.roles("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
 				.build();
 		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
