@@ -103,7 +103,7 @@ public class SecurityConfig {
 
 	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.debug(false)
+		return (web) -> web
 				.ignoring()
 				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
 	}
@@ -151,7 +151,6 @@ public class SecurityConfig {
 					context.getClaims().claim("user_name", principal.getName());
 					Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 							.collect(Collectors.toSet());
-					log.debug("authorities: {}", authorities);
 					context.getClaims().claim("authorities", authorities);
 				} else if(principal instanceof OAuth2ClientAuthenticationToken) {
 					Set<String> authorities = new HashSet<>();
