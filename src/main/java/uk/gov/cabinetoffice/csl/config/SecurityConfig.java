@@ -182,8 +182,8 @@ public class SecurityConfig {
 	@Bean
 	TokenSettings tokenSettings() {
 		return TokenSettings.builder()
-				.accessTokenTimeToLive(Duration.ofMinutes(15))
-				.refreshTokenTimeToLive(Duration.ofMinutes(20))
+				.accessTokenTimeToLive(Duration.ofMinutes(60))
+				.refreshTokenTimeToLive(Duration.ofMinutes(120))
 				.build();
 	}
 
