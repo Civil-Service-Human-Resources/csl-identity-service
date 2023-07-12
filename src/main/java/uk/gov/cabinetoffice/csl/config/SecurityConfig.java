@@ -197,11 +197,11 @@ public class SecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		var learnerUser = User.withUsername("user@test.com")
+		var learnerUser = User.withUsername("learner@test.com")
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER")
 				.build();
-		var superUser = User.withUsername("admin@test.com")
+		var superUser = User.withUsername("superuser@test.com")
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
 				.build();
