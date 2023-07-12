@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -46,6 +48,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -109,8 +112,8 @@ public class SecurityConfig {
 	public RegisteredClientRepository registeredClientRepository() {
 		RegisteredClient registeredClient =
 			RegisteredClient.withId(UUID.randomUUID().toString())
-			.clientId("client")
-			.clientSecret(passwordEncoder().encode("secret"))
+			.clientId("test_client_id")
+			.clientSecret(passwordEncoder().encode("client_secret"))
 			.scopes(scopes -> {
 				scopes.add("read");
 				scopes.add("write");
@@ -143,16 +146,18 @@ public class SecurityConfig {
 			context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
 			Authentication principal = context.getPrincipal();
 			log.debug("principal: {}", principal);
-			if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
-				//check if principal instanceof UsernamePasswordAuthenticationToken
-				Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-						.collect(Collectors.toSet());
-				log.debug("authorities: {}", authorities);
-				//if authorities are not blank then set the authorities
-				context.getClaims().claim("authorities", authorities);
-				//if authorities are not blank then set the user_name (extract it from the principal)
-				//check if else of principal instanceof UsernamePasswordAuthenticationToken can be used here OR use below if condition
-				//if authorities are blank then set the authorities as CLIENT
+			if(OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+				if(principal instanceof UsernamePasswordAuthenticationToken) {
+					context.getClaims().claim("user_name", principal.getName());
+					Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+							.collect(Collectors.toSet());
+					log.debug("authorities: {}", authorities);
+					context.getClaims().claim("authorities", authorities);
+				} else if(principal instanceof OAuth2ClientAuthenticationToken) {
+					Set<String> authorities = new HashSet<>();
+					authorities.add("CLIENT");
+					context.getClaims().claim("authorities", authorities);
+				}
 			}
 		};
 		return customToken;
