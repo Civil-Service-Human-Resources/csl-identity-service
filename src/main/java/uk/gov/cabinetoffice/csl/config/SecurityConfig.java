@@ -141,7 +141,7 @@ public class SecurityConfig {
 
 	@Bean
 	public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
-		OAuth2TokenCustomizer<JwtEncodingContext> customToken = context -> {
+		return context -> {
 			context.getJwsHeader().algorithm(MacAlgorithm.HS256);
 			context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
 			Authentication principal = context.getPrincipal();
@@ -160,7 +160,6 @@ public class SecurityConfig {
 				}
 			}
 		};
-		return customToken;
 	}
 
 	@Bean
