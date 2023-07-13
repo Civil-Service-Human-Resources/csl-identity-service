@@ -62,43 +62,41 @@ import static org.springframework.security.oauth2.core.oidc.OidcScopes.PROFILE;
 @Configuration
 @Slf4j
 public class SecurityConfig {
-	@Value("${oauth2.redirectUri}")
-	String redirectUri;
+
+	@Value("${lpg.uiUrl}")
+	private String lpgUiUrl;
 
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
 
 	@Bean
 	@Order(1)
-	public SecurityFilterChain asSecurityFilterChain(HttpSecurity http) throws Exception {
-		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
-		http
+	public SecurityFilterChain asSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+		httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
+		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
-					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-				)
-			)
+					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-		return http.build();
+		return httpSecurity.build();
 	}
 
 	@Bean
 	@Order(2)
-	public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
+	public SecurityFilterChain appSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers("/error").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login").permitAll()
-			);
-		return http.build();
+				.loginPage("/login").permitAll().defaultSuccessUrl(lpgUiUrl));
+		return httpSecurity.build();
 	}
 
 	@Bean
@@ -118,9 +116,8 @@ public class SecurityConfig {
 				scopes.add("read");
 				scopes.add("write");
 				scopes.add(OPENID);
-				scopes.add(PROFILE);
-			})
-			.redirectUri(redirectUri)
+				scopes.add(PROFILE);})
+			.redirectUri(lpgUiUrl)
 			.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
 			.clientAuthenticationMethod(CLIENT_SECRET_JWT)
 			.authorizationGrantType(CLIENT_CREDENTIALS)
@@ -196,6 +193,11 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
 	public UserDetailsService userDetailsService() {
 		var learnerUser = User.withUsername("learner@test.com")
 				.password(passwordEncoder().encode("password"))
@@ -206,10 +208,5 @@ public class SecurityConfig {
 				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
 				.build();
 		return new InMemoryUserDetailsManager(learnerUser, superUser);
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
 	}
 }
