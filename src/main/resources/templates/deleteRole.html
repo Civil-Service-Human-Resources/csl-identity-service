@@ -1,0 +1,33 @@
+<page th:replace="fragments/layout :: page(~{::title},~{::content})">
+    <title>Delete Role</title>
+
+    <content>
+        <h1>Delete Role</h1>
+        <p>Are you sure you want to delete the following role:</p>
+        <form autocomplete="nope" action="#" th:action="@{/management/roles/delete}" th:object="${role}" method="POST">
+            <label class="d-none" th:for="id">User ID</label>
+            <input type="hidden" th:field="*{id}"/>
+            <table class="table">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Action</th>
+                </tr>
+                <tr>
+                    <td>
+                        <label th:label="name" class="d-none">Name: </label>
+                        <input type="hidden" th:text="${role.name}" th:field="*{name}"/>
+                    </td>
+                    <td>
+                        <label th:label="description" class="d-none">description: </label>
+                        <input type="hidden" th:text="${role.description}" th:field="*{description}"/>
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" href="/management/roles/">Cancel</a>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </content>
+</page>

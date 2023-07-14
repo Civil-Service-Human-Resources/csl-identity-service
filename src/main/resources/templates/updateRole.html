@@ -1,0 +1,33 @@
+<page th:replace="fragments/layout :: page(~{::title},~{::content})">
+    <title>Update Role</title>
+
+    <content>
+        <h1>Update Role</h1>
+
+        <form autocomplete="nope" action="#" th:action="@{/management/roles/update}" th:object="${role}" method="POST">
+            <label class="d-none" th:for="id">User ID</label>
+            <input type="hidden" th:field="*{id}"/>
+
+            <table class="table">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Action</th>
+                </tr>
+                <tr>
+                    <td>
+                        <label class="d-none" th:for="name">Name:</label>
+                        <input type="text" th:field="*{name}"/>
+                    </td>
+                    <td>
+                        <label class="d-none" th:for="description">Description:</label>
+                        <input type="text" th:field="*{description}"/></td>
+                    <td>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </td>
+                </tr>
+            </table>
+
+        </form>
+    </content>
+</page>

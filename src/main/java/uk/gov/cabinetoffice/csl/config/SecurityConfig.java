@@ -7,11 +7,13 @@ import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -22,13 +24,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -42,81 +44,121 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.springframework.security.oauth2.core.AuthorizationGrantType.*;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_JWT;
+import static org.springframework.security.oauth2.core.oidc.OidcScopes.OPENID;
+import static org.springframework.security.oauth2.core.oidc.OidcScopes.PROFILE;
+
 @Configuration
 @Slf4j
 public class SecurityConfig {
-	@Value("${oauth2.redirectUri}")
-	String redirectUri;
+
+	@Value("${lpg.uiUrl}")
+	private String lpgUiUrl;
 
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
 
+	@Autowired
+	CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
 	@Bean
 	@Order(1)
-	public SecurityFilterChain asSecurityFilterChain(HttpSecurity http) throws Exception {
-		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
-		http
+	public SecurityFilterChain asSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+		httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
+		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
-					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-				)
-			)
+					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-		return http.build();
+		return httpSecurity.build();
 	}
 
 	@Bean
 	@Order(2)
-	public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
+	public SecurityFilterChain appSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
-				.requestMatchers("/error").permitAll()
+				.requestMatchers(
+						"/login",
+						"/logout",
+						"/webjars/**",
+						"/static/assets/**",
+						"/signup/**",
+						"/reset/**",
+						"/account/passwordUpdated",
+						"/account/reactivate/**",
+						"/account/verify/agency/**",
+						"/health",
+						"/error").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login").permitAll()
-			);
-		return http.build();
+				.loginPage("/login")
+				.defaultSuccessUrl(lpgUiUrl)
+				.failureHandler(customAuthenticationFailureHandler))
+			.logout(logout -> {
+				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
+				logout.logoutSuccessHandler((request, response, authentication) -> {
+					String redirectUrl = request.getParameter("returnTo");
+					if (redirectUrl == null) {
+						response.sendRedirect("/login");
+					} else {
+						response.sendRedirect(redirectUrl);
+					}}
+				);})
+			.exceptionHandling(exceptions -> exceptions
+					.defaultAuthenticationEntryPointFor(
+							new LoginUrlAuthenticationEntryPoint("/login"),
+							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+		return httpSecurity.build();
 	}
 
 	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.debug(false)
+		return (web) -> web
+				.expressionHandler(new WebSecurityExpressionHandler())
 				.ignoring()
-				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
+				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/static/assets/**", "/favicon-backup.ico");
 	}
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
 		RegisteredClient registeredClient =
 			RegisteredClient.withId(UUID.randomUUID().toString())
-			.clientId("client")
-			.clientSecret(passwordEncoder().encode("secret"))
-			.scope("read")
-//			.scope(OidcScopes.OPENID)
-//			.scope(OidcScopes.PROFILE)
-			.redirectUri(redirectUri)
-			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
-			.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-			.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-			.authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-			.authorizationGrantType(AuthorizationGrantType.PASSWORD)
+			.clientId("test_client_id")
+			.clientSecret(passwordEncoder().encode("client_secret"))
+			.scopes(scopes -> {
+				scopes.add("read");
+				scopes.add("write");
+				scopes.add(OPENID);
+				scopes.add(PROFILE);})
+			.redirectUri(lpgUiUrl)
+			.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+			.clientAuthenticationMethod(CLIENT_SECRET_JWT)
+			.authorizationGrantType(CLIENT_CREDENTIALS)
+			.authorizationGrantType(AUTHORIZATION_CODE)
+			.authorizationGrantType(REFRESH_TOKEN)
+			.authorizationGrantType(JWT_BEARER)
+			.authorizationGrantType(PASSWORD)
 			.clientSettings(clientSettings())
 			.tokenSettings(tokenSettings())
 			.build();
@@ -132,13 +174,20 @@ public class SecurityConfig {
 	public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
 		return context -> {
 			context.getJwsHeader().algorithm(MacAlgorithm.HS256);
+			context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
 			Authentication principal = context.getPrincipal();
 			log.debug("principal: {}", principal);
-			if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
-				Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-						.collect(Collectors.toSet());
-				log.debug("authorities: {}", authorities);
-				context.getClaims().claim("authorities", authorities);
+			if(OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+				if(principal instanceof UsernamePasswordAuthenticationToken) {
+					context.getClaims().claim("user_name", principal.getName());
+					Set<String> authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+							.collect(Collectors.toSet());
+					context.getClaims().claim("authorities", authorities);
+				} else if(principal instanceof OAuth2ClientAuthenticationToken) {
+					Set<String> authorities = new HashSet<>();
+					authorities.add("CLIENT");
+					context.getClaims().claim("authorities", authorities);
+				}
 			}
 		};
 	}
@@ -164,8 +213,8 @@ public class SecurityConfig {
 	@Bean
 	TokenSettings tokenSettings() {
 		return TokenSettings.builder()
-				.accessTokenTimeToLive(Duration.ofMinutes(15))
-				.refreshTokenTimeToLive(Duration.ofMinutes(20))
+				.accessTokenTimeToLive(Duration.ofMinutes(60))
+				.refreshTokenTimeToLive(Duration.ofMinutes(120))
 				.build();
 	}
 
@@ -178,22 +227,20 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public UserDetailsService userDetailsService() {
-		var user1 = User.withUsername("user")
-				.password(passwordEncoder().encode("password"))
-				.authorities("read")
-				.roles("USER")
-				.build();
-		var user2 = User.withUsername("admin")
-				.password(passwordEncoder().encode("password"))
-				.authorities("read","write")
-				.roles("USER", "ADMIN")
-				.build();
-		return new InMemoryUserDetailsManager(user1, user2);
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+	public UserDetailsService userDetailsService() {
+		var learnerUser = User.withUsername("learner@test.com")
+				.password(passwordEncoder().encode("password"))
+				.authorities("LEARNER")
+				.build();
+		var superUser = User.withUsername("superuser@test.com")
+				.password(passwordEncoder().encode("password"))
+				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
+				.build();
+		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
 }

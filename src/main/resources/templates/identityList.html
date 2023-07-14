@@ -1,0 +1,41 @@
+<page th:replace="fragments/layout :: page(~{::title},~{::content})">
+    <title>Identity Management</title>
+    <content>
+        <h1>List of Identities</h1>
+        <br/>
+        <form autocomplete="nope" action="#" th:action="@{/management}" th:object="${identity}" method="post">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Active</th>
+                        <th scope="col">Locked</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Roles</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="identity : ${identities}">
+                        <td>
+                            <input type="checkbox" th:checked="${identity.active}" disabled="disabled">
+                        </td>
+                        <td>
+                            <input type="checkbox" th:checked="${identity.locked}" disabled="disabled">
+                        </td>
+                        <td th:text="${identity.email}"></td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <li th:each="role : ${identity.roles}" th:text="${role.name}"></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" th:href="@{|/management/identities/update/${identity.uid}|}">
+                                Update
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </content>
+</page>
