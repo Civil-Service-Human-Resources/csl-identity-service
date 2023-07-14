@@ -1,0 +1,46 @@
+<page th:replace="fragments/layout :: page(~{::title},~{::content})">
+    <title>Update Identity</title>
+
+    <content>
+        <h1>Update Identity</h1>
+
+        <form autocomplete="nope" action="#" th:action="@{/management/identities/update}" th:object="${identity}" method="POST">
+            <input type="hidden" th:field="*{uid}" /></p>
+            <table class="table">
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Roles</th>
+                    <th scope="col">Active</th>
+                    <th scope="col">Locked</th>
+                    <th scope="col">Action</th>
+                </tr>
+                <tr>
+                    <td th:text="${identity.email}"></td>
+                    <td>
+                        <label class="d-none" th:for="RoleId">RoleId:</label>
+                        <select class="form-control"  multiple name="roleId" id="roleId">
+                            <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}" th:selected="${identity.getRoles().contains(role)}"></option>
+                        </select>
+                    </td>
+                    <td>
+                        <label class="d-none" th:for="active">Active:</label>
+                        <input  type="checkbox" th:field="*{active}" th:checked="${identity.active}">
+                    </td>
+                    <td>
+                        <label class="d-none" th:for="locked">Locked:</label>
+                        <input type="checkbox" th:field="*{locked}" th:checked="${identity.locked}">
+                    </td>
+                    <td><button type="submit" class="btn btn-primary">Update</button></td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <a class="btn btn-primary" href="/management/identities">
+                            Cancel
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+        </form>
+    </content>
+</page>

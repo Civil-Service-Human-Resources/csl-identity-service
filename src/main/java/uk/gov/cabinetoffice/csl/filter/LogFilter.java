@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.config;
+package uk.gov.cabinetoffice.csl.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,0 +1,35 @@
+<page th:replace="fragments/layout :: page(~{::title},~{::content})">
+    <title>Role Management</title>
+
+    <content>
+        <h1>List of Roles</h1>
+        <br/>
+        <form autocomplete="nope" action="#" th:action="@{/management/roles/create}" th:object="${role}" method="post">
+        <table class="table">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Action</th>
+            </tr>
+
+            <tr th:each="role : ${roles}">
+                <td th:text="${role.name}"></td>
+                <td th:text="${role.description}"></td>
+                <td align="right" nowrap >
+                    <a class="btn btn-primary" th:href="@{|/management/roles/update/${role.id}|}">
+                        Update
+                    </a>
+                    <a class="btn btn-danger" th:href="@{|/management/roles/delete/${role.id}|}">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><input  class="form-control" type="text" th:field="*{name}" /></td>
+                <td><input  class="form-control" type="text" th:field="*{description}" /></td>
+                <td align="right"><button type="submit" class="btn btn-primary">Create</button></td>
+            </tr>
+        </table>
+        </form>
+    </content>
+</page>

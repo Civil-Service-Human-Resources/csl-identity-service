@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +44,9 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -69,6 +72,9 @@ public class SecurityConfig {
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
 
+	@Autowired
+	CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
 	@Bean
 	@Order(1)
 	public SecurityFilterChain asSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -92,18 +98,46 @@ public class SecurityConfig {
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
-				.requestMatchers("/error").permitAll()
+				.requestMatchers(
+						"/login",
+						"/logout",
+						"/webjars/**",
+						"/static/assets/**",
+						"/signup/**",
+						"/reset/**",
+						"/account/passwordUpdated",
+						"/account/reactivate/**",
+						"/account/verify/agency/**",
+						"/health",
+						"/error").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login").permitAll().defaultSuccessUrl(lpgUiUrl));
+				.loginPage("/login")
+				.defaultSuccessUrl(lpgUiUrl)
+				.failureHandler(customAuthenticationFailureHandler))
+			.logout(logout -> {
+				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
+				logout.logoutSuccessHandler((request, response, authentication) -> {
+					String redirectUrl = request.getParameter("returnTo");
+					if (redirectUrl == null) {
+						response.sendRedirect("/login");
+					} else {
+						response.sendRedirect(redirectUrl);
+					}}
+				);})
+			.exceptionHandling(exceptions -> exceptions
+					.defaultAuthenticationEntryPointFor(
+							new LoginUrlAuthenticationEntryPoint("/login"),
+							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 		return httpSecurity.build();
 	}
 
 	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
+				.expressionHandler(new WebSecurityExpressionHandler())
 				.ignoring()
-				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
+				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/static/assets/**", "/favicon-backup.ico");
 	}
 
 	@Bean

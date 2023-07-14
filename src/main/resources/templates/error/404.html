@@ -1,19 +1,17 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>404 - Not Found</title>
-    </head>
-    <body>
+<page th:replace="fragments/user-layout :: page(~{::title},~{::content})">
+  <title>Content not found</title>
 
-        <h2>404 - Not Found</h2>
-
-        <p>
-            404 - Not Found; template - specific
-        </p>
-
-        <p th:text="${error}">Error Info</p>
-        <p th:text="${status}">Status</p>
-
-    </body>
-</html>
+  <content>
+    <div class="container">
+      <div class="grid-row">
+        <div class="column-two-thirds">
+          <h1 class="heading-xlarge">Sorry, there is a problem with the service</h1>
+          <p class="body">Try again later.</p>
+          <p class="body">
+            <a class="link" href="/login">Login again</a> to access the Learning Platform for Government.
+          </p>
+        </div>
+      </div>
+    </div>
+  </content>
+</page>
