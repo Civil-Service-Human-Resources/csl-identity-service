@@ -72,6 +72,22 @@ public class SecurityConfig {
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
 
+	@Value("${oauth2.accessTokenTTLSeconds}")
+	private Long accessTokenTTLSeconds;
+
+	@Value("${oauth2.refreshTokenTTLSeconds}")
+	private Long refreshTokenTTLSeconds;
+
+	//TODO: Remove following properties after initial development testing
+	@Value("${identity.test_client_id}")
+	private String testClientId;
+	@Value("${identity.learner_user_id}")
+	private String learnerUserId;
+	@Value("${identity.admin_user_id}")
+	private String adminUserId;
+	@Value("${identity.admin_user_roles}")
+	private String adminUserRoles;
+
 	@Autowired
 	CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
@@ -144,8 +160,8 @@ public class SecurityConfig {
 	public RegisteredClientRepository registeredClientRepository() {
 		RegisteredClient registeredClient =
 			RegisteredClient.withId(UUID.randomUUID().toString())
-			.clientId("test_client_id")
-			.clientSecret(passwordEncoder().encode("client_secret"))
+			.clientId(testClientId)
+			.clientSecret(passwordEncoder().encode("secret"))
 			.scopes(scopes -> {
 				scopes.add("read");
 				scopes.add("write");
@@ -213,8 +229,8 @@ public class SecurityConfig {
 	@Bean
 	TokenSettings tokenSettings() {
 		return TokenSettings.builder()
-				.accessTokenTimeToLive(Duration.ofMinutes(60))
-				.refreshTokenTimeToLive(Duration.ofMinutes(120))
+				.accessTokenTimeToLive(Duration.ofSeconds(accessTokenTTLSeconds))
+				.refreshTokenTimeToLive(Duration.ofSeconds(refreshTokenTTLSeconds))
 				.build();
 	}
 
@@ -233,13 +249,13 @@ public class SecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		var learnerUser = User.withUsername("learner@test.com")
+		var learnerUser = User.withUsername(learnerUserId)
 				.password(passwordEncoder().encode("password"))
 				.authorities("LEARNER")
 				.build();
-		var superUser = User.withUsername("superuser@test.com")
+		var superUser = User.withUsername(adminUserId)
 				.password(passwordEncoder().encode("password"))
-				.authorities("LEARNER","LEARNING_MANAGER","IDENTITY_MANAGER","CSHR_REPORTER","DOWNLOAD_BOOKING_FEED")
+				.authorities(adminUserRoles.split(","))
 				.build();
 		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
