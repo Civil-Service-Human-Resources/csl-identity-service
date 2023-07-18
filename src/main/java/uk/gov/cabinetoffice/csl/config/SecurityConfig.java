@@ -78,10 +78,16 @@ public class SecurityConfig {
 	//TODO: Remove following properties after initial development testing
 	@Value("${identity.test_client_id}")
 	private String testClientId;
+	@Value("${identity.test_client_secret}")
+	private String testClientSecret;
 	@Value("${identity.learner_user_id}")
 	private String learnerUserId;
+	@Value("${identity.learner_user_password}")
+	private String learnerUserPassword;
 	@Value("${identity.admin_user_id}")
 	private String adminUserId;
+	@Value("${identity.admin_user_password}")
+	private String adminUserPassword;
 	@Value("${identity.admin_user_roles}")
 	private String adminUserRoles;
 
@@ -127,7 +133,7 @@ public class SecurityConfig {
 		RegisteredClient registeredClient =
 			RegisteredClient.withId(UUID.randomUUID().toString())
 			.clientId(testClientId)
-			.clientSecret(passwordEncoder().encode("secret"))
+			.clientSecret(passwordEncoder().encode(testClientSecret))
 			.scopes(scopes -> {
 				scopes.add("read");
 				scopes.add("write");
@@ -216,12 +222,12 @@ public class SecurityConfig {
 	@Bean
 	public UserDetailsService userDetailsService() {
 		var learnerUser = User.withUsername(learnerUserId)
-				.password(passwordEncoder().encode("password"))
+				.password(passwordEncoder().encode(learnerUserPassword))
 				.authorities("LEARNER")
 				.build();
 		var superUser = User.withUsername(adminUserId)
-				.password(passwordEncoder().encode("password"))
-				.authorities(adminUserRoles.split(","))
+				.password(passwordEncoder().encode(adminUserPassword))
+				.authorities(adminUserRoles.split("\\s*,\\s*"))
 				.build();
 		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
