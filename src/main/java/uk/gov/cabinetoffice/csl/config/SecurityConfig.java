@@ -48,6 +48,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -75,20 +76,23 @@ public class SecurityConfig {
 	@Value("${oauth2.refreshTokenTTLSeconds}")
 	private Long refreshTokenTTLSeconds;
 
+	@Value("${oauth2.scope}")
+	private String accessTokenScope;
+
 	//TODO: Remove following properties after initial development testing
-	@Value("${identity.test_client_id}")
+	@Value("${test.client_id}")
 	private String testClientId;
-	@Value("${identity.test_client_secret}")
+	@Value("${test.client_secret}")
 	private String testClientSecret;
-	@Value("${identity.learner_user_id}")
+	@Value("${test.learner_user_id}")
 	private String learnerUserId;
-	@Value("${identity.learner_user_password}")
+	@Value("${test.learner_user_password}")
 	private String learnerUserPassword;
-	@Value("${identity.admin_user_id}")
+	@Value("${test.admin_user_id}")
 	private String adminUserId;
-	@Value("${identity.admin_user_password}")
+	@Value("${test.admin_user_password}")
 	private String adminUserPassword;
-	@Value("${identity.admin_user_roles}")
+	@Value("${test.admin_user_roles}")
 	private String adminUserRoles;
 
 	@Bean
@@ -163,6 +167,9 @@ public class SecurityConfig {
 		return context -> {
 			context.getJwsHeader().algorithm(MacAlgorithm.HS256);
 			context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
+			Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
+			context.getClaims().claim("scope", scopes);
+			context.getClaims().claim("scopes", scopes);
 			Authentication principal = context.getPrincipal();
 			log.debug("principal: {}", principal);
 			if(OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
