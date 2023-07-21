@@ -137,12 +137,7 @@ public class SecurityConfig {
 				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
 				logout.logoutSuccessHandler((request, response, authentication) -> {
 					String redirectUrl = request.getParameter("returnTo");
-					if (redirectUrl == null) {
-						response.sendRedirect("/login");
-					} else {
-						response.sendRedirect(redirectUrl);
-					}}
-				);})
+					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));});})
 			.exceptionHandling(exceptions -> exceptions
 					.defaultAuthenticationEntryPointFor(
 							new LoginUrlAuthenticationEntryPoint("/login"),
