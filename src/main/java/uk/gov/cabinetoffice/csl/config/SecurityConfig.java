@@ -117,10 +117,13 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers(
+						"/webjars/**",
+						"/images/**",
+						"/css/**",
+						"/assets/**",
+						"/favicon-backup.ico",
 						"/login",
 						"/logout",
-						"/webjars/**",
-						"/static/assets/**",
 						"/signup/**",
 						"/reset/**",
 						"/account/passwordUpdated",
@@ -149,8 +152,7 @@ public class SecurityConfig {
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler())
-				.ignoring()
-				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/static/assets/**", "/favicon-backup.ico");
+				.ignoring().requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon-backup.ico");
 	}
 
 	@Bean
