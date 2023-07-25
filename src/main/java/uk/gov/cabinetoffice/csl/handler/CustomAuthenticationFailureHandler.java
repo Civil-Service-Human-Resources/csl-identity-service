@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.config;
+package uk.gov.cabinetoffice.csl.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +37,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is deactivated"):
                 String username = request.getParameter("username");
                 String encryptedUsername = TextEncryptionUtils.getEncryptedText(username, encryptionKey);
-
                 response.sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
                 break;
             case("Pending reactivation already exists for user"):

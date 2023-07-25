@@ -39,9 +39,8 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
-import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
+import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -55,6 +54,8 @@ import static org.springframework.security.oauth2.core.ClientAuthenticationMetho
 
 @Configuration
 public class SecurityConfig {
+
+	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
 	@Value("${lpg.uiUrl}")
 	private String lpgUiUrl;
@@ -89,8 +90,9 @@ public class SecurityConfig {
 	@Value("${test.admin_user_roles}")
 	private String adminUserRoles;
 
-//	@Autowired
-//	CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+	public SecurityConfig(CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
+	}
 
 	@Bean
 	@Order(1)
@@ -132,8 +134,10 @@ public class SecurityConfig {
 						"/error").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login").permitAll().defaultSuccessUrl(lpgUiUrl));
-//				.failureHandler(customAuthenticationFailureHandler))
+				.loginPage("/login").permitAll()
+				.failureHandler(customAuthenticationFailureHandler)
+				.defaultSuccessUrl(lpgUiUrl)
+			);
 //			.logout(logout -> {
 //				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
 //				logout.logoutSuccessHandler((request, response, authentication) -> {
