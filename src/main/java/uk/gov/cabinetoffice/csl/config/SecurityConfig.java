@@ -150,7 +150,8 @@ public class SecurityConfig {
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
 				//.expressionHandler(new WebSecurityExpressionHandler())
-				.ignoring().requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
+				.ignoring()
+				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
 	}
 
 	@Bean
