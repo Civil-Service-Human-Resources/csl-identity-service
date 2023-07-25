@@ -132,8 +132,7 @@ public class SecurityConfig {
 						"/error").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login").permitAll()
-				.defaultSuccessUrl(lpgUiUrl));
+				.loginPage("/login").permitAll().defaultSuccessUrl(lpgUiUrl));
 //				.failureHandler(customAuthenticationFailureHandler))
 //			.logout(logout -> {
 //				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
