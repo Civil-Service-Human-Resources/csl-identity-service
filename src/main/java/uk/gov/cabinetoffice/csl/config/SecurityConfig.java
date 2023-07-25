@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 
@@ -137,12 +138,14 @@ public class SecurityConfig {
 				.loginPage("/login").permitAll()
 				.failureHandler(customAuthenticationFailureHandler)
 				.defaultSuccessUrl(lpgUiUrl)
-			);
-//			.logout(logout -> {
-//				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
-//				logout.logoutSuccessHandler((request, response, authentication) -> {
-//					String redirectUrl = request.getParameter("returnTo");
-//					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));});})
+			)
+			.logout(logout -> {
+				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
+				logout.logoutSuccessHandler((request, response, authentication) -> {
+					String redirectUrl = request.getParameter("returnTo");
+					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
+				);
+			});
 //			.exceptionHandling(exceptions -> exceptions
 //					.defaultAuthenticationEntryPointFor(
 //							new LoginUrlAuthenticationEntryPoint("/login"),
