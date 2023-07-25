@@ -6,7 +6,6 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -90,8 +89,8 @@ public class SecurityConfig {
 	@Value("${test.admin_user_roles}")
 	private String adminUserRoles;
 
-	@Autowired
-	CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+//	@Autowired
+//	CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
 	@Bean
 	@Order(1)
@@ -133,26 +132,26 @@ public class SecurityConfig {
 						"/error").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login")
-				.defaultSuccessUrl(lpgUiUrl)
-				.failureHandler(customAuthenticationFailureHandler))
-			.logout(logout -> {
-				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
-				logout.logoutSuccessHandler((request, response, authentication) -> {
-					String redirectUrl = request.getParameter("returnTo");
-					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));});})
-			.exceptionHandling(exceptions -> exceptions
-					.defaultAuthenticationEntryPointFor(
-							new LoginUrlAuthenticationEntryPoint("/login"),
-							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+				.loginPage("/login").permitAll()
+				.defaultSuccessUrl(lpgUiUrl));
+//				.failureHandler(customAuthenticationFailureHandler))
+//			.logout(logout -> {
+//				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
+//				logout.logoutSuccessHandler((request, response, authentication) -> {
+//					String redirectUrl = request.getParameter("returnTo");
+//					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));});})
+//			.exceptionHandling(exceptions -> exceptions
+//					.defaultAuthenticationEntryPointFor(
+//							new LoginUrlAuthenticationEntryPoint("/login"),
+//							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 		return httpSecurity.build();
 	}
 
 	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
-				.expressionHandler(new WebSecurityExpressionHandler())
-				.ignoring().requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon-backup.ico");
+				//.expressionHandler(new WebSecurityExpressionHandler())
+				.ignoring().requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
 	}
 
 	@Bean
