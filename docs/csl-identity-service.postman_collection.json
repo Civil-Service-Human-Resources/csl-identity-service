@@ -1,0 +1,486 @@
+{
+	"info": {
+		"_postman_id": "78a6d7e4-6b5e-4dd2-8eb5-e15a923640df",
+		"name": "csl-identity-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auth-server-end-points",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/.well-known/oauth-authorization-server",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						".well-known",
+						"oauth-authorization-server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-openid-configuration",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/.well-known/openid-configuration",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						".well-known",
+						"openid-configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-jwks-public-key",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/oauth2/jwks",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"oauth2",
+						"jwks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-oauth2-service-token",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{client-secret}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{client-id}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "default"
+						},
+						{
+							"key": "scope",
+							"value": "",
+							"type": "default",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{csl-identity-base-url}}/oauth2/token",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-oauth2-introspect",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{client-secret}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{client-id}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "token",
+							"value": "token-value",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{csl-identity-base-url}}/oauth2/introspect",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"oauth2",
+						"introspect"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-oauth2-userinfo",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{client-secret}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{client-id}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "token",
+							"value": "token-value",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{csl-identity-base-url}}/userinfo",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"userinfo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-oauth2-revoke",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{client-secret}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{client-id}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "token",
+							"value": "token-value",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{csl-identity-base-url}}/oauth2/revoke",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"oauth2",
+						"revoke"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-oauth2-logout",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{client-secret}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{client-id}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "token",
+							"value": "token-value",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{csl-identity-base-url}}/connect/logout",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"connect",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-actuator-health",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{actuator-csl-identity-base-url}}/health",
+					"host": [
+						"{{actuator-csl-identity-base-url}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-actuator-info",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{actuator-csl-identity-base-url}}/info",
+					"host": [
+						"{{actuator-csl-identity-base-url}}"
+					],
+					"path": [
+						"info"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "clientSecret",
+				"value": "{{client-secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{client-id}}",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{access-token-url}}",
+				"type": "string"
+			},
+			{
+				"key": "authUrl",
+				"value": "{{auth-url}}",
+				"type": "string"
+			},
+			{
+				"key": "redirect_uri",
+				"value": "{{callback-url}}",
+				"type": "string"
+			},
+			{
+				"key": "state",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "scope",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "authorization_code_with_pkce",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "adminuser@test.com",
+				"type": "string"
+			},
+			{
+				"key": "headerPrefix",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "useBrowser",
+				"value": false,
+				"type": "boolean"
+			},
+			{
+				"key": "password",
+				"value": "password",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "usertoken",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "csl-identity-base-url",
+			"value": "{{local-csl-identity-base-url}}",
+			"type": "default"
+		},
+		{
+			"key": "callback-url",
+			"value": "{{local-lpg-ui-url}}",
+			"type": "default"
+		},
+		{
+			"key": "auth-url",
+			"value": "{{csl-identity-base-url}}/oauth2/authorize",
+			"type": "default"
+		},
+		{
+			"key": "access-token-url",
+			"value": "{{csl-identity-base-url}}/oauth2/token",
+			"type": "default"
+		},
+		{
+			"key": "actuator-csl-identity-base-url",
+			"value": "{{csl-identity-base-url}}/manage",
+			"type": "default"
+		},
+		{
+			"key": "remote-csl-identity-base-url",
+			"value": "https://INTEGRATION-CSL-IDENTITY",
+			"type": "default"
+		},
+		{
+			"key": "remote-lpg-ui-url",
+			"value": "https://INTEGRATION-LPG-UI",
+			"type": "default"
+		},
+		{
+			"key": "local-csl-identity-base-url",
+			"value": "http://localhost:9005",
+			"type": "default"
+		},
+		{
+			"key": "local-lpg-ui-url",
+			"value": "http://localhost:3001",
+			"type": "default"
+		},
+		{
+			"key": "client-id",
+			"value": "CLIENT-ID",
+			"type": "default"
+		},
+		{
+			"key": "client-secret",
+			"value": "CLIENT-SECRET",
+			"type": "default"
+		}
+	]
+}
