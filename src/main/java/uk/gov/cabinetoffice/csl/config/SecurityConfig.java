@@ -150,7 +150,7 @@ public class SecurityConfig {
 					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
 				);
 			});
-			//TODO: Below commented code will be used for the future tickets.
+			//TODO: Below commented code will be removed if not used for future tickets.
 			//.exceptionHandling(exceptions -> exceptions
 			//		.defaultAuthenticationEntryPointFor(
 			//				new LoginUrlAuthenticationEntryPoint("/login"),
@@ -162,7 +162,7 @@ public class SecurityConfig {
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler());
-				//TODO: Below commented code will be used for the future tickets.
+				//TODO: Below commented code will be removed if not used for future tickets.
 				//.ignoring()
 				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}
