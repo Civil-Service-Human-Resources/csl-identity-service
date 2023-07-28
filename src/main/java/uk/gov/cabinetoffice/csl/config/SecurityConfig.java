@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,6 +42,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
+import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -157,13 +159,13 @@ public class SecurityConfig {
 	}
 
 //TODO: Below commented code will be used for the future tickets.
-//	@Bean
-//	WebSecurityCustomizer webSecurityCustomizer() {
-//		return (web) -> web
-//				.expressionHandler(new WebSecurityExpressionHandler())
-//				.ignoring()
-//				.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
-//	}
+	@Bean
+	WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web
+				.expressionHandler(new WebSecurityExpressionHandler());
+				//.ignoring()
+				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
+	}
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
