@@ -77,7 +77,7 @@ public class SecurityConfig {
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
 
-	//TODO: Remove following properties after Database implementation
+	//TODO: Below test properties will be removed after database implementation
 	@Value("${test.redirectUri}")
 	private String testRedirectUri;
 	@Value("${test.client_id}")
