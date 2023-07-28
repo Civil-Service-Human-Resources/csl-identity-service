@@ -121,12 +121,12 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers(
-						actuatorBasePath + "/**",
 						"/webjars/**",
-						"/images/**",
-						"/css/**",
 						"/assets/**",
-						"/favicon-backup.ico",
+						"/css/**",
+						"/img/**",
+						"/favicon.ico",
+						"/error",
 						"/login",
 						"/logout",
 						"/signup/**",
@@ -134,8 +134,7 @@ public class SecurityConfig {
 						"/account/passwordUpdated",
 						"/account/reactivate/**",
 						"/account/verify/agency/**",
-						"/health",
-						"/error").permitAll()
+						actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
 				.loginPage("/login").permitAll()
@@ -163,7 +162,7 @@ public class SecurityConfig {
 //		return (web) -> web
 //				.expressionHandler(new WebSecurityExpressionHandler())
 //				.ignoring()
-//				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
+//				.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 //	}
 
 	@Bean
