@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -60,6 +59,9 @@ public class SecurityConfig {
 
 	@Value("${lpg.uiUrl}")
 	private String lpgUiUrl;
+
+	@Value("${management.endpoints.web.base-path}")
+	private String actuatorBasePath;
 
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
@@ -119,6 +121,7 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers(
+						actuatorBasePath + "/**",
 						"/webjars/**",
 						"/images/**",
 						"/css/**",
@@ -153,13 +156,13 @@ public class SecurityConfig {
 		return httpSecurity.build();
 	}
 
-	@Bean
-	WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web
-				//.expressionHandler(new WebSecurityExpressionHandler())
-				.ignoring()
-				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
-	}
+//	@Bean
+//	WebSecurityCustomizer webSecurityCustomizer() {
+//		return (web) -> web
+//				.expressionHandler(new WebSecurityExpressionHandler())
+//				.ignoring()
+//				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
+//	}
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
