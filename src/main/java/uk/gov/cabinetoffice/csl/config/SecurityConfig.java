@@ -149,6 +149,7 @@ public class SecurityConfig {
 					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
 				);
 			});
+//TODO: Below commented code will be used for the future tickets.
 //			.exceptionHandling(exceptions -> exceptions
 //					.defaultAuthenticationEntryPointFor(
 //							new LoginUrlAuthenticationEntryPoint("/login"),
@@ -156,6 +157,7 @@ public class SecurityConfig {
 		return httpSecurity.build();
 	}
 
+//TODO: Below commented code will be used for the future tickets.
 //	@Bean
 //	WebSecurityCustomizer webSecurityCustomizer() {
 //		return (web) -> web
