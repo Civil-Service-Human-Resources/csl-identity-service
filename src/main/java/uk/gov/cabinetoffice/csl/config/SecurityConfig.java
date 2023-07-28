@@ -150,19 +150,19 @@ public class SecurityConfig {
 					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
 				);
 			});
-//TODO: Below commented code will be used for the future tickets.
-//			.exceptionHandling(exceptions -> exceptions
-//					.defaultAuthenticationEntryPointFor(
-//							new LoginUrlAuthenticationEntryPoint("/login"),
-//							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+			//TODO: Below commented code will be used for the future tickets.
+			//.exceptionHandling(exceptions -> exceptions
+			//		.defaultAuthenticationEntryPointFor(
+			//				new LoginUrlAuthenticationEntryPoint("/login"),
+			//				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 		return httpSecurity.build();
 	}
 
-//TODO: Below commented code will be used for the future tickets.
 	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler());
+				//TODO: Below commented code will be used for the future tickets.
 				//.ignoring()
 				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}
@@ -219,7 +219,7 @@ public class SecurityConfig {
 					authorities.add("CLIENT");
 				}
 				context.getClaims().claim("authorities", authorities);
-				//audience is set to null to make the access token backward compatible with all the existing backend services
+				//Audience is set to null to make the access token backward compatible with all the existing backend services
 				context.getClaims().audience(new ArrayList<>());
 			}
 		};
