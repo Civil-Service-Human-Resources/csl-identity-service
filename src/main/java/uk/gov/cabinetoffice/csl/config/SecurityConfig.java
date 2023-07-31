@@ -131,11 +131,6 @@ public class SecurityConfig {
 						"/error",
 						"/login",
 						"/logout",
-						"/signup/**",
-						"/reset/**",
-						"/account/passwordUpdated",
-						"/account/reactivate/**",
-						"/account/verify/agency/**",
 						actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
