@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
@@ -31,13 +32,13 @@ public class LoginController {
   private String maintenancePageContentLine4;
 
   @RequestMapping("/login")
-  public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 
     if(maintenancePageEnabled) {
-      request.setAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-      request.setAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-      request.setAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-      request.setAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+      model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
+      model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
+      model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
+      model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
       return "maintenance";
     }
 
