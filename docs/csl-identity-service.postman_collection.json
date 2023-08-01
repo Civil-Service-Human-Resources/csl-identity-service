@@ -50,6 +50,9 @@
 		{
 			"name": "auth-server-jwks-public-key",
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -195,6 +198,23 @@
 					"path": [
 						"oauth2",
 						"revoke"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-oauth2-userinfo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/userinfo",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"userinfo"
 					]
 				}
 			},
