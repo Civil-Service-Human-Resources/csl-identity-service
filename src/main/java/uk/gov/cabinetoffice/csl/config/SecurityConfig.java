@@ -129,15 +129,10 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
 				.requestMatchers(
-						"/webjars/**",
-						"/assets/**",
-						"/css/**",
-						"/img/**",
-						"/favicon.ico",
-						"/error",
-						"/login",
-						"/logout",
-						actuatorBasePath + "/**").permitAll()
+					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
+					"/error",
+					"/login", "/logout",
+					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
 				.loginPage("/login").permitAll()
