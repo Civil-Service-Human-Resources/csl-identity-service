@@ -77,6 +77,12 @@ public class SecurityConfig {
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
 
+	@Value("${oauth2.requireAuthorizationConsent}")
+	private Boolean requireAuthorizationConsent;
+
+	@Value("${oauth2.requirePKCE}")
+	private Boolean requirePKCE;
+
 	//TODO: Below test properties will be removed after database implementation
 	@Value("${test.redirectUri}")
 	private String testRedirectUri;
@@ -249,8 +255,8 @@ public class SecurityConfig {
 	@Bean
 	ClientSettings clientSettings() {
 		return ClientSettings.builder()
-				.requireAuthorizationConsent(false)
-				.requireProofKey(true)
+				.requireAuthorizationConsent(requireAuthorizationConsent)
+				.requireProofKey(requirePKCE)
 				.build();
 	}
 
