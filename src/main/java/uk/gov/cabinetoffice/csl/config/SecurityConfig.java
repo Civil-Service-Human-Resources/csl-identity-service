@@ -170,14 +170,13 @@ public class SecurityConfig {
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
+		Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
 		RegisteredClient registeredClient =
 			RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId(testClientId)
 				.clientSecret(passwordEncoder().encode(testClientSecret))
 				.redirectUri(testRedirectUri)
-				.scopes(scopes -> {
-					scopes.add("read");
-					scopes.add("write");})
+				.scopes(s -> s.addAll(scopes))
 				.clientAuthenticationMethods(methods -> {
 					methods.add(CLIENT_SECRET_BASIC);
 					methods.add(CLIENT_SECRET_JWT);})
