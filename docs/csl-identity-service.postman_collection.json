@@ -204,23 +204,6 @@
 			"response": []
 		},
 		{
-			"name": "auth-server-oauth2-userinfo",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{csl-identity-base-url}}/userinfo",
-					"host": [
-						"{{csl-identity-base-url}}"
-					],
-					"path": [
-						"userinfo"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "auth-server-actuator-health",
 			"request": {
 				"auth": {
