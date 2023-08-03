@@ -1,27 +1,70 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
-	<head>
-		<title>Log In</title>
-		<link rel="stylesheet" th:href="@{/css/main.css}">
-	</head>
-	<body>
-		<div class="login-page">
-		  	<div class="form">
-				<h2>Please Log In</h2>
-				<div class="error" th:if="${param.error}">
-					Invalid username and password.</div>
-				<div class="error" th:if="${param.logout}">
-					You have been logged out.</div>
-				<form  class="login-form" th:action="@{/login}" method="post">
-					<div>
-					<input type="text" name="username" placeholder="Username"/>
-					</div>
-					<div>
-					<input type="password" name="password" placeholder="Password"/>
-					</div>
-					<input class="button" type="submit" value="Log in" />
-				</form>
-			</div>
-		</div>
-	</body>
-</html>
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+    <title>Sign in - Civil Service Learning</title>
+
+    <content>
+        <div class="container">
+            <div class="grid-row">
+                <div class="column-two-thirds">
+                    <div th:if="${param.error}" class="error-summary" role="alert"
+                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+
+                        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1" th:switch="${param.error[0]}">
+                            <span th:case="'deactivated'">Your account has been deactivated</span>
+                            <span th:case="'deactivated-expired'">Your reactivation email link has expired</span>
+                            <span th:case="'pending-reactivation'">Your account is pending reactivation</span>
+                            <span th:case="*">Your sign-in details are incorrect</span>
+                        </h2>
+                        <p>
+                            <span th:if="${param.error[0] == 'failed'}">Check your email and password are correct. After 5 unsuccessful attempts, your account will be locked.</span>
+                            <span th:if="${param.error[0] == 'locked'}"><a href="/reset" class="push-bottom">Reset your password to unlock your account</a></span>
+                            <span th:if="${param.error[0] == 'blocked'}">Your account has been blocked and cannot access this website.<br>Please <a href="mailto:feedback@cslearning.gov.uk">contact us</a> for more information.</span>
+                            <span th:if="${param.error[0] == 'deactivated' || param.error[0] == 'deactivated-expired'}">You will need to <a th:href="@{/account/reactivate(code=${param.username[0]})}">reactivate your account</a> to keep using Civil Service Learning. You have 24 hours to click the reactivation link within the email.</span>
+                            <span th:if="${param.error[0] == 'pending-reactivation'}">We recently sent you a message to reactivate your account. Please check your emails (including the junk/spam folder)</span>
+                        </p>
+                    </div>
+
+                    <div th:if="${status}" class="error-summary" role="alert"
+                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">There was
+                            a problem</h2>
+                        <ul class="error-summary-list">
+                            <li><a href="#token" th:text="${status}">status ...</a></li>
+                        </ul>
+                    </div>
+
+                    <div th:if="${param.logout}" class="error-summary" role="alert"
+                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                        You have been logged out.
+                    </div>
+
+                    <h1 class="heading-large">Sign in</h1>
+
+                    <p class="info-item">If this is the first time you have used this website, you will need to <a href="/signup/request">create an account</a></p>
+
+
+                    <form autocomplete="nope" th:action="@{/login}" method="post" class="push-bottom">
+                        <div class="form-group">
+                            <label for="email-address" class="form-label">
+                                Email address
+                            </label>
+<!--                            <input class="form-control form-control-2-3" id="email-address" name="username"-->
+<!--                                   type="email">-->
+                            <input class="form-control form-control-2-3" id="email-address" name="username"
+                                   type="text">
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                Password
+                            </label>
+                            <input class="form-control form-control-2-3" id="password" type="password" name="password">
+                        </div>
+                        <div>
+                            <input type="submit" class="button" value="Continue">
+                        </div>
+                    </form>
+                    <a href="/reset" class="push-bottom">Forgotten your password?</a>
+                </div>
+            </div>
+        </div>
+    </content>
+</page>

@@ -39,7 +39,10 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
+import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -54,8 +57,13 @@ import static org.springframework.security.oauth2.core.ClientAuthenticationMetho
 @Configuration
 public class SecurityConfig {
 
+	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
 	@Value("${lpg.uiUrl}")
 	private String lpgUiUrl;
+
+	@Value("${management.endpoints.web.base-path}")
+	private String actuatorBasePath;
 
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
@@ -69,7 +77,13 @@ public class SecurityConfig {
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
 
-	//TODO: Remove following properties after Database implementation
+	@Value("${oauth2.requireAuthorizationConsent}")
+	private Boolean requireAuthorizationConsent;
+
+	@Value("${oauth2.requirePKCE}")
+	private Boolean requirePKCE;
+
+	//TODO: Below test properties will be removed after database implementation
 	@Value("${test.redirectUri}")
 	private String testRedirectUri;
 	@Value("${test.client_id}")
@@ -86,6 +100,10 @@ public class SecurityConfig {
 	private String adminUserPassword;
 	@Value("${test.admin_user_roles}")
 	private String adminUserRoles;
+
+	public SecurityConfig(CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
+	}
 
 	@Bean
 	@Order(1)
@@ -110,30 +128,50 @@ public class SecurityConfig {
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests((authorize) -> authorize
-				.requestMatchers("/error").permitAll()
+				.requestMatchers(
+					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
+					"/error",
+					"/login", "/logout",
+					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated())
 			.formLogin(formLogin -> formLogin
-				.loginPage("/login").permitAll().defaultSuccessUrl(lpgUiUrl));
+				.loginPage("/login").permitAll()
+				.failureHandler(customAuthenticationFailureHandler)
+				.defaultSuccessUrl(lpgUiUrl)
+			)
+			.logout(logout -> {
+				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
+				logout.logoutSuccessHandler((request, response, authentication) -> {
+					String redirectUrl = request.getParameter("returnTo");
+					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
+				);
+			});
+			//TODO: Below commented code will be removed if not used for future tickets.
+			//.exceptionHandling(exceptions -> exceptions
+			//		.defaultAuthenticationEntryPointFor(
+			//				new LoginUrlAuthenticationEntryPoint("/login"),
+			//				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 		return httpSecurity.build();
 	}
 
 	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
-				.ignoring()
-				.requestMatchers("/webjars/**", "/images/**", "/css/**", "/assets/**", "/favicon.ico");
+				.expressionHandler(new WebSecurityExpressionHandler());
+				//TODO: Below commented code will be removed if not used for future tickets.
+				//.ignoring()
+				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
+		Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
 		RegisteredClient registeredClient =
 			RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId(testClientId)
 				.clientSecret(passwordEncoder().encode(testClientSecret))
 				.redirectUri(testRedirectUri)
-				.scopes(scopes -> {
-					scopes.add("read");
-					scopes.add("write");})
+				.scopes(s -> s.addAll(scopes))
 				.clientAuthenticationMethods(methods -> {
 					methods.add(CLIENT_SECRET_BASIC);
 					methods.add(CLIENT_SECRET_JWT);})
@@ -176,7 +214,7 @@ public class SecurityConfig {
 					authorities.add("CLIENT");
 				}
 				context.getClaims().claim("authorities", authorities);
-				//audience is set to null to make the access token backward compatible with all the existing backend services
+				//Audience is set to null to make the access token backward compatible with all the existing backend services
 				context.getClaims().audience(new ArrayList<>());
 			}
 		};
@@ -211,8 +249,8 @@ public class SecurityConfig {
 	@Bean
 	ClientSettings clientSettings() {
 		return ClientSettings.builder()
-				.requireAuthorizationConsent(false)
-				.requireProofKey(true)
+				.requireAuthorizationConsent(requireAuthorizationConsent)
+				.requireProofKey(requirePKCE)
 				.build();
 	}
 
