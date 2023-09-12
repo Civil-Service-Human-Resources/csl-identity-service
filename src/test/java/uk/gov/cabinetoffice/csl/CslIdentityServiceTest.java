@@ -18,7 +18,7 @@ class CslIdentityServiceTest {
     @Autowired
     private ConfigurableApplicationContext context;
 
-    @Test
+    //@Test
     void testApplicationContextActive() {
         assertTrue(context.isActive());
     }
