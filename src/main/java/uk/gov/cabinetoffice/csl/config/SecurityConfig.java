@@ -127,7 +127,7 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
-			.authorizeHttpRequests((authorize) -> authorize
+			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/error",
