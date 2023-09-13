@@ -85,12 +85,12 @@ public class SecurityConfig {
 	private Boolean requirePKCE;
 
 	//TODO: Below test properties will be removed after database implementation
-	@Value("${test.redirectUri}")
-	private String testRedirectUri;
-	@Value("${test.client_id}")
-	private String testClientId;
-	@Value("${test.client_secret}")
-	private String testClientSecret;
+	// @Value("${test.redirectUri}")
+	// private String testRedirectUri;
+	// @Value("${test.client_id}")
+	// private String testClientId;
+	// @Value("${test.client_secret}")
+	// private String testClientSecret;
 	@Value("${test.learner_user_id}")
 	private String learnerUserId;
 	@Value("${test.learner_user_password}")
@@ -167,33 +167,33 @@ public class SecurityConfig {
 	@Bean
 	public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
 		// If the database already has client data or does not require default settings, just inject a JdbcRegisteredClientRepository directly
-		// return new JdbcRegisteredClientRepository(jdbcTemplate);
+		return new JdbcRegisteredClientRepository(jdbcTemplate);
 
-		Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
-		RegisteredClient registeredClient =
-			RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId(testClientId)
-				.clientSecret(passwordEncoder().encode(testClientSecret))
-				.redirectUri(testRedirectUri)
-				.scopes(s -> s.addAll(scopes))
-				.clientAuthenticationMethods(methods -> {
-					methods.add(CLIENT_SECRET_BASIC);
-					methods.add(CLIENT_SECRET_JWT);})
-				.authorizationGrantTypes(grantTypes -> {
-					grantTypes.add(CLIENT_CREDENTIALS);
-					grantTypes.add(AUTHORIZATION_CODE);
-					grantTypes.add(REFRESH_TOKEN);
-					grantTypes.add(JWT_BEARER);
-					grantTypes.add(PASSWORD);})
-				.clientSettings(clientSettings())
-				.tokenSettings(tokenSettings())
-				.build();
-		JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
-		RegisteredClient repositoryByClientId = registeredClientRepository.findByClientId(registeredClient.getClientId());
-		if (repositoryByClientId == null) {
-			registeredClientRepository.save(registeredClient);
-		}
-		return registeredClientRepository;
+		// Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
+		// RegisteredClient registeredClient =
+		// 	RegisteredClient.withId(UUID.randomUUID().toString())
+		// 		.clientId(testClientId)
+		// 		.clientSecret(passwordEncoder().encode(testClientSecret))
+		// 		.redirectUri(testRedirectUri)
+		// 		.scopes(s -> s.addAll(scopes))
+		// 		.clientAuthenticationMethods(methods -> {
+		// 			methods.add(CLIENT_SECRET_BASIC);
+		// 			methods.add(CLIENT_SECRET_JWT);})
+		// 		.authorizationGrantTypes(grantTypes -> {
+		// 			grantTypes.add(CLIENT_CREDENTIALS);
+		// 			grantTypes.add(AUTHORIZATION_CODE);
+		// 			grantTypes.add(REFRESH_TOKEN);
+		// 			grantTypes.add(JWT_BEARER);
+		// 			grantTypes.add(PASSWORD);})
+		// 		.clientSettings(clientSettings())
+		// 		.tokenSettings(tokenSettings())
+		// 		.build();
+		// JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
+		// RegisteredClient repositoryByClientId = registeredClientRepository.findByClientId(registeredClient.getClientId());
+		// if (repositoryByClientId == null) {
+		// 	registeredClientRepository.save(registeredClient);
+		// }
+		// return registeredClientRepository;
 	}
 
 	@Bean
