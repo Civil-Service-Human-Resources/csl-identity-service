@@ -1,0 +1,65 @@
+INSERT INTO OAUTH2_REGISTERED_CLIENT
+(
+    ID,
+    CLIENT_ID,
+    CLIENT_ID_ISSUED_AT,
+    CLIENT_SECRET,
+    CLIENT_SECRET_EXPIRES_AT,
+    CLIENT_NAME,
+    CLIENT_AUTHENTICATION_METHODS,
+    AUTHORIZATION_GRANT_TYPES,
+    REDIRECT_URIS,
+    POST_LOGOUT_REDIRECT_URIS,
+    SCOPES,
+    CLIENT_SETTINGS,
+    TOKEN_SETTINGS
+)
+VALUES
+(
+    '14146526-02f4-48fc-913c-ed939fce30f8',
+    '9fbd4ae2-2db3-44c7-9544-88e80255b56e',
+    CURRENT_TIMESTAMP,
+    '$2a$10$bQVqpVI/JC3pLm7sIMzrl.K8ebTphXXINrGMH4WUnP3DvaCA8D09S',
+    null,
+    'client-1',
+    'client_secret_jwt,client_secret_basic',
+    'refresh_token,client_credentials,password,authorization_code,urn:ietf:params:oauth:grant-type:jwt-bearer',
+    'http://localhost:3001',
+    'http://localhost:3001',
+    'read,openid,write',
+    '{"@class":"java.util.Collections$UnmodifiableMap","settings.client.require-proof-key":true,"settings.client.require-authorization-consent":false}',
+    '{"@class":"java.util.Collections$UnmodifiableMap","settings.token.reuse-refresh-tokens":true,"settings.token.id-token-signature-algorithm":["org.springframework.security.oauth2.jose.jws.SignatureAlgorithm","RS256"],"settings.token.access-token-time-to-live":["java.time.Duration",43200.000000000],"settings.token.access-token-format":{"@class":"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat","value":"self-contained"},"settings.token.refresh-token-time-to-live":["java.time.Duration",86400.000000000],"settings.token.authorization-code-time-to-live":["java.time.Duration",300.000000000],"settings.token.device-code-time-to-live":["java.time.Duration",300.000000000]}'
+);
+
+INSERT INTO OAUTH2_REGISTERED_CLIENT
+(
+    ID,
+    CLIENT_ID,
+    CLIENT_ID_ISSUED_AT,
+    CLIENT_SECRET,
+    CLIENT_SECRET_EXPIRES_AT,
+    CLIENT_NAME,
+    CLIENT_AUTHENTICATION_METHODS,
+    AUTHORIZATION_GRANT_TYPES,
+    REDIRECT_URIS,
+    POST_LOGOUT_REDIRECT_URIS,
+    SCOPES,
+    CLIENT_SETTINGS,
+    TOKEN_SETTINGS
+)
+VALUES
+(
+    '24146526-02f4-48fc-913c-ed939fce30f8',
+    '8fbd4ae2-2db3-44c7-9544-88e80255b56e',
+    CURRENT_TIMESTAMP,
+    '$2a$10$bQVqpVI/JC3pLm7sIMzrl.K8ebTphXXINrGMH4WUnP3DvaCA8D09S',
+    null,
+    'client-2',
+    'client_secret_jwt,client_secret_basic',
+    'refresh_token,client_credentials,password,authorization_code,urn:ietf:params:oauth:grant-type:jwt-bearer',
+    'http://localhost:3001',
+    'http://localhost:3001',
+    'read,openid,write',
+    '{"@class":"java.util.Collections$UnmodifiableMap","settings.client.require-proof-key":true,"settings.client.require-authorization-consent":false}',
+    '{"@class":"java.util.Collections$UnmodifiableMap","settings.token.reuse-refresh-tokens":true,"settings.token.id-token-signature-algorithm":["org.springframework.security.oauth2.jose.jws.SignatureAlgorithm","RS256"],"settings.token.access-token-time-to-live":["java.time.Duration",43200.000000000],"settings.token.access-token-format":{"@class":"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat","value":"self-contained"},"settings.token.refresh-token-time-to-live":["java.time.Duration",86400.000000000],"settings.token.authorization-code-time-to-live":["java.time.Duration",300.000000000],"settings.token.device-code-time-to-live":["java.time.Duration",300.000000000]}'
+);

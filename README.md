@@ -34,7 +34,7 @@ Run the application either using IDE e.g. Intellij or Maven or Docker as follows
 
 ### REST Endpoints:
 
-A postman collection is available in [docs/csl-identity-service.postman_collection.json](docs/csl-identity-service.postman_collection.json) to execute above endpoints.
+A postman collection is available in [docs/csl-identity-service.postman_collection.json](docs/postman_collection/csl-identity-service.postman_collection.json) to execute above endpoints.
 
 ### Azure Build Pipeline:
 

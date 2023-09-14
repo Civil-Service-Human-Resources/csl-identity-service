@@ -1,4 +1,5 @@
-CREATE TABLE oauth2_registered_client (
+CREATE TABLE oauth2_registered_client
+(
     id varchar(100) NOT NULL,
     client_id varchar(100) NOT NULL,
     client_id_issued_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
