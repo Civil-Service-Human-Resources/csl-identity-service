@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,16 +25,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -46,13 +44,8 @@ import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.springframework.security.oauth2.core.AuthorizationGrantType.*;
-import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
-import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_JWT;
 
 @Configuration
 public class SecurityConfig {
@@ -68,28 +61,10 @@ public class SecurityConfig {
 	@Value("${oauth2.jwtKey}")
 	private String jwtKey;
 
-	@Value("${oauth2.accessTokenTTLSeconds}")
-	private Long accessTokenTTLSeconds;
-
-	@Value("${oauth2.refreshTokenTTLSeconds}")
-	private Long refreshTokenTTLSeconds;
-
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
 
-	@Value("${oauth2.requireAuthorizationConsent}")
-	private Boolean requireAuthorizationConsent;
-
-	@Value("${oauth2.requirePKCE}")
-	private Boolean requirePKCE;
-
 	//TODO: Below test properties will be removed after database implementation
-	@Value("${test.redirectUri}")
-	private String testRedirectUri;
-	@Value("${test.client_id}")
-	private String testClientId;
-	@Value("${test.client_secret}")
-	private String testClientSecret;
 	@Value("${test.learner_user_id}")
 	private String learnerUserId;
 	@Value("${test.learner_user_password}")
@@ -127,7 +102,7 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
-			.authorizeHttpRequests((authorize) -> authorize
+			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/error",
@@ -164,27 +139,18 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public RegisteredClientRepository registeredClientRepository() {
-		Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
-		RegisteredClient registeredClient =
-			RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId(testClientId)
-				.clientSecret(passwordEncoder().encode(testClientSecret))
-				.redirectUri(testRedirectUri)
-				.scopes(s -> s.addAll(scopes))
-				.clientAuthenticationMethods(methods -> {
-					methods.add(CLIENT_SECRET_BASIC);
-					methods.add(CLIENT_SECRET_JWT);})
-				.authorizationGrantTypes(grantTypes -> {
-					grantTypes.add(CLIENT_CREDENTIALS);
-					grantTypes.add(AUTHORIZATION_CODE);
-					grantTypes.add(REFRESH_TOKEN);
-					grantTypes.add(JWT_BEARER);
-					grantTypes.add(PASSWORD);})
-				.clientSettings(clientSettings())
-				.tokenSettings(tokenSettings())
-				.build();
-		return new InMemoryRegisteredClientRepository(registeredClient);
+	public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+		return new JdbcRegisteredClientRepository(jdbcTemplate);
+	}
+
+	@Bean
+	public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+		return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+	}
+
+	@Bean
+	public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+		return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
 	}
 
 	@Bean
@@ -236,22 +202,6 @@ public class SecurityConfig {
 	@Bean
 	public JwtEncoder jwtEncoder() {
 		return new NimbusJwtEncoder(jwkSource());
-	}
-
-	@Bean
-	TokenSettings tokenSettings() {
-		return TokenSettings.builder()
-				.accessTokenTimeToLive(Duration.ofSeconds(accessTokenTTLSeconds))
-				.refreshTokenTimeToLive(Duration.ofSeconds(refreshTokenTTLSeconds))
-				.build();
-	}
-
-	@Bean
-	ClientSettings clientSettings() {
-		return ClientSettings.builder()
-				.requireAuthorizationConsent(requireAuthorizationConsent)
-				.requireProofKey(requirePKCE)
-				.build();
 	}
 
 	@Bean
