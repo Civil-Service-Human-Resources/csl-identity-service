@@ -25,8 +25,8 @@ CREATE TABLE role
 
 CREATE TABLE identity_role
 (
-     identity_id    mediumint(8)    unsigned NOT NULL,
-     role_id        smallint(5)     unsigned NOT NULL,
+     identity_id    mediumint(8) unsigned   NOT NULL,
+     role_id        smallint(5) unsigned    NOT NULL,
      PRIMARY KEY (identity_id, role_id),
      KEY KEY_role_id (role_id),
      CONSTRAINT FK_identity_role_identity FOREIGN KEY (identity_id) REFERENCES identity (id) ON DELETE CASCADE ON UPDATE CASCADE,
