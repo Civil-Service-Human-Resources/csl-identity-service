@@ -20,9 +20,7 @@ public class RoleRepositoryTest {
     @Test
     public void shouldSaveRole() {
         long repositoryCount = repository.count();
-
         Role role = createRole();
-
         repository.save(role);
 
         assertThat(repository.count(), equalTo(repositoryCount + 1));
@@ -31,9 +29,7 @@ public class RoleRepositoryTest {
     @Test
     public void shouldReturnFirstByName() {
         Role role = createRole();
-
         repository.save(role);
-
         Role actualRole = repository.findFirstByNameEquals("name");
 
         assertThat(actualRole.getId(), notNullValue());
@@ -46,9 +42,6 @@ public class RoleRepositoryTest {
     }
 
     private Role createRole(String name, String description) {
-        Role role = new Role(name, description);
-
-        return role;
+        return new Role(name, description);
     }
-
 }

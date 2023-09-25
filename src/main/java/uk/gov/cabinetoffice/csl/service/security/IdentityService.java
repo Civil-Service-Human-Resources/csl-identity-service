@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.service.security;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,17 +18,13 @@ import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import java.time.Instant;
 
 @Slf4j
+@AllArgsConstructor
 @Service
 @Transactional
 public class IdentityService implements UserDetailsService {
 
     private final IdentityRepository identityRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public IdentityService(IdentityRepository identityRepository, PasswordEncoder passwordEncoder) {
-        this.identityRepository = identityRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
