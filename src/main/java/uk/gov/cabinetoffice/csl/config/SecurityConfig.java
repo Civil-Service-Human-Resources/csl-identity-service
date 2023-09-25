@@ -19,7 +19,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,13 +33,13 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
+import uk.gov.cabinetoffice.csl.service.security.IdentityService;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -63,18 +62,6 @@ public class SecurityConfig {
 
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
-
-	//TODO: Below test properties will be removed after database implementation
-	@Value("${test.learner_user_id}")
-	private String learnerUserId;
-	@Value("${test.learner_user_password}")
-	private String learnerUserPassword;
-	@Value("${test.admin_user_id}")
-	private String adminUserId;
-	@Value("${test.admin_user_password}")
-	private String adminUserPassword;
-	@Value("${test.admin_user_roles}")
-	private String adminUserRoles;
 
 	public SecurityConfig(CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
 		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
@@ -210,15 +197,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public UserDetailsService userDetailsService() {
-		var learnerUser = User.withUsername(learnerUserId)
-				.password(passwordEncoder().encode(learnerUserPassword))
-				.authorities("LEARNER")
-				.build();
-		var superUser = User.withUsername(adminUserId)
-				.password(passwordEncoder().encode(adminUserPassword))
-				.authorities(adminUserRoles.split("\\s*,\\s*"))
-				.build();
-		return new InMemoryUserDetailsManager(learnerUser, superUser);
+	UserDetailsService userDetailsService(IdentityService identityService) {
+		return identityService;
 	}
 }
