@@ -30,9 +30,8 @@ public class Identity implements Serializable {
     @Column(length = 100)
     private String password;
 
-    private boolean active;
-
-    private boolean locked;
+    @Column
+    private String agencyTokenUid;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "identity_role",
@@ -41,23 +40,13 @@ public class Identity implements Serializable {
     )
     private Set<Role> roles;
 
+    private boolean active;
+
+    private boolean locked;
+
     private Instant lastLoggedIn;
 
     private boolean deletionNotificationSent;
-
-    @Column
-    private String agencyTokenUid;
-
-    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn, boolean deletionNotificationSent) {
-        this.uid = uid;
-        this.email = email;
-        this.password = password;
-        this.active = active;
-        this.roles = roles;
-        this.locked = locked;
-        this.lastLoggedIn = lastLoggedIn;
-        this.deletionNotificationSent = deletionNotificationSent;
-    }
 
     public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid) {
         this.uid = uid;
@@ -76,9 +65,12 @@ public class Identity implements Serializable {
         return "Identity{" +
                 "id=" + id +
                 ", uid='" + uid + '\'' +
+                ", email=" + email +
                 ", active=" + active +
                 ", locked=" + locked +
+                ", deletionNotificationSent=" + deletionNotificationSent +
                 ", agencyTokenUid=" + agencyTokenUid +
+                ", roles=" + roles +
                 '}';
     }
 }

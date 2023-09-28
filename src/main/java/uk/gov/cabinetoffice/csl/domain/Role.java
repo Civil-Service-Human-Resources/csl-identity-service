@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,12 +27,14 @@ public class Role implements Serializable {
     @Column
     private String description;
 
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Set<Identity> identities;
 
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Set<Identity> invites;
 
     public Role(String name, String description) {
@@ -45,6 +48,8 @@ public class Role implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", identities=" + identities +
+                ", invites=" + invites +
                 '}';
     }
 }
