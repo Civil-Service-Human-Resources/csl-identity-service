@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.exception.AccountDeactivatedException;
@@ -18,8 +20,8 @@ import java.time.Instant;
 
 @Slf4j
 @AllArgsConstructor
-//@Service
-//@Transactional
+@Service
+@Transactional
 public class IdentityService implements UserDetailsService {
 
     private final IdentityRepository identityRepository;

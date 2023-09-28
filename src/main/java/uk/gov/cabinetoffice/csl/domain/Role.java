@@ -33,14 +33,14 @@ public class Role implements Serializable {
     @Column
     private String description;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
     private Set<Identity> identities;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
     private Set<Identity> invites;
 
     public Role(String name, String description) {

@@ -1,8 +1,5 @@
 package uk.gov.cabinetoffice.csl.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -22,11 +19,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.jackson2.CoreJackson2Module;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.*;
@@ -35,7 +29,6 @@ import org.springframework.security.oauth2.server.authorization.client.JdbcRegis
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
@@ -45,8 +38,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
-import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
-import uk.gov.cabinetoffice.csl.service.security.IdentityService;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -137,22 +128,7 @@ public class SecurityConfig {
 
 	@Bean
 	public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-		JdbcOAuth2AuthorizationService authorizationService =
-				new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-		JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper =
-				new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
-		ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
-		ObjectMapper objectMapper = new ObjectMapper();
-
-//		objectMapper.configure(MapperFeature.USE_GETTERS_AS_SETTERS, false);
-//		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-		objectMapper.registerModules(new CoreJackson2Module());
-		objectMapper.registerModules(SecurityJackson2Modules.getModules(classLoader));
-		objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-		rowMapper.setObjectMapper(objectMapper);
-		authorizationService.setAuthorizationRowMapper(rowMapper);
-		return authorizationService;
+		return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
 	}
 
 	@Bean
@@ -214,10 +190,5 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public UserDetailsService identityService(IdentityRepository identityRepository, PasswordEncoder passwordEncoder) {
-		return new IdentityService(identityRepository, passwordEncoder);
 	}
 }

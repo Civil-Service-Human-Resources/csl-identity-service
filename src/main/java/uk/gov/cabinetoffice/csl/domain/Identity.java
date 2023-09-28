@@ -40,8 +40,8 @@ public class Identity implements Serializable {
     @Column
     private String agencyTokenUid;
 
-    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "identity_role",
             joinColumns = @JoinColumn(name = "identity_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")

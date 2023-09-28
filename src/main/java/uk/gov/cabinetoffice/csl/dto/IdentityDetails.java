@@ -34,8 +34,6 @@ public class IdentityDetails implements UserDetails {
                 .collect(toSet());
     }
 
-//    private void setAuthorities(Collection<? extends GrantedAuthority> authorities) {}
-
     @Override
     public String getPassword() {
         return identity.getPassword();
