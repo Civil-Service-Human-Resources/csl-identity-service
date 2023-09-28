@@ -1,7 +1,10 @@
 package uk.gov.cabinetoffice.csl.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,8 +15,11 @@ import java.io.Serializable;
 import java.util.Set;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@JsonDeserialize
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 public class Role implements Serializable {
 
