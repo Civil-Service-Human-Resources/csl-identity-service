@@ -93,17 +93,20 @@ public class SecurityConfig {
 					"/error",
 					"/login", "/logout",
 					actuatorBasePath + "/**").permitAll()
-				.anyRequest().authenticated())
+				.anyRequest().authenticated()
+			)
 			.formLogin(formLogin -> formLogin
 				.loginPage("/login").permitAll()
 				.failureHandler(customAuthenticationFailureHandler)
-				.defaultSuccessUrl(lpgUiUrl))
+				.defaultSuccessUrl(lpgUiUrl)
+			)
 			.logout(logout -> {
 				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
 				logout.logoutSuccessHandler((request, response, authentication) -> {
 					String redirectUrl = request.getParameter("returnTo");
-					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
-				);});
+					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
+				});
+			});
 			//TODO: Below commented code will be removed if not used for future tickets.
 			//.exceptionHandling(exceptions -> exceptions
 			//		.defaultAuthenticationEntryPointFor(
