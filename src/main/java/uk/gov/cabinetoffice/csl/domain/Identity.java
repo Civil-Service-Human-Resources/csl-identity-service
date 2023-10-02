@@ -72,7 +72,7 @@ public class Identity implements Serializable {
     public String toString() {
         return "Identity{" +
                 "id=" + id +
-                ", uid='" + uid + '\'' +
+                ", uid=" + uid +
                 ", email=" + email +
                 ", active=" + active +
                 ", locked=" + locked +
