@@ -34,9 +34,12 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
+import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
 import javax.crypto.SecretKey;
@@ -47,6 +50,7 @@ import java.util.stream.Collectors;
 @Configuration
 public class SecurityConfig {
 
+	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
 	@Value("${lpg.uiUrl}")
@@ -61,7 +65,9 @@ public class SecurityConfig {
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
 
-	public SecurityConfig(CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+	public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
+						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+		this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
 		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
 	}
 
@@ -98,7 +104,8 @@ public class SecurityConfig {
 			.formLogin(formLogin -> formLogin
 				.loginPage("/login").permitAll()
 				.failureHandler(customAuthenticationFailureHandler)
-				.defaultSuccessUrl(lpgUiUrl)
+				.successHandler(customAuthenticationSuccessHandler)
+//				.defaultSuccessUrl(lpgUiUrl)
 			)
 			.logout(logout -> {
 				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
@@ -116,10 +123,28 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	public HttpFirewall getHttpFirewall() {
+		StrictHttpFirewall strictHttpFirewall = new StrictHttpFirewall();
+		strictHttpFirewall.setAllowSemicolon(true);
+		strictHttpFirewall.setAllowBackSlash(true);
+		strictHttpFirewall.setAllowUrlEncodedDoubleSlash(true);
+		strictHttpFirewall.setAllowUrlEncodedPeriod(true);
+		strictHttpFirewall.setAllowBackSlash(true);
+		return strictHttpFirewall;
+	}
+
+	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
+//		StrictHttpFirewall strictHttpFirewall = new StrictHttpFirewall();
+//		strictHttpFirewall.setAllowSemicolon(true);
+//		strictHttpFirewall.setAllowBackSlash(true);
+//		strictHttpFirewall.setAllowUrlEncodedDoubleSlash(true);
+//		strictHttpFirewall.setAllowUrlEncodedPeriod(true);
+//		strictHttpFirewall.setAllowBackSlash(true);
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler());
 				//TODO: Below commented code will be removed if not used for future tickets.
+				//.httpFirewall(strictHttpFirewall)
 				//.ignoring()
 				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}
