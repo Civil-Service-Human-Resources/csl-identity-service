@@ -34,8 +34,6 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
@@ -52,9 +50,6 @@ public class SecurityConfig {
 
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-
-	@Value("${lpg.uiUrl}")
-	private String lpgUiUrl;
 
 	@Value("${management.endpoints.web.base-path}")
 	private String actuatorBasePath;
@@ -105,7 +100,6 @@ public class SecurityConfig {
 				.loginPage("/login").permitAll()
 				.failureHandler(customAuthenticationFailureHandler)
 				.successHandler(customAuthenticationSuccessHandler)
-//				.defaultSuccessUrl(lpgUiUrl)
 			)
 			.logout(logout -> {
 				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
@@ -123,28 +117,10 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public HttpFirewall getHttpFirewall() {
-		StrictHttpFirewall strictHttpFirewall = new StrictHttpFirewall();
-		strictHttpFirewall.setAllowSemicolon(true);
-		strictHttpFirewall.setAllowBackSlash(true);
-		strictHttpFirewall.setAllowUrlEncodedDoubleSlash(true);
-		strictHttpFirewall.setAllowUrlEncodedPeriod(true);
-		strictHttpFirewall.setAllowBackSlash(true);
-		return strictHttpFirewall;
-	}
-
-	@Bean
 	WebSecurityCustomizer webSecurityCustomizer() {
-//		StrictHttpFirewall strictHttpFirewall = new StrictHttpFirewall();
-//		strictHttpFirewall.setAllowSemicolon(true);
-//		strictHttpFirewall.setAllowBackSlash(true);
-//		strictHttpFirewall.setAllowUrlEncodedDoubleSlash(true);
-//		strictHttpFirewall.setAllowUrlEncodedPeriod(true);
-//		strictHttpFirewall.setAllowBackSlash(true);
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler());
 				//TODO: Below commented code will be removed if not used for future tickets.
-				//.httpFirewall(strictHttpFirewall)
 				//.ignoring()
 				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}

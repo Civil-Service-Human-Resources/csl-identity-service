@@ -3,34 +3,34 @@ package uk.gov.cabinetoffice.csl.handler;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import uk.gov.cabinetoffice.csl.domain.Identity;
+import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
+import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 import java.io.IOException;
+import java.time.Instant;
 
-@NoArgsConstructor
+@AllArgsConstructor
 @Configuration
-public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-//    private final AuthenticationSuccessHandler delegate = new SavedRequestAwareAuthenticationSuccessHandler();
-    private final ForwardAuthenticationSuccessHandler forward = new ForwardAuthenticationSuccessHandler("http:////localhost:3004");
+    private final IdentityRepository identityRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         if (authentication != null) {
             if (authentication.getPrincipal() != null) {
-                    System.out.println("#####CustomAuthenticationSuccessHandler.onAuthenticationSuccess.authentication.getPrincipal(): " + authentication.getPrincipal());
-                    //IdentityService.setLastLoggedIn()
+                if (authentication.getPrincipal() instanceof IdentityDetails identityDetails){
+                    Identity identity = identityDetails.getIdentity();
+                    identity.setLastLoggedIn(Instant.now());
+                    identityRepository.save(identity);
+                }
             }
         }
-        System.out.println("#####CustomAuthenticationSuccessHandler.onAuthenticationSuccess.Before forwarding");
-        this.forward.onAuthenticationSuccess(request, response, authentication);
-        System.out.println("#####CustomAuthenticationSuccessHandler.onAuthenticationSuccess.After forwarding");
-//        this.delegate.onAuthenticationSuccess(request, response, authentication);
-//        System.out.println("#####CustomAuthenticationSuccessHandler.onAuthenticationSuccess.After delegate");
+        super.onAuthenticationSuccess(request, response, authentication);
     }
 }
