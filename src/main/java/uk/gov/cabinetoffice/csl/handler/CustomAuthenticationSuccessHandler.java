@@ -7,9 +7,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
+import uk.gov.cabinetoffice.csl.service.security.IdentityService;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -18,16 +17,14 @@ import java.time.Instant;
 @Configuration
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private final IdentityRepository identityRepository;
+    private final IdentityService identityService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         if (authentication != null) {
             if (authentication.getPrincipal() != null) {
                 if (authentication.getPrincipal() instanceof IdentityDetails identityDetails){
-                    Identity identity = identityDetails.getIdentity();
-                    identity.setLastLoggedIn(Instant.now());
-                    identityRepository.save(identity);
+                    identityService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
                 }
             }
         }

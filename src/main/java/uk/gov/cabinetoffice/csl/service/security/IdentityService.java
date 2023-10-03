@@ -64,8 +64,8 @@ public class IdentityService implements UserDetailsService {
     }
 
     public boolean checkPassword(String username, String password) {
-        UserDetails userDetails = loadUserByUsername(username);
-        return passwordEncoder.matches(password, userDetails.getPassword());
+        Identity identity = identityRepository.findFirstByEmailEquals(username);
+        return passwordEncoder.matches(password, identity.getPassword());
     }
 
     public boolean checkEmailExists(String email) {

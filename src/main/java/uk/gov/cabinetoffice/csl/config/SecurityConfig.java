@@ -1,11 +1,5 @@
 package uk.gov.cabinetoffice.csl.config;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.*;
@@ -40,25 +32,20 @@ import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
 
-	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-
 	@Value("${management.endpoints.web.base-path}")
 	private String actuatorBasePath;
 
-	@Value("${oauth2.jwtKey}")
-	private String jwtKey;
-
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
+
+	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
 	public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
 						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
@@ -171,28 +158,5 @@ public class SecurityConfig {
 				context.getClaims().audience(new ArrayList<>());
 			}
 		};
-	}
-
-	@Bean
-	public JWKSource<SecurityContext> jwkSource() {
-		SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HMACSHA256");
-		JWK jwk = new OctetSequenceKey.Builder(secretKey).algorithm(JWSAlgorithm.HS256).build();
-		JWKSet jwkSet = new JWKSet(jwk);
-		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-	}
-
-	@Bean
-	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-	}
-
-	@Bean
-	public JwtEncoder jwtEncoder() {
-		return new NimbusJwtEncoder(jwkSource());
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
 	}
 }
