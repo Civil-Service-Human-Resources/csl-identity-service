@@ -1,18 +1,18 @@
-INSERT INTO OAUTH2_REGISTERED_CLIENT
+INSERT INTO oauth2_registered_client
 (
-    ID,
-    CLIENT_ID,
-    CLIENT_ID_ISSUED_AT,
-    CLIENT_SECRET,
-    CLIENT_SECRET_EXPIRES_AT,
-    CLIENT_NAME,
-    CLIENT_AUTHENTICATION_METHODS,
-    AUTHORIZATION_GRANT_TYPES,
-    REDIRECT_URIS,
-    POST_LOGOUT_REDIRECT_URIS,
-    SCOPES,
-    CLIENT_SETTINGS,
-    TOKEN_SETTINGS
+    id,
+    client_id,
+    client_id_issued_at,
+    client_secret,
+    client_secret_expires_at,
+    client_name,
+    client_authentication_methods,
+    authorization_grant_types,
+    redirect_uris,
+    post_logout_redirect_uris,
+    scopes,
+    client_settings,
+    token_settings
 )
 VALUES
 (
@@ -31,21 +31,21 @@ VALUES
     '{"@class":"java.util.Collections$UnmodifiableMap","settings.token.reuse-refresh-tokens":true,"settings.token.id-token-signature-algorithm":["org.springframework.security.oauth2.jose.jws.SignatureAlgorithm","RS256"],"settings.token.access-token-time-to-live":["java.time.Duration",43200.000000000],"settings.token.access-token-format":{"@class":"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat","value":"self-contained"},"settings.token.refresh-token-time-to-live":["java.time.Duration",86400.000000000],"settings.token.authorization-code-time-to-live":["java.time.Duration",300.000000000],"settings.token.device-code-time-to-live":["java.time.Duration",300.000000000]}'
 );
 
-INSERT INTO OAUTH2_REGISTERED_CLIENT
+INSERT INTO oauth2_registered_client
 (
-    ID,
-    CLIENT_ID,
-    CLIENT_ID_ISSUED_AT,
-    CLIENT_SECRET,
-    CLIENT_SECRET_EXPIRES_AT,
-    CLIENT_NAME,
-    CLIENT_AUTHENTICATION_METHODS,
-    AUTHORIZATION_GRANT_TYPES,
-    REDIRECT_URIS,
-    POST_LOGOUT_REDIRECT_URIS,
-    SCOPES,
-    CLIENT_SETTINGS,
-    TOKEN_SETTINGS
+    id,
+    client_id,
+    client_id_issued_at,
+    client_secret,
+    client_secret_expires_at,
+    client_name,
+    client_authentication_methods,
+    authorization_grant_types,
+    redirect_uris,
+    post_logout_redirect_uris,
+    scopes,
+    client_settings,
+    token_settings
 )
 VALUES
 (

@@ -15,21 +15,15 @@ public class TextEncryptionUtils {
         Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
-
         byte[] encrypted = cipher.doFinal(rawText.getBytes());
-        String encryptedText = Base64.getEncoder().encodeToString(encrypted);
-        return encryptedText;
+        return Base64.getEncoder().encodeToString(encrypted);
     }
 
     public static String getDecryptedText(String encryptedText, String encryptionKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, aesKey);
-
-        byte[] plainText = cipher.doFinal(Base64.getDecoder()
-                .decode(encryptedText));
-
-        String decryptedText = new String(plainText);
-        return decryptedText;
+        byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
+        return new String(plainText);
     }
 }

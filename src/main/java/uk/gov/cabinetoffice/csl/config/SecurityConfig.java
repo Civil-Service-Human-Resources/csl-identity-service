@@ -1,11 +1,5 @@
 package uk.gov.cabinetoffice.csl.config;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.*;
@@ -34,49 +24,32 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
+import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
 
-	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-
-	@Value("${lpg.uiUrl}")
-	private String lpgUiUrl;
-
 	@Value("${management.endpoints.web.base-path}")
 	private String actuatorBasePath;
-
-	@Value("${oauth2.jwtKey}")
-	private String jwtKey;
 
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
 
-	//TODO: Below test properties will be removed after database implementation
-	@Value("${test.learner_user_id}")
-	private String learnerUserId;
-	@Value("${test.learner_user_password}")
-	private String learnerUserPassword;
-	@Value("${test.admin_user_id}")
-	private String adminUserId;
-	@Value("${test.admin_user_password}")
-	private String adminUserPassword;
-	@Value("${test.admin_user_roles}")
-	private String adminUserRoles;
+	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
-	public SecurityConfig(CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+	public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
+						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+		this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
 		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
 	}
 
@@ -108,18 +81,19 @@ public class SecurityConfig {
 					"/error",
 					"/login", "/logout",
 					actuatorBasePath + "/**").permitAll()
-				.anyRequest().authenticated())
+				.anyRequest().authenticated()
+			)
 			.formLogin(formLogin -> formLogin
 				.loginPage("/login").permitAll()
 				.failureHandler(customAuthenticationFailureHandler)
-				.defaultSuccessUrl(lpgUiUrl)
+				.successHandler(customAuthenticationSuccessHandler)
 			)
 			.logout(logout -> {
 				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
 				logout.logoutSuccessHandler((request, response, authentication) -> {
 					String redirectUrl = request.getParameter("returnTo");
-					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));}
-				);
+					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
+				});
 			});
 			//TODO: Below commented code will be removed if not used for future tickets.
 			//.exceptionHandling(exceptions -> exceptions
@@ -184,41 +158,5 @@ public class SecurityConfig {
 				context.getClaims().audience(new ArrayList<>());
 			}
 		};
-	}
-
-	@Bean
-	public JWKSource<SecurityContext> jwkSource() {
-		SecretKey secretKey = new SecretKeySpec(jwtKey.getBytes(), "HMACSHA256");
-		JWK jwk = new OctetSequenceKey.Builder(secretKey).algorithm(JWSAlgorithm.HS256).build();
-		JWKSet jwkSet = new JWKSet(jwk);
-		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-	}
-
-	@Bean
-	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-	}
-
-	@Bean
-	public JwtEncoder jwtEncoder() {
-		return new NimbusJwtEncoder(jwkSource());
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public UserDetailsService userDetailsService() {
-		var learnerUser = User.withUsername(learnerUserId)
-				.password(passwordEncoder().encode(learnerUserPassword))
-				.authorities("LEARNER")
-				.build();
-		var superUser = User.withUsername(adminUserId)
-				.password(passwordEncoder().encode(adminUserPassword))
-				.authorities(adminUserRoles.split("\\s*,\\s*"))
-				.build();
-		return new InMemoryUserDetailsManager(learnerUser, superUser);
 	}
 }

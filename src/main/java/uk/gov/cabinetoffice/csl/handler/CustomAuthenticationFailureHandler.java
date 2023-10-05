@@ -26,7 +26,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         String exceptionMessage = exception.getMessage();
-
         switch (exceptionMessage) {
             case ("User account is locked"):
                 response.sendRedirect("/login?error=locked");
