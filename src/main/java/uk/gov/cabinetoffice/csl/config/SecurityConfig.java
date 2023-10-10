@@ -94,12 +94,11 @@ public class SecurityConfig {
 					String redirectUrl = request.getParameter("returnTo");
 					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
 				});
-			});
-			//TODO: Below commented code will be removed if not used for future tickets.
-			//.exceptionHandling(exceptions -> exceptions
-			//		.defaultAuthenticationEntryPointFor(
-			//				new LoginUrlAuthenticationEntryPoint("/login"),
-			//				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+			})
+			.exceptionHandling(exceptions -> exceptions
+					.defaultAuthenticationEntryPointFor(
+							new LoginUrlAuthenticationEntryPoint("/login"),
+							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 		return httpSecurity.build();
 	}
 
