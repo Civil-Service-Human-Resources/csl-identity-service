@@ -13,6 +13,7 @@ public class AuthenticationController {
 
     @GetMapping("/identity/resolve")
     public IdentityDTO resolveIdentity(Authentication authentication) {
+        //TODO: Below code is wrong. It needs fixing.
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
         return new IdentityDTO(identityDetails.getIdentity());
     }

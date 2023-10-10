@@ -96,9 +96,9 @@ public class SecurityConfig {
 				});
 			})
 			.exceptionHandling(exceptions -> exceptions
-					.defaultAuthenticationEntryPointFor(
-							new LoginUrlAuthenticationEntryPoint("/login"),
-							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+				.defaultAuthenticationEntryPointFor(
+					new LoginUrlAuthenticationEntryPoint("/login"),
+					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));;
 		return httpSecurity.build();
 	}
