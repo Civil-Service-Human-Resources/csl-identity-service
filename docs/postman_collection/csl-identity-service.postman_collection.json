@@ -377,7 +377,7 @@
 		},
 		{
 			"key": "remote-lpg-ui-url",
-			"value": "https://INTEGRATION-LPG-UI",
+			"value": "https://INTEGRATION-LPG-UI/authenticate",
 			"type": "default"
 		},
 		{
@@ -387,7 +387,7 @@
 		},
 		{
 			"key": "local-lpg-ui-url",
-			"value": "http://localhost:3001",
+			"value": "http://localhost:3001/authenticate",
 			"type": "default"
 		},
 		{
