@@ -95,11 +95,11 @@ public class SecurityConfig {
 					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
 				});
 			})
-			//TODO: Below commented code will be removed if not used for future tickets.
 			.exceptionHandling(exceptions -> exceptions
 					.defaultAuthenticationEntryPointFor(
 							new LoginUrlAuthenticationEntryPoint("/login"),
-							new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+							new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
+			);
 		return httpSecurity.build();
 	}
 
