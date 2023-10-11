@@ -17,8 +17,8 @@ public class AuthenticationController {
     @GetMapping("/identity/resolve")
     public IdentityDTO resolveIdentity(Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
-        String email = jwt.getClaim("email").toString();
-        String uid = jwt.getClaim("user_name").toString();
+        String email = jwt.getClaim("email");
+        String uid = jwt.getClaim("user_name");
         Set<String> roles = new HashSet<>();
         if (jwt.getClaim("authorities") instanceof List) {
             roles.addAll(jwt.getClaim("authorities"));
