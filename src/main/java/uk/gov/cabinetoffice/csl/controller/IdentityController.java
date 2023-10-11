@@ -12,7 +12,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @RestController
-public class AuthenticationController {
+public class IdentityController {
 
     @GetMapping("/identity/resolve")
     public IdentityDTO resolveIdentity(Authentication authentication) {
