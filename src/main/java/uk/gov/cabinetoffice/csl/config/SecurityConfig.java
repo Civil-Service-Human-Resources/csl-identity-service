@@ -28,6 +28,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
@@ -150,6 +151,10 @@ public class SecurityConfig {
 					context.getClaims().claim("user_name", principal.getName());
 					authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 							.collect(Collectors.toSet());
+					if (principal.getPrincipal() instanceof IdentityDetails) {
+						String email = ((IdentityDetails) principal.getPrincipal()).getIdentity().getEmail();
+						context.getClaims().claim("email", email);
+					}
 				} else if (principal instanceof OAuth2ClientAuthenticationToken) {
 					authorities.add("CLIENT");
 				}
