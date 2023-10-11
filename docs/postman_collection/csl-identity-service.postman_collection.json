@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "78a6d7e4-6b5e-4dd2-8eb5-e15a923640df",
+		"_postman_id": "0750451a-06be-4418-a3bb-5cf70dc473d9",
 		"name": "csl-identity-service",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29877626"
 	},
 	"item": [
 		{
@@ -155,6 +156,34 @@
 					"path": [
 						"oauth2",
 						"introspect"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-server-identity-resolve",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BEARER-TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/identity/resolve",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"identity",
+						"resolve"
 					]
 				}
 			},
