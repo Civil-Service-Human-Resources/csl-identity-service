@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.service.security.IdentityService;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 
 import java.io.IOException;
 import java.time.Instant;

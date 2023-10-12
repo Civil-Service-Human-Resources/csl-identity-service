@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller;
+package uk.gov.cabinetoffice.csl.controller.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

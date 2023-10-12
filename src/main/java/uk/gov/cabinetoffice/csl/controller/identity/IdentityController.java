@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller;
+package uk.gov.cabinetoffice.csl.controller.identity;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;

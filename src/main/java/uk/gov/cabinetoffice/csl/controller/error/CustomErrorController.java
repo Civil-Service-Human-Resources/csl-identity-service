@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller;
+package uk.gov.cabinetoffice.csl.controller.error;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
