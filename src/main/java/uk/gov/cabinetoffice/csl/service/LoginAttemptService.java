@@ -10,7 +10,7 @@ import java.util.Map;
 @Service
 public class LoginAttemptService {
 
-    private Map<String, Integer> loginAttemptCache;
+    private final Map<String, Integer> loginAttemptCache;
     private final int maxAttempt;
     private final IdentityService identityService;
 

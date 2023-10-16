@@ -49,7 +49,7 @@ public class IdentityService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else if (!identity.isActive()) {
-            //TODO: Implement as part of the future tickets
+            //TODO: To be implemented as part of the future tickets
             //boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
             boolean pendingReactivationExistsForAccount = false;
             if(pendingReactivationExistsForAccount){

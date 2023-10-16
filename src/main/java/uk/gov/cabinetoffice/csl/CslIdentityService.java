@@ -35,6 +35,7 @@ public class CslIdentityService {
 		return new NotificationClient(key);
 	}
 
+//	TODO: To be implemented as part of the future ticket
 //	@Bean
 //	public RestTemplate restTemplate() {
 //		return new RestTemplate();

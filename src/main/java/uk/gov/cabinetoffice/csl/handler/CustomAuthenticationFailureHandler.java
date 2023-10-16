@@ -16,7 +16,7 @@ import java.net.URLEncoder;
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private String encryptionKey;
+    private final String encryptionKey;
 
     public CustomAuthenticationFailureHandler(@Value("${textEncryption.encryptionKey}") String encryptionKey){
         this.encryptionKey = encryptionKey;

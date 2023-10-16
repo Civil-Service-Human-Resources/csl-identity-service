@@ -8,11 +8,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 public class TokenRequest implements Serializable {
-
-    private static long serialVersionUID = 1l;
-
     private String domain;
     private String token;
     private String org;
-
 }

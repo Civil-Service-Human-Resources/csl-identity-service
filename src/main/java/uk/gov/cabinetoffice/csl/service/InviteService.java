@@ -65,11 +65,7 @@ public class InviteService {
 
     public boolean isInviteCodeExpired(Invite invite) {
         long diffInMs = new Date().getTime() - invite.getInvitedAt().getTime();
-
-        if (diffInMs > validityInSeconds * 1000) {
-            return true;
-        }
-        return false;
+        return diffInMs > validityInSeconds * 1000L;
     }
 
     public void updateInviteByCode(String code, InviteStatus newStatus) {

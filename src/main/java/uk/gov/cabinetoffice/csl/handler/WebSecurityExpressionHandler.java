@@ -11,7 +11,7 @@ public class WebSecurityExpressionHandler extends DefaultWebSecurityExpressionHa
     @Override
     protected SecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, FilterInvocation fi) {
         WebSecurityExpressionRoot root = (WebSecurityExpressionRoot) super.createSecurityExpressionRoot(authentication, fi);
-        root.setDefaultRolePrefix(""); //remove the prefix ROLE_
+        root.setDefaultRolePrefix(""); //To remove the prefix ROLE_
         return root;
     }
 }

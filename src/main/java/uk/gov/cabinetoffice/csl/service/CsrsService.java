@@ -13,18 +13,20 @@ import java.util.Optional;
 @Service
 public class CsrsService {
 
-//    private RestTemplate restTemplate;
-    private String agencyTokensFormat;
-    private String agencyTokensByDomainFormat;
-    private String agencyTokensByDomainAndOrganisationFormat;
-    private String organisationalUnitsFlatUrl;
+    private final String agencyTokensFormat;
+    private final String agencyTokensByDomainFormat;
+    private final String agencyTokensByDomainAndOrganisationFormat;
+    private final String organisationalUnitsFlatUrl;
+
+    //TODO: To be implemented as part of the future ticket
+    //private RestTemplate restTemplate;
 
     public CsrsService(//@Autowired RestTemplate restTemplate,
                        @Value("${registry.agencyTokensFormat}") String agencyTokensFormat,
                        @Value("${registry.agencyTokensByDomainFormat}") String agencyTokensByDomainFormat,
                        @Value("${registry.agencyTokensByDomainAndOrganisationFormat}") String agencyTokensByDomainAndOrganisationFormat,
                        @Value("${registry.organisationalUnitsFlatUrl}") String organisationalUnitsFlatUrl) {
-//        this.restTemplate = restTemplate;
+        //this.restTemplate = restTemplate;
         this.agencyTokensFormat = agencyTokensFormat;
         this.agencyTokensByDomainFormat = agencyTokensByDomainFormat;
         this.agencyTokensByDomainAndOrganisationFormat = agencyTokensByDomainAndOrganisationFormat;
@@ -33,7 +35,8 @@ public class CsrsService {
 
     public Boolean isDomainInAgency(String domain) {
         try {
-//            return restTemplate.getForObject(String.format(agencyTokensByDomainFormat, domain), Boolean.class);
+            //TODO: To be implemented as part of the future ticket
+            //return restTemplate.getForObject(String.format(agencyTokensByDomainFormat, domain), Boolean.class);
             return false;
         } catch (HttpClientErrorException e) {
             log.error("An error occurred checking if domain in agency", e);
@@ -43,7 +46,8 @@ public class CsrsService {
 
     public AgencyToken[] getAgencyTokensForDomain(String domain) {
         try {
-//            return restTemplate.getForObject(String.format(agencyTokensByDomainFormat, domain), AgencyToken[].class);
+            //TODO: To be implemented as part of the future ticket
+            //return restTemplate.getForObject(String.format(agencyTokensByDomainFormat, domain), AgencyToken[].class);
             return null;
         } catch (HttpClientErrorException e) {
             return new AgencyToken[]{};
@@ -52,7 +56,8 @@ public class CsrsService {
 
     public Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation) {
         try {
-//            return Optional.of(restTemplate.getForObject(String.format(agencyTokensFormat, domain, token, organisation), AgencyToken.class));
+            //TODO: To be implemented as part of the future ticket
+            //return Optional.of(restTemplate.getForObject(String.format(agencyTokensFormat, domain, token, organisation), AgencyToken.class));
             return Optional.empty();
         } catch (HttpClientErrorException e) {
             return Optional.empty();
@@ -61,7 +66,8 @@ public class CsrsService {
 
     public Optional<AgencyToken> getAgencyTokenForDomainAndOrganisation(String domain, String organisation) {
         try {
-//            return Optional.of(restTemplate.getForObject(String.format(agencyTokensByDomainAndOrganisationFormat, domain, organisation), AgencyToken.class));
+            //TODO: To be implemented as part of the future ticket
+            //return Optional.of(restTemplate.getForObject(String.format(agencyTokensByDomainAndOrganisationFormat, domain, organisation), AgencyToken.class));
             return Optional.empty();
         } catch (HttpClientErrorException e) {
             return Optional.empty();
@@ -71,7 +77,8 @@ public class CsrsService {
     public OrganisationalUnitDto[] getOrganisationalUnitsFormatted() {
         OrganisationalUnitDto[] organisationalUnitDtos = null;
         try {
-//            organisationalUnitDtos = restTemplate.getForObject(organisationalUnitsFlatUrl, OrganisationalUnitDto[].class);
+            //TODO: To be implemented as part of the future ticket
+            //organisationalUnitDtos = restTemplate.getForObject(organisationalUnitsFlatUrl, OrganisationalUnitDto[].class);
         } catch (HttpClientErrorException e) {
             organisationalUnitDtos = new OrganisationalUnitDto[0];
         }
