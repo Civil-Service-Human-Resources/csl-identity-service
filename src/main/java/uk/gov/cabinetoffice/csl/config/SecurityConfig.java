@@ -61,7 +61,7 @@ public class SecurityConfig {
 		httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 		httpSecurity
 			.cors(Customizer.withDefaults())
-			.csrf(AbstractHttpConfigurer::disable)
+			.csrf(Customizer.withDefaults())
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
@@ -75,7 +75,7 @@ public class SecurityConfig {
 	public SecurityFilterChain appSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
 			.cors(Customizer.withDefaults())
-			.csrf(AbstractHttpConfigurer::disable)
+			.csrf(Customizer.withDefaults())
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",

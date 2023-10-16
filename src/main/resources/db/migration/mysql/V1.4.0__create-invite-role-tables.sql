@@ -1,6 +1,6 @@
 CREATE TABLE invite (
     id                      mediumint(8) unsigned   NOT NULL AUTO_INCREMENT,
-    inviter_id              mediumint(8) unsigned   NOT NULL,
+    inviter_id              mediumint(8) unsigned,
     code                    char(40)                NOT NULL,
     status                  varchar(10)             NOT NULL,
     for_email               varchar(150)            NOT NULL,

@@ -1,6 +1,6 @@
 CREATE TABLE invite (
     id                      int                     NOT NULL AUTO_INCREMENT,
-    inviter_id              int                     NOT NULL,
+    inviter_id              int,
     code                    char(40)                NOT NULL UNIQUE,
     status                  varchar(10)             NOT NULL,
     for_email               varchar(150)            NOT NULL,
