@@ -13,10 +13,10 @@ import java.util.Map;
 
 @SpringBootApplication
 public class CslIdentityService {
+
 	public static void main(String[] args) {
 		SpringApplication.run(CslIdentityService.class, args);
 	}
-
 
 	@Bean
 	public LocalValidatorFactoryBean validator(MessageSource messageSource) {
@@ -34,10 +34,4 @@ public class CslIdentityService {
 	public NotificationClient notificationClient(@Value("${govNotify.key}") String key) {
 		return new NotificationClient(key);
 	}
-
-//	TODO: To be implemented as part of the future ticket
-//	@Bean
-//	public RestTemplate restTemplate() {
-//		return new RestTemplate();
-//	}
 }
