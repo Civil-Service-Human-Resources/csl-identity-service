@@ -1,8 +1,8 @@
 package uk.gov.cabinetoffice.csl.client.identity;
 
-import uk.gov.cabinetoffice.csl.domain.identity.OAuth2Token;
+import uk.gov.cabinetoffice.csl.service.auth2.OAuthToken;
 
 public interface IIdentityClient {
 
-    OAuth2Token getServiceToken();
+    OAuthToken getServiceToken();
 }

@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.domain.identity;
+package uk.gov.cabinetoffice.csl.service.auth2;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OAuth2Token implements Serializable {
+public class OAuthToken implements Serializable {
 
     @JsonProperty("access_token")
     private String accessToken;
@@ -22,5 +22,12 @@ public class OAuth2Token implements Serializable {
     @JsonProperty("expires_in")
     private Integer expiresIn;
 
+    @JsonProperty("scope")
+    private String scope;
+
+    @JsonProperty("jti")
+    private String jti;
+
     private LocalDateTime expiryDateTime;
 }
+

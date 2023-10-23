@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.client.IHttpClient;
-import uk.gov.cabinetoffice.csl.domain.identity.OAuth2Token;
+import uk.gov.cabinetoffice.csl.service.auth2.OAuthToken;
 import uk.gov.cabinetoffice.csl.exception.InternalAuthErrorException;
 
 @Component
@@ -23,11 +23,11 @@ public class IdentityClient implements IIdentityClient {
     }
 
     @Override
-    public OAuth2Token getServiceToken() {
+    public OAuthToken getServiceToken() {
         log.debug("Getting service token from identity service");
         String url = String.format("%s?grant_type=client_credentials", token);
         RequestEntity<Void> request = RequestEntity.post(url).build();
-        OAuth2Token response = client.executeRequest(request, OAuth2Token.class);
+        OAuthToken response = client.executeRequest(request, OAuthToken.class);
         if (response == null) {
             throw new InternalAuthErrorException("Service token response was null");
         }

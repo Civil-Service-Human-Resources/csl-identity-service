@@ -17,8 +17,8 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
-import uk.gov.cabinetoffice.csl.service.CsrsService;
-import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.client.csrs.CivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 import uk.gov.service.notify.NotificationClientException;
@@ -53,9 +53,9 @@ public class SignupController {
 
     private final InviteService inviteService;
 
-    private final IdentityService identityService;
+    private final UserService userService;
 
-    private final CsrsService csrsService;
+    private final CivilServantRegistryClient civilServantRegistryClient;
 
     private final InviteRepository inviteRepository;
 
@@ -66,15 +66,15 @@ public class SignupController {
     private final long durationAfterReRegAllowedInSeconds;
 
     public SignupController(InviteService inviteService,
-                            IdentityService identityService,
-                            CsrsService csrsService,
+                            UserService userService,
+                            CivilServantRegistryClient civilServantRegistryClient,
                             InviteRepository inviteRepository,
                             AgencyTokenCapacityService agencyTokenCapacityService,
                             @Value("${lpg.uiUrl}") String lpgUiUrl,
                             @Value("${invite.durationAfterReRegAllowedInSeconds}") long durationAfterReRegAllowedInSeconds) {
         this.inviteService = inviteService;
-        this.identityService = identityService;
-        this.csrsService = csrsService;
+        this.userService = userService;
+        this.civilServantRegistryClient = civilServantRegistryClient;
         this.inviteRepository = inviteRepository;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.lpgUiUrl = lpgUiUrl;
@@ -123,25 +123,25 @@ public class SignupController {
             }
         }
 
-        if (identityService.existsByEmail(email)) {
+        if (userService.existsByEmail(email)) {
             log.info("{} is already a user", email);
             redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, "User already exists with email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
         }
 
-        final String domain = identityService.getDomainFromEmailAddress(email);
+        final String domain = userService.getDomainFromEmailAddress(email);
 
-        if (csrsService.isDomainInAgency(domain)) {
+        if (civilServantRegistryClient.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
         } else {
-            if (identityService.isWhitelistedDomain(domain)) {
-                log.debug("Sending invite to whitelisted user {}", email);
+            if (userService.isAllowListedDomain(domain)) {
+                log.debug("Sending invite to allowListed user {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
                 return INVITE_SENT_TEMPLATE;
             } else {
-                log.debug("The domain of user {} is neither Whitelisted nor part of an Agency token", email);
+                log.debug("The domain of user {} is neither allowListed nor part of an Agency token", email);
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, "Your organisation is unable to use this service. Please contact your line manager.");
                 return REDIRECT_SIGNUP_REQUEST;
             }
@@ -209,7 +209,7 @@ public class SignupController {
 
             log.debug("Invite and signup credentials valid - creating identity and updating invite to 'Accepted'");
             try {
-                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
+                userService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
             } catch (UnableToAllocateAgencyTokenException e) {
                 log.debug("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
 
@@ -246,7 +246,7 @@ public class SignupController {
 
             log.debug("Invite email = {} accessing enter token screen for validation", invite.getForEmail());
 
-            OrganisationalUnitDto[] organisations = csrsService.getOrganisationalUnitsFormatted();
+            OrganisationalUnitDto[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
 
             model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
             model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
@@ -272,9 +272,9 @@ public class SignupController {
             Invite invite = inviteRepository.findByCode(code);
 
             final String emailAddress = invite.getForEmail();
-            final String domain = identityService.getDomainFromEmailAddress(emailAddress);
+            final String domain = userService.getDomainFromEmailAddress(emailAddress);
 
-            return csrsService.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(), form.getOrganisation())
+            return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(), form.getOrganisation())
                     .map(agencyToken -> {
                         if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
                             log.info("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup");
