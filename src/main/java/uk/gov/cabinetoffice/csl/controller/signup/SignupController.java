@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.gov.cabinetoffice.csl.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
 import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDto;
@@ -17,7 +18,6 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
-import uk.gov.cabinetoffice.csl.client.csrs.CivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
@@ -55,7 +55,7 @@ public class SignupController {
 
     private final UserService userService;
 
-    private final CivilServantRegistryClient civilServantRegistryClient;
+    private final ICivilServantRegistryClient civilServantRegistryClient;
 
     private final InviteRepository inviteRepository;
 
@@ -67,7 +67,7 @@ public class SignupController {
 
     public SignupController(InviteService inviteService,
                             UserService userService,
-                            CivilServantRegistryClient civilServantRegistryClient,
+                            ICivilServantRegistryClient civilServantRegistryClient,
                             InviteRepository inviteRepository,
                             AgencyTokenCapacityService agencyTokenCapacityService,
                             @Value("${lpg.uiUrl}") String lpgUiUrl,
