@@ -176,6 +176,7 @@ public class IdentityRepositoryTest {
     }
 
     private Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
-        return new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false, new HashSet<>(), Instant.now(), false, agencyTokenUid);
+        return new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false,
+                new HashSet<>(), Instant.now(), false, agencyTokenUid);
     }
 }

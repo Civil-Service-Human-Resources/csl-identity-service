@@ -28,6 +28,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
 import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
@@ -60,7 +61,7 @@ public class SecurityConfig {
 		httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 		httpSecurity
 			.cors(Customizer.withDefaults())
-			.csrf(AbstractHttpConfigurer::disable)
+			.csrf(Customizer.withDefaults())
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
@@ -74,12 +75,12 @@ public class SecurityConfig {
 	public SecurityFilterChain appSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
 			.cors(Customizer.withDefaults())
-			.csrf(AbstractHttpConfigurer::disable)
+			.csrf(Customizer.withDefaults())
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/error",
-					"/login", "/logout",
+					"/login","/signup/**",
 					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated()
 			)
@@ -94,12 +95,12 @@ public class SecurityConfig {
 					String redirectUrl = request.getParameter("returnTo");
 					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
 				});
-			});
-			//TODO: Below commented code will be removed if not used for future tickets.
-			//.exceptionHandling(exceptions -> exceptions
-			//		.defaultAuthenticationEntryPointFor(
-			//				new LoginUrlAuthenticationEntryPoint("/login"),
-			//				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+			})
+			.exceptionHandling(exceptions -> exceptions
+				.defaultAuthenticationEntryPointFor(
+					new LoginUrlAuthenticationEntryPoint("/login"),
+					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));;
 		return httpSecurity.build();
 	}
 
@@ -150,6 +151,10 @@ public class SecurityConfig {
 					context.getClaims().claim("user_name", principal.getName());
 					authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 							.collect(Collectors.toSet());
+					if (principal.getPrincipal() instanceof IdentityDetails) {
+						String email = ((IdentityDetails) principal.getPrincipal()).getIdentity().getEmail();
+						context.getClaims().claim("email", email);
+					}
 				} else if (principal instanceof OAuth2ClientAuthenticationToken) {
 					authorities.add("CLIENT");
 				}

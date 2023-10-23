@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller;
+package uk.gov.cabinetoffice.csl.controller.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,8 +13,8 @@ import java.io.IOException;
 @Controller
 public class LoginController {
 
-  @Value("${lpg.uiUrl}")
-  private String lpgUiUrl;
+  @Value("${authenticationSuccess.targetUrl}")
+  private String authenticationSuccessTargetUrl;
 
   @Value("${maintenancePage.enabled}")
   private boolean maintenancePageEnabled;
@@ -45,8 +45,13 @@ public class LoginController {
     DefaultSavedRequest dsr =
         (DefaultSavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
     if (dsr != null && dsr.getQueryString() == null) {
-      response.sendRedirect(lpgUiUrl);
+      response.sendRedirect(authenticationSuccessTargetUrl);
     }
     return "login";
+  }
+
+  @RequestMapping("/management/login")
+  public String managementLogin() {
+    return "management-login";
   }
 }

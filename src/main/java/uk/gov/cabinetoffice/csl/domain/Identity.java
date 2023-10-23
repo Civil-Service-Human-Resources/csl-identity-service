@@ -37,8 +37,9 @@ public class Identity implements Serializable {
     @Column(length = 100)
     private String password;
 
-    @Column
-    private String agencyTokenUid;
+    private boolean active;
+
+    private boolean locked;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
@@ -48,21 +49,33 @@ public class Identity implements Serializable {
     )
     private Set<Role> roles;
 
-    private boolean active;
-
-    private boolean locked;
-
     private Instant lastLoggedIn;
 
     private boolean deletionNotificationSent;
 
-    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid) {
+    @Column
+    private String agencyTokenUid;
+
+    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles,
+                    Instant lastLoggedIn, boolean deletionNotificationSent) {
         this.uid = uid;
         this.email = email;
         this.password = password;
         this.active = active;
-        this.roles = roles;
         this.locked = locked;
+        this.roles = roles;
+        this.lastLoggedIn = lastLoggedIn;
+        this.deletionNotificationSent = deletionNotificationSent;
+    }
+
+    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles,
+                    Instant lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid) {
+        this.uid = uid;
+        this.email = email;
+        this.password = password;
+        this.active = active;
+        this.locked = locked;
+        this.roles = roles;
         this.lastLoggedIn = lastLoggedIn;
         this.deletionNotificationSent = deletionNotificationSent;
         this.agencyTokenUid = agencyTokenUid;
@@ -78,7 +91,6 @@ public class Identity implements Serializable {
                 ", locked=" + locked +
                 ", deletionNotificationSent=" + deletionNotificationSent +
                 ", agencyTokenUid=" + agencyTokenUid +
-                ", roles=" + roles +
                 '}';
     }
 }
