@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.cabinetoffice.csl.domain.AgencyToken;
-import uk.gov.cabinetoffice.csl.domain.AgencyTokenCapacityUsedDto;
+import uk.gov.cabinetoffice.csl.domain.AgencyTokenCapacityUsedDTO;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 @Slf4j
@@ -22,8 +22,8 @@ public class AgencyTokenCapacityService {
         return (agencyToken.getCapacity() - spacesUsed) > 0;
     }
 
-    public AgencyTokenCapacityUsedDto getSpacesUsedByAgencyToken(String uid) {
-        return new AgencyTokenCapacityUsedDto(identityRepository.countByAgencyTokenUid(uid));
+    public AgencyTokenCapacityUsedDTO getSpacesUsedByAgencyToken(String uid) {
+        return new AgencyTokenCapacityUsedDTO(identityRepository.countByAgencyTokenUid(uid));
     }
 
     public Long getCountOfAgencyByUid(String uid) {

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.cabinetoffice.csl.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.domain.AgencyToken;
-import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDto;
+import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;
 
 import java.util.Optional;
 
@@ -53,15 +53,15 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         }
     }
 
-    public OrganisationalUnitDto[] getOrganisationalUnitsFormatted() {
-        OrganisationalUnitDto[] organisationalUnitDtos = null;
+    public OrganisationalUnitDTO[] getOrganisationalUnitsFormatted() {
+        OrganisationalUnitDTO[] organisationalUnitDTOs;
         try {
             RequestEntity<Void> request = RequestEntity.get(organisationalUnitsFlatUrl).build();
-            return httpClient.executeRequest(request, OrganisationalUnitDto[].class);
+            return httpClient.executeRequest(request, OrganisationalUnitDTO[].class);
         } catch (HttpClientErrorException e) {
             log.error("An error occurred while getting Organisational Units Formatted", e);
-            organisationalUnitDtos = new OrganisationalUnitDto[0];
+            organisationalUnitDTOs = new OrganisationalUnitDTO[0];
         }
-        return organisationalUnitDtos;
+        return organisationalUnitDTOs;
     }
 }

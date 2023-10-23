@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
-import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDto;
+import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;
 import uk.gov.cabinetoffice.csl.domain.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
@@ -71,7 +71,8 @@ public class SignupController {
                             InviteRepository inviteRepository,
                             AgencyTokenCapacityService agencyTokenCapacityService,
                             @Value("${lpg.uiUrl}") String lpgUiUrl,
-                            @Value("${invite.durationAfterReRegAllowedInSeconds}") long durationAfterReRegAllowedInSeconds) {
+                            @Value("${invite.durationAfterReRegAllowedInSeconds}")
+                            long durationAfterReRegAllowedInSeconds) {
         this.inviteService = inviteService;
         this.userService = userService;
         this.civilServantRegistryClient = civilServantRegistryClient;
@@ -110,7 +111,8 @@ public class SignupController {
                     log.info("{} user trying to re-register before re-registration allowed time", email);
                     redirectAttributes.addFlashAttribute(
                             ApplicationConstants.STATUS_ATTRIBUTE,
-                            "You have been sent an email with a link to register your account. Please check your spam or junk mail folders.\n" +
+                            "You have been sent an email with a link to register your account. " +
+                                    "Please check your spam or junk mail folders.\n" +
                                     "If you have not received the email, please wait " +
                                     (durationAfterReRegAllowedInSeconds/3600) +
                                     " hours and re-enter your details to create an account.");
@@ -125,7 +127,8 @@ public class SignupController {
 
         if (userService.existsByEmail(email)) {
             log.info("{} is already a user", email);
-            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, "User already exists with email address " + email);
+            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                    "User already exists with email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
         }
 
@@ -142,7 +145,8 @@ public class SignupController {
                 return INVITE_SENT_TEMPLATE;
             } else {
                 log.debug("The domain of user {} is neither allowListed nor part of an Agency token", email);
-                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, "Your organisation is unable to use this service. Please contact your line manager.");
+                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                        "Your organisation is unable to use this service. Please contact your line manager.");
                 return REDIRECT_SIGNUP_REQUEST;
             }
         }
@@ -163,7 +167,8 @@ public class SignupController {
                 Invite invite = inviteRepository.findByCode(code);
 
                 if (!invite.isAuthorisedInvite()) {
-                    log.debug("Invite email = {} not yet authorised - redirecting to enter token screen", invite.getForEmail());
+                    log.debug("Invite email = {} not yet authorised - redirecting to enter token screen",
+                            invite.getForEmail());
                     return REDIRECT_ENTER_TOKEN + code;
                 }
 
@@ -176,7 +181,8 @@ public class SignupController {
                 } else {
                     model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new TokenRequest());
                 }
-                log.debug("Invite email = {} valid and authorised - redirecting to set password screen", invite.getForEmail());
+                log.debug("Invite email = {} valid and authorised - redirecting to set password screen",
+                        invite.getForEmail());
                 return SIGNUP_TEMPLATE;
             }
         } else {
@@ -189,7 +195,8 @@ public class SignupController {
     }
 
     @PostMapping("/{code}")
-    @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
+    @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class,
+            ResourceNotFoundException.class})
     public String signup(@PathVariable(value = "code") String code,
                          @ModelAttribute @Valid SignupForm signupForm,
                          BindingResult signUpFormBindingResult,
@@ -214,14 +221,16 @@ public class SignupController {
                 log.debug("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
 
                 model.addAttribute(INVITE_MODEL, invite);
-                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                        ApplicationConstants.SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
                 redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
                 return REDIRECT_SIGNUP + code;
             } catch (ResourceNotFoundException e) {
                 log.debug("ResourceNotFoundException. Redirecting to set password with error: " + e);
 
                 model.addAttribute(INVITE_MODEL, invite);
-                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
+                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                        ApplicationConstants.SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
 
                 return REDIRECT_LOGIN;
             }
@@ -246,7 +255,7 @@ public class SignupController {
 
             log.debug("Invite email = {} accessing enter token screen for validation", invite.getForEmail());
 
-            OrganisationalUnitDto[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
+            OrganisationalUnitDTO[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
 
             model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
             model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
@@ -274,11 +283,15 @@ public class SignupController {
             final String emailAddress = invite.getForEmail();
             final String domain = userService.getDomainFromEmailAddress(emailAddress);
 
-            return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(), form.getOrganisation())
+            return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(),
+                            form.getOrganisation())
                     .map(agencyToken -> {
                         if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                            log.info("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup");
-                            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+                            log.info("Agency token uid = {}, capacity = {}, has no spaces available. " +
+                                            "User {} unable to signup",
+                                    agencyToken.getUid(), agencyToken.getCapacity(), emailAddress);
+                            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                                    ApplicationConstants.NO_SPACES_AVAILABLE_ERROR_MESSAGE);
                             return REDIRECT_ENTER_TOKEN + code;
                         }
 
@@ -287,14 +300,16 @@ public class SignupController {
 
                         model.addAttribute(INVITE_MODEL, invite);
 
-                        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
+                        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
+                                addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
 
                         log.debug("Enter token form has passed domain, token, organisation validation");
 
                         return REDIRECT_SIGNUP + code;
                     }).orElseGet(() -> {
                         log.debug("Enter token form has failed domain, token, organisation validation");
-                        redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE);
+                        redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                                ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE);
                         return REDIRECT_ENTER_TOKEN + code;
                     });
         } else {

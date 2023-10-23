@@ -3,7 +3,7 @@ package uk.gov.cabinetoffice.csl.domain;
 import lombok.Data;
 
 @Data
-public class OrganisationalUnitDto {
+public class OrganisationalUnitDTO {
     protected String name;
     protected String href;
     protected String abbreviation;
