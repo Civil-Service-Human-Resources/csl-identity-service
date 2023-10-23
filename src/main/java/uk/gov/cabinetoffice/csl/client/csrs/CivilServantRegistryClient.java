@@ -31,6 +31,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         this.httpClient = httpClient;
     }
 
+    @Override
     public Boolean isDomainInAgency(String domain) {
         try {
             String url = String.format(agencyTokensByDomainFormat, domain);
@@ -38,10 +39,11 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             return httpClient.executeRequest(request, Boolean.class);
         } catch (HttpClientErrorException e) {
             log.error("An error occurred while checking if domain in agency", e);
-            return null;
+            return false;
         }
     }
 
+    @Override
     public Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation) {
         try {
             String url = String.format(agencyTokensFormat, domain, token, organisation);
@@ -53,6 +55,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         }
     }
 
+    @Override
     public OrganisationalUnitDTO[] getOrganisationalUnitsFormatted() {
         OrganisationalUnitDTO[] organisationalUnitDTOs;
         try {
