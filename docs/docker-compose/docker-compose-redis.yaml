@@ -3,7 +3,7 @@ services:
   cache:
     image: redis:7.2.2-alpine
     container_name: redis722
-    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
     restart: always
     volumes:
       - cache:/data
