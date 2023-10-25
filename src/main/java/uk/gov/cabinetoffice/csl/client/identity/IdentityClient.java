@@ -16,7 +16,7 @@ public class IdentityClient implements IIdentityClient {
     private final IHttpClient client;
 
     @Value("${oauth2.tokenUrl}")
-    private String token;
+    private String tokenUrl;
 
     public IdentityClient(@Qualifier("identityHttpClient") IHttpClient client) {
         this.client = client;
@@ -25,7 +25,7 @@ public class IdentityClient implements IIdentityClient {
     @Override
     public OAuthToken getServiceToken() {
         log.debug("Getting service token from identity service");
-        String url = String.format("%s?grant_type=client_credentials", token);
+        String url = String.format("%s?grant_type=client_credentials", tokenUrl);
         RequestEntity<Void> request = RequestEntity.post(url).build();
         OAuthToken response = client.executeRequest(request, OAuthToken.class);
         if (response == null) {
