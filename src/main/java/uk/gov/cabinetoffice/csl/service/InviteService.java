@@ -71,6 +71,9 @@ public class InviteService {
     public void updateInviteByCode(String code, InviteStatus newStatus) {
         Invite invite = inviteRepository.findByCode(code);
         invite.setStatus(newStatus);
+        if(InviteStatus.ACCEPTED.equals(newStatus)) {
+            invite.setAcceptedAt(new Date());
+        }
         inviteRepository.save(invite);
     }
 
