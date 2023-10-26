@@ -36,9 +36,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             String url = String.format(agencyTokensByDomainFormat, domain);
             RequestEntity<Void> request = RequestEntity.get(url).build();
-            Boolean aBoolean = httpClient.executeRequest(request, Boolean.class);
-            log.debug("##########isDomainInAgency: Response from CSRS service:aBoolean: {}", aBoolean);
-            return aBoolean;
+            return httpClient.executeRequest(request, Boolean.class);
         } catch (HttpClientErrorException e) {
             log.error("An error occurred while checking if domain in agency", e);
             return false;
@@ -50,9 +48,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             String url = String.format(agencyTokensFormat, domain, token, organisation);
             RequestEntity<Void> request = RequestEntity.get(url).build();
-            AgencyToken agencyToken = httpClient.executeRequest(request, AgencyToken.class);
-            log.debug("##########getAgencyTokenForDomainTokenOrganisation: Response from CSRS service:agencyToken: {}", agencyToken);
-            return Optional.of(agencyToken);
+            return Optional.of(httpClient.executeRequest(request, AgencyToken.class));
         } catch (HttpClientErrorException e) {
             log.error("An error occurred while getting Agency Token For Domain Token Organisation", e);
             return Optional.empty();
@@ -64,9 +60,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         OrganisationalUnitDTO[] organisationalUnitDTOs;
         try {
             RequestEntity<Void> request = RequestEntity.get(organisationalUnitsFlatUrl).build();
-            organisationalUnitDTOs = httpClient.executeRequest(request, OrganisationalUnitDTO[].class);
-            log.debug("##########getOrganisationalUnitsFormatted: Response from CSRS service:organisationalUnitDTOs: {}", organisationalUnitDTOs.length);
-            return organisationalUnitDTOs;
+            return httpClient.executeRequest(request, OrganisationalUnitDTO[].class);
         } catch (HttpClientErrorException e) {
             log.error("An error occurred while getting Organisational Units Formatted", e);
             organisationalUnitDTOs = new OrganisationalUnitDTO[0];
