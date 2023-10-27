@@ -305,6 +305,11 @@
 		"type": "oauth2",
 		"oauth2": [
 			{
+				"key": "grant_type",
+				"value": "authorization_code",
+				"type": "string"
+			},
+			{
 				"key": "clientSecret",
 				"value": "{{client-secret}}",
 				"type": "string"
@@ -337,11 +342,6 @@
 			{
 				"key": "scope",
 				"value": "",
-				"type": "string"
-			},
-			{
-				"key": "grant_type",
-				"value": "authorization_code_with_pkce",
 				"type": "string"
 			},
 			{
