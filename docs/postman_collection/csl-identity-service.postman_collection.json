@@ -190,6 +190,34 @@
 			"response": []
 		},
 		{
+			"name": "auth-server-reset-service-token-cache",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BEARER-TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/reset-cache/service-token",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"reset-cache",
+						"service-token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "auth-server-oauth2-revoke",
 			"request": {
 				"auth": {
@@ -277,6 +305,11 @@
 		"type": "oauth2",
 		"oauth2": [
 			{
+				"key": "grant_type",
+				"value": "authorization_code",
+				"type": "string"
+			},
+			{
 				"key": "clientSecret",
 				"value": "{{client-secret}}",
 				"type": "string"
@@ -309,11 +342,6 @@
 			{
 				"key": "scope",
 				"value": "",
-				"type": "string"
-			},
-			{
-				"key": "grant_type",
-				"value": "authorization_code_with_pkce",
 				"type": "string"
 			},
 			{

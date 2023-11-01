@@ -12,13 +12,13 @@ public class LoginAttemptService {
 
     private final Map<String, Integer> loginAttemptCache;
     private final int maxAttempt;
-    private final IdentityService identityService;
+    private final UserService userService;
 
     public LoginAttemptService(@Value("${account.lockout.maxAttempt}") int maxAttempt,
-            IdentityService identityService,
+            UserService userService,
             @Qualifier("loginAttemptCache") Map<String, Integer> loginAttemptCache) {
         this.maxAttempt = maxAttempt;
-        this.identityService = identityService;
+        this.userService = userService;
         this.loginAttemptCache = loginAttemptCache;
     }
 
@@ -38,7 +38,7 @@ public class LoginAttemptService {
     }
 
     private void lockIdentity(String email) {
-        identityService.lockIdentity(email);
+        userService.lockIdentity(email);
     }
 
     private void incrementAttempts(String email) {
@@ -50,6 +50,6 @@ public class LoginAttemptService {
     }
 
     private boolean identityExists(String email) {
-        return identityService.existsByEmail(email);
+        return userService.existsByEmail(email);
     }
 }

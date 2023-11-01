@@ -5,6 +5,6 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class AgencyTokenCapacityUsedDto {
+public class AgencyTokenCapacityUsedDTO {
     private Long capacityUsed;
 }

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.service.UserService;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -19,10 +19,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Value("${authenticationSuccess.targetUrl}")
     private String authenticationSuccessTargetUrl;
 
-    private final IdentityService identityService;
+    private final UserService userService;
 
-    public CustomAuthenticationSuccessHandler(IdentityService identityService) {
-        this.identityService = identityService;
+    public CustomAuthenticationSuccessHandler(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         if (authentication != null) {
             if (authentication.getPrincipal() != null) {
                 if (authentication.getPrincipal() instanceof IdentityDetails identityDetails){
-                    identityService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
+                    userService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
                 }
             }
         }
