@@ -5,17 +5,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.AuthenticationException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.Mockito.*;
 
-@AutoConfigureMockMvc
 @SpringBootTest
 public class CustomAuthenticationFailureHandlerTest {
 
@@ -24,36 +27,30 @@ public class CustomAuthenticationFailureHandlerTest {
 
     @Test
     public void shouldSetErrorToFailedOnFailedLogin() throws IOException, ServletException {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        AuthenticationException exception = mock(AuthenticationException.class);
-        when(exception.getMessage()).thenReturn("Some other error");
-        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
+        HttpServletResponse response = executeHandler("Some other error");
         verify(response).sendRedirect("/login?error=failed");
     }
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        AuthenticationException exception = mock(AuthenticationException.class);
-        when(exception.getMessage()).thenReturn("User account is locked");
-        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
+        HttpServletResponse response = executeHandler("User account is locked");
         verify(response).sendRedirect("/login?error=locked");
     }
 
     @Test
     public void shouldSetErrorToFailedOnAccountBlocked() throws IOException, ServletException {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        AuthenticationException exception = mock(AuthenticationException.class);
-        when(exception.getMessage()).thenReturn("User account is blocked");
-        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
+        HttpServletResponse response = executeHandler("User account is blocked");
         verify(response).sendRedirect("/login?error=blocked");
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException, ServletException {
+    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists() throws IOException, ServletException {
+        HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
+        verify(response).sendRedirect("/login?error=pending-reactivation");
+    }
+
+    @Test
+    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException, ServletException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
@@ -65,13 +62,12 @@ public class CustomAuthenticationFailureHandlerTest {
         verify(response).sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, UTF_8));
     }
 
-    @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists() throws IOException, ServletException {
+    private HttpServletResponse executeHandler(String message) throws IOException, ServletException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
-        when(exception.getMessage()).thenReturn("Pending reactivation already exists for user");
+        when(exception.getMessage()).thenReturn(message);
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
-        verify(response).sendRedirect("/login?error=pending-reactivation");
+        return response;
     }
 }
