@@ -24,91 +24,37 @@ public class FieldMatchValidatorTest {
     }
 
     @Test
-    public void shouldReturnTrueIfFieldsMatch() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
-        FieldMatch fieldMatch = mock(FieldMatch.class);
-
-        when(fieldMatch.first()).thenReturn("first");
-        when(fieldMatch.second()).thenReturn("second");
-
-        Object bean = new Object();
-
-        when(BeanUtils.getProperty(bean, "first")).thenReturn("match");
-        when(BeanUtils.getProperty(bean, "second")).thenReturn("match");
-
-        validator.initialize(fieldMatch);
-        assertTrue(validator.isValid(bean, constraintValidatorContext));
+    public void shouldReturnTrueIfFieldsMatch()
+            throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        assertTrue(executeValidatorToReturnBoolean("match", "match"));
     }
 
     @Test
-    public void shouldReturnFalseIfFieldsDoNotMatch() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
-        FieldMatch fieldMatch = mock(FieldMatch.class);
-
-        when(fieldMatch.first()).thenReturn("first");
-        when(fieldMatch.second()).thenReturn("second");
-
-        Object bean = new Object();
-
-        when(BeanUtils.getProperty(bean, "first")).thenReturn("match");
-        when(BeanUtils.getProperty(bean, "second")).thenReturn("no match");
-
-        validator.initialize(fieldMatch);
-        assertFalse(validator.isValid(bean, constraintValidatorContext));
+    public void shouldReturnFalseIfFieldsDoNotMatch()
+            throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        assertFalse(executeValidatorToReturnBoolean("match", "no match"));
     }
-
 
     @Test
     public void shouldThrowFieldMatchExceptionOnIllegalAccessException()
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
-        FieldMatch fieldMatch = mock(FieldMatch.class);
-
-        when(fieldMatch.first()).thenReturn("first");
-        when(fieldMatch.second()).thenReturn("second");
-
-        Object bean = new Object();
-
-        IllegalAccessException exception = mock(IllegalAccessException.class);
-
-        when(BeanUtils.getProperty(bean, "first")).thenThrow(exception);
-        validator.initialize(fieldMatch);
-
-        try {
-            validator.isValid(bean, constraintValidatorContext);
-            fail("Expected FieldMatchException");
-        } catch (FieldMatchException e) {
-            assertEquals(exception, e.getCause());
-        }
+        executeValidatorToThrowException(mock(IllegalAccessException.class));
     }
 
     @Test
     public void shouldThrowFieldMatchExceptionOnNoSuchMethodException()
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
-        FieldMatch fieldMatch = mock(FieldMatch.class);
-
-        when(fieldMatch.first()).thenReturn("first");
-        when(fieldMatch.second()).thenReturn("second");
-
-        Object bean = new Object();
-
-        NoSuchMethodException exception = mock(NoSuchMethodException.class);
-
-        when(BeanUtils.getProperty(bean, "first")).thenThrow(exception);
-        validator.initialize(fieldMatch);
-
-        try {
-            validator.isValid(bean, constraintValidatorContext);
-            fail("Expected FieldMatchException");
-        } catch (FieldMatchException e) {
-            assertEquals(exception, e.getCause());
-        }
+        executeValidatorToThrowException(mock(NoSuchMethodException.class));
     }
 
     @Test
     public void shouldThrowFieldMatchExceptionOnInvocationTargetException()
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        executeValidatorToThrowException(mock(InvocationTargetException.class));
+    }
+
+    private boolean executeValidatorToReturnBoolean(String value1, String value2)
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
         FieldMatch fieldMatch = mock(FieldMatch.class);
 
@@ -117,9 +63,24 @@ public class FieldMatchValidatorTest {
 
         Object bean = new Object();
 
-        InvocationTargetException exception = mock(InvocationTargetException.class);
+        when(BeanUtils.getProperty(bean, "first")).thenReturn(value1);
+        when(BeanUtils.getProperty(bean, "second")).thenReturn(value2);
 
-        when(BeanUtils.getProperty(bean, "first")).thenThrow(exception);
+        validator.initialize(fieldMatch);
+        return validator.isValid(bean, constraintValidatorContext);
+    }
+
+    private <T> void executeValidatorToThrowException(T exception) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+
+        ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
+        FieldMatch fieldMatch = mock(FieldMatch.class);
+
+        when(fieldMatch.first()).thenReturn("first");
+        when(fieldMatch.second()).thenReturn("second");
+
+        Object bean = new Object();
+
+        when(BeanUtils.getProperty(bean, "first")).thenThrow((Throwable) exception);
         validator.initialize(fieldMatch);
 
         try {
