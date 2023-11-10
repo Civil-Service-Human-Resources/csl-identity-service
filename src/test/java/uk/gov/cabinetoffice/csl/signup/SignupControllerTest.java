@@ -90,7 +90,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", email)
-                        .param("confirmEmail", email))
+                        .param("confirmEmail", email)
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("We've sent you an email")))
                 .andExpect(content().string(containsString("What happens next")))
@@ -119,7 +120,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", email)
-                        .param("confirmEmail", email))
+                        .param("confirmEmail", email)
+                )
                 .andExpect(status().isOk());
 
         verify(inviteService, times(1)).updateInviteByCode(invite.get().getCode(), EXPIRED);
@@ -132,7 +134,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", "user@domain.org")
-                        .param("confirmEmail", "user1@domain.org"))
+                        .param("confirmEmail", "user1@domain.org")
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Email addresses do not match")));
     }
@@ -144,7 +147,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", "userdomain.org")
-                        .param("confirmEmail", "userdomain.org"))
+                        .param("confirmEmail", "userdomain.org")
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Email address is not valid")));
     }
@@ -160,7 +164,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", email)
-                        .param("confirmEmail", email))
+                        .param("confirmEmail", email)
+                )
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -176,7 +181,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", email)
-                        .param("confirmEmail", email))
+                        .param("confirmEmail", email)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/request"));
     }
@@ -196,7 +202,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", email)
-                        .param("confirmEmail", email))
+                        .param("confirmEmail", email)
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("inviteSent"))
                 .andExpect(content().string(containsString("We've sent you an email")))
@@ -223,7 +230,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("email", email)
-                        .param("confirmEmail", email))
+                        .param("confirmEmail", email)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/request"))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE,
@@ -321,7 +329,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
-                        .param("confirmPassword", differentPassword))
+                        .param("confirmPassword", differentPassword)
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("signup"));
     }
@@ -339,7 +348,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
-                        .param("confirmPassword", "doesn't match"))
+                        .param("confirmPassword", "doesn't match")
+                )
                 .andExpect(view().name("signup"))
                 .andExpect(model().attributeExists("invite"));
     }
@@ -356,7 +366,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
-                        .param("confirmPassword", password))
+                        .param("confirmPassword", password)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }
@@ -376,7 +387,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
-                        .param("confirmPassword", password))
+                        .param("confirmPassword", password)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/enterToken/" + code));
     }
@@ -400,7 +412,8 @@ public class SignupControllerTest {
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
                         .param("confirmPassword", password)
-                        .flashAttr("exampleEntity", tokenRequest))
+                        .flashAttr("exampleEntity", tokenRequest)
+                )
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("signupSuccess"));
     }
@@ -424,7 +437,8 @@ public class SignupControllerTest {
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
                         .param("confirmPassword", password)
-                        .flashAttr("exampleEntity", tokenRequest))
+                        .flashAttr("exampleEntity", tokenRequest)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/" + code));
     }
@@ -505,7 +519,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("organisation", organisation)
-                        .param("token", token))
+                        .param("token", token)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }
@@ -538,7 +553,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("organisation", organisation)
-                        .param("token", token))
+                        .param("token", token)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/" + code));
     }
@@ -572,7 +588,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("organisation", organisation)
-                        .param("token", token))
+                        .param("token", token)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/enterToken/" + code));
     }
@@ -602,7 +619,8 @@ public class SignupControllerTest {
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("organisation", organisation)
-                        .param("token", token))
+                        .param("token", token)
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/enterToken/" + code))
                 .andExpect(flash().attribute(ApplicationConstants.STATUS_ATTRIBUTE,
