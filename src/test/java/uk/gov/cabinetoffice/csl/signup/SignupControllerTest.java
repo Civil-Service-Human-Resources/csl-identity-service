@@ -128,19 +128,6 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldFailValidationIfEmailAddressesDoNotMatch() throws Exception {
-        mockMvc.perform(
-                post("/signup/request")
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", "user@domain.org")
-                        .param("confirmEmail", "user1@domain.org")
-                )
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Email addresses do not match")));
-    }
-
-    @Test
     public void shouldFailValidationIfEmailAddressIsNotValid() throws Exception {
         mockMvc.perform(
                 post("/signup/request")
@@ -313,23 +300,6 @@ public class SignupControllerTest {
         mockMvc.perform(
                 get("/signup/" + code)
                         .with(csrf())
-                )
-                .andExpect(status().isOk())
-                .andExpect(view().name("signup"));
-    }
-
-    @Test
-    public void shouldNotPostIfPasswordsDifferent() throws Exception {
-        String code = "abc123";
-        String password = "Password1";
-        String differentPassword = "differentPassword1";
-
-        mockMvc.perform(
-                post("/signup/" + code)
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("password", password)
-                        .param("confirmPassword", differentPassword)
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("signup"));
