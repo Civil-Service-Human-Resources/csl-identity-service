@@ -136,7 +136,7 @@ public class SignupControllerTest {
                         .param("email", "user@domain.org")
                         .param("confirmEmail", "user1@domain.org")
                 )
-//                .andExpect(status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Email addresses do not match")));
     }
 
@@ -331,7 +331,7 @@ public class SignupControllerTest {
                         .param("password", password)
                         .param("confirmPassword", differentPassword)
                 )
-//                .andExpect(status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(view().name("signup"));
     }
 
