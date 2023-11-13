@@ -30,7 +30,7 @@ public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
     private static final String UID = "uid123";
-    private final String[] allowListedDomains = new String[]{"allowlisted.gov.uk", "example.com"};
+    private final String[] allowListedDomains = new String[]{"allowListed.gov.uk", "example.com"};
 
     private UserService userService;
 
