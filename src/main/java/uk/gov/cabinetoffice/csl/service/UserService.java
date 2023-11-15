@@ -48,15 +48,15 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Identity identity = identityRepository.findFirstByEmailEquals(username);
         if (identity == null) {
-            throw new UsernameNotFoundException("No user found with email address " + username);
+            throw new UsernameNotFoundException("No user found with email address: " + username);
         } else if (!identity.isActive()) {
             //TODO: To be implemented as part of the future tickets
             //boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
             boolean pendingReactivationExistsForAccount = false;
             if(pendingReactivationExistsForAccount){
-                throw new PendingReactivationExistsException("Pending reactivation already exists for user");
+                throw new PendingReactivationExistsException("Pending reactivation already exists for user: " + username);
             }
-            throw new AccountDeactivatedException("User account is deactivated");
+            throw new AccountDeactivatedException("User account is deactivated for user: " + username);
         }
         return new IdentityDetails(identity);
     }
