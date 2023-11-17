@@ -30,7 +30,6 @@ public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
     private static final String UID = "uid123";
-    private final String[] allowListedDomains = new String[]{"allowListed.gov.uk", "example.com"};
 
     private UserService userService;
 
@@ -56,8 +55,7 @@ public class UserServiceTest {
                 civilServantRegistryClient,
                 agencyTokenCapacityService,
                 identityRepository,
-                passwordEncoder,
-                allowListedDomains
+                passwordEncoder
         );
     }
 
@@ -228,21 +226,18 @@ public class UserServiceTest {
     @Test
     public void testIsAllowListedDomainMixedCase(){
         boolean validDomain = userService.isAllowListedDomain("ExAmPlE.cOm");
-
         assertTrue(validDomain);
     }
 
     @Test
     public void testIsAllowListedDomainLowerCase(){
         boolean validDomain = userService.isAllowListedDomain("example.com");
-
         assertTrue(validDomain);
     }
 
     @Test
     public void testIsAllowListedDomainUpperCase(){
         boolean validDomain = userService.isAllowListedDomain("EXAMPLE.COM");
-
         assertTrue(validDomain);
     }
 }

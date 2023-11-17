@@ -1,7 +1,6 @@
 package uk.gov.cabinetoffice.csl.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,20 +27,17 @@ public class UserService implements UserDetailsService {
     private final AgencyTokenCapacityService agencyTokenCapacityService;
     private final IdentityRepository identityRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String[] allowListedDomains;
 
     public UserService(InviteService inviteService,
                        CivilServantRegistryClient civilServantRegistryClient,
                        AgencyTokenCapacityService agencyTokenCapacityService,
                        IdentityRepository identityRepository,
-                       PasswordEncoder passwordEncoder,
-                       @Value("${invite.allowListed.domains}") String[] allowListedDomains) {
+                       PasswordEncoder passwordEncoder) {
         this.inviteService = inviteService;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
-        this.allowListedDomains = allowListedDomains;
     }
 
     @Override
@@ -160,7 +156,7 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isAllowListedDomain(String domain) {
-        return Arrays.asList(allowListedDomains).stream().anyMatch(domain::equalsIgnoreCase);
+        return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {

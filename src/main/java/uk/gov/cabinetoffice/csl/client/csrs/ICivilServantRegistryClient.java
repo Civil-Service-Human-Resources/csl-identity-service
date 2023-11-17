@@ -12,4 +12,6 @@ public interface ICivilServantRegistryClient {
     Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation);
 
     OrganisationalUnitDTO[] getOrganisationalUnitsFormatted();
+
+    AgencyToken[] getAgencyTokensForDomain(String domain);
 }
