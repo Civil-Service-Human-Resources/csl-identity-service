@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 
@@ -15,6 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("no-redis")
 public class CustomAuthenticationFailureHandlerTest {
 
     @Autowired

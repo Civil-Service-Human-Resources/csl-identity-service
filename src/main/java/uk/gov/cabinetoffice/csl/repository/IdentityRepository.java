@@ -22,15 +22,9 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
 
         boolean existsByEmail(String email);
 
-        Optional<Identity> findFirstByUid(String uid);
-
-        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i.email, i.uid) " +
-                "from Identity i")
-        List<IdentityDTO> findAllNormalised();
-
         @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i.email, i.uid) " +
                 "from Identity i where i.uid in (?1)")
-        List<IdentityDTO> findIdentitiesByUidsNormalised(List<String> uids);
+        List<IdentityDTO> findIdentitiesByUIDsNormalised(List<String> UIDs);
 
         Long countByAgencyTokenUid(String uid);
 

@@ -50,9 +50,9 @@ public class IdentityRepositoryTest {
 
         identityRepository.removeAgencyToken(originalIdentity.getAgencyTokenUid());
 
-        Identity updatedIdentity = identityRepository.getOne(originalIdentity.getId());
-        Identity postUpdateOtherAgencyTokenIdentity = identityRepository.getOne(otherAgencyTokenIdentity.getId());
-        Identity postUpdateOtherNonAgencyIdentity = identityRepository.getOne(otherNonAgencyIdentity.getId());
+        Identity updatedIdentity = identityRepository.getReferenceById(originalIdentity.getId());
+        Identity postUpdateOtherAgencyTokenIdentity = identityRepository.getReferenceById(otherAgencyTokenIdentity.getId());
+        Identity postUpdateOtherNonAgencyIdentity = identityRepository.getReferenceById(otherNonAgencyIdentity.getId());
 
         assertTrue(updatedIdentity.isActive());
         assertNull(updatedIdentity.getAgencyTokenUid());
@@ -78,10 +78,10 @@ public class IdentityRepositoryTest {
 
         identityRepository.removeAgencyToken(agencyTokenUid);
 
-        Identity updatedIdentityOne = identityRepository.getOne(originalIdentityOne.getId());
-        Identity updatedIdentityTwo = identityRepository.getOne(originalIdentityTwo.getId());
-        Identity postUpdateOtherAgencyTokenIdentity = identityRepository.getOne(otherAgencyTokenIdentity.getId());
-        Identity postUpdateOtherNonAgencyIdentity = identityRepository.getOne(otherNonAgencyIdentity.getId());
+        Identity updatedIdentityOne = identityRepository.getReferenceById(originalIdentityOne.getId());
+        Identity updatedIdentityTwo = identityRepository.getReferenceById(originalIdentityTwo.getId());
+        Identity postUpdateOtherAgencyTokenIdentity = identityRepository.getReferenceById(otherAgencyTokenIdentity.getId());
+        Identity postUpdateOtherNonAgencyIdentity = identityRepository.getReferenceById(otherNonAgencyIdentity.getId());
 
         assertTrue(updatedIdentityOne.isActive());
         assertNull(updatedIdentityOne.getAgencyTokenUid());
@@ -105,9 +105,9 @@ public class IdentityRepositoryTest {
 
         identityRepository.removeAgencyToken(null);
 
-        Identity updatedIdentity = identityRepository.getOne(originalIdentity.getId());
-        Identity postUpdateOtherAgencyTokenIdentity = identityRepository.getOne(otherAgencyTokenIdentity.getId());
-        Identity postUpdateOtherNonAgencyIdentity = identityRepository.getOne(otherNonAgencyIdentity.getId());
+        Identity updatedIdentity = identityRepository.getReferenceById(originalIdentity.getId());
+        Identity postUpdateOtherAgencyTokenIdentity = identityRepository.getReferenceById(otherAgencyTokenIdentity.getId());
+        Identity postUpdateOtherNonAgencyIdentity = identityRepository.getReferenceById(otherNonAgencyIdentity.getId());
 
         assertEquals(originalIdentity.toString(), updatedIdentity.toString());
         assertEquals(otherAgencyTokenIdentity.toString(), postUpdateOtherAgencyTokenIdentity.toString());
@@ -115,7 +115,7 @@ public class IdentityRepositoryTest {
     }
 
     @Test
-    public void findIdentitiesByUidsNormalised_shouldReturnIdentitiesForGivenUids() {
+    public void findIdentitiesByUIDsNormalised_shouldReturnIdentitiesForGivenUIDs() {
 
         String uid1 = UUID.randomUUID().toString();
         String uid2 = UUID.randomUUID().toString();
@@ -130,40 +130,40 @@ public class IdentityRepositoryTest {
         identityRepository.saveAndFlush(identity2);
         identityRepository.saveAndFlush(identity3);
 
-        List<String> uids1 = new ArrayList<>();
-        uids1.add(uid1);
-        uids1.add(uid2);
-        uids1.add(uid3);
-        List<IdentityDTO> result1 = identityRepository.findIdentitiesByUidsNormalised(uids1);
+        List<String> UIDs1 = new ArrayList<>();
+        UIDs1.add(uid1);
+        UIDs1.add(uid2);
+        UIDs1.add(uid3);
+        List<IdentityDTO> result1 = identityRepository.findIdentitiesByUIDsNormalised(UIDs1);
         assertEquals(3, result1.size());
         assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid1)).count());
         assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid2)).count());
         assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid3)).count());
 
-        List<String> uids2 = new ArrayList<>();
-        uids2.add(uid1);
-        uids2.add(uid2);
-        List<IdentityDTO> result2 = identityRepository.findIdentitiesByUidsNormalised(uids2);
+        List<String> UIDs2 = new ArrayList<>();
+        UIDs2.add(uid1);
+        UIDs2.add(uid2);
+        List<IdentityDTO> result2 = identityRepository.findIdentitiesByUIDsNormalised(UIDs2);
         assertEquals(2, result2.size());
         assertEquals(1, result2.stream().filter(r -> r.getUid().equals(uid1)).count());
         assertEquals(1, result2.stream().filter(r -> r.getUid().equals(uid2)).count());
 
-        List<String> uids3 = new ArrayList<>();
-        uids3.add(uid1);
-        uids3.add(uid4);
-        List<IdentityDTO> result3 = identityRepository.findIdentitiesByUidsNormalised(uids3);
+        List<String> UIDs3 = new ArrayList<>();
+        UIDs3.add(uid1);
+        UIDs3.add(uid4);
+        List<IdentityDTO> result3 = identityRepository.findIdentitiesByUIDsNormalised(UIDs3);
         assertEquals(1, result3.size());
         assertEquals(1, result3.stream().filter(r -> r.getUid().equals(uid1)).count());
         assertEquals(0, result3.stream().filter(r -> r.getUid().equals(uid4)).count());
 
-        List<String> uids4 = new ArrayList<>();
-        uids4.add(uid4);
-        List<IdentityDTO> result4 = identityRepository.findIdentitiesByUidsNormalised(uids4);
+        List<String> UIDs4 = new ArrayList<>();
+        UIDs4.add(uid4);
+        List<IdentityDTO> result4 = identityRepository.findIdentitiesByUIDsNormalised(UIDs4);
         assertEquals(0, result4.size());
         assertEquals(0, result4.stream().filter(r -> r.getUid().equals(uid4)).count());
 
-        List<String> uids5 = new ArrayList<>();
-        List<IdentityDTO> result5 = identityRepository.findIdentitiesByUidsNormalised(uids5);
+        List<String> UIDs5 = new ArrayList<>();
+        List<IdentityDTO> result5 = identityRepository.findIdentitiesByUIDsNormalised(UIDs5);
         assertEquals(0, result5.size());
     }
 

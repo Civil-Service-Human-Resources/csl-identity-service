@@ -7,6 +7,7 @@ import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.client.csrs.CivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
@@ -14,6 +15,7 @@ import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("no-redis")
 public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
@@ -57,6 +60,7 @@ public class UserServiceTest {
                 identityRepository,
                 passwordEncoder
         );
+        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowlisted.gov.uk", "example.com"));
     }
 
     @Test
