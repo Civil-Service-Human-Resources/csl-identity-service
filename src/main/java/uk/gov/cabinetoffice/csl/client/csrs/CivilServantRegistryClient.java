@@ -86,14 +86,14 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         }
     }
 
-    @Cacheable("allowlist")
+    @Cacheable("allowlistdomains")
     public List<String> getAllowListDomains() {
-        log.info("Fetching allowlist from CSRS API");
+        log.info("Fetching allowlist domains from CSRS API");
         try {
             RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
             DomainsResponse domainsResponse = httpClient.executeRequest(request, DomainsResponse.class);
             if (domainsResponse == null) {
-                throw new RuntimeException("Allowlist returned null");
+                throw new RuntimeException("Allowlist Domains returned null");
             }
             return domainsResponse.getDomains().stream().map(d -> d.getDomain().toLowerCase()).collect(Collectors.toList());
         } catch (HttpClientErrorException e) {
@@ -102,9 +102,9 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         }
     }
 
-    @CacheEvict(value = "allowlist", allEntries = true)
-    @Scheduled(fixedRateString = "${civilServantRegistry.cache.allowlistTTL}")
-    public void evictAllowListCache() {
-        log.info("Evicting Allowlist cache");
+    @CacheEvict(value = "allowlistdomains", allEntries = true)
+    @Scheduled(fixedRateString = "${civilServantRegistry.cache.allowListDomainsTTL}")
+    public void evictAllowListDomainCache() {
+        log.info("Evicting Allowlist Domains cache");
     }
 }
