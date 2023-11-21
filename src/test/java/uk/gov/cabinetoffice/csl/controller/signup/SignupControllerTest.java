@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.signup;
+package uk.gov.cabinetoffice.csl.controller.signup;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
