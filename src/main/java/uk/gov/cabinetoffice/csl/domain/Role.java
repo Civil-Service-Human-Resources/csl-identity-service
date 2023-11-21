@@ -58,4 +58,9 @@ public class Role implements Serializable {
                 ", invites=" + invites +
                 '}';
     }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

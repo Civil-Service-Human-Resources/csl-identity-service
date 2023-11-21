@@ -93,4 +93,9 @@ public class Identity implements Serializable {
                 ", agencyTokenUid=" + agencyTokenUid +
                 '}';
     }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
