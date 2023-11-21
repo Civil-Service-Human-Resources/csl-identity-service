@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.client.csrs;
+package uk.gov.cabinetoffice.csl.service.client.csrs;
 
 import uk.gov.cabinetoffice.csl.domain.AgencyToken;
 import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;

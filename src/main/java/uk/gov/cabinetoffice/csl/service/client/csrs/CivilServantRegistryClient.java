@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.client.csrs;
+package uk.gov.cabinetoffice.csl.service.client.csrs;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,7 +9,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import uk.gov.cabinetoffice.csl.client.IHttpClient;
+import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.domain.AgencyToken;
 import uk.gov.cabinetoffice.csl.domain.DomainsResponse;
 import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;

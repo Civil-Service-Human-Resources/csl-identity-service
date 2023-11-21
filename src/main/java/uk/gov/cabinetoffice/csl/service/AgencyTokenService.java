@@ -2,7 +2,7 @@ package uk.gov.cabinetoffice.csl.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.cabinetoffice.csl.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 @Slf4j
 @Service

@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.client;
+package uk.gov.cabinetoffice.csl.service.client;
 
 import org.springframework.http.RequestEntity;
 
