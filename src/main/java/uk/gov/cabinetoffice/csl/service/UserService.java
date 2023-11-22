@@ -8,11 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cabinetoffice.csl.service.client.csrs.CivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.exception.*;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
+import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 import java.time.Instant;
 import java.util.*;
@@ -23,13 +23,13 @@ import java.util.*;
 public class UserService implements UserDetailsService {
 
     private final InviteService inviteService;
-    private final CivilServantRegistryClient civilServantRegistryClient;
+    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
     private final IdentityRepository identityRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(InviteService inviteService,
-                       CivilServantRegistryClient civilServantRegistryClient,
+                       ICivilServantRegistryClient civilServantRegistryClient,
                        AgencyTokenCapacityService agencyTokenCapacityService,
                        IdentityRepository identityRepository,
                        PasswordEncoder passwordEncoder) {

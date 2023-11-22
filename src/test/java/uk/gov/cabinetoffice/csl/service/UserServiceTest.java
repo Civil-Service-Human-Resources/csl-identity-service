@@ -8,11 +8,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.cabinetoffice.csl.service.client.csrs.CivilServantRegistryClient;
+
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
+import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private CivilServantRegistryClient civilServantRegistryClient;
+    private ICivilServantRegistryClient civilServantRegistryClient;
 
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;

@@ -6,5 +6,5 @@ public interface IIdentityClient {
 
     OAuthToken getServiceToken();
 
-    void removeServiceTokenFromCache();
+    void evictServiceTokenFromCache();
 }

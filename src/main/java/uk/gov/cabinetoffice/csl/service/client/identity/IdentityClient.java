@@ -42,7 +42,7 @@ public class IdentityClient implements IIdentityClient {
 
     @Override
     @CacheEvict(value = "service-token", allEntries = true)
-    public void removeServiceTokenFromCache() {
-        log.info("IdentityClient.removeServiceTokenFromCache: service token is removed from the cache.");
+    public void evictServiceTokenFromCache() {
+        log.info("Service token is removed from the cache.");
     }
 }

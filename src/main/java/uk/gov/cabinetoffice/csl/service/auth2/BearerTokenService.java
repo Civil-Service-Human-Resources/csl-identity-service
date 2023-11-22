@@ -45,7 +45,7 @@ public class BearerTokenService implements IBearerTokenService {
             log.debug("serviceToken: seconds remaining to refresh the service token cache: {}",
                     (secondsRemainingToExpire - refreshServiceTokenCacheBeforeSecondsToExpire));
             if (secondsRemainingToExpire <= refreshServiceTokenCacheBeforeSecondsToExpire) {
-                identityClient.removeServiceTokenFromCache();
+                identityClient.evictServiceTokenFromCache();
                 serviceToken = identityClient.getServiceToken();
             }
             bearerToken = serviceToken.getAccessToken();
