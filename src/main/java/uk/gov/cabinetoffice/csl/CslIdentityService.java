@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import uk.gov.service.notify.NotificationClient;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @SpringBootApplication
 @EnableCaching
+@EnableScheduling
 public class CslIdentityService {
 
 	public static void main(String[] args) {

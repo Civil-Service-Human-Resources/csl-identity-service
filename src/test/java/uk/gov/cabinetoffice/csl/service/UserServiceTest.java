@@ -7,13 +7,16 @@ import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import uk.gov.cabinetoffice.csl.client.csrs.CivilServantRegistryClient;
+import org.springframework.test.context.ActiveProfiles;
+
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
+import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -26,11 +29,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("no-redis")
 public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
     private static final String UID = "uid123";
-    private final String[] allowListedDomains = new String[]{"allowListed.gov.uk", "example.com"};
 
     private UserService userService;
 
@@ -44,7 +47,7 @@ public class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private CivilServantRegistryClient civilServantRegistryClient;
+    private ICivilServantRegistryClient civilServantRegistryClient;
 
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
@@ -56,9 +59,9 @@ public class UserServiceTest {
                 civilServantRegistryClient,
                 agencyTokenCapacityService,
                 identityRepository,
-                passwordEncoder,
-                allowListedDomains
+                passwordEncoder
         );
+        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowlisted.gov.uk", "example.com"));
     }
 
     @Test
@@ -228,21 +231,18 @@ public class UserServiceTest {
     @Test
     public void testIsAllowListedDomainMixedCase(){
         boolean validDomain = userService.isAllowListedDomain("ExAmPlE.cOm");
-
         assertTrue(validDomain);
     }
 
     @Test
     public void testIsAllowListedDomainLowerCase(){
         boolean validDomain = userService.isAllowListedDomain("example.com");
-
         assertTrue(validDomain);
     }
 
     @Test
     public void testIsAllowListedDomainUpperCase(){
         boolean validDomain = userService.isAllowListedDomain("EXAMPLE.COM");
-
         assertTrue(validDomain);
     }
 }

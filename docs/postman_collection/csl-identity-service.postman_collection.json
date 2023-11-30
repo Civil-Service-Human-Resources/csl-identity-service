@@ -218,6 +218,34 @@
 			"response": []
 		},
 		{
+			"name": "auth-server-reset-allow-list-domain-cache",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BEARER-TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{csl-identity-base-url}}/reset-cache/allowlist-domains",
+					"host": [
+						"{{csl-identity-base-url}}"
+					],
+					"path": [
+						"reset-cache",
+						"allowlist-domains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "auth-server-oauth2-revoke",
 			"request": {
 				"auth": {

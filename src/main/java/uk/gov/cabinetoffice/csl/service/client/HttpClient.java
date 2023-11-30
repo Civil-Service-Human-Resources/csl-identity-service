@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.client;
+package uk.gov.cabinetoffice.csl.service.client;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

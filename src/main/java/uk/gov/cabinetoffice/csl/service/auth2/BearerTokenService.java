@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.service.client.identity.IIdentityClient;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -17,15 +17,15 @@ import static io.micrometer.common.util.StringUtils.isBlank;
 public class BearerTokenService implements IBearerTokenService {
 
     private final Clock clock;
-    private final IdentityService identityService;
+    private final IIdentityClient identityClient;
     private final IUserAuthService userAuthService;
 
     @Value("${oauth2.refresh.serviceTokenCache.beforeSecondsToExpire}")
     private long refreshServiceTokenCacheBeforeSecondsToExpire;
 
-    public BearerTokenService(Clock clock, IdentityService identityService, IUserAuthService userAuthService) {
+    public BearerTokenService(Clock clock, IIdentityClient identityClient, IUserAuthService userAuthService) {
         this.clock = clock;
-        this.identityService = identityService;
+        this.identityClient = identityClient;
         this.userAuthService = userAuthService;
     }
 
@@ -36,7 +36,7 @@ public class BearerTokenService implements IBearerTokenService {
             bearerToken = jwtPrincipal.getTokenValue();
         }
         if (isBlank(bearerToken)) {
-            OAuthToken serviceToken = identityService.getCachedOAuthServiceToken();
+            OAuthToken serviceToken = identityClient.getServiceToken();
             LocalDateTime tokenExpiry = serviceToken.getExpiryDateTime();
             log.debug("serviceToken: expiryDateTime: {}", tokenExpiry);
             long secondsRemainingToExpire = tokenExpiry != null ?
@@ -45,8 +45,8 @@ public class BearerTokenService implements IBearerTokenService {
             log.debug("serviceToken: seconds remaining to refresh the service token cache: {}",
                     (secondsRemainingToExpire - refreshServiceTokenCacheBeforeSecondsToExpire));
             if (secondsRemainingToExpire <= refreshServiceTokenCacheBeforeSecondsToExpire) {
-                identityService.removeServiceTokenFromCache();
-                serviceToken = identityService.getCachedOAuthServiceToken();
+                identityClient.evictServiceTokenFromCache();
+                serviceToken = identityClient.getServiceToken();
             }
             bearerToken = serviceToken.getAccessToken();
         }

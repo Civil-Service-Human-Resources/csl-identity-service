@@ -1,13 +1,20 @@
 package uk.gov.cabinetoffice.csl.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@JsonDeserialize
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 public class Invite implements Serializable {
 
@@ -22,7 +29,7 @@ public class Invite implements Serializable {
     @Enumerated(EnumType.STRING)
     private InviteStatus status;
 
-    @OneToOne(optional = true)
+    @OneToOne()
     private Identity inviter;
 
     @Column(nullable = false)
@@ -41,4 +48,23 @@ public class Invite implements Serializable {
     private Set<Role> forRoles;
 
     private boolean isAuthorisedInvite = true;
+
+    @Override
+    public String toString() {
+        return "Identity{" +
+                "id=" + id +
+                ", code=" + code +
+                ", status=" + status +
+                ", forEmail=" + forEmail +
+                ", isAuthorisedInvite=" + isAuthorisedInvite +
+                ", invitedAt=" + invitedAt +
+                ", acceptedAt=" + acceptedAt +
+                ", inviter=" + inviter +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -31,17 +31,14 @@ public class LogFilter implements Filter {
 	        String headerName = headers.nextElement();
 			log.debug("\tHeader: " + headerName + ":" + httpRequest.getHeader(headerName));
 	    }
-		log.debug("\n");
 		Enumeration<String> parameters = httpRequest.getParameterNames();
 		while(parameters.hasMoreElements()) {
 	        String parameterName = parameters.nextElement();
 			log.debug("\tParameter: " + parameterName + ": " + httpRequest.getParameter(parameterName));
 	    }
-		log.debug("\n");
 		log.debug("Response:");
 		chain.doFilter(request, response);
 		Collection<String> responseHeaders = httpResponse.getHeaderNames();
 		responseHeaders.forEach(x -> log.debug("\tHeader: " + x + ": " + httpResponse.getHeader(x)));
-		log.debug("\n\n");
 	}
 }

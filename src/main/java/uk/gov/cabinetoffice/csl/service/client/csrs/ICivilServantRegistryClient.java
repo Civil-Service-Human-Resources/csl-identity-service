@@ -1,8 +1,9 @@
-package uk.gov.cabinetoffice.csl.client.csrs;
+package uk.gov.cabinetoffice.csl.service.client.csrs;
 
 import uk.gov.cabinetoffice.csl.domain.AgencyToken;
 import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ICivilServantRegistryClient {
@@ -12,4 +13,10 @@ public interface ICivilServantRegistryClient {
     Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation);
 
     OrganisationalUnitDTO[] getOrganisationalUnitsFormatted();
+
+    AgencyToken[] getAgencyTokensForDomain(String domain);
+
+    List<String> getAllowListDomains();
+
+    void evictAllowListDomainCache();
 }
