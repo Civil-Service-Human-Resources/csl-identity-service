@@ -1,0 +1,54 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="csl-identity-service [mvn boot-run]" type="MavenRunConfiguration" factoryName="Maven">
+    <MavenSettings>
+      <option name="myGeneralSettings" />
+      <option name="myRunnerSettings">
+        <MavenRunnerSettings>
+          <option name="delegateBuildToMaven" value="false" />
+          <option name="environmentProperties">
+            <map>
+              <entry key="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
+              <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
+              <entry key="CLIENT_SECRET" value="test" />
+              <entry key="DATASOURCE" value="jdbc:mysql://localhost:3306/csl_identity?user=root&amp;password=password&amp;useSSL=false" />
+              <entry key="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
+              <entry key="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
+              <entry key="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
+              <entry key="JWT_KEY" value="bJwXRAslLzOtPywnCqBbQujKBKki44LB" />
+              <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
+              <entry key="REDIS_PASSWORD" value="password" />
+              <entry key="UK_GOV_CABINETOFFICE_LOGGING_LEVEL" value="DEBUG" />
+            </map>
+          </option>
+          <option name="jreName" value="#USE_PROJECT_JDK" />
+          <option name="mavenProperties">
+            <map />
+          </option>
+          <option name="passParentEnv" value="true" />
+          <option name="runMavenInBackground" value="true" />
+          <option name="skipTests" value="false" />
+          <option name="vmOptions" value="" />
+        </MavenRunnerSettings>
+      </option>
+      <option name="myRunnerParameters">
+        <MavenRunnerParameters>
+          <option name="profiles">
+            <set />
+          </option>
+          <option name="goals">
+            <list>
+              <option value="spring-boot:run" />
+            </list>
+          </option>
+          <option name="pomFileName" />
+          <option name="profilesMap">
+            <map />
+          </option>
+          <option name="resolveToWorkspace" value="false" />
+          <option name="workingDirPath" value="$PROJECT_DIR$" />
+        </MavenRunnerParameters>
+      </option>
+    </MavenSettings>
+    <method v="2" />
+  </configuration>
+</component>
