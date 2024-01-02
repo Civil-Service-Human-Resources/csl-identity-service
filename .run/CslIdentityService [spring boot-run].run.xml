@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CslIdentityService [spring boot-run]" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="DEBUG_MODE" value="true" />
+    <envs>
+      <env name="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
+      <env name="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
+      <env name="CLIENT_SECRET" value="test" />
+      <env name="DATASOURCE" value="jdbc:mysql://localhost:3306/csl_identity?user=root&amp;password=password&amp;useSSL=false" />
+      <env name="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
+      <env name="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
+      <env name="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
+      <env name="JWT_KEY" value="bJwXRAslLzOtPywnCqBbQujKBKki44LB" />
+      <env name="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
+      <env name="REDIS_PASSWORD" value="password" />
+      <env name="UK_GOV_CABINETOFFICE_LOGGING_LEVEL" value="DEBUG" />
+    </envs>
+    <module name="csl-identity-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.cabinetoffice.csl.CslIdentityService" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
