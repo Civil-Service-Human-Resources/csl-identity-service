@@ -80,6 +80,7 @@ public class SecurityConfig {
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/error",
 					"/login","/signup/**",
+					"/reset/**",
 					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated()
 			)
