@@ -79,8 +79,7 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/error",
-					"/login","/signup/**",
-					"/reset/**",
+					"/signup/**", "/login", "/reset/**",
 					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated()
 			)
