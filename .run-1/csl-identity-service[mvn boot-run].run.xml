@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="csl-identity-service [mvn boot-run]" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="csl-identity-service[mvn boot-run]" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings">
@@ -45,8 +45,8 @@
               <entry key="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
               <entry key="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
               <entry key="REQUIRE_AUTHORIZATION_CONSENT" value="false" />
-              <entry key="RESET_VALIDITY" value="86400" />
               <entry key="RESET_URL" value="http://localhost:9005/reset/%s" />
+              <entry key="RESET_VALIDITY" value="86400" />
               <entry key="ROOT_LOGGING_LEVEL" value="INFO" />
               <entry key="SESSION_TIMEOUT" value="3600" />
               <entry key="THYMELEAF_CACHE" value="true" />

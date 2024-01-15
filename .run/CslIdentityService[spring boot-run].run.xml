@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="CslIdentityService [spring boot-run]" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="CslIdentityService[spring boot-run]" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="DEBUG_MODE" value="true" />
     <envs>
       <env name="ACCESS_TOKEN_SCOPE" value="openid, read, write" />
