@@ -2,14 +2,12 @@ package uk.gov.cabinetoffice.csl.controller.reset;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
@@ -24,23 +22,29 @@ import uk.gov.service.notify.NotificationClientException;
 @RequestMapping("/reset")
 public class ResetController {
 
-    @Autowired
-    private ResetService resetService;
+    private final ResetService resetService;
 
-    @Autowired
-    private ResetRepository resetRepository;
+    private final ResetRepository resetRepository;
 
-    @Autowired
-    private IdentityRepository identityRepository;
+    private final IdentityRepository identityRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private ResetFormValidator resetFormValidator;
+    private final ResetFormValidator resetFormValidator;
 
-    @Value("${lpg.uiUrl}")
-    private String lpgUiUrl;
+    private final String lpgUiUrl;
+
+    public ResetController(ResetService resetService, UserService userService,
+                           ResetRepository resetRepository, IdentityRepository identityRepository,
+                           ResetFormValidator resetFormValidator,
+                           @Value("${lpg.uiUrl}") String lpgUiUrl) {
+        this.resetService = resetService;
+        this.userService = userService;
+        this.resetRepository = resetRepository;
+        this.identityRepository = identityRepository;
+        this.resetFormValidator = resetFormValidator;
+        this.lpgUiUrl = lpgUiUrl;
+    }
 
     @GetMapping
     public String reset() {
@@ -59,7 +63,7 @@ public class ResetController {
     }
 
     @GetMapping("/{code}")
-    public String loadResetForm(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes, Model model) {
+    public String loadResetForm(@PathVariable(value = "code") String code, Model model) {
         log.debug("User on reset screen with code {}", code);
 
         checkResetCodeExists(code);
