@@ -48,5 +48,4 @@ public class ResetRepositoryTest {
         reset.setRequestedAt(new Date());
         return reset;
     }
-
 }

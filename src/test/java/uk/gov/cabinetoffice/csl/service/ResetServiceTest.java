@@ -49,7 +49,6 @@ public class ResetServiceTest {
         Reset reset = resetArgumentCaptor.getValue();
         MatcherAssert.assertThat(reset.getEmail(), equalTo(EMAIL));
         MatcherAssert.assertThat(reset.getResetStatus(), equalTo(ResetStatus.PENDING));
-
     }
 
     @Test
@@ -69,7 +68,6 @@ public class ResetServiceTest {
         Reset actualReset = resetArgumentCaptor.getValue();
         MatcherAssert.assertThat(actualReset.getEmail(), equalTo(EMAIL));
         MatcherAssert.assertThat(actualReset.getResetStatus(), equalTo(ResetStatus.RESET));
-
     }
 
     @Test
