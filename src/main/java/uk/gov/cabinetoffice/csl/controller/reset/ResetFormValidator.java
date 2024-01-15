@@ -9,7 +9,7 @@ import org.springframework.validation.Validator;
 @Component
 public class ResetFormValidator implements Validator {
 
-    private String passwordPattern;
+    private final String passwordPattern;
 
     @Autowired
     public ResetFormValidator(@Value("${accountValidation.passwordPattern}") String passwordPattern) {
