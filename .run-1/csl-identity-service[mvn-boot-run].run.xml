@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="csl-identity-service[mvn boot-run]" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="csl-identity-service[mvn-boot-run]" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings">
