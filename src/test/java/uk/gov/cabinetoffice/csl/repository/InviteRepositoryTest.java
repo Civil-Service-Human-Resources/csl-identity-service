@@ -3,6 +3,7 @@ package uk.gov.cabinetoffice.csl.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Invite;
@@ -16,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("no-redis")
 public class InviteRepositoryTest {
 
     public static final String INVITE_CODE = "abc123";

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.domain.ResetStatus;
 
@@ -14,6 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("no-redis")
 public class ResetRepositoryTest {
 
     public static final String CODE = "ABC123";

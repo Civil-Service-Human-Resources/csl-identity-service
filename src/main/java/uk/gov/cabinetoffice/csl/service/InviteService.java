@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 @Transactional
 public class InviteService {
@@ -60,6 +62,10 @@ public class InviteService {
 
     public boolean isCodeExpired(String code) {
         Invite invite = inviteRepository.findByCode(code);
+        if(invite == null) {
+            log.info("Invite not found for code: {}", code);
+            return true;
+        }
         return isInviteCodeExpired(invite);
     }
 
