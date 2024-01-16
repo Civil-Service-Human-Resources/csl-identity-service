@@ -2,6 +2,7 @@ package uk.gov.cabinetoffice.csl.controller.reset;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -66,20 +67,21 @@ public class ResetController {
     public String loadResetForm(@PathVariable(value = "code") String code, Model model) {
         log.debug("User on reset screen with code {}", code);
 
-        checkResetCodeExists(code);
-
         Reset reset = resetRepository.findByCode(code);
 
-        if (isResetInvalid(reset)) {
-            return "redirect:/reset";
+        String result = checkResetValidity(reset, code);
+
+        if(StringUtils.isBlank(result)) {
+
+            ResetForm resetForm = new ResetForm();
+            resetForm.setCode(code);
+
+            model.addAttribute("resetForm", resetForm);
+
+            return "reset/passwordForm";
         }
 
-        ResetForm resetForm = new ResetForm();
-        resetForm.setCode(code);
-
-        model.addAttribute("resetForm", resetForm);
-
-        return "reset/passwordForm";
+        return result;
     }
 
     @PostMapping("/{code}")
@@ -87,40 +89,36 @@ public class ResetController {
                                 @ModelAttribute @Valid ResetForm resetForm,
                                 BindingResult bindingResult, Model model)
             throws NotificationClientException {
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("resetForm", resetForm);
             return "reset/passwordForm";
         }
 
-        checkResetCodeExists(code);
-
         Reset reset = resetRepository.findByCode(code);
 
-        if (isResetInvalid(reset)) {
-            return "redirect:/reset";
+        String result = checkResetValidity(reset, code);
+
+        if(StringUtils.isBlank(result)) {
+
+            Identity identity = identityRepository.findFirstByEmailEquals(reset.getEmail());
+
+            if (identity == null || identity.getEmail() == null) {
+                log.info("Identity does not exist with reset code {}", code);
+                throw new ResourceNotFoundException();
+            }
+
+            userService.updatePassword(identity, resetForm.getPassword());
+
+            resetService.notifyOfSuccessfulReset(reset);
+
+            log.info("Password reset successfully for {}", identity.getEmail());
+
+            model.addAttribute("lpgUiUrl", lpgUiUrl);
+
+            return "reset/passwordReset";
         }
-
-        if (reset == null || reset.getEmail() == null) {
-            log.info("Reset does not exist with code {}", code);
-            throw new ResourceNotFoundException();
-        }
-
-        Identity identity = identityRepository.findFirstByEmailEquals(reset.getEmail());
-
-        if (identity == null || identity.getEmail() == null) {
-            log.info("Identity does not exist with reset code {}", code);
-            throw new ResourceNotFoundException();
-        }
-
-        userService.updatePassword(identity, resetForm.getPassword());
-
-        resetService.notifyOfSuccessfulReset(reset);
-
-        log.info("Password reset successfully for {}", identity.getEmail());
-
-        model.addAttribute("lpgUiUrl", lpgUiUrl);
-
-        return "reset/passwordReset";
+        return result;
     }
 
     @InitBinder
@@ -130,18 +128,22 @@ public class ResetController {
         }
     }
 
-    private boolean isResetInvalid(Reset reset) {
-        if (resetService.isResetExpired(reset) || !resetService.isResetPending(reset)) {
-            log.info("Reset is not valid for code {}", reset.getCode());
-            return true;
-        }
-        return false;
-    }
+    private String checkResetValidity(Reset reset, String code) {
 
-    private void checkResetCodeExists(String code) {
-        if (!resetRepository.existsByCode(code)) {
-            log.info("Reset code does not exist {}", code);
+        if (reset == null || reset.getEmail() == null) {
+            log.info("Reset does not exist with code {}", code);
             throw new ResourceNotFoundException();
         }
+
+        if (isResetInvalid(reset)) {
+            log.info("Reset is not valid for code {}", reset.getCode());
+            return "redirect:/reset";
+        }
+
+        return "";
+    }
+
+    private boolean isResetInvalid(Reset reset) {
+        return resetService.isResetExpired(reset) || !resetService.isResetPending(reset);
     }
 }
