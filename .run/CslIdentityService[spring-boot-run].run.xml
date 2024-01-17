@@ -5,7 +5,7 @@
       <env name="ACCESS_TOKEN_SCOPE" value="openid, read, write" />
       <env name="ACCESS_TOKEN_TTL_SECONDS" value="43200" />
       <env name="ACCOUNT_LOCKOUT_MAX_ATTEMPT" value="12" />
-      <env name="ALLOWLIST_DOMAINS_TTL" value="10800000" />
+      <env name="ALLOWLIST_DOMAINS_TTL_MS" value="10800000" />
       <env name="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
       <env name="AUTHENTICATION_SUCCESS_TARGET_URL" value="http://localhost:3001" />
       <env name="CIVIL_SERVANT_REGISTRY_SERVICE_URL" value="http://localhost:9002" />
@@ -19,7 +19,7 @@
       <env name="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
       <env name="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
       <env name="INVITE_SIGNUP_URL" value="http://localhost:9005/signup/%s" />
-      <env name="INVITE_VALIDITY" value="259200" />
+      <env name="INVITE_VALIDITY_SECONDS" value="259200" />
       <env name="JPA_HIBERNATE_ENABLE_LAZY_LOAD_NO_TRANS" value="true" />
       <env name="JPA_OPEN_IN_VIEW" value="false" />
       <env name="JPA_SHOW_SQL" value="true" />
@@ -35,15 +35,14 @@
       <env name="REDIS_HOST" value="localhost" />
       <env name="REDIS_PASSWORD" value="password" />
       <env name="REDIS_PORT" value="6379" />
-      <env name="RESET_URL" value="http://localhost:9005/reset/%s" />
       <env name="REDIS_USE_KEY_PREFIX" value="true" />
       <env name="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
       <env name="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
       <env name="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
-      <env name="REQUIRE_AUTHORIZATION_CONSENT" value="false" />
-      <env name="RESET_VALIDITY" value="86400" />
+      <env name="RESET_URL" value="http://localhost:9005/reset/%s" />
+      <env name="RESET_VALIDITY_SECONDS" value="86400" />
       <env name="ROOT_LOGGING_LEVEL" value="INFO" />
-      <env name="SESSION_TIMEOUT" value="3600" />
+      <env name="SESSION_TIMEOUT_SECONDS" value="3600" />
       <env name="THYMELEAF_CACHE" value="true" />
       <env name="THYMELEAF_CHECK_TEMPLATE" value="true" />
       <env name="UK_GOV_CABINETOFFICE_LOGGING_LEVEL" value="DEBUG" />
