@@ -47,6 +47,7 @@ public class ResetService {
         if (diffInMs > validityInSeconds * 1000L && reset.getResetStatus().equals(ResetStatus.PENDING)) {
             reset.setResetStatus(ResetStatus.EXPIRED);
             resetRepository.save(reset);
+            log.info("Reset code is expired for {}", reset.getEmail());
             return true;
         }
 
@@ -68,7 +69,7 @@ public class ResetService {
 
         resetRepository.save(reset);
 
-        log.info("Reset request sent to {} ", email);
+        log.info("Reset request sent to {}", email);
     }
 
     public void notifyOfSuccessfulReset(Reset reset) throws NotificationClientException {
@@ -79,6 +80,6 @@ public class ResetService {
 
         resetRepository.save(reset);
 
-        log.info("Reset success sent to {} ", reset.getEmail());
+        log.info("Reset success sent to {}", reset.getEmail());
     }
 }
