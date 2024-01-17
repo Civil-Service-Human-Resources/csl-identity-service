@@ -180,4 +180,26 @@ public class ResetControllerTest {
                 .andExpect(MockMvcResultMatchers.view().name("reset/passwordReset"))
                 .andDo(print());
     }
+
+    @Test
+    public void shouldReturnResourceNotFoundIfIdentityNotFound() throws Exception {
+        Reset reset = new Reset();
+        reset.setEmail(EMAIL);
+        reset.setCode(CODE);
+        reset.setResetStatus(PENDING);
+        reset.setRequestedAt(new Date(2323223232L));
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(null);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "Password123")
+                        .param("confirmPassword", "Password123")
+                        .with(csrf())
+                )
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
 }

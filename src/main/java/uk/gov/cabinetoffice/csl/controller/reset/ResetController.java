@@ -104,7 +104,7 @@ public class ResetController {
             Identity identity = identityRepository.findFirstByEmailEquals(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
-                log.info("Identity does not exist with reset code {}", code);
+                log.info("Identity does not exist for reset code {}", code);
                 throw new ResourceNotFoundException();
             }
 
@@ -131,7 +131,7 @@ public class ResetController {
     private String checkResetValidity(Reset reset, String code) {
 
         if (reset == null || reset.getEmail() == null) {
-            log.info("Reset does not exist with code {}", code);
+            log.info("Reset does not exist for code {}", code);
             throw new ResourceNotFoundException();
         }
 
