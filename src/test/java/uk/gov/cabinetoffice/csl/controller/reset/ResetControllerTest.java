@@ -140,7 +140,7 @@ public class ResetControllerTest {
         reset.setEmail(EMAIL);
         reset.setCode(CODE);
         reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date(2323223232L));
+        reset.setRequestedAt(new Date());
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
@@ -161,7 +161,7 @@ public class ResetControllerTest {
         reset.setEmail(EMAIL);
         reset.setCode(CODE);
         reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date(2323223232L));
+        reset.setRequestedAt(new Date());
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
@@ -187,7 +187,7 @@ public class ResetControllerTest {
         reset.setEmail(EMAIL);
         reset.setCode(CODE);
         reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date(2323223232L));
+        reset.setRequestedAt(new Date());
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
