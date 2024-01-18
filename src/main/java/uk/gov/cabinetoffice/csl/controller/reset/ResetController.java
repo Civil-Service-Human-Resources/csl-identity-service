@@ -87,6 +87,7 @@ public class ResetController {
                                 @ModelAttribute @Valid ResetForm resetForm,
                                 BindingResult bindingResult, Model model)
             throws NotificationClientException {
+        log.debug("User on enter password screen with code {}", code);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("resetForm", resetForm);
@@ -123,21 +124,27 @@ public class ResetController {
 
     private String checkResetValidity(Reset reset, String code, Model model) {
 
-        if (reset == null || reset.getEmail() == null) {
-            log.info("Reset does not exist for code {}", code);
-            model.addAttribute("userMessage", "Invalid reset request code. Submit the reset request again.");
+        if (StringUtils.isBlank(code)) {
+            log.info("Blank reset code.");
+            model.addAttribute("userMessage", "Invalid reset code. Submit the reset request again.");
             return "reset/requestReset";
         }
 
-        if (resetService.isResetExpired(reset)) {
-            log.info("Reset expired for code {}", reset.getCode());
-            model.addAttribute("userMessage", "Reset request code expired. Submit the reset request again.");
+        if (reset == null || StringUtils.isBlank(reset.getEmail())) {
+            log.info("Reset does not exist for code {}", code);
+            model.addAttribute("userMessage", "Invalid reset code. Submit the reset request again.");
             return "reset/requestReset";
         }
 
         if (resetService.isResetComplete(reset)) {
             log.info("Reset is already used for code {}", reset.getCode());
-            model.addAttribute("userMessage", "Reset request code is already used. Submit the reset request again.");
+            model.addAttribute("userMessage", "Reset code is already used. Submit the reset request again.");
+            return "reset/requestReset";
+        }
+
+        if (resetService.isResetExpired(reset)) {
+            log.info("Reset expired for code {}", reset.getCode());
+            model.addAttribute("userMessage", "Reset code expired. Submit the reset request again.");
             return "reset/requestReset";
         }
 

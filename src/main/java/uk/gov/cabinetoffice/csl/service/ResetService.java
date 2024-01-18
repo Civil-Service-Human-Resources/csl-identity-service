@@ -12,6 +12,10 @@ import uk.gov.cabinetoffice.csl.repository.ResetRepository;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Date;
+import java.util.List;
+
+import static uk.gov.cabinetoffice.csl.domain.ResetStatus.EXPIRED;
+import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
 
 @Service
 @Transactional
@@ -40,11 +44,17 @@ public class ResetService {
     }
 
     public boolean isResetExpired(Reset reset) {
-        long diffInMs = new Date().getTime() - reset.getRequestedAt().getTime();
-        if (diffInMs > validityInSeconds * 1000L && reset.getResetStatus().equals(ResetStatus.PENDING)) {
-            reset.setResetStatus(ResetStatus.EXPIRED);
-            resetRepository.save(reset);
+        if(reset.getResetStatus().equals(ResetStatus.EXPIRED) || isResetComplete(reset)) {
             return true;
+        }
+
+        if(isResetPending(reset)) {
+            long diffInMs = new Date().getTime() - reset.getRequestedAt().getTime();
+            if(diffInMs > validityInSeconds * 1000L) {
+                reset.setResetStatus(ResetStatus.EXPIRED);
+                resetRepository.save(reset);
+                return true;
+            }
         }
         return false;
     }
@@ -58,19 +68,39 @@ public class ResetService {
     }
 
     public void notifyForResetRequest(String email) throws NotificationClientException {
-        Reset reset = new Reset();
-        reset.setEmail(email);
-        reset.setRequestedAt(new Date());
-        reset.setResetStatus(ResetStatus.PENDING);
-        reset.setCode(RandomStringUtils.random(40, true, true));
-        notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
+
+        Reset reset = null;
+
+        List<Reset> existingPendingResets =
+                resetRepository.findByEmailIgnoreCaseAndResetStatus(email, PENDING);
+
+        if(existingPendingResets != null && existingPendingResets.size() > 1) {
+            existingPendingResets.forEach(r -> r.setResetStatus(EXPIRED));
+            resetRepository.saveAll(existingPendingResets);
+        }
+
+        if(existingPendingResets != null && existingPendingResets.size() == 1) {
+            reset = existingPendingResets.get(0);
+            if(!isResetExpired(reset)) {
+                reset.setRequestedAt(new Date());
+            }
+        }
+
+        if(reset == null) {
+            reset = new Reset();
+            reset.setEmail(email);
+            reset.setRequestedAt(new Date());
+            reset.setResetStatus(ResetStatus.PENDING);
+            reset.setCode(RandomStringUtils.random(40, true, true));
+        }
         resetRepository.save(reset);
+        notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
     }
 
     public void notifyOfSuccessfulReset(Reset reset) throws NotificationClientException {
         reset.setResetAt(new Date());
         reset.setResetStatus(ResetStatus.RESET);
-        notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
         resetRepository.save(reset);
+        notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
     }
 }

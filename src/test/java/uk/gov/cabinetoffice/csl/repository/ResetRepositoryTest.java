@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.domain.ResetStatus;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.cabinetoffice.csl.domain.ResetStatus.*;
 
 @SpringBootTest
 @Transactional
@@ -42,11 +43,23 @@ public class ResetRepositoryTest {
         assertThat(actualReset.getEmail(), equalTo(expectedReset.getEmail()));
     }
 
+    @Test
+    public void findByEmailIgnoreCaseAndResetStatusShouldReturnCorrectResetRecord() {
+        Reset expectedReset = createReset();
+        resetRepository.save(expectedReset);
+        List<Reset> byEmailIgnoreCaseAndResetStatusIgnoreCase =
+                resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING);
+        Reset actualReset = byEmailIgnoreCaseAndResetStatusIgnoreCase.get(0);
+        assertThat(actualReset.getResetStatus(), equalTo(expectedReset.getResetStatus()));
+        assertThat(actualReset.getCode(), equalTo(expectedReset.getCode()));
+        assertThat(actualReset.getEmail(), equalTo(expectedReset.getEmail()));
+    }
+
     private Reset createReset() {
         Reset reset = new Reset();
         reset.setCode(CODE);
         reset.setEmail(EMAIL);
-        reset.setResetStatus(ResetStatus.PENDING);
+        reset.setResetStatus(PENDING);
         reset.setRequestedAt(new Date());
         return reset;
     }
