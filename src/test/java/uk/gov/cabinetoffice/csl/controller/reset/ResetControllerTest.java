@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
+import static uk.gov.cabinetoffice.csl.domain.ResetStatus.RESET;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -66,13 +67,16 @@ public class ResetControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(content().string(containsString("id=\"email\"")))
+                .andExpect(content().string(containsString("Reset your password")))
+                .andExpect(content().string(containsString("Enter your email")))
+                .andExpect(content().string(containsString("Email address")))
                 .andDo(print());
     }
 
     @Test
-    public void shouldLoadCheckEmailIfUserNameExists() throws Exception {
+    public void shouldLoadCheckEmailPageIfIdentityExistsForTheGivenEmailId() throws Exception {
         when(identityRepository.existsByEmail(EMAIL)).thenReturn(true);
 
         mockMvc.perform(post("/reset")
@@ -80,41 +84,53 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/checkEmail"))
+                .andExpect(content().string(containsString("Now check your email")))
+                .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
+                .andExpect(content().string(containsString("The link will expire in 24 hours.")))
+                .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
-                .andExpect(MockMvcResultMatchers.view().name("reset/checkEmail"))
                 .andDo(print());
     }
 
     @Test
-    public void shouldLoadResetIfUserNameDoesNotExist() throws Exception {
+    public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExistForTheGivenEmailId() throws Exception {
         when(identityRepository.existsByEmail(EMAIL)).thenReturn(false);
-
         mockMvc.perform(post("/reset")
                         .param("email", EMAIL)
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(content().string(containsString("Invalid email id. Submit the reset request for the valid email id.")))
+                .andExpect(content().string(containsString("id=\"email\"")))
+                .andExpect(content().string(containsString("Reset your password")))
+                .andExpect(content().string(containsString("Enter your email")))
+                .andExpect(content().string(containsString("Email address")))
                 .andDo(print());
     }
 
     @Test
-    public void shouldReturnResourceNotFoundIfCodeNotFound() throws Exception {
+    public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeDoesNotExist() throws Exception {
         when(resetRepository.findByCode(CODE)).thenReturn(null);
         mockMvc.perform(
                         get("/reset/" + CODE)
                         .with(csrf())
                 )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.view().name("redirect:/reset"))
-                .andExpect(redirectedUrl("/reset"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(content().string(containsString("Invalid reset request code. Submit the reset request again.")))
+                .andExpect(content().string(containsString("id=\"email\"")))
+                .andExpect(content().string(containsString("Reset your password")))
+                .andExpect(content().string(containsString("Enter your email")))
+                .andExpect(content().string(containsString("Email address")))
                 .andDo(print());
     }
 
     @Test
-    public void shouldLoadResetIfCodeIsExpired() throws Exception {
+    public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsExpired() throws Exception {
         Reset reset = new Reset();
         reset.setEmail(EMAIL);
         reset.setCode(CODE);
@@ -127,9 +143,39 @@ public class ResetControllerTest {
                         get("/reset/" + CODE)
                                 .with(csrf())
                 )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.view().name("redirect:/reset"))
-                .andExpect(redirectedUrl("/reset"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(content().string(containsString("Reset request code expired. Submit the reset request again.")))
+                .andExpect(content().string(containsString("id=\"email\"")))
+                .andExpect(content().string(containsString("Reset your password")))
+                .andExpect(content().string(containsString("Enter your email")))
+                .andExpect(content().string(containsString("Email address")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsAlreadyUsed() throws Exception {
+        Reset reset = new Reset();
+        reset.setEmail(EMAIL);
+        reset.setCode(CODE);
+        reset.setResetStatus(RESET);
+        reset.setRequestedAt(new Date(2323223232L));
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetComplete(reset)).thenReturn(true);
+
+        mockMvc.perform(
+                        get("/reset/" + CODE)
+                                .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(content().string(containsString("Reset request code is already used. Submit the reset request again.")))
+                .andExpect(content().string(containsString("id=\"email\"")))
+                .andExpect(content().string(containsString("Reset your password")))
+                .andExpect(content().string(containsString("Enter your email")))
+                .andExpect(content().string(containsString("Email address")))
                 .andDo(print());
     }
 
@@ -151,6 +197,15 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
                 .andDo(print());
     }
 
@@ -177,11 +232,15 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("reset/passwordReset"))
+                .andExpect(content().string(containsString("Password reset complete")))
+                .andExpect(content().string(containsString("Your new password has been changed")))
+                .andExpect(content().string(containsString("What happens next?")))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiUrl"))
                 .andDo(print());
     }
 
     @Test
-    public void shouldReturnResourceNotFoundIfIdentityNotFound() throws Exception {
+    public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExist() throws Exception {
         Reset reset = new Reset();
         reset.setEmail(EMAIL);
         reset.setCode(CODE);
@@ -190,15 +249,21 @@ public class ResetControllerTest {
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
-
+        when(resetService.isResetComplete(reset)).thenReturn(false);
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(null);
+
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123")
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(content().string(containsString("Invalid reset code. Submit the reset request for the valid email id.")))
+                .andExpect(content().string(containsString("id=\"email\"")))
+                .andExpect(content().string(containsString("Reset your password")))
+                .andExpect(content().string(containsString("Enter your email")))
+                .andExpect(content().string(containsString("Email address")))
                 .andDo(print());
     }
 }

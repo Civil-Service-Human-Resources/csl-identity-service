@@ -100,8 +100,8 @@ public class ResetController {
             Identity identity = identityRepository.findFirstByEmailEquals(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
-                log.info("Identity does not exist for reset code {}", code);
-                model.addAttribute("userMessage", "Invalid email id. Submit the reset request for the valid email id.");
+                log.info("Identity does not exist for email {} which is retrieved using Reset code {}", reset.getEmail(), code);
+                model.addAttribute("userMessage", "Invalid reset code. Submit the reset request for the valid email id.");
                 return "reset/requestReset";
             }
 
@@ -126,19 +126,19 @@ public class ResetController {
         if (reset == null || reset.getEmail() == null) {
             log.info("Reset does not exist for code {}", code);
             model.addAttribute("userMessage", "Invalid reset request code. Submit the reset request again.");
-            return "redirect:/reset";
+            return "reset/requestReset";
         }
 
         if (resetService.isResetExpired(reset)) {
             log.info("Reset expired for code {}", reset.getCode());
             model.addAttribute("userMessage", "Reset request code expired. Submit the reset request again.");
-            return "redirect:/reset";
+            return "reset/requestReset";
         }
 
         if (resetService.isResetComplete(reset)) {
             log.info("Reset is already used for code {}", reset.getCode());
             model.addAttribute("userMessage", "Reset request code is already used. Submit the reset request again.");
-            return "redirect:/reset";
+            return "reset/requestReset";
         }
 
         return "";
