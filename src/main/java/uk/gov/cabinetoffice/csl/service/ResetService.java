@@ -30,17 +30,19 @@ public class ResetService {
     @Value("${reset.url}")
     private String resetUrlFormat;
 
-    @Value("${reset.validityInSeconds}")
-    private int validityInSeconds;
+    private final int validityInSeconds;
 
     private final ResetRepository resetRepository;
 
     private final NotifyService notifyService;
 
     @Autowired
-    public ResetService(ResetRepository resetRepository, @Qualifier("notifyServiceImpl") NotifyService notifyService) {
+    public ResetService(ResetRepository resetRepository,
+                        @Qualifier("notifyServiceImpl") NotifyService notifyService,
+                        @Value("${reset.validityInSeconds}") int validityInSeconds) {
         this.resetRepository = resetRepository;
         this.notifyService = notifyService;
+        this.validityInSeconds = validityInSeconds;
     }
 
     public boolean isResetExpired(Reset reset) {
@@ -81,7 +83,9 @@ public class ResetService {
 
         if(existingPendingResets != null && existingPendingResets.size() == 1) {
             reset = existingPendingResets.get(0);
-            if(!isResetExpired(reset)) {
+            if(isResetExpired(reset)) {
+                reset = null;
+            } else {
                 reset.setRequestedAt(new Date());
             }
         }
