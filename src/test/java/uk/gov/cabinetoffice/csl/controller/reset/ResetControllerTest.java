@@ -78,7 +78,6 @@ public class ResetControllerTest {
     @Test
     public void shouldLoadCheckEmailPageIfIdentityExistsForTheGivenEmailId() throws Exception {
         when(identityRepository.existsByEmail(EMAIL)).thenReturn(true);
-
         mockMvc.perform(post("/reset")
                         .param("email", EMAIL)
                         .with(csrf())
@@ -131,9 +130,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsExpired() throws Exception {
-        Reset reset = new Reset();
-        reset.setEmail(EMAIL);
-        reset.setCode(CODE);
+        Reset reset = createReset();
         reset.setRequestedAt(new Date(2323223232L));
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
@@ -155,9 +152,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsAlreadyUsed() throws Exception {
-        Reset reset = new Reset();
-        reset.setEmail(EMAIL);
-        reset.setCode(CODE);
+        Reset reset = createReset();
         reset.setResetStatus(RESET);
         reset.setRequestedAt(new Date(2323223232L));
 
@@ -181,11 +176,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadPasswordFormIfCodeIsPending() throws Exception {
-        Reset reset = new Reset();
-        reset.setEmail(EMAIL);
-        reset.setCode(CODE);
-        reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date());
+        Reset reset = createReset();
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
@@ -211,11 +202,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadPasswordResetSuccessful() throws Exception {
-        Reset reset = new Reset();
-        reset.setEmail(EMAIL);
-        reset.setCode(CODE);
-        reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date());
+        Reset reset = createReset();
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
@@ -241,11 +228,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExist() throws Exception {
-        Reset reset = new Reset();
-        reset.setEmail(EMAIL);
-        reset.setCode(CODE);
-        reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date());
+        Reset reset = createReset();
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
@@ -265,5 +248,14 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Enter your email")))
                 .andExpect(content().string(containsString("Email address")))
                 .andDo(print());
+    }
+
+    private Reset createReset() {
+        Reset reset = new Reset();
+        reset.setCode(CODE);
+        reset.setEmail(EMAIL);
+        reset.setResetStatus(PENDING);
+        reset.setRequestedAt(new Date());
+        return reset;
     }
 }
