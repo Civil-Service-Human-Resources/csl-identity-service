@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,7 +13,6 @@ import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Date;
 
-@Slf4j
 @Service
 @Transactional
 public class ResetService {
@@ -43,19 +41,20 @@ public class ResetService {
 
     public boolean isResetExpired(Reset reset) {
         long diffInMs = new Date().getTime() - reset.getRequestedAt().getTime();
-
         if (diffInMs > validityInSeconds * 1000L && reset.getResetStatus().equals(ResetStatus.PENDING)) {
             reset.setResetStatus(ResetStatus.EXPIRED);
             resetRepository.save(reset);
-            log.info("Reset code is expired for {}", reset.getEmail());
             return true;
         }
-
         return false;
     }
 
     public boolean isResetPending(Reset reset) {
         return reset.getResetStatus().equals(ResetStatus.PENDING);
+    }
+
+    public boolean isResetComplete(Reset reset) {
+        return reset.getResetStatus().equals(ResetStatus.RESET);
     }
 
     public void notifyForResetRequest(String email) throws NotificationClientException {
@@ -64,22 +63,14 @@ public class ResetService {
         reset.setRequestedAt(new Date());
         reset.setResetStatus(ResetStatus.PENDING);
         reset.setCode(RandomStringUtils.random(40, true, true));
-
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
-
         resetRepository.save(reset);
-
-        log.info("Reset request sent to {}", email);
     }
 
     public void notifyOfSuccessfulReset(Reset reset) throws NotificationClientException {
         reset.setResetAt(new Date());
         reset.setResetStatus(ResetStatus.RESET);
-
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
-
         resetRepository.save(reset);
-
-        log.info("Reset success sent to {}", reset.getEmail());
     }
 }

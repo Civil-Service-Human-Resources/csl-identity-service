@@ -96,10 +96,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
-                .andExpect(content().string(containsString("Check your spam folder.")))
-                .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
-                .andExpect(MockMvcResultMatchers.view().name("reset/checkEmail"))
+                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
                 .andDo(print());
     }
 
@@ -110,7 +107,9 @@ public class ResetControllerTest {
                         get("/reset/" + CODE)
                         .with(csrf())
                 )
-                .andExpect(status().isNotFound())
+                .andExpect(status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.view().name("redirect:/reset"))
+                .andExpect(redirectedUrl("/reset"))
                 .andDo(print());
     }
 
@@ -199,7 +198,7 @@ public class ResetControllerTest {
                         .param("confirmPassword", "Password123")
                         .with(csrf())
                 )
-                .andExpect(status().isNotFound())
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 }

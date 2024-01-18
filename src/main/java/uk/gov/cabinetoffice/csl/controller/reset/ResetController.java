@@ -11,7 +11,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.repository.ResetRepository;
 import uk.gov.cabinetoffice.csl.service.ResetService;
@@ -53,14 +52,17 @@ public class ResetController {
     }
 
     @PostMapping
-    public String requestReset(@RequestParam(value = "email") String email) throws Exception {
-        log.info("Requesting reset for {} ", email);
-
+    public String requestReset(@RequestParam(value = "email") String email, Model model) throws Exception {
+        log.debug("Reset request received for email {}", email);
         if (identityRepository.existsByEmail(email)) {
             resetService.notifyForResetRequest(email);
+            log.info("Reset request email sent to {}", email);
+            return "reset/checkEmail";
+        } else {
+            log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
+            model.addAttribute("userMessage", "Invalid email id. Submit the reset request for the valid email id.");
+            return "reset/requestReset";
         }
-
-        return "reset/checkEmail";
     }
 
     @GetMapping("/{code}")
@@ -68,20 +70,16 @@ public class ResetController {
         log.debug("User on reset screen with code {}", code);
 
         Reset reset = resetRepository.findByCode(code);
+        String checkResetValidityResult = checkResetValidity(reset, code, model);
 
-        String result = checkResetValidity(reset, code);
-
-        if(StringUtils.isBlank(result)) {
-
+        if(StringUtils.isBlank(checkResetValidityResult)) {
             ResetForm resetForm = new ResetForm();
             resetForm.setCode(code);
-
             model.addAttribute("resetForm", resetForm);
-
             return "reset/passwordForm";
         }
 
-        return result;
+        return checkResetValidityResult;
     }
 
     @PostMapping("/{code}")
@@ -96,26 +94,21 @@ public class ResetController {
         }
 
         Reset reset = resetRepository.findByCode(code);
-
-        String result = checkResetValidity(reset, code);
+        String result = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(result)) {
-
             Identity identity = identityRepository.findFirstByEmailEquals(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
                 log.info("Identity does not exist for reset code {}", code);
-                throw new ResourceNotFoundException();
+                model.addAttribute("userMessage", "Invalid email id. Submit the reset request for the valid email id.");
+                return "reset/requestReset";
             }
 
             userService.updatePassword(identity, resetForm.getPassword());
-
             resetService.notifyOfSuccessfulReset(reset);
-
-            log.info("Password reset successfully for {}", identity.getEmail());
-
+            log.info("Reset success sent to {}", reset.getEmail());
             model.addAttribute("lpgUiUrl", lpgUiUrl);
-
             return "reset/passwordReset";
         }
         return result;
@@ -128,22 +121,26 @@ public class ResetController {
         }
     }
 
-    private String checkResetValidity(Reset reset, String code) {
+    private String checkResetValidity(Reset reset, String code, Model model) {
 
         if (reset == null || reset.getEmail() == null) {
             log.info("Reset does not exist for code {}", code);
-            throw new ResourceNotFoundException();
+            model.addAttribute("userMessage", "Invalid reset request code. Submit the reset request again.");
+            return "redirect:/reset";
         }
 
-        if (isResetInvalid(reset)) {
-            log.info("Reset is not valid for code {}", reset.getCode());
+        if (resetService.isResetExpired(reset)) {
+            log.info("Reset expired for code {}", reset.getCode());
+            model.addAttribute("userMessage", "Reset request code expired. Submit the reset request again.");
+            return "redirect:/reset";
+        }
+
+        if (resetService.isResetComplete(reset)) {
+            log.info("Reset is already used for code {}", reset.getCode());
+            model.addAttribute("userMessage", "Reset request code is already used. Submit the reset request again.");
             return "redirect:/reset";
         }
 
         return "";
-    }
-
-    private boolean isResetInvalid(Reset reset) {
-        return resetService.isResetExpired(reset) || !resetService.isResetPending(reset);
     }
 }
