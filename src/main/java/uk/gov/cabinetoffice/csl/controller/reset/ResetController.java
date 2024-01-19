@@ -56,7 +56,7 @@ public class ResetController {
     }
 
     @PostMapping
-    public String requestReset(@RequestParam(value = "email") String email, Model model) throws Exception {
+    public String requestReset(@RequestParam(value = "email") String email, Model model) throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
         if (identityRepository.existsByEmail(email)) {
             resetService.notifyForResetRequest(email);
