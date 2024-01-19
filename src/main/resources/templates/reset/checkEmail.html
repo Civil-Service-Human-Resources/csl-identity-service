@@ -14,7 +14,7 @@
                 <div class="column-two-thirds">
                     <h2 class="heading-medium">What next?</h2>
                     <p>Check your email for the link to reset your password.</p>
-                    <p>The link will expire in 24 hours.</p>
+                    <p>The link will expire in <div th:text="${resetValidity}"></div>.</p>
                     <details role="group">
                         <summary role="button" aria-controls="details-content-0" aria-expanded="false">
                             <span class="summary">Haven't received the email?</span>
