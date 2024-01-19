@@ -61,7 +61,7 @@ public class ResetController {
         if (identityRepository.existsByEmail(email)) {
             resetService.notifyForResetRequest(email);
             log.info("Reset request email sent to {}", email);
-            model.addAttribute("resetValidity", resetValiditySecondsToHoursMinutes());
+            model.addAttribute("resetValidityMessage", resetValidityMessage());
             return "reset/checkEmail";
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
@@ -156,15 +156,17 @@ public class ResetController {
         return "";
     }
 
-    private String resetValiditySecondsToHoursMinutes() {
-        log.info("validityInSeconds: {}", validityInSeconds);
+    private String resetValidityMessage() {
+        log.debug("validityInSeconds: {}", validityInSeconds);
         int hours = validityInSeconds / 3600;
-        String result = String.format("%02d", hours) + " hours";
+        String resetValidityMessage = "The link will expire in %s";
         if(hours < 1) {
             int minutes = (validityInSeconds % 3600) / 60;
-            result = String.format("%02d", minutes) + " minutes";
+            resetValidityMessage = resetValidityMessage.formatted(String.format("%02d", minutes) + " minutes.");
+        } else {
+            resetValidityMessage = resetValidityMessage.formatted(String.format("%02d", hours) + " hours.");
         }
-        log.info("result: {}", result);
-        return result;
+        log.debug("resetValidityMessage: {}", resetValidityMessage);
+        return resetValidityMessage;
     }
 }

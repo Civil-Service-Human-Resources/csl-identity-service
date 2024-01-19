@@ -87,7 +87,7 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Now check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
-                .andExpect(content().string(containsString("The link will expire in")))
+                .andExpect(content().string(containsString("The link will expire in 24 hours.")))
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
