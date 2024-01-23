@@ -201,7 +201,172 @@ public class ResetControllerTest {
     }
 
     @Test
-    public void shouldLoadPasswordResetSuccessful() throws Exception {
+    public void shouldShowPasswordInvalidErrorMessageIfNumberIsMissingFromPassword() throws Exception {
+        Reset reset = createReset();
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
+                Instant.now(), false, "AgencyTokenUid");
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "Password")
+                        .param("confirmPassword", "Password")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Password is invalid")))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldShowPasswordInvalidErrorMessageIfLowerCaseCharacterMissingFromPassword() throws Exception {
+        Reset reset = createReset();
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
+                Instant.now(), false, "AgencyTokenUid");
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "PASSWORD123")
+                        .param("confirmPassword", "PASSWORD123")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Password is invalid")))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldShowPasswordInvalidErrorMessageIfUpperCaseCharacterMissingFromPassword() throws Exception {
+        Reset reset = createReset();
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
+                Instant.now(), false, "AgencyTokenUid");
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "password123")
+                        .param("confirmPassword", "password123")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Password is invalid")))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldShowPasswordInvalidErrorMessageIfPasswordLengthIsLessThan8Characters() throws Exception {
+        Reset reset = createReset();
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
+                Instant.now(), false, "AgencyTokenUid");
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "Pass123")
+                        .param("confirmPassword", "Pass123")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Password is invalid")))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldShowPasswordInvalidErrorMessageIfPasswordHasSpace() throws Exception {
+        Reset reset = createReset();
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
+                Instant.now(), false, "AgencyTokenUid");
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "Password123 ")
+                        .param("confirmPassword", "Password123 ")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Password is invalid")))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldShowPasswordMismatchErrorMessageIfPasswordAndConfirmPasswordMismatch() throws Exception {
         Reset reset = createReset();
 
         when(resetRepository.findByCode(CODE)).thenReturn(reset);
@@ -214,15 +379,22 @@ public class ResetControllerTest {
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
-                        .param("confirmPassword", "Password123")
+                        .param("confirmPassword", "PasswordMisMatch")
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordReset"))
-                .andExpect(content().string(containsString("Password reset complete")))
-                .andExpect(content().string(containsString("Your new password has been changed")))
-                .andExpect(content().string(containsString("What happens next?")))
-                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiUrl"))
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Passwords do not match")))
+                .andExpect(content().string(containsString("Create a memorable password for your account.")))
+                .andExpect(content().string(containsString("Your password must have:")))
+                .andExpect(content().string(containsString("8 or more characters")))
+                .andExpect(content().string(containsString("at least 1 number")))
+                .andExpect(content().string(containsString("upper and lower case letters")))
+                .andExpect(content().string(containsString("Password")))
+                .andExpect(content().string(containsString("Re-type your Password")))
+                .andExpect(content().string(containsString("id=\"password\"")))
+                .andExpect(content().string(containsString("id=\"passwordConfirm\"")))
                 .andDo(print());
     }
 
@@ -247,6 +419,32 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
                 .andExpect(content().string(containsString("Email address")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldLoadPasswordResetSuccessful() throws Exception {
+        Reset reset = createReset();
+
+        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.isResetExpired(reset)).thenReturn(false);
+        when(resetService.isResetPending(reset)).thenReturn(true);
+
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
+                Instant.now(), false, "AgencyTokenUid");
+
+        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        mockMvc.perform(post("/reset/" + CODE)
+                        .param("password", "Password123")
+                        .param("confirmPassword", "Password123")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("reset/passwordReset"))
+                .andExpect(content().string(containsString("Password reset complete")))
+                .andExpect(content().string(containsString("Your new password has been changed")))
+                .andExpect(content().string(containsString("What happens next?")))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiUrl"))
                 .andDo(print());
     }
 
