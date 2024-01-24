@@ -1,0 +1,37 @@
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+    <title>Check your email - Civil Service Learning</title>
+
+    <content>
+        <div class="container">
+            <div class="grid-row">
+                <div class="column-full">
+                    <div class="govuk-box-highlight">
+                        <h1 class="heading-large">Now check your email</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-row">
+                <div class="column-two-thirds">
+                    <h2 class="heading-medium">What next?</h2>
+                    <p>Check your email for the link to reset your password.</p>
+                    <p th:text="${resetValidityMessage}"></p>
+                    <details role="group">
+                        <summary role="button" aria-controls="details-content-0" aria-expanded="false">
+                            <span class="summary">Haven't received the email?</span>
+                        </summary>
+                        <div class="panel panel-border-narrow" id="details-content-0" aria-hidden="true">
+                            <div class="text">
+                                <p>Check your spam folder.</p>
+                                <p>If you don't see the email after 30 minutes, you can contact the Learning Platform
+                                    for Government helpdesk on <a href="tel:+442036407985">020 3640 7985</a> or by email
+                                    on
+                                    <a href="mailto:support@governmentcampus.co.uk">support@governmentcampus.co.uk</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </content>
+</page>
