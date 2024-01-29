@@ -1,6 +1,8 @@
 package uk.gov.cabinetoffice.csl.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,21 +24,33 @@ import java.util.*;
 @Transactional
 public class UserService implements UserDetailsService {
 
+    private final String updatePasswordEmailTemplateId;
     private final InviteService inviteService;
-    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
+    private final TokenServices tokenServices;
+    private final NotifyService notifyService;
     private final IdentityRepository identityRepository;
+    private final TokenRepository tokenRepository;
+    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(InviteService inviteService,
-                       ICivilServantRegistryClient civilServantRegistryClient,
+    public UserService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
+                       InviteService inviteService,
                        AgencyTokenCapacityService agencyTokenCapacityService,
+                       TokenServices tokenServices,
+                       @Qualifier("notifyServiceImpl") NotifyService notifyService,
                        IdentityRepository identityRepository,
+                       @Qualifier("tokenRepository") TokenRepository tokenRepository,
+                       ICivilServantRegistryClient civilServantRegistryClient,
                        PasswordEncoder passwordEncoder) {
+        this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.inviteService = inviteService;
-        this.civilServantRegistryClient = civilServantRegistryClient;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.tokenServices = tokenServices;
+        this.notifyService = notifyService;
         this.identityRepository = identityRepository;
+        this.tokenRepository = tokenRepository;
+        this.civilServantRegistryClient = civilServantRegistryClient;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -157,6 +171,18 @@ public class UserService implements UserDetailsService {
 
     public boolean isAllowListedDomain(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
+    }
+
+    public void updatePasswordAndRevokeTokens(Identity identity, String password) {
+        identity.setPassword(passwordEncoder.encode(password));
+        identityRepository.save(identity);
+        revokeAccessTokens(identity);
+        notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
+    }
+
+    public void revokeAccessTokens(Identity identity) {
+        tokenRepository.findAllByUserName(identity.getUid())
+                .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
