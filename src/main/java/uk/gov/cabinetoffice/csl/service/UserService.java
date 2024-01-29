@@ -27,29 +27,23 @@ public class UserService implements UserDetailsService {
     private final String updatePasswordEmailTemplateId;
     private final InviteService inviteService;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
-    private final TokenServices tokenServices;
     private final NotifyService notifyService;
     private final IdentityRepository identityRepository;
-    private final TokenRepository tokenRepository;
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                        InviteService inviteService,
                        AgencyTokenCapacityService agencyTokenCapacityService,
-                       TokenServices tokenServices,
                        @Qualifier("notifyServiceImpl") NotifyService notifyService,
                        IdentityRepository identityRepository,
-                       @Qualifier("tokenRepository") TokenRepository tokenRepository,
                        ICivilServantRegistryClient civilServantRegistryClient,
                        PasswordEncoder passwordEncoder) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.inviteService = inviteService;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
-        this.tokenServices = tokenServices;
         this.notifyService = notifyService;
         this.identityRepository = identityRepository;
-        this.tokenRepository = tokenRepository;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.passwordEncoder = passwordEncoder;
     }
@@ -176,13 +170,7 @@ public class UserService implements UserDetailsService {
     public void updatePasswordAndRevokeTokens(Identity identity, String password) {
         identity.setPassword(passwordEncoder.encode(password));
         identityRepository.save(identity);
-        revokeAccessTokens(identity);
         notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
-    }
-
-    public void revokeAccessTokens(Identity identity) {
-        tokenRepository.findAllByUserName(identity.getUid())
-                .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {

@@ -34,6 +34,7 @@ public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
     private static final String UID = "uid123";
+    private final String updatePasswordEmailTemplateId  = "template-id";
 
     private UserService userService;
 
@@ -52,13 +53,17 @@ public class UserServiceTest {
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private final NotifyService notifyService = mock(NotifyService.class);
+
     @BeforeEach
     public void setUp() {
         userService = new UserService(
+                updatePasswordEmailTemplateId,
                 inviteService,
-                civilServantRegistryClient,
                 agencyTokenCapacityService,
+                notifyService,
                 identityRepository,
+                civilServantRegistryClient,
                 passwordEncoder
         );
         when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowlisted.gov.uk", "example.com"));
