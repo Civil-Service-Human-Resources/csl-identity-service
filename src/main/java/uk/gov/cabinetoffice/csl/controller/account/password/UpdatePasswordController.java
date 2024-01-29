@@ -1,6 +1,7 @@
 package uk.gov.cabinetoffice.csl.controller.account.password;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,15 +15,12 @@ import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.UserService;
 
 @Slf4j
+@AllArgsConstructor
 @Controller
 @RequestMapping("/account/password")
-public class ChangePasswordController {
+public class UpdatePasswordController {
 
     private final UserService userService;
-
-    public ChangePasswordController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping
     public String updatePasswordForm(Model model, @ModelAttribute UpdatePasswordForm form) {
@@ -31,14 +29,17 @@ public class ChangePasswordController {
     }
 
     @PostMapping
-    public String updatePassword(Model model, @Valid @ModelAttribute UpdatePasswordForm form, BindingResult bindingResult, Authentication authentication) {
+    public String updatePassword(Model model, @Valid @ModelAttribute UpdatePasswordForm form,
+                                 BindingResult bindingResult, Authentication authentication) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("updatePasswordForm", form);
             return "account/updatePassword";
         }
 
-        userService.updatePasswordAndRevokeTokens(((IdentityDetails) authentication.getPrincipal()).getIdentity(), form.getNewPassword());
+        userService.updatePasswordAndNotify(
+                ((IdentityDetails) authentication.getPrincipal()).getIdentity(),
+                form.getNewPassword());
         return "redirect:/account/password/passwordUpdated";
     }
 

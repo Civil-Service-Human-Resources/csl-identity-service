@@ -118,10 +118,16 @@ public class UserService implements UserDetailsService {
 
     public void updatePassword(Identity identity, String password) {
         identity.setActive(true);
+        identity.setLocked(false);
         identity.setDeletionNotificationSent(false);
         identity.setPassword(passwordEncoder.encode(password));
-        identity.setLocked(false);
         identityRepository.save(identity);
+    }
+
+    public void updatePasswordAndNotify(Identity identity, String password) {
+        identity.setPassword(passwordEncoder.encode(password));
+        identityRepository.save(identity);
+        notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
     }
 
     public void lockIdentity(String email) {
@@ -165,12 +171,6 @@ public class UserService implements UserDetailsService {
 
     public boolean isAllowListedDomain(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
-    }
-
-    public void updatePasswordAndRevokeTokens(Identity identity, String password) {
-        identity.setPassword(passwordEncoder.encode(password));
-        identityRepository.save(identity);
-        notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
