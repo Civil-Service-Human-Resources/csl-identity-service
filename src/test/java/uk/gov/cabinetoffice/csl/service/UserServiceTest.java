@@ -34,7 +34,6 @@ public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
     private static final String UID = "uid123";
-    private final String updatePasswordEmailTemplateId  = "template-id";
 
     private UserService userService;
 
@@ -58,7 +57,7 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() {
         userService = new UserService(
-                updatePasswordEmailTemplateId,
+                "updatePasswordEmailTemplateId",
                 inviteService,
                 agencyTokenCapacityService,
                 notifyService,
