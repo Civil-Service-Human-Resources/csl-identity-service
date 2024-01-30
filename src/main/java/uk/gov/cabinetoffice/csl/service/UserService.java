@@ -19,6 +19,8 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import java.time.Instant;
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Slf4j
 @Service
 @Transactional
@@ -116,7 +118,7 @@ public class UserService implements UserDetailsService {
         log.debug("New identity email = {} successfully created", identity.getEmail());
     }
 
-    public void updatePassword(Identity identity, String password) {
+    public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
         identity.setActive(true);
         identity.setLocked(false);
         identity.setDeletionNotificationSent(false);
@@ -154,10 +156,6 @@ public class UserService implements UserDetailsService {
         return emailAddress.substring(emailAddress.indexOf('@') + 1);
     }
 
-    private boolean hasData(String s) {
-        return s != null && s.length() > 0;
-    }
-
     public Identity getIdentityByEmail(String email) {
         return identityRepository.findFirstByEmailEquals(email);
     }
@@ -174,9 +172,9 @@ public class UserService implements UserDetailsService {
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
-        return hasData(tokenRequest.getDomain())
-                && hasData(tokenRequest.getToken())
-                && hasData(tokenRequest.getOrg());
+        return isNotBlank(tokenRequest.getDomain())
+                && isNotBlank(tokenRequest.getToken())
+                && isNotBlank(tokenRequest.getOrg());
     }
 
     private boolean isEmailInvitedViaIDM(String email) {

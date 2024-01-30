@@ -111,7 +111,7 @@ public class ResetController {
                 return "reset/requestReset";
             }
 
-            userService.updatePassword(identity, resetForm.getPassword());
+            userService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyOfSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
             model.addAttribute("lpgUiUrl", lpgUiUrl);

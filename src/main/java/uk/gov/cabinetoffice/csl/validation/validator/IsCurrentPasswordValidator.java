@@ -16,8 +16,7 @@ public class IsCurrentPasswordValidator implements ConstraintValidator<IsCurrent
    private final UserService userService;
    private final IUserAuthService userAuthService;
 
-   public void initialize(IsCurrentPassword constraint) {
-   }
+   public void initialize(IsCurrentPassword constraint) {}
 
    public boolean isValid(String value, ConstraintValidatorContext context) {
       Identity identity = userAuthService.getIdentity();

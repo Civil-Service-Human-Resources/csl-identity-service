@@ -1,13 +1,14 @@
 package uk.gov.cabinetoffice.csl.service.auth2;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.exception.ClientAuthenticationErrorException;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @AllArgsConstructor
@@ -37,7 +38,7 @@ public class UserAuthService implements IUserAuthService {
         if (jwtPrincipal != null) {
             username = (String) jwtPrincipal.getClaims().get("user_name");
         }
-        if (StringUtils.isBlank(username)) {
+        if (isBlank(username)) {
             throw new ClientAuthenticationErrorException("Learner Id is missing from authentication token");
         }
         return username;
@@ -45,8 +46,7 @@ public class UserAuthService implements IUserAuthService {
 
     @Override
     public IdentityDetails getIdentityDetails() {
-        Authentication authentication = getAuthentication();
-        return ((IdentityDetails) authentication.getPrincipal());
+        return (IdentityDetails)getAuthentication().getPrincipal();
     }
 
     @Override
