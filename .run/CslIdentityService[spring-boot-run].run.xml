@@ -11,11 +11,16 @@
       <env name="CIVIL_SERVANT_REGISTRY_SERVICE_URL" value="http://localhost:9002" />
       <env name="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
       <env name="CLIENT_SECRET" value="test" />
-      <env name="DATASOURCE" value="jdbc:mysql://localhost:3306/csl_identity?user=root&amp;password=password&amp;useSSL=false" />
+      <env name="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
+      <env name="DATABASE_NAME" value="csl_identity" />
+      <env name="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=false" />
       <env name="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
+      <env name="DATASOURCE_PASSWORD" value="password" />
+      <env name="DATASOURCE_USERNAME" value="root" />
       <env name="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
       <env name="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
       <env name="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
+      <env name="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
       <env name="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
       <env name="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
       <env name="INVITE_SIGNUP_URL" value="http://localhost:9005/signup/%s" />
