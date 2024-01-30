@@ -119,10 +119,10 @@ public class UserService implements UserDetailsService {
     }
 
     public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
+        identity.setPassword(passwordEncoder.encode(password));
         identity.setActive(true);
         identity.setLocked(false);
         identity.setDeletionNotificationSent(false);
-        identity.setPassword(passwordEncoder.encode(password));
         identityRepository.save(identity);
     }
 
