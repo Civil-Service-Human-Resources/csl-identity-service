@@ -36,6 +36,10 @@
                          aria-labelledby="error-summary-heading-example-1" tabindex="-1">
                         You have been logged out.
                     </div>
+                    <div th:if="${userMessage}" class="error-summary" role="alert"
+                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1" th:text="${userMessage}"></h2>
+                    </div>
 
                     <h1 class="heading-large">Sign in</h1>
 
