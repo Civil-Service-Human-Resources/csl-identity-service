@@ -25,11 +25,10 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler im
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
-        //TODO: Check authentication object if it has uid, if yes then delete the token entries from DB
         Jwt principal = (Jwt) authentication.getPrincipal();
         String principalName = principal.getClaim("user_name");
         Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
-        log.info("{} Oauth2Authorization are deleted for user {}", l, principalName);
+        log.info("{} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
         String redirectUrl = request.getParameter("returnTo");
         response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
         super.onLogoutSuccess(request, response, authentication);
