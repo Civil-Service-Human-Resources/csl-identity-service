@@ -47,12 +47,10 @@ public class UpdatePasswordController {
         //return "redirect:/account/password/passwordUpdated";
     }
 
-    @GetMapping("/passwordUpdated")
-    public String passwordUpdated(Model model) {
-        model.addAttribute("userMessage", "Your password has been updated. Please login to continue");
-        log.info("UpdatePasswordController:passwordUpdated.redirecting to logout");
-        return "redirect:/logout";
-        ///"logout?returnTo=/login"
-        //return "account/passwordUpdated";
-    }
+//    @GetMapping("/passwordUpdated")
+//    public String passwordUpdated(Model model) {
+//        model.addAttribute("userMessage", "Your password has been updated. Please login to continue");
+//        log.info("UpdatePasswordController:passwordUpdated.redirecting to logout");
+//        return "account/passwordUpdated";
+//    }
 }
