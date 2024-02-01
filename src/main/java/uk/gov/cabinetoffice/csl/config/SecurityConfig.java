@@ -28,9 +28,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationFailureHandler;
-import uk.gov.cabinetoffice.csl.handler.CustomAuthenticationSuccessHandler;
-import uk.gov.cabinetoffice.csl.handler.WebSecurityExpressionHandler;
+import uk.gov.cabinetoffice.csl.handler.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,11 +44,17 @@ public class SecurityConfig {
 
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+	private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+	private final CustomCookieClearingLogoutHandler customCookieClearingLogoutHandler;
 
 	public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
-						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler){
+						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler,
+						  CustomLogoutSuccessHandler customLogoutSuccessHandler,
+						  CustomCookieClearingLogoutHandler customCookieClearingLogoutHandler){
 		this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
 		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
+		this.customLogoutSuccessHandler = customLogoutSuccessHandler;
+		this.customCookieClearingLogoutHandler = customCookieClearingLogoutHandler;
 	}
 
 	@Bean
@@ -89,11 +93,12 @@ public class SecurityConfig {
 				.successHandler(customAuthenticationSuccessHandler)
 			)
 			.logout(logout -> {
-				logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
-				logout.logoutSuccessHandler((request, response, authentication) -> {
-					String redirectUrl = request.getParameter("returnTo");
-					response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
-				});
+				logout
+					.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+					.clearAuthentication(true)
+					.invalidateHttpSession(true)
+					.addLogoutHandler(customCookieClearingLogoutHandler)
+					.logoutSuccessHandler(customLogoutSuccessHandler);
 			})
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(

@@ -40,7 +40,10 @@ public class UpdatePasswordController {
         userService.updatePasswordAndNotify(
                 ((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 form.getNewPassword());
-        return "redirect:/account/password/passwordUpdated";
+        model.addAttribute("userMessage", "Your password has been updated. Please login to continue");
+        log.info("UpdatePasswordController:updatePassword.redirecting to logout");
+        return "redirect:/logout";
+//        return "redirect:/account/password/passwordUpdated";
     }
 
     @GetMapping("/passwordUpdated")
