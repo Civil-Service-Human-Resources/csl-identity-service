@@ -20,14 +20,42 @@ public class MatchesPolicyValidatorTest {
 
     @Test
     public void shouldMatchPolicy() {
-        String password = "Abcdefg1";
+        String password = "Password123";
         ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
         assertTrue(validator.isValid(password, context));
     }
 
     @Test
-    public void shouldFailValidationIfDoesntSatisfyPolicy() {
-        String password = "password";
+    public void shouldFailMatchPolicyIfNumberMissing() {
+        String password = "Password";
+        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
+        assertFalse(validator.isValid(password, context));
+    }
+
+    @Test
+    public void shouldFailMatchPolicyIfLowerCaseMissing() {
+        String password = "PASSWORD123";
+        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
+        assertFalse(validator.isValid(password, context));
+    }
+
+    @Test
+    public void shouldFailMatchPolicyIfUpperCaseMissing() {
+        String password = "password123";
+        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
+        assertFalse(validator.isValid(password, context));
+    }
+
+    @Test
+    public void shouldFailMatchPolicyIfCharacterMissing() {
+        String password = "1234567890";
+        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
+        assertFalse(validator.isValid(password, context));
+    }
+
+    @Test
+    public void shouldFailMatchPolicyIfLessThan8Characters() {
+        String password = "Passwo1";
         ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
         assertFalse(validator.isValid(password, context));
     }
