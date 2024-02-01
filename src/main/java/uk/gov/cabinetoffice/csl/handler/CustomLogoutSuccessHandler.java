@@ -28,7 +28,7 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler im
         //TODO: Check authentication object if it has uid, if yes then delete the token entries from DB
         Jwt principal = (Jwt) authentication.getPrincipal();
         String principalName = principal.getClaim("user_name");
-        long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
+        Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
         log.info("{} Oauth2Authorization are deleted for user {}", l, principalName);
         String redirectUrl = request.getParameter("returnTo");
         response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));

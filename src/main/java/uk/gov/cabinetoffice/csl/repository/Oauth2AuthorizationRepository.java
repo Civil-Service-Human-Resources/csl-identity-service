@@ -7,5 +7,5 @@ import uk.gov.cabinetoffice.csl.domain.Oauth2Authorization;
 @Repository
 public interface Oauth2AuthorizationRepository extends CrudRepository<Oauth2Authorization, Long> {
 
-    long deleteByPrincipalName(String principalName);
+    Long deleteByPrincipalName(String principalName);
 }
