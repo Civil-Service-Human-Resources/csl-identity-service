@@ -33,7 +33,7 @@
       <env name="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
       <env name="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
       <env name="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
-      <env name="PASSWORD_PATTERN" value="(?!([a-zA-Z]*|[a-z\d]*|[^A-Z\d]*|[A-Z\d]*|[^a-z\d]*|[^a-zA-Z]*)$).{8,}" />
+      <env name="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
       <env name="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
       <env name="REDIS_CACHE_NULL_VALUES" value="false" />
       <env name="REDIS_CACHE_TTL_MS" value="86400000" />
