@@ -18,9 +18,10 @@
               <entry key="CLIENT_SECRET" value="test" />
               <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
               <entry key="DATABASE_NAME" value="csl_identity" />
-              <entry key="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=false" />
+              <entry key="DATABASE_USESSL" value="false" />
               <entry key="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
               <entry key="DATASOURCE_PASSWORD" value="password" />
+              <entry key="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
               <entry key="DATASOURCE_USERNAME" value="root" />
               <entry key="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
               <entry key="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />

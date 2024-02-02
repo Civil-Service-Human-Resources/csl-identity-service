@@ -13,9 +13,10 @@
       <env name="CLIENT_SECRET" value="test" />
       <env name="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
       <env name="DATABASE_NAME" value="csl_identity" />
-      <env name="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=false" />
+      <env name="DATABASE_USESSL" value="false" />
       <env name="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
       <env name="DATASOURCE_PASSWORD" value="password" />
+      <env name="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
       <env name="DATASOURCE_USERNAME" value="root" />
       <env name="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
       <env name="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
