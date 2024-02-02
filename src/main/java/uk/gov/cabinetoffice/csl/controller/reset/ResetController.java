@@ -32,21 +32,21 @@ public class ResetController {
 
     private final ResetFormValidator resetFormValidator;
 
-    private final String lpgUiUrl;
+    private final String lpgUiSignOutUrl;
 
     private final int validityInSeconds;
 
     public ResetController(ResetService resetService, UserService userService,
                            ResetRepository resetRepository, IdentityRepository identityRepository,
                            ResetFormValidator resetFormValidator,
-                           @Value("${lpg.uiUrl}") String lpgUiUrl,
+                           @Value("${lpg.uiSignOutUrl}") String lpgUiSignOutUrl,
                            @Value("${reset.validityInSeconds}") int validityInSeconds) {
         this.resetService = resetService;
         this.userService = userService;
         this.resetRepository = resetRepository;
         this.identityRepository = identityRepository;
         this.resetFormValidator = resetFormValidator;
-        this.lpgUiUrl = lpgUiUrl;
+        this.lpgUiSignOutUrl = lpgUiSignOutUrl;
         this.validityInSeconds = validityInSeconds;
     }
 
@@ -114,7 +114,7 @@ public class ResetController {
             userService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyOfSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
-            model.addAttribute("lpgUiUrl", lpgUiUrl);
+            model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
             return "reset/passwordReset";
         }
         return result;

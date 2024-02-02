@@ -411,7 +411,7 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Password reset complete")))
                 .andExpect(content().string(containsString("Your new password has been changed")))
                 .andExpect(content().string(containsString("What happens next?")))
-                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiUrl"))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiSignOutUrl"))
                 .andDo(print());
     }
 
