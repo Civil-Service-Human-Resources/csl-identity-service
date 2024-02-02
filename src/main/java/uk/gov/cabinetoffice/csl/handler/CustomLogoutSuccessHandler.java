@@ -25,8 +25,10 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler im
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
+        log.info("CustomLogoutSuccessHandler: authentication: {}", authentication);
         Jwt principal = (Jwt) authentication.getPrincipal();
         String principalName = principal.getClaim("user_name");
+        log.info("CustomLogoutSuccessHandler: principalName: {}", principalName);
         Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
         log.info("{} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
         String redirectUrl = request.getParameter("returnTo");
