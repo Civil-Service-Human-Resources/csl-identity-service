@@ -35,13 +35,12 @@ public class CustomCookieAndAuth2TokenClearingLogoutHandler implements LogoutHan
         log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: authentication: {}", authentication);
         if (authentication != null) {
             String principalName = null;
-            if (authentication.getPrincipal() instanceof Jwt) {
-                Jwt principal = (Jwt) authentication.getPrincipal();
-                principalName = principal.getClaim("user_name");
-            }
             if (authentication.getPrincipal() instanceof IdentityDetails) {
                 IdentityDetails principal = (IdentityDetails) authentication.getPrincipal();
                 principalName = principal.getUsername();
+            } else if (authentication.getPrincipal() instanceof Jwt) {
+                Jwt principal = (Jwt) authentication.getPrincipal();
+                principalName = principal.getClaim("user_name");
             }
             log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: principalName: {}", principalName);
             if (isNotBlank(principalName)) {
