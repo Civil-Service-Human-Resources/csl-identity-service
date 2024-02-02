@@ -95,9 +95,9 @@ public class SecurityConfig {
 			.logout(logout -> {
 				logout
 					.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+					.addLogoutHandler(customCookieClearingLogoutHandler)
 					.clearAuthentication(true)
 					.invalidateHttpSession(true)
-					.addLogoutHandler(customCookieClearingLogoutHandler)
 					.logoutSuccessHandler(customLogoutSuccessHandler);
 			})
 			.exceptionHandling(exceptions -> exceptions
