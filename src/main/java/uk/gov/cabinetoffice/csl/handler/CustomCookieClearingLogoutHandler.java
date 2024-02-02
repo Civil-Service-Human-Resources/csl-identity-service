@@ -26,13 +26,14 @@ public class CustomCookieClearingLogoutHandler implements LogoutHandler {
             Cookie cookieToDelete = new Cookie(cookieName, null);
             cookieToDelete.setMaxAge(0);
             response.addCookie(cookieToDelete);
-
             log.info("CustomCookieClearingLogoutHandler: authentication: {}", authentication);
-            Jwt principal = (Jwt) authentication.getPrincipal();
-            String principalName = principal.getClaim("user_name");
-            log.info("CustomCookieClearingLogoutHandler: principalName: {}", principalName);
-            Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
-            log.info("CustomCookieClearingLogoutHandler: {} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
+            if(authentication != null) {
+                Jwt principal = (Jwt) authentication.getPrincipal();
+                String principalName = principal.getClaim("user_name");
+                log.info("CustomCookieClearingLogoutHandler: principalName: {}", principalName);
+                Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
+                log.info("CustomCookieClearingLogoutHandler: {} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
+            }
         }
     }
 }
