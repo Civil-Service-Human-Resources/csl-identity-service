@@ -20,12 +20,12 @@ import uk.gov.cabinetoffice.csl.service.UserService;
 public class UpdatePasswordController {
 
     private final UserService userService;
-    private final String lpgUiUrl;
+    private final String lpgUiSignOutUrl;
 
     public UpdatePasswordController(UserService userService,
-                                    @Value("${lpg.uiUrl}") String lpgUiUrl) {
+                                    @Value("${lpg.uiSignOutUrl}") String lpgUiSignOutUrl) {
         this.userService = userService;
-        this.lpgUiUrl = lpgUiUrl;
+        this.lpgUiSignOutUrl = lpgUiSignOutUrl;
     }
 
     @GetMapping
@@ -51,7 +51,7 @@ public class UpdatePasswordController {
 
     @GetMapping("/passwordUpdated")
     public String passwordUpdated(Model model) {
-        model.addAttribute("lpgUiUrl", lpgUiUrl);
+        model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
         return "account/passwordUpdated";
     }
 }
