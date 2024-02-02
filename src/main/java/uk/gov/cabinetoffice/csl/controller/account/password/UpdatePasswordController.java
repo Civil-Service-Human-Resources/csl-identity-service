@@ -1,7 +1,6 @@
 package uk.gov.cabinetoffice.csl.controller.account.password;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,18 +13,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.UserService;
 
-@Slf4j
 @Controller
 @RequestMapping("/account/password")
 public class UpdatePasswordController {
 
-    private final UserService userService;
-    private final String lpgUiSignOutUrl;
+    @Value("${lpg.uiSignOutUrl}")
+    private String lpgUiSignOutUrl;
 
-    public UpdatePasswordController(UserService userService,
-                                    @Value("${lpg.uiSignOutUrl}") String lpgUiSignOutUrl) {
+    private final UserService userService;
+
+    public UpdatePasswordController(UserService userService) {
         this.userService = userService;
-        this.lpgUiSignOutUrl = lpgUiSignOutUrl;
     }
 
     @GetMapping

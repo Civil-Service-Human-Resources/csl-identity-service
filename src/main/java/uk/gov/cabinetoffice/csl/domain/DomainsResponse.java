@@ -9,10 +9,10 @@ import java.util.Map;
 @Data
 public class DomainsResponse {
 
+    private List<Domain> domains;
+
     @JsonProperty("_embedded")
     public void setDomains(Map<String, List<Domain>> embeddedDomains) {
         this.domains = embeddedDomains.get("domains");
     }
-
-    private List<Domain> domains;
 }

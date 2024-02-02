@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class TextEncryptionUtils {
+
     public static String getEncryptedText(String rawText, String encryptionKey)
             throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException,
             IllegalBlockSizeException, BadPaddingException {

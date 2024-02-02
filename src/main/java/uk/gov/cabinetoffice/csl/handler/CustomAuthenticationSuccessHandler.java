@@ -29,10 +29,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         this.setDefaultTargetUrl(authenticationSuccessTargetUrl);
         if (authentication != null) {
-            if (authentication.getPrincipal() != null) {
-                if (authentication.getPrincipal() instanceof IdentityDetails identityDetails){
+            if (authentication.getPrincipal() != null
+                    && authentication.getPrincipal() instanceof IdentityDetails identityDetails){
                     userService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
-                }
             }
         }
         super.onAuthenticationSuccess(request, response, authentication);

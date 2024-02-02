@@ -8,6 +8,7 @@ import uk.gov.cabinetoffice.csl.validation.annotation.MatchesPolicy;
 
 @Component
 public class MatchesPolicyValidator implements ConstraintValidator<MatchesPolicy, String> {
+
    private final String passwordPattern;
 
    public MatchesPolicyValidator(@Value("${accountValidation.passwordPattern}") String passwordPattern) {

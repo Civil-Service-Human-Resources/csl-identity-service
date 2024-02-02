@@ -51,6 +51,12 @@ public class SignupController {
 
     private static final String LPG_UI_URL = "lpgUiUrl";
 
+    @Value("${lpg.uiUrl}")
+    private String lpgUiUrl;
+
+    @Value("${invite.durationAfterReRegAllowedInSeconds}")
+    private long durationAfterReRegAllowedInSeconds;
+
     private final InviteService inviteService;
 
     private final UserService userService;
@@ -61,25 +67,16 @@ public class SignupController {
 
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
-    private final String lpgUiUrl;
-
-    private final long durationAfterReRegAllowedInSeconds;
-
     public SignupController(InviteService inviteService,
                             UserService userService,
                             ICivilServantRegistryClient civilServantRegistryClient,
                             InviteRepository inviteRepository,
-                            AgencyTokenCapacityService agencyTokenCapacityService,
-                            @Value("${lpg.uiUrl}") String lpgUiUrl,
-                            @Value("${invite.durationAfterReRegAllowedInSeconds}")
-                            long durationAfterReRegAllowedInSeconds) {
+                            AgencyTokenCapacityService agencyTokenCapacityService) {
         this.inviteService = inviteService;
         this.userService = userService;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.inviteRepository = inviteRepository;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
-        this.lpgUiUrl = lpgUiUrl;
-        this.durationAfterReRegAllowedInSeconds = durationAfterReRegAllowedInSeconds;
     }
 
     @GetMapping(path = "/request")

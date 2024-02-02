@@ -1,5 +1,7 @@
 package uk.gov.cabinetoffice.csl.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -7,15 +9,20 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.Instant;
 
+@NoArgsConstructor
+@JsonDeserialize
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
 @Entity
 @Table(name = "OAUTH2_AUTHORIZATION")
-public class Oauth2Authorization {
+public class Oauth2Authorization implements Serializable {
 
     @Id
     @Size(max = 100)

@@ -35,17 +35,18 @@ public class CustomCookieAndAuth2TokenClearingLogoutHandler implements LogoutHan
         log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: authentication: {}", authentication);
         if (authentication != null) {
             String principalName = null;
-            if (authentication.getPrincipal() instanceof IdentityDetails) {
-                IdentityDetails principal = (IdentityDetails) authentication.getPrincipal();
+            if (authentication.getPrincipal() instanceof IdentityDetails principal) {
+                principal = (IdentityDetails) authentication.getPrincipal();
                 principalName = principal.getUsername();
-            } else if (authentication.getPrincipal() instanceof Jwt) {
-                Jwt principal = (Jwt) authentication.getPrincipal();
+            } else if (authentication.getPrincipal() instanceof Jwt principal) {
+                principal = (Jwt) authentication.getPrincipal();
                 principalName = principal.getClaim("user_name");
             }
             log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: principalName: {}", principalName);
             if (isNotBlank(principalName)) {
                 Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
-                log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: {} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
+                log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: " +
+                        "{} Oauth2Authorization entries deleted from DB for user {}", l, principalName);
             }
         }
     }
