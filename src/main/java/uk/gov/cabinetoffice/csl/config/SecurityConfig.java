@@ -45,16 +45,16 @@ public class SecurityConfig {
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 	private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
-	private final CustomCookieClearingLogoutHandler customCookieClearingLogoutHandler;
+	private final CustomCookieAndAuth2TokenClearingLogoutHandler customCookieAndAuth2TokenClearingLogoutHandler;
 
 	public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
 						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler,
 						  CustomLogoutSuccessHandler customLogoutSuccessHandler,
-						  CustomCookieClearingLogoutHandler customCookieClearingLogoutHandler){
+						  CustomCookieAndAuth2TokenClearingLogoutHandler customCookieAndAuth2TokenClearingLogoutHandler){
 		this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
 		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
 		this.customLogoutSuccessHandler = customLogoutSuccessHandler;
-		this.customCookieClearingLogoutHandler = customCookieClearingLogoutHandler;
+		this.customCookieAndAuth2TokenClearingLogoutHandler = customCookieAndAuth2TokenClearingLogoutHandler;
 	}
 
 	@Bean
@@ -95,7 +95,7 @@ public class SecurityConfig {
 			.logout(logout -> {
 				logout
 					.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-					.addLogoutHandler(customCookieClearingLogoutHandler)
+					.addLogoutHandler(customCookieAndAuth2TokenClearingLogoutHandler)
 					.clearAuthentication(true)
 					.invalidateHttpSession(true)
 					.logoutSuccessHandler(customLogoutSuccessHandler);

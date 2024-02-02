@@ -17,7 +17,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Slf4j
 @AllArgsConstructor
 @Configuration
-public class CustomCookieClearingLogoutHandler implements LogoutHandler {
+public class CustomCookieAndAuth2TokenClearingLogoutHandler implements LogoutHandler {
 
     private final Oauth2AuthorizationRepository oauth2AuthorizationRepository;
 
@@ -26,13 +26,13 @@ public class CustomCookieClearingLogoutHandler implements LogoutHandler {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 String cookieName = cookie.getName();
-                log.info("CustomCookieClearingLogoutHandler.cookieName: {}", cookieName);
+                log.info("CustomCookieAndAuth2TokenClearingLogoutHandler.cookieName: {}", cookieName);
                 Cookie cookieToDelete = new Cookie(cookieName, null);
                 cookieToDelete.setMaxAge(0);
                 response.addCookie(cookieToDelete);
             }
         }
-        log.info("CustomCookieClearingLogoutHandler: authentication: {}", authentication);
+        log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: authentication: {}", authentication);
         if (authentication != null) {
             String principalName = null;
             if (authentication.getPrincipal() instanceof Jwt) {
@@ -43,10 +43,10 @@ public class CustomCookieClearingLogoutHandler implements LogoutHandler {
                 IdentityDetails principal = (IdentityDetails) authentication.getPrincipal();
                 principalName = principal.getUsername();
             }
-            log.info("CustomCookieClearingLogoutHandler: principalName: {}", principalName);
+            log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: principalName: {}", principalName);
             if (isNotBlank(principalName)) {
                 Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
-                log.info("CustomCookieClearingLogoutHandler: {} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
+                log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: {} Oauth2Authorization entries are deleted from DB for user {}", l, principalName);
             }
         }
     }
