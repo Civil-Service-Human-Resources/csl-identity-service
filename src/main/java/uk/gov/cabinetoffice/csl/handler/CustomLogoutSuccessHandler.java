@@ -19,9 +19,11 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler im
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
-        log.info("CustomLogoutSuccessHandler.onLogoutSuccess: Invoked");
+        log.info("CustomLogoutSuccessHandler.onLogoutSuccess: Invoking");
         String redirectUrl = request.getParameter("returnTo");
         response.sendRedirect(Objects.requireNonNullElse(redirectUrl, "/login"));
+        request.logout();
         super.onLogoutSuccess(request, response, authentication);
+        log.info("CustomLogoutSuccessHandler.onLogoutSuccess: Invoked");
     }
 }
