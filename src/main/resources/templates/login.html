@@ -36,6 +36,11 @@
                          aria-labelledby="error-summary-heading-example-1" tabindex="-1">
                         You have been logged out.
                     </div>
+                    <div th:if="${param.passwordUpdated}" class="error-summary" role="alert"
+                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                        Your password has been updated. Please login to continue.
+                        <h3 th:text="${param.passwordUpdated}"> param.passwordUpdated</h3>
+                    </div>
 
                     <h1 class="heading-large">Sign in</h1>
 
