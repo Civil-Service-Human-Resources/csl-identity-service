@@ -26,13 +26,14 @@ public class CustomCookieAndAuth2TokenClearingLogoutHandler implements LogoutHan
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 String cookieName = cookie.getName();
-                log.info("CustomCookieAndAuth2TokenClearingLogoutHandler.cookieName: {}", cookieName);
+                log.debug("CustomCookieAndAuth2TokenClearingLogoutHandler.cookieName: {}", cookieName);
+                log.debug("CustomCookieAndAuth2TokenClearingLogoutHandler.Cookie: {}", cookie);
                 Cookie cookieToDelete = new Cookie(cookieName, null);
                 cookieToDelete.setMaxAge(0);
                 response.addCookie(cookieToDelete);
             }
         }
-        log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: authentication: {}", authentication);
+        log.debug("CustomCookieAndAuth2TokenClearingLogoutHandler: authentication: {}", authentication);
         if (authentication != null) {
             String principalName = null;
             if (authentication.getPrincipal() instanceof IdentityDetails principal) {
@@ -42,10 +43,10 @@ public class CustomCookieAndAuth2TokenClearingLogoutHandler implements LogoutHan
                 principal = (Jwt) authentication.getPrincipal();
                 principalName = principal.getClaim("user_name");
             }
-            log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: principalName: {}", principalName);
+            log.debug("CustomCookieAndAuth2TokenClearingLogoutHandler: principalName: {}", principalName);
             if (isNotBlank(principalName)) {
                 Long l = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
-                log.info("CustomCookieAndAuth2TokenClearingLogoutHandler: " +
+                log.debug("CustomCookieAndAuth2TokenClearingLogoutHandler: " +
                         "{} Oauth2Authorization entries deleted from DB for user {}", l, principalName);
             }
         }
