@@ -15,8 +15,7 @@ public class MatchesPolicyValidator implements ConstraintValidator<MatchesPolicy
       this.passwordPattern = passwordPattern;
    }
 
-   public void initialize(MatchesPolicy constraint) {
-   }
+   public void initialize(MatchesPolicy constraint) {}
 
    public boolean isValid(String value, ConstraintValidatorContext context) {
       return value.matches(passwordPattern);

@@ -45,7 +45,7 @@ public class ResetControllerTest {
     private static final String UID = "uid123";
     private static final Boolean ACTIVE = true;
     private static final Boolean LOCKED = false;
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "Password123";
     private static final Set<Role> ROLES = new HashSet<>();
 
     @Autowired
