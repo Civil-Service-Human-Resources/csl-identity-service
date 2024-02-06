@@ -114,6 +114,7 @@ public class UpdatePasswordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.view().name("account/passwordUpdated"))
                 .andExpect(content().string(containsString("Your password has been updated")))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiSignOutUrl"))
                 .andDo(print());
     }
 }
