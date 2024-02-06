@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
@@ -23,8 +22,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,7 +52,7 @@ public class UpdatePasswordControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("account/updatePassword"))
+                .andExpect(view().name("account/updatePassword"))
                 .andExpect(content().string(containsString("Change your password")))
                 .andExpect(content().string(containsString("Current Password")))
                 .andExpect(content().string(containsString("id=\"password\"")))
@@ -79,7 +77,7 @@ public class UpdatePasswordControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("account/updatePassword"))
+                .andExpect(view().name("account/updatePassword"))
                 .andExpect(content().string(containsString("Change your password")))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("New password fields do not match")))
@@ -100,8 +98,8 @@ public class UpdatePasswordControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/account/password/passwordUpdated"))
-                .andExpect(MockMvcResultMatchers.view().name("redirect:/account/password/passwordUpdated"))
+                .andExpect(redirectedUrl("/account/password/passwordUpdated"))
+                .andExpect(view().name("redirect:/account/password/passwordUpdated"))
                 .andDo(print());
     }
 
@@ -112,9 +110,9 @@ public class UpdatePasswordControllerTest {
                                 .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("account/passwordUpdated"))
+                .andExpect(view().name("account/passwordUpdated"))
                 .andExpect(content().string(containsString("Your password has been updated")))
-                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiSignOutUrl"))
+                .andExpect(model().attributeExists("lpgUiSignOutUrl"))
                 .andDo(print());
     }
 }

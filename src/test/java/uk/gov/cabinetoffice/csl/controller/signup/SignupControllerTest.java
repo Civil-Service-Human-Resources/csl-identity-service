@@ -19,7 +19,6 @@ import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 import uk.gov.cabinetoffice.csl.service.UserService;
-import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 
 import java.util.Date;
 import java.util.Optional;
@@ -36,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.InviteStatus.EXPIRED;
 import static uk.gov.cabinetoffice.csl.domain.InviteStatus.PENDING;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -593,7 +593,6 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/enterToken/" + code))
-                .andExpect(flash().attribute(ApplicationConstants.STATUS_ATTRIBUTE,
-                        ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE));
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE));
     }
 }
