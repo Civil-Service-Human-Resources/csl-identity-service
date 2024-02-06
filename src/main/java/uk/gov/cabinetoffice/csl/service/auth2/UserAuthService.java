@@ -26,9 +26,8 @@ public class UserAuthService implements IUserAuthService {
         Object principal = getAuthentication().getPrincipal();
         if (principal instanceof Jwt jwtPrincipal) {
             return jwtPrincipal;
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override
