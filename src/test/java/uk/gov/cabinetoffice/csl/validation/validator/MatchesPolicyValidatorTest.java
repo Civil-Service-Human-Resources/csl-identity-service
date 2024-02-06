@@ -2,11 +2,13 @@ package uk.gov.cabinetoffice.csl.validation.validator;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+@ActiveProfiles("no-redis")
 public class MatchesPolicyValidatorTest {
     /*
         - 8 or more characters
