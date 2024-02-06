@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -14,6 +13,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
+import uk.gov.cabinetoffice.csl.util.TestUtil;
+import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.doNothing;
@@ -29,12 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("no-redis")
-@WithMockUser(username = "user")
+@WithMockCustomUser
 public class UpdatePasswordControllerTest {
 
+    private static final Long ID = 123L;
+    private static final String UID = "uid123";
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "Password123";
-    private static final String UID = "uid123";
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,8 +66,8 @@ public class UpdatePasswordControllerTest {
     }
 
     @Test
-    public void shouldLoadCheckEmailPageIfIdentityExistsForTheGivenEmailId() throws Exception {
-        Identity identity = createIdentity();
+    public void shouldLoadPasswordResetFormWithPasswordMismatchError() throws Exception {
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
         when(userAuthService.getIdentity()).thenReturn(identity);
         when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
         doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
@@ -73,7 +75,7 @@ public class UpdatePasswordControllerTest {
         mockMvc.perform(post("/account/password")
                         .param("password", PASSWORD)
                         .param("newPassword", PASSWORD)
-                        .param("confirm", "Password")
+                        .param("confirm", "password")
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
@@ -84,14 +86,34 @@ public class UpdatePasswordControllerTest {
                 .andDo(print());
     }
 
-    private Identity createIdentity(){
-        Identity identity = new Identity();
-        identity.setPassword(PASSWORD);
-        identity.setActive(true);
-        identity.setLocked(false);
-        identity.setId(1234L);
-        identity.setEmail(EMAIL);
-        identity.setUid(UID);
-        return identity;
+    @Test
+    public void shouldUpdatePassword() throws Exception {
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        when(userAuthService.getIdentity()).thenReturn(identity);
+        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
+        doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
+
+        mockMvc.perform(post("/account/password")
+                        .param("password", PASSWORD)
+                        .param("newPassword", PASSWORD)
+                        .param("confirm", PASSWORD)
+                        .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/account/password/passwordUpdated"))
+                .andExpect(MockMvcResultMatchers.view().name("redirect:/account/password/passwordUpdated"))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldLoadPasswordUpdatedScreen() throws Exception {
+        mockMvc.perform(
+                        get("/account/password/passwordUpdated")
+                                .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("account/passwordUpdated"))
+                .andExpect(content().string(containsString("Your password has been updated")))
+                .andDo(print());
     }
 }
