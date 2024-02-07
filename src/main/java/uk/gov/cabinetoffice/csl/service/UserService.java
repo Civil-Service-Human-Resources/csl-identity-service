@@ -1,6 +1,8 @@
 package uk.gov.cabinetoffice.csl.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,26 +19,34 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import java.time.Instant;
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Slf4j
 @Service
 @Transactional
 public class UserService implements UserDetailsService {
 
+    private final String updatePasswordEmailTemplateId;
     private final InviteService inviteService;
-    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
+    private final NotifyService notifyService;
     private final IdentityRepository identityRepository;
+    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(InviteService inviteService,
-                       ICivilServantRegistryClient civilServantRegistryClient,
+    public UserService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
+                       InviteService inviteService,
                        AgencyTokenCapacityService agencyTokenCapacityService,
+                       @Qualifier("notifyServiceImpl") NotifyService notifyService,
                        IdentityRepository identityRepository,
+                       ICivilServantRegistryClient civilServantRegistryClient,
                        PasswordEncoder passwordEncoder) {
+        this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.inviteService = inviteService;
-        this.civilServantRegistryClient = civilServantRegistryClient;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.notifyService = notifyService;
         this.identityRepository = identityRepository;
+        this.civilServantRegistryClient = civilServantRegistryClient;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -108,12 +118,18 @@ public class UserService implements UserDetailsService {
         log.debug("New identity email = {} successfully created", identity.getEmail());
     }
 
-    public void updatePassword(Identity identity, String password) {
-        identity.setActive(true);
-        identity.setDeletionNotificationSent(false);
+    public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
         identity.setPassword(passwordEncoder.encode(password));
+        identity.setActive(true);
         identity.setLocked(false);
+        identity.setDeletionNotificationSent(false);
         identityRepository.save(identity);
+    }
+
+    public void updatePasswordAndNotify(Identity identity, String password) {
+        identity.setPassword(passwordEncoder.encode(password));
+        identityRepository.save(identity);
+        notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
     }
 
     public void lockIdentity(String email) {
@@ -140,10 +156,6 @@ public class UserService implements UserDetailsService {
         return emailAddress.substring(emailAddress.indexOf('@') + 1);
     }
 
-    private boolean hasData(String s) {
-        return s != null && s.length() > 0;
-    }
-
     public Identity getIdentityByEmail(String email) {
         return identityRepository.findFirstByEmailEquals(email);
     }
@@ -160,9 +172,9 @@ public class UserService implements UserDetailsService {
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
-        return hasData(tokenRequest.getDomain())
-                && hasData(tokenRequest.getToken())
-                && hasData(tokenRequest.getOrg());
+        return isNotBlank(tokenRequest.getDomain())
+                && isNotBlank(tokenRequest.getToken())
+                && isNotBlank(tokenRequest.getOrg());
     }
 
     private boolean isEmailInvitedViaIDM(String email) {

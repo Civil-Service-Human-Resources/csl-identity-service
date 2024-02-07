@@ -10,18 +10,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.repository.ResetRepository;
 import uk.gov.cabinetoffice.csl.service.ResetService;
+import uk.gov.cabinetoffice.csl.util.TestUtil;
 
-import java.time.Instant;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
@@ -40,13 +36,11 @@ import static uk.gov.cabinetoffice.csl.domain.ResetStatus.RESET;
 @WithMockUser(username = "user")
 public class ResetControllerTest {
 
-    private static final String EMAIL = "test@example.com";
-    private static final String CODE = "abc123";
+    private static final Long ID = 123L;
     private static final String UID = "uid123";
-    private static final Boolean ACTIVE = true;
-    private static final Boolean LOCKED = false;
-    private static final String PASSWORD = "password";
-    private static final Set<Role> ROLES = new HashSet<>();
+    private static final String EMAIL = "test@example.com";
+    private static final String PASSWORD = "Password123";
+    private static final String CODE = "abc123";
 
     @Autowired
     private MockMvc mockMvc;
@@ -67,7 +61,7 @@ public class ResetControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(view().name("reset/requestReset"))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
@@ -83,7 +77,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/checkEmail"))
+                .andExpect(view().name("reset/checkEmail"))
                 .andExpect(content().string(containsString("Now check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
@@ -102,7 +96,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(view().name("reset/requestReset"))
                 .andExpect(content().string(containsString("Invalid email id. Submit the reset request for the valid email id.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
@@ -119,7 +113,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(view().name("reset/requestReset"))
                 .andExpect(content().string(containsString("Invalid reset code. Submit the reset request again.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
@@ -141,7 +135,7 @@ public class ResetControllerTest {
                                 .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(view().name("reset/requestReset"))
                 .andExpect(content().string(containsString("Reset code expired. Submit the reset request again.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
@@ -165,7 +159,7 @@ public class ResetControllerTest {
                                 .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(view().name("reset/requestReset"))
                 .andExpect(content().string(containsString("Reset code is already used. Submit the reset request again.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
@@ -187,7 +181,7 @@ public class ResetControllerTest {
                                 .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(view().name("reset/passwordForm"))
                 .andExpect(content().string(containsString("Create a memorable password for your account.")))
                 .andExpect(content().string(containsString("Your password must have:")))
                 .andExpect(content().string(containsString("8 or more characters")))
@@ -208,8 +202,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
-                Instant.now(), false, "AgencyTokenUid");
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -218,7 +211,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(view().name("reset/passwordForm"))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("Password is invalid")))
                 .andExpect(content().string(containsString("Create a memorable password for your account.")))
@@ -241,8 +234,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
-                Instant.now(), false, "AgencyTokenUid");
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -251,7 +243,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(view().name("reset/passwordForm"))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("Password is invalid")))
                 .andExpect(content().string(containsString("Create a memorable password for your account.")))
@@ -274,8 +266,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
-                Instant.now(), false, "AgencyTokenUid");
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -284,7 +275,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(view().name("reset/passwordForm"))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("Password is invalid")))
                 .andExpect(content().string(containsString("Create a memorable password for your account.")))
@@ -307,8 +298,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
-                Instant.now(), false, "AgencyTokenUid");
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -317,7 +307,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(view().name("reset/passwordForm"))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("Password is invalid")))
                 .andExpect(content().string(containsString("Create a memorable password for your account.")))
@@ -340,8 +330,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
-                Instant.now(), false, "AgencyTokenUid");
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -350,7 +339,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordForm"))
+                .andExpect(view().name("reset/passwordForm"))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("Passwords do not match")))
                 .andExpect(content().string(containsString("Create a memorable password for your account.")))
@@ -380,7 +369,7 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/requestReset"))
+                .andExpect(view().name("reset/requestReset"))
                 .andExpect(content().string(containsString("Invalid reset code. Submit the reset request for the valid email id.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
@@ -397,8 +386,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES,
-                Instant.now(), false, "AgencyTokenUid");
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -407,11 +395,11 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("reset/passwordReset"))
+                .andExpect(view().name("reset/passwordReset"))
                 .andExpect(content().string(containsString("Password reset complete")))
                 .andExpect(content().string(containsString("Your new password has been changed")))
                 .andExpect(content().string(containsString("What happens next?")))
-                .andExpect(MockMvcResultMatchers.model().attributeExists("lpgUiUrl"))
+                .andExpect(model().attributeExists("lpgUiSignOutUrl"))
                 .andDo(print());
     }
 

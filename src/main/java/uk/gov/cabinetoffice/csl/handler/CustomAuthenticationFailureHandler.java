@@ -16,11 +16,8 @@ import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private final String encryptionKey;
-
-    public CustomAuthenticationFailureHandler(@Value("${textEncryption.encryptionKey}") String encryptionKey){
-        this.encryptionKey = encryptionKey;
-    }
+    @Value("${textEncryption.encryptionKey}")
+    private String encryptionKey;
 
     @SneakyThrows
     @Override

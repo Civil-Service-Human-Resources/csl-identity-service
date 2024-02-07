@@ -16,11 +16,17 @@
               <entry key="CIVIL_SERVANT_REGISTRY_SERVICE_URL" value="http://localhost:9002" />
               <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
               <entry key="CLIENT_SECRET" value="test" />
-              <entry key="DATASOURCE" value="jdbc:mysql://localhost:3306/csl_identity?user=root&amp;password=password&amp;useSSL=false" />
+              <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
+              <entry key="DATABASE_NAME" value="csl_identity" />
+              <entry key="DATABASE_USESSL" value="false" />
               <entry key="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
+              <entry key="DATASOURCE_PASSWORD" value="password" />
+              <entry key="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
+              <entry key="DATASOURCE_USERNAME" value="root" />
               <entry key="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
               <entry key="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
               <entry key="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
+              <entry key="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
               <entry key="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
               <entry key="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
               <entry key="INVITE_SIGNUP_URL" value="http://localhost:9005/signup/%s" />
@@ -29,11 +35,12 @@
               <entry key="JPA_OPEN_IN_VIEW" value="false" />
               <entry key="JPA_SHOW_SQL" value="true" />
               <entry key="JWT_KEY" value="bJwXRAslLzOtPywnCqBbQujKBKki44LB" />
+              <entry key="LPG_UI_SIGNOUT_URI" value="/sign-out" />
               <entry key="LPG_UI_URL" value="http:http://localhost:3001" />
               <entry key="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
               <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
               <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
-              <entry key="PASSWORD_PATTERN" value="(?!([a-zA-Z]*|[a-z\d]*|[^A-Z\d]*|[A-Z\d]*|[^a-z\d]*|[^a-zA-Z]*)$).{8,}" />
+              <entry key="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
               <entry key="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
               <entry key="REDIS_CACHE_NULL_VALUES" value="false" />
               <entry key="REDIS_CACHE_TTL_MS" value="86400000" />

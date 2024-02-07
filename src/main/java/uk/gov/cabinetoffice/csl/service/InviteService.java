@@ -86,19 +86,15 @@ public class InviteService {
     public void createNewInviteForEmailAndRoles(String email, Set<Role> roleSet, Identity inviter)
             throws NotificationClientException {
         Invite invite = inviteFactory.create(email, roleSet, inviter);
-
-        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
-
         inviteRepository.save(invite);
+        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
     }
 
     public void sendSelfSignupInvite(String email, boolean isAuthorisedInvite) throws NotificationClientException {
         Invite invite = inviteFactory.createSelfSignUpInvite(email);
         invite.setAuthorisedInvite(isAuthorisedInvite);
-
-        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
-
         inviteRepository.save(invite);
+        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
     }
 
     public boolean isInviteValid(String code) {

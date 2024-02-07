@@ -52,13 +52,17 @@ public class UserServiceTest {
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private final NotifyService notifyService = mock(NotifyService.class);
+
     @BeforeEach
     public void setUp() {
         userService = new UserService(
+                "updatePasswordEmailTemplateId",
                 inviteService,
-                civilServantRegistryClient,
                 agencyTokenCapacityService,
+                notifyService,
                 identityRepository,
+                civilServantRegistryClient,
                 passwordEncoder
         );
         when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowlisted.gov.uk", "example.com"));

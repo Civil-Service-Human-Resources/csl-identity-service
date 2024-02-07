@@ -22,6 +22,12 @@ import uk.gov.service.notify.NotificationClientException;
 @RequestMapping("/reset")
 public class ResetController {
 
+    @Value("${lpg.uiSignOutUrl}")
+    private String lpgUiSignOutUrl;
+
+    @Value("${reset.validityInSeconds}")
+    private int validityInSeconds;
+
     private final ResetService resetService;
 
     private final ResetRepository resetRepository;
@@ -32,22 +38,14 @@ public class ResetController {
 
     private final ResetFormValidator resetFormValidator;
 
-    private final String lpgUiUrl;
-
-    private final int validityInSeconds;
-
     public ResetController(ResetService resetService, UserService userService,
                            ResetRepository resetRepository, IdentityRepository identityRepository,
-                           ResetFormValidator resetFormValidator,
-                           @Value("${lpg.uiUrl}") String lpgUiUrl,
-                           @Value("${reset.validityInSeconds}") int validityInSeconds) {
+                           ResetFormValidator resetFormValidator) {
         this.resetService = resetService;
         this.userService = userService;
         this.resetRepository = resetRepository;
         this.identityRepository = identityRepository;
         this.resetFormValidator = resetFormValidator;
-        this.lpgUiUrl = lpgUiUrl;
-        this.validityInSeconds = validityInSeconds;
     }
 
     @GetMapping
@@ -111,10 +109,10 @@ public class ResetController {
                 return "reset/requestReset";
             }
 
-            userService.updatePassword(identity, resetForm.getPassword());
+            userService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyOfSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
-            model.addAttribute("lpgUiUrl", lpgUiUrl);
+            model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
             return "reset/passwordReset";
         }
         return result;
@@ -157,7 +155,6 @@ public class ResetController {
     }
 
     private String resetValidityMessage() {
-        log.debug("validityInSeconds: {}", validityInSeconds);
         int hours = validityInSeconds / 3600;
         String resetValidityMessage = "The link will expire in %s";
         if(hours < 1) {
@@ -166,7 +163,6 @@ public class ResetController {
         } else {
             resetValidityMessage = resetValidityMessage.formatted(String.format("%02d", hours) + " hours.");
         }
-        log.debug("resetValidityMessage: {}", resetValidityMessage);
         return resetValidityMessage;
     }
 }
