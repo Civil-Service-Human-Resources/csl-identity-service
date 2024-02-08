@@ -40,6 +40,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                             getEncryptedText(request.getParameter("username"), encryptionKey));
             default -> {
                 //TODO:
+                // Call UserAuthService.getIdentity() and debug to see if it returns Identity
                 // Increase number of failed attempt in the identity DB table
                 // If number of failed attempt reached the threshold then show the locked error message to the user
                 // response.sendRedirect("/login?error=locked");
