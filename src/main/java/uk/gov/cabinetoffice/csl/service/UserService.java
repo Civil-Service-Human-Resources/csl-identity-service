@@ -149,10 +149,29 @@ public class UserService implements UserDetailsService {
         return identityRepository.existsByEmail(email);
     }
 
-    public Identity setLastLoggedIn(Instant datetime, Identity identity) {
-        identity.setLastLoggedIn(datetime);
+    public Identity loginSucceeded(Identity identity) {
+        identity.setLastLoggedIn(Instant.now());
         identity.setFailedLoginAttempts(0);
         return identityRepository.save(identity);
+    }
+
+    public void loginFailed(String email) {
+        log.info("UserService:loginFailed: {}", email);
+        //TODO: implement below code
+        // 1. fetch the identity from DB for the given email id
+        // 2. check if identity is not null
+        // 3. increase the failedLoginAttempts in identity
+        // 4. check if failedLoginAttempts is equal or more than the account.lockout.maxLoginAttempts
+        // 5. if yes for 3 then set locked to true in identity
+        // 6. save the identity
+        // 7. if identity is locked then throw AuthenticationException("User account is locked")
+//        if (existsByEmail(email)) {
+//            incrementAttempts(email);
+//            if (areAttemptsMoreThanAllowedLimit(email)) {
+//                lockIdentity(email);
+//                throw new AuthenticationException("User account is locked") {};
+//            }
+//        }
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {
