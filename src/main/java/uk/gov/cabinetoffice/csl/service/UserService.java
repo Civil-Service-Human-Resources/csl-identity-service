@@ -111,7 +111,8 @@ public class UserService implements UserDetailsService {
                 newRoles,
                 Instant.now(),
                 false,
-                agencyTokenUid);
+                agencyTokenUid,
+                0);
 
         identityRepository.save(identity);
 

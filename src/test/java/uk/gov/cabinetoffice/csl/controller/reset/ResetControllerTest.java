@@ -202,7 +202,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -234,7 +234,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -266,7 +266,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -298,7 +298,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -330,7 +330,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
@@ -386,7 +386,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
         when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)

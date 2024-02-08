@@ -11,14 +11,18 @@ import java.util.Set;
 public class TestUtil {
 
     public static IdentityDetails createIdentityDetails(Long id, String uid, String email, String password) {
-        return new IdentityDetails(createIdentity(id, uid, email, password));
+        return new IdentityDetails(createIdentity(id, uid, email, password, "agencyTokenUid"));
     }
 
-    public static Identity createIdentity(Long id, String uid, String email, String password) {
-        Identity identity = new Identity(uid, email, password, true, false, createRoles(),
-                Instant.now(), false, "AgencyTokenUid");
+    public static Identity createIdentity(Long id, String uid, String email, String password, String agencyTokenUid) {
+        Identity identity = createIdentity(uid, email, password, agencyTokenUid);
         identity.setId(id);
         return identity;
+    }
+
+    public static Identity createIdentity(String uid, String email, String password, String agencyTokenUid) {
+        return new Identity(uid, email, password, true, false, createRoles(),
+                Instant.now(), false, agencyTokenUid, 0);
     }
 
     public static Set<Role> createRoles() {

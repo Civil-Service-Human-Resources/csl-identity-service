@@ -43,9 +43,6 @@ public class Identity implements Serializable {
     @Column
     private boolean locked;
 
-    @Column
-    private Integer failedLoginAttempts;
-
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "identity_role",
@@ -63,8 +60,11 @@ public class Identity implements Serializable {
     @Column
     private String agencyTokenUid;
 
+    @Column
+    private Integer failedLoginAttempts;
+
     public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles,
-                    Instant lastLoggedIn, boolean deletionNotificationSent) {
+                    Instant lastLoggedIn, boolean deletionNotificationSent, Integer failedLoginAttempts) {
         this.uid = uid;
         this.email = email;
         this.password = password;
@@ -73,10 +73,11 @@ public class Identity implements Serializable {
         this.roles = roles;
         this.lastLoggedIn = lastLoggedIn;
         this.deletionNotificationSent = deletionNotificationSent;
+        this.failedLoginAttempts = failedLoginAttempts;
     }
 
     public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles,
-                    Instant lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid) {
+                    Instant lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid, Integer failedLoginAttempts) {
         this.uid = uid;
         this.email = email;
         this.password = password;
@@ -86,6 +87,7 @@ public class Identity implements Serializable {
         this.lastLoggedIn = lastLoggedIn;
         this.deletionNotificationSent = deletionNotificationSent;
         this.agencyTokenUid = agencyTokenUid;
+        this.failedLoginAttempts = failedLoginAttempts;
     }
 
     @Override
@@ -98,6 +100,7 @@ public class Identity implements Serializable {
                 ", locked=" + locked +
                 ", deletionNotificationSent=" + deletionNotificationSent +
                 ", agencyTokenUid=" + agencyTokenUid +
+                ", failedLoginAttempts=" + failedLoginAttempts +
                 '}';
     }
 
