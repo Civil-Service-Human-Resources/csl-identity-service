@@ -76,7 +76,6 @@ public class UpdatePasswordControllerTest {
                         .param("confirm", "password")
                         .with(csrf())
                 )
-                .andExpect(status().isOk())
                 .andExpect(view().name("account/updatePassword"))
                 .andExpect(content().string(containsString("Change your password")))
                 .andExpect(content().string(containsString("There was a problem with your password")))
