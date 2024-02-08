@@ -10,9 +10,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import uk.gov.service.notify.NotificationClient;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @SpringBootApplication
 @EnableCaching
 @EnableScheduling
@@ -27,11 +24,6 @@ public class CslIdentityService {
 		LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
 		bean.setValidationMessageSource(messageSource);
 		return bean;
-	}
-
-	@Bean(name = "loginAttemptCache")
-	public Map<String, Integer> loginAttemptCache() {
-		return new HashMap<>();
 	}
 
 	@Bean

@@ -37,9 +37,14 @@ public class Identity implements Serializable {
     @Column(length = 100)
     private String password;
 
+    @Column
     private boolean active;
 
+    @Column
     private boolean locked;
+
+    @Column
+    private Integer failedLoginAttempts;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
@@ -49,8 +54,10 @@ public class Identity implements Serializable {
     )
     private Set<Role> roles;
 
+    @Column
     private Instant lastLoggedIn;
 
+    @Column
     private boolean deletionNotificationSent;
 
     @Column

@@ -33,6 +33,7 @@ public class Reset {
     @Column(nullable = false)
     private Date requestedAt;
 
+    @Column
     private Date resetAt;
 
     @Column(length = 150, nullable = false)

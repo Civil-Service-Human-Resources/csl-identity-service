@@ -35,6 +35,7 @@ public class Invite implements Serializable {
     @Column(nullable = false)
     private Date invitedAt;
 
+    @Column
     private Date acceptedAt;
 
     @Column(length = 150, nullable = false)
@@ -47,6 +48,7 @@ public class Invite implements Serializable {
     )
     private Set<Role> forRoles;
 
+    @Column
     private boolean isAuthorisedInvite = true;
 
     @Override
