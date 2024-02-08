@@ -27,13 +27,13 @@ public class TestUtil {
 
     public static Set<Role> createRoles() {
         Set<Role> roles = new HashSet<>();
-        roles.add(new Role("LEARNER", "Learner"));
-        roles.add(new Role("LEARNING_MANAGER", "Learning Manager"));
-        roles.add(new Role("IDENTITY_MANAGER", "Identity Manager"));
-        roles.add(new Role("CSHR_REPORTER", "CSHR Reporter"));
-        roles.add(new Role("DOWNLOAD_BOOKING_FEED", "Download Booking Feed"));
-        roles.add(new Role("ORGANISATION_MANAGER", "Organisation Manager"));
-        roles.add(new Role("PROFESSION_MANAGER", "Profession Manager"));
+        roles.add(new Role(1L, "LEARNER", "Learner"));
+        roles.add(new Role(2L, "LEARNING_MANAGER", "Learning Manager"));
+        roles.add(new Role(3L, "IDENTITY_MANAGER", "Identity Manager"));
+        roles.add(new Role(4L, "CSHR_REPORTER", "CSHR Reporter"));
+        roles.add(new Role(5L, "DOWNLOAD_BOOKING_FEED", "Download Booking Feed"));
+        roles.add(new Role(6L, "ORGANISATION_MANAGER", "Organisation Manager"));
+        roles.add(new Role(7L, "PROFESSION_MANAGER", "Profession Manager"));
         return roles;
     }
 }

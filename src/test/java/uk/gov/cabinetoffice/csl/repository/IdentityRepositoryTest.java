@@ -7,10 +7,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
+import uk.gov.cabinetoffice.csl.util.TestUtil;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -178,7 +177,6 @@ public class IdentityRepositoryTest {
     }
 
     private Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
-        return new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false,
-                new HashSet<>(), Instant.now(), false, agencyTokenUid, 0);
+        return TestUtil.createIdentity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, agencyTokenUid);
     }
 }
