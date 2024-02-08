@@ -9,7 +9,7 @@
             <map>
               <entry key="ACCESS_TOKEN_SCOPE" value="openid, read, write" />
               <entry key="ACCESS_TOKEN_TTL_SECONDS" value="43200" />
-              <entry key="ACCOUNT_LOCKOUT_MAX_ATTEMPT" value="12" />
+              <entry key="ACCOUNT_LOCKOUT_MAX_LOGIN_ATTEMPTS" value="5" />
               <entry key="ALLOWLIST_DOMAINS_TTL_MS" value="10800000" />
               <entry key="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
               <entry key="AUTHENTICATION_SUCCESS_TARGET_URL" value="http://localhost:3001" />
