@@ -120,11 +120,11 @@ public class UserService implements UserDetailsService {
     }
 
     public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
-        //TODO: set the number of failed attempt to zero in the identity DB table
         identity.setPassword(passwordEncoder.encode(password));
         identity.setActive(true);
         identity.setLocked(false);
         identity.setDeletionNotificationSent(false);
+        identity.setFailedLoginAttempts(0);
         identityRepository.save(identity);
     }
 
@@ -151,6 +151,7 @@ public class UserService implements UserDetailsService {
 
     public Identity setLastLoggedIn(Instant datetime, Identity identity) {
         identity.setLastLoggedIn(datetime);
+        identity.setFailedLoginAttempts(0);
         return identityRepository.save(identity);
     }
 
