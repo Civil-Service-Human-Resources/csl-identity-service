@@ -31,7 +31,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         if (authentication != null) {
             if (authentication.getPrincipal() != null
                     && authentication.getPrincipal() instanceof IdentityDetails identityDetails){
-                    userService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
+                //TODO:
+                // set the number of failed attempt to zero in the identity DB table
+                // along with the setLastLoggedIn date and time
+                userService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
             }
         }
         super.onAuthenticationSuccess(request, response, authentication);

@@ -91,11 +91,7 @@ public class ResetService {
         }
 
         if(reset == null) {
-            reset = new Reset();
-            reset.setEmail(email);
-            reset.setRequestedAt(new Date());
-            reset.setResetStatus(ResetStatus.PENDING);
-            reset.setCode(RandomStringUtils.random(40, true, true));
+            reset = createPendingReset(email);
         }
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
@@ -106,5 +102,14 @@ public class ResetService {
         reset.setResetStatus(ResetStatus.RESET);
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
+    }
+
+    private Reset createPendingReset(String email) {
+        Reset reset = new Reset();
+        reset.setEmail(email);
+        reset.setRequestedAt(new Date());
+        reset.setResetStatus(ResetStatus.PENDING);
+        reset.setCode(RandomStringUtils.random(40, true, true));
+        return reset;
     }
 }

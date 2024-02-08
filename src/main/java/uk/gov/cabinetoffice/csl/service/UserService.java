@@ -119,6 +119,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
+        //TODO: set the number of failed attempt to zero in the identity DB table
         identity.setPassword(passwordEncoder.encode(password));
         identity.setActive(true);
         identity.setLocked(false);
