@@ -115,6 +115,21 @@ public class UserService implements UserDetailsService {
         log.debug("New identity email = {} successfully created", email);
     }
 
+    @ReadOnlyProperty
+    public boolean isIdentityExistsForEmail(String email) {
+        return identityRepository.existsByEmailIgnoreCase(email);
+    }
+
+    public Identity getIdentityForEmail(String email) {
+        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
+    }
+
+    public Identity getIdentityForEmailAndActiveFalse(String email) {
+        return identityRepository
+                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
+                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
+    }
+
     public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
         identity.setPassword(passwordEncoder.encode(password));
         identity.setActive(true);
@@ -133,21 +148,6 @@ public class UserService implements UserDetailsService {
     public boolean checkPassword(String username, String password) {
         Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
         return passwordEncoder.matches(password, identity.getPassword());
-    }
-
-    @ReadOnlyProperty
-    public boolean isIdentityExistsForEmail(String email) {
-        return identityRepository.existsByEmailIgnoreCase(email);
-    }
-
-    public Identity getIdentityForEmail(String email) {
-        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
-    }
-
-    public Identity getIdentityForEmailAndActiveFalse(String email) {
-        return identityRepository
-                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
-                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
     }
 
     public Identity loginSucceeded(Identity identity) {
