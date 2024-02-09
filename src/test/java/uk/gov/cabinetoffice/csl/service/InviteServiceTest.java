@@ -98,13 +98,13 @@ public class InviteServiceTest {
 
     @Test
     public void shouldReturnTrueIfEmailInvited() {
-        when(inviteRepository.existsByForEmailAndInviterIdIsNotNull(EMAIL)).thenReturn(true);
+        when(inviteRepository.existsByForEmailIgnoreCaseAndInviterIdIsNotNull(EMAIL)).thenReturn(true);
         assertTrue(inviteService.isEmailInvited(EMAIL));
     }
 
     @Test
     public void shouldReturnFalseIfEmailNotInvited() {
-        when(inviteRepository.existsByForEmailAndInviterIdIsNotNull(EMAIL)).thenReturn(false);
+        when(inviteRepository.existsByForEmailIgnoreCaseAndInviterIdIsNotNull(EMAIL)).thenReturn(false);
         assertFalse(inviteService.isEmailInvited(EMAIL));
     }
 }

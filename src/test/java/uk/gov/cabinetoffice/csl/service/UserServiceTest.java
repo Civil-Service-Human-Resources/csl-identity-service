@@ -76,7 +76,7 @@ public class UserServiceTest {
         final Identity identity = new Identity(uid, emailAddress, "password", true, false,
                 emptySet(), Instant.now(), false, null);
 
-        when(identityRepository.findFirstByEmailEquals(emailAddress))
+        when(identityRepository.findFirstByEmailEqualsIgnoreCase(emailAddress))
                 .thenReturn(identity);
 
         IdentityDetails identityDetails = (IdentityDetails) userService.loadUserByUsername(emailAddress);
@@ -91,7 +91,7 @@ public class UserServiceTest {
 
         final String emailAddress = "test@example.org";
 
-        when(identityRepository.findFirstByEmailEquals(emailAddress))
+        when(identityRepository.findFirstByEmailEqualsIgnoreCase(emailAddress))
                 .thenReturn(null);
 
         UsernameNotFoundException thrown = assertThrows(
@@ -104,15 +104,14 @@ public class UserServiceTest {
     public void shouldReturnTrueWhenInvitingAnExistingUser() {
         final String emailAddress = "test@example.org";
 
-        when(identityRepository.existsByEmail(emailAddress))
-                .thenReturn(true);
+        when(identityRepository.existsByEmailIgnoreCase(emailAddress)).thenReturn(true);
 
-        assertThat(userService.existsByEmail("test@example.org"), equalTo(true));
+        assertThat(userService.isIdentityExistsForEmail("test@example.org"), equalTo(true));
     }
 
     @Test
     public void shouldReturnFalseWhenInvitingAnNonExistingUser() {
-        assertThat(userService.existsByEmail("test2@example.org"), equalTo(false));
+        assertThat(userService.isIdentityExistsForEmail("test2@example.org"), equalTo(false));
     }
 
     @Test
@@ -132,7 +131,7 @@ public class UserServiceTest {
 
         TokenRequest tokenRequest = new TokenRequest();
 
-        when(inviteService.findByCode(code)).thenReturn(invite);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         when(passwordEncoder.encode("password")).thenReturn("password");
 
@@ -176,7 +175,7 @@ public class UserServiceTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(uid);
 
-        when(inviteService.findByCode(code)).thenReturn(invite);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenDomain, tokenToken, tokenCode)).thenReturn(Optional.of(agencyToken));
         when(passwordEncoder.encode("password")).thenReturn("password");
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
@@ -198,7 +197,7 @@ public class UserServiceTest {
     public void lockIdentitySetsLockedToTrue() {
         String email = "test-email";
         Identity identity = mock(Identity.class);
-        when(identityRepository.findFirstByActiveTrueAndEmailEquals(email)).thenReturn(identity);
+        when(identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email)).thenReturn(identity);
 
         userService.lockIdentity(email);
 
@@ -214,7 +213,7 @@ public class UserServiceTest {
         when(identity.getUid()).thenReturn(UID);
         when(identity.isActive()).thenReturn(false);
 
-        when(identityRepository.findFirstByActiveFalseAndEmailEquals(EMAIL)).thenReturn(Optional.of(identity));
+        when(identityRepository.findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL)).thenReturn(Optional.of(identity));
 
         Identity actualIdentity = userService.getIdentityByEmailAndActiveFalse(EMAIL);
 
@@ -224,7 +223,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldThrowExceptionIfIdentityNotFound() {
-        doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEquals(EMAIL);
+        doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL);
 
         IdentityNotFoundException thrown = assertThrows(
                 IdentityNotFoundException.class, () -> userService.getIdentityByEmailAndActiveFalse(EMAIL));

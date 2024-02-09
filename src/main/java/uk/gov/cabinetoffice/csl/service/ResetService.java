@@ -45,6 +45,10 @@ public class ResetService {
         this.validityInSeconds = validityInSeconds;
     }
 
+    public Reset getResetByCode(String code) {
+        return resetRepository.findByCode(code);
+    }
+
     public boolean isResetExpired(Reset reset) {
         if(reset.getResetStatus().equals(ResetStatus.EXPIRED) || isResetComplete(reset)) {
             return true;

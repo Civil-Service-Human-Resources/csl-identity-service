@@ -11,8 +11,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
-import uk.gov.cabinetoffice.csl.repository.ResetRepository;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.service.notify.NotificationClientException;
@@ -30,21 +28,14 @@ public class ResetController {
 
     private final ResetService resetService;
 
-    private final ResetRepository resetRepository;
-
-    private final IdentityRepository identityRepository;
-
     private final UserService userService;
 
     private final ResetFormValidator resetFormValidator;
 
     public ResetController(ResetService resetService, UserService userService,
-                           ResetRepository resetRepository, IdentityRepository identityRepository,
                            ResetFormValidator resetFormValidator) {
         this.resetService = resetService;
         this.userService = userService;
-        this.resetRepository = resetRepository;
-        this.identityRepository = identityRepository;
         this.resetFormValidator = resetFormValidator;
     }
 
@@ -56,7 +47,7 @@ public class ResetController {
     @PostMapping
     public String requestReset(@RequestParam(value = "email") String email, Model model) throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
-        if (identityRepository.existsByEmail(email)) {
+        if (userService.isIdentityExistsForEmail(email)) {
             resetService.notifyForResetRequest(email);
             log.info("Reset request email sent to {}", email);
             model.addAttribute("resetValidityMessage", resetValidityMessage());
@@ -72,7 +63,7 @@ public class ResetController {
     public String loadResetForm(@PathVariable(value = "code") String code, Model model) {
         log.debug("User on reset screen with code {}", code);
 
-        Reset reset = resetRepository.findByCode(code);
+        Reset reset = resetService.getResetByCode(code);
         String checkResetValidityResult = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(checkResetValidityResult)) {
@@ -97,11 +88,11 @@ public class ResetController {
             return "reset/passwordForm";
         }
 
-        Reset reset = resetRepository.findByCode(code);
+        Reset reset = resetService.getResetByCode(code);
         String result = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(result)) {
-            Identity identity = identityRepository.findFirstByEmailEquals(reset.getEmail());
+            Identity identity = userService.getIdentityByEmail(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
                 log.info("Identity does not exist for email {} which is retrieved using Reset code {}", reset.getEmail(), code);

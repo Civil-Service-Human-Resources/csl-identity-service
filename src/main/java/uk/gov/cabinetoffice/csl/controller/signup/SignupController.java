@@ -16,7 +16,6 @@ import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;
 import uk.gov.cabinetoffice.csl.domain.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
-import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
@@ -63,19 +62,15 @@ public class SignupController {
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
-    private final InviteRepository inviteRepository;
-
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
     public SignupController(InviteService inviteService,
                             UserService userService,
                             ICivilServantRegistryClient civilServantRegistryClient,
-                            InviteRepository inviteRepository,
                             AgencyTokenCapacityService agencyTokenCapacityService) {
         this.inviteService = inviteService;
         this.userService = userService;
         this.civilServantRegistryClient = civilServantRegistryClient;
-        this.inviteRepository = inviteRepository;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
     }
 
@@ -97,7 +92,7 @@ public class SignupController {
         }
 
         final String email = form.getEmail();
-        Optional<Invite> pendingInvite = inviteService.findByForEmailAndStatus(email, InviteStatus.PENDING);
+        Optional<Invite> pendingInvite = inviteService.getInviteForEmailAndStatus(email, InviteStatus.PENDING);
         if(pendingInvite.isPresent()) {
             if (inviteService.isInviteCodeExpired(pendingInvite.get())) {
                 log.info("{} has already been invited", email);
@@ -122,7 +117,7 @@ public class SignupController {
             }
         }
 
-        if (userService.existsByEmail(email)) {
+        if (userService.isIdentityExistsForEmail(email)) {
             log.info("{} is already a user", email);
             redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                     "User already exists with email address " + email);
@@ -161,7 +156,7 @@ public class SignupController {
                 inviteService.updateInviteByCode(code, InviteStatus.EXPIRED);
                 return REDIRECT_SIGNUP_REQUEST;
             } else {
-                Invite invite = inviteRepository.findByCode(code);
+                Invite invite = inviteService.getInviteForCode(code);
 
                 if (!invite.isAuthorisedInvite()) {
                     log.debug("Invite email = {} not yet authorised - redirecting to enter token screen",
@@ -201,12 +196,12 @@ public class SignupController {
                          Model model,
                          RedirectAttributes redirectAttributes) {
         if (signUpFormBindingResult.hasErrors()) {
-            model.addAttribute(INVITE_MODEL, inviteRepository.findByCode(code));
+            model.addAttribute(INVITE_MODEL, inviteService.getInviteForCode(code));
             return SIGNUP_TEMPLATE;
         }
 
         if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
+            Invite invite = inviteService.getInviteForCode(code);
             if (!invite.isAuthorisedInvite()) {
                 return REDIRECT_ENTER_TOKEN + code;
             }
@@ -245,7 +240,7 @@ public class SignupController {
     @GetMapping(path = "/enterToken/{code}")
     public String enterToken(Model model, @PathVariable(value = "code") String code) {
         if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
+            Invite invite = inviteService.getInviteForCode(code);
             if (invite.isAuthorisedInvite()) {
                 return REDIRECT_SIGNUP + code;
             }
@@ -275,7 +270,7 @@ public class SignupController {
         }
 
         if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
+            Invite invite = inviteService.getInviteForCode(code);
 
             final String emailAddress = invite.getForEmail();
             final String domain = userService.getDomainFromEmailAddress(emailAddress);
@@ -293,7 +288,7 @@ public class SignupController {
                         }
 
                         invite.setAuthorisedInvite(true);
-                        inviteRepository.save(invite);
+                        inviteService.saveInvite(invite);
 
                         model.addAttribute(INVITE_MODEL, invite);
 

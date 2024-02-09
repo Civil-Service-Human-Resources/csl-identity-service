@@ -52,7 +52,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Identity identity = identityRepository.findFirstByEmailEquals(username);
+        Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address: " + username);
         } else if (!identity.isActive()) {
@@ -68,13 +68,13 @@ public class UserService implements UserDetailsService {
     }
 
     @ReadOnlyProperty
-    public boolean existsByEmail(String email) {
-        return identityRepository.existsByEmail(email);
+    public boolean isIdentityExistsForEmail(String email) {
+        return identityRepository.existsByEmailIgnoreCase(email);
     }
 
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
     public void createIdentityFromInviteCode(String code, String password, TokenRequest tokenRequest) {
-        Invite invite = inviteService.findByCode(code);
+        Invite invite = inviteService.getInviteForCode(code);
         final String domain = getDomainFromEmailAddress(invite.getForEmail());
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
@@ -135,28 +135,29 @@ public class UserService implements UserDetailsService {
     }
 
     public void lockIdentity(String email) {
-        Identity identity = identityRepository.findFirstByActiveTrueAndEmailEquals(email);
+        Identity identity = identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email);
         identity.setLocked(true);
         identityRepository.save(identity);
     }
 
     public boolean checkPassword(String username, String password) {
-        Identity identity = identityRepository.findFirstByEmailEquals(username);
+        Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
         return passwordEncoder.matches(password, identity.getPassword());
     }
 
-    public boolean checkEmailExists(String email) {
-        return identityRepository.existsByEmail(email);
+    public boolean checkIdentityExistsForEmail(String email) {
+        return identityRepository.existsByEmailIgnoreCase(email);
     }
 
     public Identity loginSucceeded(Identity identity) {
+        log.debug("UserService.loginSucceeded: {}", identity);
         identity.setLastLoggedIn(Instant.now());
         identity.setFailedLoginAttempts(0);
         return identityRepository.save(identity);
     }
 
     public void loginFailed(String email) {
-        log.info("UserService:loginFailed: {}", email);
+        log.debug("UserService:loginFailed: {}", email);
         //TODO: implement below code
         // 1. fetch the identity from DB for the given email id
         // 2. check if identity is not null
@@ -165,6 +166,9 @@ public class UserService implements UserDetailsService {
         // 5. if yes for 3 then set locked to true in identity
         // 6. save the identity
         // 7. if identity is locked then throw AuthenticationException("User account is locked")
+
+        identityRepository.findFirstByEmailEqualsIgnoreCase(email);
+
 //        if (existsByEmail(email)) {
 //            incrementAttempts(email);
 //            if (areAttemptsMoreThanAllowedLimit(email)) {
@@ -179,12 +183,12 @@ public class UserService implements UserDetailsService {
     }
 
     public Identity getIdentityByEmail(String email) {
-        return identityRepository.findFirstByEmailEquals(email);
+        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
     }
 
     public Identity getIdentityByEmailAndActiveFalse(String email) {
         return identityRepository
-                .findFirstByActiveFalseAndEmailEquals(email)
+                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
                 .orElseThrow(
                         () -> new IdentityNotFoundException("Identity not found for email: " + email));
     }

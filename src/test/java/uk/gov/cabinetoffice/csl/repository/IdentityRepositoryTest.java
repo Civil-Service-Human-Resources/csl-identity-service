@@ -33,8 +33,8 @@ public class IdentityRepositoryTest {
         Identity identity = createIdentity();
         identityRepository.save(identity);
 
-        assertThat(identityRepository.existsByEmail(identity.getEmail()), equalTo(true));
-        assertThat(identityRepository.existsByEmail("doesntexist@example.com"), equalTo(false));
+        assertThat(identityRepository.existsByEmailIgnoreCase(identity.getEmail()), equalTo(true));
+        assertThat(identityRepository.existsByEmailIgnoreCase("doesntexist@example.com"), equalTo(false));
 
     }
 

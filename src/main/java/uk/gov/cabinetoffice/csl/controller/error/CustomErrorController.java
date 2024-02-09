@@ -9,6 +9,7 @@ import uk.gov.cabinetoffice.csl.util.ErrorPageMap;
 
 @Controller
 public class CustomErrorController implements ErrorController {
+
   private static final String GENERIC_ERROR = "/error";
 
   @RequestMapping(GENERIC_ERROR)

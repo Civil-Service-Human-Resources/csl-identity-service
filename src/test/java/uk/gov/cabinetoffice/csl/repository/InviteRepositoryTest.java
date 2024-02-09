@@ -33,7 +33,7 @@ public class InviteRepositoryTest {
     public void findByForEmailShouldReturnCorrectInvite() {
         Invite invite = createInvite();
         inviteRepository.save(invite);
-        Invite actualInvite = inviteRepository.findByForEmail(INVITE_FOR_EMAIL);
+        Invite actualInvite = inviteRepository.findByForEmailIgnoreCase(INVITE_FOR_EMAIL);
         assertThat(actualInvite.getCode(), equalTo(INVITE_CODE));
         assertThat(actualInvite.getForEmail(), equalTo(INVITE_FOR_EMAIL));
 
@@ -68,8 +68,8 @@ public class InviteRepositoryTest {
         Invite expiredInvite = createInvite("code2", expiredEmail);
         expiredInvite.setStatus(InviteStatus.EXPIRED);
         inviteRepository.save(expiredInvite);
-        boolean existsByCodeAndStatusForPendingInvite = inviteRepository.existsByForEmailAndStatus(pendingEmail, InviteStatus.PENDING);
-        boolean existsByCodeAndStatusForExpiredInvite = inviteRepository.existsByForEmailAndStatus(expiredEmail, InviteStatus.PENDING);
+        boolean existsByCodeAndStatusForPendingInvite = inviteRepository.existsByForEmailIgnoreCaseAndStatus(pendingEmail, InviteStatus.PENDING);
+        boolean existsByCodeAndStatusForExpiredInvite = inviteRepository.existsByForEmailIgnoreCaseAndStatus(expiredEmail, InviteStatus.PENDING);
         assertThat(existsByCodeAndStatusForPendingInvite, equalTo(true));
         assertThat(existsByCodeAndStatusForExpiredInvite, equalTo(false));
     }
@@ -78,7 +78,7 @@ public class InviteRepositoryTest {
     public void findByForEmailAndStatusShouldReturnCorrectInvite() {
         Invite invite = createInvite();
         inviteRepository.save(invite);
-        Optional<Invite> actualInvite = inviteRepository.findByForEmailAndStatus(INVITE_FOR_EMAIL, InviteStatus.PENDING);
+        Optional<Invite> actualInvite = inviteRepository.findByForEmailIgnoreCaseAndStatus(INVITE_FOR_EMAIL, InviteStatus.PENDING);
         assertThat(actualInvite.get().getCode(), equalTo(INVITE_CODE));
         assertThat(actualInvite.get().getForEmail(), equalTo(INVITE_FOR_EMAIL));
         assertThat(actualInvite.get().getStatus(), equalTo(InviteStatus.PENDING));
@@ -89,7 +89,7 @@ public class InviteRepositoryTest {
     }
 
     private Invite createInvite(String code, String forEmail) {
-        Identity identity = identityRepository.findFirstByActiveTrueAndEmailEquals("learner@domain.com");
+        Identity identity = identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase("learner@domain.com");
         Invite invite = new Invite();
         invite.setInviter(identity);
         invite.setCode(code);

@@ -45,19 +45,23 @@ public class InviteService {
         this.inviteFactory = inviteFactory;
     }
 
+    public Invite saveInvite(Invite invite) {
+        return inviteRepository.save(invite);
+    }
+
     @ReadOnlyProperty
-    public Invite findByCode(String code) {
+    public Invite getInviteForCode(String code) {
         return inviteRepository.findByCode(code);
     }
 
     @ReadOnlyProperty
-    public Invite findByForEmail(String email) {
-        return inviteRepository.findByForEmail(email);
+    public Invite getInviteForEmail(String email) {
+        return inviteRepository.findByForEmailIgnoreCase(email);
     }
 
     @ReadOnlyProperty
-    public Optional<Invite> findByForEmailAndStatus(String email, InviteStatus status) {
-        return inviteRepository.findByForEmailAndStatus(email, status);
+    public Optional<Invite> getInviteForEmailAndStatus(String email, InviteStatus status) {
+        return inviteRepository.findByForEmailIgnoreCaseAndStatus(email, status);
     }
 
     public boolean isCodeExpired(String code) {
@@ -106,6 +110,6 @@ public class InviteService {
     }
 
     public boolean isEmailInvited(String email) {
-        return inviteRepository.existsByForEmailAndInviterIdIsNotNull(email);
+        return inviteRepository.existsByForEmailIgnoreCaseAndInviterIdIsNotNull(email);
     }
 }
