@@ -200,7 +200,7 @@ public class ResetControllerTest {
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(identity);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password")
                         .param("confirmPassword", "Password")
@@ -232,7 +232,7 @@ public class ResetControllerTest {
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(identity);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "PASSWORD123")
                         .param("confirmPassword", "PASSWORD123")
@@ -264,7 +264,7 @@ public class ResetControllerTest {
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(identity);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "password123")
                         .param("confirmPassword", "password123")
@@ -296,7 +296,7 @@ public class ResetControllerTest {
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(identity);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Pass123")
                         .param("confirmPassword", "Pass123")
@@ -328,7 +328,7 @@ public class ResetControllerTest {
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(identity);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
                         .param("confirmPassword", "PasswordMisMatch")
@@ -357,7 +357,7 @@ public class ResetControllerTest {
         when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetComplete(reset)).thenReturn(false);
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(null);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(null);
 
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
@@ -384,7 +384,7 @@ public class ResetControllerTest {
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.getIdentityByEmail(EMAIL)).thenReturn(identity);
+        when(userService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123")

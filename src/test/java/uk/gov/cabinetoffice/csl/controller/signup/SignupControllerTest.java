@@ -152,7 +152,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
         String email = "user@domain.com";
 
-        when(userService.checkIdentityExistsForEmail(email)).thenReturn(true);
+        when(userService.isIdentityExistsForEmail(email)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -170,7 +170,7 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(userService.checkIdentityExistsForEmail(email)).thenReturn(false);
+        when(userService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(true);
 
@@ -196,7 +196,7 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(userService.checkIdentityExistsForEmail(email)).thenReturn(false);
+        when(userService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(userService.isAllowListedDomain(domain)).thenReturn(false);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);

@@ -20,8 +20,6 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import java.time.Instant;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 @Slf4j
 @Service
 @Transactional
@@ -71,20 +69,14 @@ public class UserService implements UserDetailsService {
         return new IdentityDetails(identity);
     }
 
-    @ReadOnlyProperty
-    public boolean isIdentityExistsForEmail(String email) {
-        return identityRepository.existsByEmailIgnoreCase(email);
-    }
-
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
     public void createIdentityFromInviteCode(String code, String password, TokenRequest tokenRequest) {
         Invite invite = inviteService.getInviteForCode(code);
-        final String domain = getDomainFromEmailAddress(invite.getForEmail());
-
+        String email = invite.getForEmail();
+        final String domain = getDomainFromEmailAddress(email);
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-
         String agencyTokenUid = null;
-        if (requestHasTokenData(tokenRequest)) {
+        if (tokenRequest != null && tokenRequest.hasData()) {
             Optional<AgencyToken> agencyTokenForDomainTokenOrganisation =
                     civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenRequest.getDomain(),
                             tokenRequest.getToken(), tokenRequest.getOrg());
@@ -101,14 +93,14 @@ public class UserService implements UserDetailsService {
                     .orElseThrow(ResourceNotFoundException::new);
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
-        } else if (!isAllowListedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
+        } else if (!isAllowListedDomain(domain) && !inviteService.isEmailInvited(email)) {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException();
         }
 
         Identity identity = new Identity(
                 UUID.randomUUID().toString(),
-                invite.getForEmail(),
+                email,
                 passwordEncoder.encode(password),
                 true,
                 false,
@@ -120,7 +112,7 @@ public class UserService implements UserDetailsService {
 
         identityRepository.save(identity);
 
-        log.debug("New identity email = {} successfully created", identity.getEmail());
+        log.debug("New identity email = {} successfully created", email);
     }
 
     public void updatePasswordAndActivateAndUnlock(Identity identity, String password) {
@@ -138,19 +130,24 @@ public class UserService implements UserDetailsService {
         notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
     }
 
-    public void lockIdentity(String email) {
-        Identity identity = identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email);
-        identity.setLocked(true);
-        identityRepository.save(identity);
-    }
-
     public boolean checkPassword(String username, String password) {
         Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
         return passwordEncoder.matches(password, identity.getPassword());
     }
 
-    public boolean checkIdentityExistsForEmail(String email) {
+    @ReadOnlyProperty
+    public boolean isIdentityExistsForEmail(String email) {
         return identityRepository.existsByEmailIgnoreCase(email);
+    }
+
+    public Identity getIdentityForEmail(String email) {
+        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
+    }
+
+    public Identity getIdentityForEmailAndActiveFalse(String email) {
+        return identityRepository
+                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
+                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
     }
 
     public Identity loginSucceeded(Identity identity) {
@@ -181,28 +178,7 @@ public class UserService implements UserDetailsService {
         return emailAddress.substring(emailAddress.indexOf('@') + 1);
     }
 
-    public Identity getIdentityByEmail(String email) {
-        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
-    }
-
-    public Identity getIdentityByEmailAndActiveFalse(String email) {
-        return identityRepository
-                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
-                .orElseThrow(
-                        () -> new IdentityNotFoundException("Identity not found for email: " + email));
-    }
-
     public boolean isAllowListedDomain(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
-    }
-
-    private boolean requestHasTokenData(TokenRequest tokenRequest) {
-        return isNotBlank(tokenRequest.getDomain())
-                && isNotBlank(tokenRequest.getToken())
-                && isNotBlank(tokenRequest.getOrg());
-    }
-
-    private boolean isEmailInvitedViaIDM(String email) {
-        return inviteService.isEmailInvited(email);
     }
 }

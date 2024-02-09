@@ -92,7 +92,7 @@ public class ResetController {
         String result = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(result)) {
-            Identity identity = userService.getIdentityByEmail(reset.getEmail());
+            Identity identity = userService.getIdentityForEmail(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
                 log.info("Identity does not exist for email {} which is retrieved using Reset code {}", reset.getEmail(), code);

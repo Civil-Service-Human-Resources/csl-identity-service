@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.exception.FieldMatchException;
 import uk.gov.cabinetoffice.csl.validation.annotation.FieldMatch;
@@ -14,7 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 @ActiveProfiles("no-redis")
 public class FieldMatchValidatorTest {
 
