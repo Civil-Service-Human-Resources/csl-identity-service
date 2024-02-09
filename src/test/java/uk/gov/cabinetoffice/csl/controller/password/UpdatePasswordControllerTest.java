@@ -62,8 +62,6 @@ public class UpdatePasswordControllerTest {
     @Test
     public void shouldLoadPasswordResetFormWithPasswordMismatchError() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
-
-        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
         doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
 
         mockMvc.perform(post("/account/password")
