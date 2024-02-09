@@ -11,7 +11,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.UserService;
-import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -42,9 +41,6 @@ public class UpdatePasswordControllerTest {
     @MockBean
     private UserService userService;
 
-    @MockBean
-    private IUserAuthService userAuthService;
-
     @Test
     public void shouldLoadPasswordResetForm() throws Exception {
         mockMvc.perform(
@@ -64,9 +60,30 @@ public class UpdatePasswordControllerTest {
     }
 
     @Test
+    public void shouldLoadPasswordResetFormWithPasswordMismatchError() throws Exception {
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
+
+        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
+        doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
+
+        mockMvc.perform(post("/account/password")
+                        .param("password", PASSWORD)
+                        .param("newPassword", PASSWORD)
+                        .param("confirm", "password")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/updatePassword"))
+                .andExpect(content().string(containsString("Change your password")))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("New password fields do not match")))
+                .andDo(print());
+    }
+
+    @Test
     public void shouldUpdatePassword() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
-        when(userAuthService.getIdentity()).thenReturn(identity);
+
         when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
         doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
 
