@@ -45,8 +45,31 @@ public class InviteService {
         this.inviteFactory = inviteFactory;
     }
 
+    public void createNewInviteForEmailAndRoles(String email, Set<Role> roleSet, Identity inviter)
+            throws NotificationClientException {
+        Invite invite = inviteFactory.create(email, roleSet, inviter);
+        inviteRepository.save(invite);
+        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
+    }
+
+    public void sendSelfSignupInvite(String email, boolean isAuthorisedInvite) throws NotificationClientException {
+        Invite invite = inviteFactory.createSelfSignUpInvite(email);
+        invite.setAuthorisedInvite(isAuthorisedInvite);
+        inviteRepository.save(invite);
+        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
+    }
+
     public Invite saveInvite(Invite invite) {
         return inviteRepository.save(invite);
+    }
+
+    public void updateInviteStatus(String code, InviteStatus newStatus) {
+        Invite invite = inviteRepository.findByCode(code);
+        invite.setStatus(newStatus);
+        if(InviteStatus.ACCEPTED.equals(newStatus)) {
+            invite.setAcceptedAt(new Date());
+        }
+        inviteRepository.save(invite);
     }
 
     @ReadOnlyProperty
@@ -64,48 +87,25 @@ public class InviteService {
         return inviteRepository.findByForEmailIgnoreCaseAndStatus(email, status);
     }
 
-    public boolean isCodeExpired(String code) {
+    public boolean isInviteCodeExpired(String code) {
         Invite invite = inviteRepository.findByCode(code);
         if(invite == null) {
             log.info("Invite not found for code: {}", code);
             return true;
         }
-        return isInviteCodeExpired(invite);
+        return isInviteExpired(invite);
     }
 
-    public boolean isInviteCodeExpired(Invite invite) {
+    public boolean isInviteExpired(Invite invite) {
         long diffInMs = new Date().getTime() - invite.getInvitedAt().getTime();
         return diffInMs > validityInSeconds * 1000L;
     }
 
-    public void updateInviteByCode(String code, InviteStatus newStatus) {
-        Invite invite = inviteRepository.findByCode(code);
-        invite.setStatus(newStatus);
-        if(InviteStatus.ACCEPTED.equals(newStatus)) {
-            invite.setAcceptedAt(new Date());
-        }
-        inviteRepository.save(invite);
-    }
-
-    public void createNewInviteForEmailAndRoles(String email, Set<Role> roleSet, Identity inviter)
-            throws NotificationClientException {
-        Invite invite = inviteFactory.create(email, roleSet, inviter);
-        inviteRepository.save(invite);
-        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
-    }
-
-    public void sendSelfSignupInvite(String email, boolean isAuthorisedInvite) throws NotificationClientException {
-        Invite invite = inviteFactory.createSelfSignUpInvite(email);
-        invite.setAuthorisedInvite(isAuthorisedInvite);
-        inviteRepository.save(invite);
-        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
-    }
-
     public boolean isInviteValid(String code) {
-        return inviteRepository.existsByCode(code) && !isCodeExpired(code);
+        return inviteRepository.existsByCode(code) && !isInviteCodeExpired(code);
     }
 
-    public boolean isCodeExists(String code) {
+    public boolean isInviteCodeExists(String code) {
         return inviteRepository.existsByCode(code);
     }
 

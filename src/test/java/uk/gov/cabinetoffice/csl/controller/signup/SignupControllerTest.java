@@ -104,7 +104,7 @@ public class SignupControllerTest {
         invite.get().setCode("code");
 
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
-        when(inviteService.isInviteCodeExpired(invite.get())).thenReturn(false);
+        when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
 
         when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(userService.isAllowListedDomain(domain)).thenReturn(true);
@@ -118,7 +118,7 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk());
 
-        verify(inviteService, times(1)).updateInviteByCode(invite.get().getCode(), EXPIRED);
+        verify(inviteService, times(1)).updateInviteStatus(invite.get().getCode(), EXPIRED);
     }
 
     @Test
@@ -232,9 +232,9 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfInviteCodeExpired() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isCodeExists(code)).thenReturn(true);
-        when(inviteService.isCodeExpired(code)).thenReturn(true);
-        doNothing().when(inviteService).updateInviteByCode(code, EXPIRED);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(code)).thenReturn(true);
+        doNothing().when(inviteService).updateInviteStatus(code, EXPIRED);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -248,7 +248,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfInviteCodeDoesNotExists() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isCodeExists(code)).thenReturn(false);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(false);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -264,8 +264,8 @@ public class SignupControllerTest {
         Invite invite = new Invite();
         invite.setAuthorisedInvite(false);
 
-        when(inviteService.isCodeExists(code)).thenReturn(true);
-        when(inviteService.isCodeExpired(code)).thenReturn(false);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(code)).thenReturn(false);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
@@ -282,8 +282,8 @@ public class SignupControllerTest {
         Invite invite = new Invite();
         invite.setAuthorisedInvite(true);
 
-        when(inviteService.isCodeExists(code)).thenReturn(true);
-        when(inviteService.isCodeExpired(code)).thenReturn(false);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(code)).thenReturn(false);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
@@ -363,7 +363,7 @@ public class SignupControllerTest {
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         doNothing().when(userService).createIdentityFromInviteCode(code, password, tokenRequest);
-        doNothing().when(inviteService).updateInviteByCode(code, InviteStatus.ACCEPTED);
+        doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
 
         mockMvc.perform(
                 post("/signup/" + code)

@@ -94,9 +94,9 @@ public class SignupController {
         final String email = form.getEmail();
         Optional<Invite> pendingInvite = inviteService.getInviteForEmailAndStatus(email, InviteStatus.PENDING);
         if(pendingInvite.isPresent()) {
-            if (inviteService.isInviteCodeExpired(pendingInvite.get())) {
+            if (inviteService.isInviteExpired(pendingInvite.get())) {
                 log.info("{} has already been invited", email);
-                inviteService.updateInviteByCode(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
+                inviteService.updateInviteStatus(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
             } else {
                 long timeForReReg = new Date().getTime() - pendingInvite.get().getInvitedAt().getTime();
                 if (timeForReReg < durationAfterReRegAllowedInSeconds * 1000) {
@@ -112,7 +112,7 @@ public class SignupController {
                 } else {
                     log.info("{} user trying to re-register after re-registration allowed time but " +
                             "before code expired hence setting the current pending invite to expired.", email);
-                    inviteService.updateInviteByCode(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
+                    inviteService.updateInviteStatus(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
                 }
             }
         }
@@ -147,13 +147,13 @@ public class SignupController {
     @GetMapping("/{code}")
     public String signup(Model model, @PathVariable(value = "code") String code,
                                             RedirectAttributes redirectAttributes) {
-        if (inviteService.isCodeExists(code)) {
-            if (inviteService.isCodeExpired(code)) {
+        if (inviteService.isInviteCodeExists(code)) {
+            if (inviteService.isInviteCodeExpired(code)) {
                 log.debug("Signup code for invite is expired - redirecting to signup");
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                         "This registration link has now expired.\n" +
                                 "Please re-enter your details to create an account.");
-                inviteService.updateInviteByCode(code, InviteStatus.EXPIRED);
+                inviteService.updateInviteStatus(code, InviteStatus.EXPIRED);
                 return REDIRECT_SIGNUP_REQUEST;
             } else {
                 Invite invite = inviteService.getInviteForCode(code);
@@ -226,7 +226,7 @@ public class SignupController {
 
                 return REDIRECT_LOGIN;
             }
-            inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+            inviteService.updateInviteStatus(code, InviteStatus.ACCEPTED);
 
             // This provides the next template the URL for LPG-UI so a user can begin the login process
             model.addAttribute(LPG_UI_URL, lpgUiUrl);

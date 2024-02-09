@@ -39,7 +39,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+        inviteService.updateInviteStatus(code, InviteStatus.ACCEPTED);
 
         ArgumentCaptor<Invite> inviteArgumentCaptor = ArgumentCaptor.forClass(Invite.class);
 
@@ -62,7 +62,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        MatcherAssert.assertThat(inviteService.isCodeExpired(code), equalTo(true));
+        MatcherAssert.assertThat(inviteService.isInviteCodeExpired(code), equalTo(true));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        MatcherAssert.assertThat(inviteService.isCodeExpired(code), equalTo(false));
+        MatcherAssert.assertThat(inviteService.isInviteCodeExpired(code), equalTo(false));
     }
 
     @Test
