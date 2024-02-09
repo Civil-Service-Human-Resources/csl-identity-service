@@ -34,6 +34,7 @@ public class UserServiceTest {
 
     private static final String EMAIL = "test@example.com";
     private static final String UID = "uid123";
+    private int maxLoginAttempts = 5;
 
     private UserService userService;
 
@@ -57,6 +58,7 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() {
         userService = new UserService(
+                maxLoginAttempts,
                 "updatePasswordEmailTemplateId",
                 inviteService,
                 agencyTokenCapacityService,

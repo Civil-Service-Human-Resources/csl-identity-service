@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Transactional
 public class UserService implements UserDetailsService {
 
+    private final int maxLoginAttempts;
     private final String updatePasswordEmailTemplateId;
     private final InviteService inviteService;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
@@ -34,13 +36,15 @@ public class UserService implements UserDetailsService {
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
+    public UserService(@Value("${account.lockout.maxLoginAttempts}") int maxLoginAttempts,
+                       @Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                        InviteService inviteService,
                        AgencyTokenCapacityService agencyTokenCapacityService,
                        @Qualifier("notifyServiceImpl") NotifyService notifyService,
                        IdentityRepository identityRepository,
                        ICivilServantRegistryClient civilServantRegistryClient,
                        PasswordEncoder passwordEncoder) {
+        this.maxLoginAttempts = maxLoginAttempts;
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.inviteService = inviteService;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
@@ -156,26 +160,21 @@ public class UserService implements UserDetailsService {
         return identityRepository.save(identity);
     }
 
-    public void loginFailed(String email) {
+    public Identity loginFailed(String email) {
         log.debug("UserService:loginFailed: {}", email);
-        //TODO: implement below code
-        // 1. fetch the identity from DB for the given email id
-        // 2. check if identity is not null
-        // 3. increase the failedLoginAttempts in identity
-        // 4. check if failedLoginAttempts is equal or more than the account.lockout.maxLoginAttempts
-        // 5. if yes for 3 then set locked to true in identity
-        // 6. save the identity
-        // 7. if identity is locked then throw AuthenticationException("User account is locked")
-
-        identityRepository.findFirstByEmailEqualsIgnoreCase(email);
-
-//        if (existsByEmail(email)) {
-//            incrementAttempts(email);
-//            if (areAttemptsMoreThanAllowedLimit(email)) {
-//                lockIdentity(email);
-//                throw new AuthenticationException("User account is locked") {};
-//            }
-//        }
+        Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(email);
+        if(identity != null && email.equalsIgnoreCase(identity.getEmail())) {
+            Integer currentFailedLoginAttempts = identity.getFailedLoginAttempts();
+            identity.setFailedLoginAttempts(currentFailedLoginAttempts + 1);
+            if(identity.getFailedLoginAttempts() >= maxLoginAttempts) {
+                identity.setLocked(true);
+                identityRepository.save(identity);
+                log.info("UserService:User account is locked for {}", email);
+                throw new AuthenticationException("User account is locked") {};
+            }
+            identity = identityRepository.save(identity);
+        }
+        return identity;
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {
