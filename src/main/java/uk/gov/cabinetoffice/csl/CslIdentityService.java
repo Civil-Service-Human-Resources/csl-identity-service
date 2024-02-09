@@ -30,9 +30,8 @@ public class CslIdentityService {
 	}
 
 	@Bean
-	public AuthenticationEventPublisher authenticationEventPublisher(
-			ApplicationEventPublisher applicationEventPublisher) {
-		return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+	public AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher eventPublisher) {
+		return new DefaultAuthenticationEventPublisher(eventPublisher);
 	}
 
 	@Bean
