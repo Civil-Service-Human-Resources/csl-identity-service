@@ -60,14 +60,33 @@ public class UpdatePasswordControllerTest {
     }
 
     @Test
+    public void shouldLoadPasswordResetFormWithCurrentPasswordIncorrectError() throws Exception {
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
+        when(userService.checkPassword(identity.getEmail(), "currentPassword123")).thenReturn(false);
+
+        mockMvc.perform(post("/account/password")
+                        .param("password", "currentPassword123")
+                        .param("newPassword", "Password1234")
+                        .param("confirm", "Password1234")
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/updatePassword"))
+                .andExpect(content().string(containsString("Change your password")))
+                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("Current password is incorrect")))
+                .andDo(print());
+    }
+
+    @Test
     public void shouldLoadPasswordResetFormWithPasswordMismatchError() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
-        doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
+        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
 
         mockMvc.perform(post("/account/password")
                         .param("password", PASSWORD)
-                        .param("newPassword", PASSWORD)
-                        .param("confirm", "password")
+                        .param("newPassword", "Password1234")
+                        .param("confirm", "Password12345")
                         .with(csrf())
                 )
                 .andExpect(status().isOk())

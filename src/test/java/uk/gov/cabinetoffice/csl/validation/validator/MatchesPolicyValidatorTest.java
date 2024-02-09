@@ -2,12 +2,14 @@ package uk.gov.cabinetoffice.csl.validation.validator;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+@SpringBootTest
 @ActiveProfiles("no-redis")
 public class MatchesPolicyValidatorTest {
     /*
