@@ -172,20 +172,6 @@ public class IdentityServiceTest {
         assertThat(identity.getAgencyTokenUid(), equalTo(uid));
     }
 
-//    @Test
-//    public void lockIdentitySetsLockedToTrue() {
-//        String email = "test-email";
-//        Identity identity = mock(Identity.class);
-//        when(identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email)).thenReturn(identity);
-//
-//        userService.lockIdentity(email);
-//
-//        InOrder inOrder = inOrder(identity, identityRepository);
-//
-//        inOrder.verify(identity).setLocked(true);
-//        inOrder.verify(identityRepository).save(identity);
-//    }
-
     @Test
     public void shouldGetIdentityByEmailAndActiveFalse() {
         Identity identity = mock(Identity.class);
