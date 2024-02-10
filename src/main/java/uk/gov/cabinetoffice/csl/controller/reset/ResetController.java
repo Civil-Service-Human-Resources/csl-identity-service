@@ -11,8 +11,9 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
-import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.service.notify.NotificationClientException;
 
 @Slf4j
@@ -28,14 +29,17 @@ public class ResetController {
 
     private final ResetService resetService;
 
-    private final UserService userService;
+    private final PasswordService passwordService;
+
+    private final IdentityService identityService;
 
     private final ResetFormValidator resetFormValidator;
 
-    public ResetController(ResetService resetService, UserService userService,
-                           ResetFormValidator resetFormValidator) {
+    public ResetController(ResetService resetService, PasswordService passwordService,
+                           IdentityService identityService, ResetFormValidator resetFormValidator) {
         this.resetService = resetService;
-        this.userService = userService;
+        this.passwordService = passwordService;
+        this.identityService = identityService;
         this.resetFormValidator = resetFormValidator;
     }
 
@@ -47,7 +51,7 @@ public class ResetController {
     @PostMapping
     public String requestReset(@RequestParam(value = "email") String email, Model model) throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
-        if (userService.isIdentityExistsForEmail(email)) {
+        if (identityService.isIdentityExistsForEmail(email)) {
             resetService.notifyForResetRequest(email);
             log.info("Reset request email sent to {}", email);
             model.addAttribute("resetValidityMessage", resetValidityMessage());
@@ -92,7 +96,7 @@ public class ResetController {
         String result = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(result)) {
-            Identity identity = userService.getIdentityForEmail(reset.getEmail());
+            Identity identity = identityService.getIdentityForEmail(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
                 log.info("Identity does not exist for email {} which is retrieved using Reset code {}", reset.getEmail(), code);
@@ -100,7 +104,7 @@ public class ResetController {
                 return "reset/requestReset";
             }
 
-            userService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
+            passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyOfSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
             model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);

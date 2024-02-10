@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.service.UserService;
+import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 public class IsCurrentPasswordValidatorTest {
 
     @Mock
-    private UserService userService;
+    private PasswordService passwordService;
 
     @Mock
     private IUserAuthService userAuthService;
@@ -39,7 +39,7 @@ public class IsCurrentPasswordValidatorTest {
 
         ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
 
-        when(userService.checkPassword(email, value)).thenReturn(true);
+        when(passwordService.checkPassword(email, value)).thenReturn(true);
 
         assertTrue(validator.isValid(value, constraintValidatorContext));
     }
@@ -55,7 +55,7 @@ public class IsCurrentPasswordValidatorTest {
 
         ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
 
-        when(userService.checkPassword(email, value)).thenReturn(false);
+        when(passwordService.checkPassword(email, value)).thenReturn(false);
 
         assertFalse(validator.isValid(value, constraintValidatorContext));
     }

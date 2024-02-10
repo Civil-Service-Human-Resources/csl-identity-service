@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
@@ -17,7 +18,6 @@ import uk.gov.cabinetoffice.csl.domain.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
-import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 import uk.gov.service.notify.NotificationClientException;
@@ -58,18 +58,18 @@ public class SignupController {
 
     private final InviteService inviteService;
 
-    private final UserService userService;
+    private final IdentityService identityService;
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
     public SignupController(InviteService inviteService,
-                            UserService userService,
+                            IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
                             AgencyTokenCapacityService agencyTokenCapacityService) {
         this.inviteService = inviteService;
-        this.userService = userService;
+        this.identityService = identityService;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
     }
@@ -117,21 +117,21 @@ public class SignupController {
             }
         }
 
-        if (userService.isIdentityExistsForEmail(email)) {
+        if (identityService.isIdentityExistsForEmail(email)) {
             log.info("{} is already a user", email);
             redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                     "User already exists with email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
         }
 
-        final String domain = userService.getDomainFromEmailAddress(email);
+        final String domain = identityService.getDomainFromEmailAddress(email);
 
         if (civilServantRegistryClient.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
         } else {
-            if (userService.isAllowListedDomain(domain)) {
+            if (identityService.isAllowListedDomain(domain)) {
                 log.debug("Sending invite to allowListed user {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
                 return INVITE_SENT_TEMPLATE;
@@ -208,7 +208,7 @@ public class SignupController {
 
             log.debug("Invite and signup credentials valid - creating identity and updating invite to 'Accepted'");
             try {
-                userService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
+                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
             } catch (UnableToAllocateAgencyTokenException e) {
                 log.debug("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
 
@@ -273,7 +273,7 @@ public class SignupController {
             Invite invite = inviteService.getInviteForCode(code);
 
             final String emailAddress = invite.getForEmail();
-            final String domain = userService.getDomainFromEmailAddress(emailAddress);
+            final String domain = identityService.getDomainFromEmailAddress(emailAddress);
 
             return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(),
                             form.getOrganisation())

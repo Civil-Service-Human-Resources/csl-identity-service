@@ -12,12 +12,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
-import uk.gov.cabinetoffice.csl.service.UserService;
 
 import java.util.Date;
 import java.util.Optional;
@@ -54,7 +54,7 @@ public class SignupControllerTest {
     private InviteService inviteService;
 
     @MockBean
-    private UserService userService;
+    private IdentityService identityService;;
 
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
@@ -75,9 +75,9 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(userService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(userService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
         mockMvc.perform(
                 post("/signup/request")
@@ -106,8 +106,8 @@ public class SignupControllerTest {
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
         when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
 
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(userService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
         mockMvc.perform(
                 post("/signup/request")
@@ -152,7 +152,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
         String email = "user@domain.com";
 
-        when(userService.isIdentityExistsForEmail(email)).thenReturn(true);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -170,8 +170,8 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(userService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(true);
 
         mockMvc.perform(
@@ -196,9 +196,9 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(userService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(userService.isAllowListedDomain(domain)).thenReturn(false);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(false);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
@@ -362,7 +362,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        doNothing().when(userService).createIdentityFromInviteCode(code, password, tokenRequest);
+        doNothing().when(identityService).createIdentityFromInviteCode(code, password, tokenRequest);
         doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
 
         mockMvc.perform(
@@ -387,7 +387,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        doThrow(new UnableToAllocateAgencyTokenException("Error")).when(userService)
+        doThrow(new UnableToAllocateAgencyTokenException("Error")).when(identityService)
                 .createIdentityFromInviteCode(code, password, tokenRequest);
 
         mockMvc.perform(
@@ -502,7 +502,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
@@ -537,7 +537,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
@@ -569,7 +569,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(emptyOptional);
 

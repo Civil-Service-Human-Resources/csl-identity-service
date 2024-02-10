@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.service.UserService;
+import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -39,7 +39,7 @@ public class UpdatePasswordControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private PasswordService passwordService;
 
     @Test
     public void shouldLoadPasswordResetForm() throws Exception {
@@ -62,7 +62,7 @@ public class UpdatePasswordControllerTest {
     @Test
     public void shouldLoadPasswordResetFormWithCurrentPasswordIncorrectError() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
-        when(userService.checkPassword(identity.getEmail(), "currentPassword123")).thenReturn(false);
+        when(passwordService.checkPassword(identity.getEmail(), "currentPassword123")).thenReturn(false);
 
         mockMvc.perform(post("/account/password")
                         .param("password", "currentPassword123")
@@ -82,8 +82,8 @@ public class UpdatePasswordControllerTest {
     public void shouldUpdatePassword() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
-        doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
+        when(passwordService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
+        doNothing().when(passwordService).updatePasswordAndNotify(identity, PASSWORD);
 
         mockMvc.perform(post("/account/password")
                         .param("password", PASSWORD)

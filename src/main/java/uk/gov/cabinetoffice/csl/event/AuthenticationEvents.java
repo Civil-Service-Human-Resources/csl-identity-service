@@ -8,14 +8,14 @@ import org.springframework.security.authentication.event.AbstractAuthenticationF
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.service.UserService;
+import uk.gov.cabinetoffice.csl.service.LoginService;
 
 @Slf4j
 @AllArgsConstructor
 @Component
 public class AuthenticationEvents {
 
-    private final UserService userService;
+    private final LoginService loginService;
 
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent success) {
@@ -24,7 +24,7 @@ public class AuthenticationEvents {
         log.info("AuthenticationEvents:onSuccess:authentication: {}", authentication);
         if (authentication.getPrincipal() != null
                 && authentication.getPrincipal() instanceof IdentityDetails identityDetails){
-            userService.loginSucceeded(identityDetails.getIdentity());
+            loginService.loginSucceeded(identityDetails.getIdentity());
         }
     }
 
@@ -36,7 +36,7 @@ public class AuthenticationEvents {
         if (authentication.getPrincipal() != null
                 && authentication.getPrincipal() instanceof String email) {
             log.info("AuthenticationFailureListener: email: {}", email);
-            userService.loginFailed(email);
+            loginService.loginFailed(email);
         }
     }
 }

@@ -8,12 +8,12 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 @Service
 public class AgencyTokenService {
 
-    private final UserService userService;
+    private final IdentityService identityService;
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
     public boolean isDomainAllowListed(String domain) {
-        return userService.isAllowListedDomain(domain);
+        return identityService.isAllowListedDomain(domain);
     }
 
     public boolean isDomainAnAgencyTokenDomain(String domain) {
