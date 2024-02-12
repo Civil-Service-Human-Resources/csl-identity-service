@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.service;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +13,7 @@ import uk.gov.service.notify.NotificationClientException;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.EXPIRED;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
 
@@ -66,7 +66,7 @@ public class ResetService {
     }
 
     public boolean isResetPending(Reset reset) {
-        return reset.getResetStatus().equals(ResetStatus.PENDING);
+        return reset.getResetStatus().equals(PENDING);
     }
 
     public boolean isResetComplete(Reset reset) {
@@ -109,11 +109,6 @@ public class ResetService {
     }
 
     private Reset createPendingReset(String email) {
-        Reset reset = new Reset();
-        reset.setEmail(email);
-        reset.setRequestedAt(new Date());
-        reset.setResetStatus(ResetStatus.PENDING);
-        reset.setCode(RandomStringUtils.random(40, true, true));
-        return reset;
+        return new Reset(random(40, true, true), email, PENDING, new Date());
     }
 }

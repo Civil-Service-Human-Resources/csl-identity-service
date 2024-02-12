@@ -12,11 +12,12 @@ import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
+
+import static java.time.Instant.now;
+import static java.util.UUID.randomUUID;
 
 @Slf4j
 @Service
@@ -69,21 +70,9 @@ public class IdentityService {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException();
         }
-
-        Identity identity = new Identity(
-                UUID.randomUUID().toString(),
-                email,
-                passwordEncoder.encode(password),
-                true,
-                false,
-                newRoles,
-                Instant.now(),
-                false,
-                agencyTokenUid,
-                0);
-
+        Identity identity = new Identity(randomUUID().toString(), email, passwordEncoder.encode(password),
+                true, false, newRoles, now(), false, agencyTokenUid, 0);
         identityRepository.save(identity);
-
         log.debug("New identity email = {} successfully created", email);
     }
 

@@ -26,6 +26,9 @@ public class Reset {
     @Column(unique = true, length = 40, nullable = false)
     private String code;
 
+    @Column(length = 150, nullable = false)
+    private String email;
+
     @Column(length = 10, nullable = false)
     @Enumerated(EnumType.STRING)
     private ResetStatus resetStatus;
@@ -36,6 +39,10 @@ public class Reset {
     @Column
     private Date resetAt;
 
-    @Column(length = 150, nullable = false)
-    private String email;
+    public Reset(String code, String email, ResetStatus resetStatus, Date requestedAt) {
+        this.code = code;
+        this.email = email;
+        this.resetStatus = resetStatus;
+        this.requestedAt = requestedAt;
+    }
 }
