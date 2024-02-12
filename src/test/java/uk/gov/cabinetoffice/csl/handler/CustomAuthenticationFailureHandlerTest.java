@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.handler;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -19,42 +18,44 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("no-redis")
 public class CustomAuthenticationFailureHandlerTest {
 
+    private final int maxLoginAttempts = 5;
+
     @Autowired
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Test
-    public void shouldSetErrorToFailedOnFailedLogin() throws IOException, ServletException {
+    public void shouldSetErrorToFailedOnFailedLogin() throws IOException {
         HttpServletResponse response = executeHandler("Some other error");
-        verify(response).sendRedirect("/login?error=failed");
+        verify(response).sendRedirect("/login?error=failed&maxLoginAttempts=" + maxLoginAttempts);
     }
 
     @Test
-    public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
+    public void shouldSetErrorToLockedOnAccountLock() throws IOException {
         HttpServletResponse response = executeHandler("User account is locked");
-        verify(response).sendRedirect("/login?error=locked");
+        verify(response).sendRedirect("/login?error=locked&maxLoginAttempts=" + maxLoginAttempts);
     }
 
     @Test
-    public void shouldSetErrorToFailedOnAccountBlocked() throws IOException, ServletException {
+    public void shouldSetErrorToFailedOnAccountBlocked() throws IOException {
         HttpServletResponse response = executeHandler("User account is blocked");
         verify(response).sendRedirect("/login?error=blocked");
     }
 
     @Test
     public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
-            throws IOException, ServletException {
+            throws IOException {
         HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
         verify(response).sendRedirect("/login?error=pending-reactivation");
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException, ServletException {
+    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=deactivated&username=" + encode(encryptedUsername, UTF_8));
     }
 
-    private HttpServletResponse executeHandler(String message) throws IOException, ServletException {
+    private HttpServletResponse executeHandler(String message) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);

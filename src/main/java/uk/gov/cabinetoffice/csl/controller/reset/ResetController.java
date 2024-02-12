@@ -85,7 +85,7 @@ public class ResetController {
                                 @ModelAttribute @Valid ResetForm resetForm,
                                 BindingResult bindingResult, Model model)
             throws NotificationClientException {
-        log.debug("User on enter password screen with code {}", code);
+        log.debug("User on enter password screen for reset code {}", code);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("resetForm", resetForm);
@@ -99,8 +99,8 @@ public class ResetController {
             Identity identity = identityService.getIdentityForEmail(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
-                log.info("Identity does not exist for email {} which is retrieved using Reset code {}", reset.getEmail(), code);
-                model.addAttribute("userMessage", "Invalid reset code. Submit the reset request for the valid email id.");
+                log.info("Identity does not exist for email {} which is retrieved using the reset code {}", reset.getEmail(), code);
+                model.addAttribute("userMessage", "The reset link is invalid. Please submit the reset request for the valid email id.");
                 return "reset/requestReset";
             }
 
@@ -123,26 +123,26 @@ public class ResetController {
     private String checkResetValidity(Reset reset, String code, Model model) {
 
         if (StringUtils.isBlank(code)) {
-            log.info("Blank reset code.");
-            model.addAttribute("userMessage", "Invalid reset code. Submit the reset request again.");
+            log.info("The reset code is blank.");
+            model.addAttribute("userMessage", "The reset link is invalid. Please re-submit the reset request.");
             return "reset/requestReset";
         }
 
         if (reset == null || StringUtils.isBlank(reset.getEmail())) {
-            log.info("Reset does not exist for code {}", code);
-            model.addAttribute("userMessage", "Invalid reset code. Submit the reset request again.");
+            log.info("The reset does not exist for the code {}", code);
+            model.addAttribute("userMessage", "The reset link is invalid. Please re-submit the reset request.");
             return "reset/requestReset";
         }
 
         if (resetService.isResetComplete(reset)) {
-            log.info("Reset is already used for code {}", reset.getCode());
-            model.addAttribute("userMessage", "Reset code is already used. Submit the reset request again.");
+            log.info("The reset is already used for the code {}", reset.getCode());
+            model.addAttribute("userMessage", "The reset link is already used. Please re-submit the reset request.");
             return "reset/requestReset";
         }
 
         if (resetService.isResetExpired(reset)) {
-            log.info("Reset expired for code {}", reset.getCode());
-            model.addAttribute("userMessage", "Reset code expired. Submit the reset request again.");
+            log.info("The reset is expired for the code {}", reset.getCode());
+            model.addAttribute("userMessage", "The reset link is expired. Please re-submit the reset request.");
             return "reset/requestReset";
         }
 

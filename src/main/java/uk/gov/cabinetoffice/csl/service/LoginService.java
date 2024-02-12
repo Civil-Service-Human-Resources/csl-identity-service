@@ -38,7 +38,7 @@ public class LoginService {
             if(identity.getFailedLoginAttempts() >= maxLoginAttempts) {
                 identity.setLocked(true);
                 identityRepository.save(identity);
-                log.info("LoginService.loginFailed:User account is locked for email {}", email);
+                log.info("LoginService.loginFailed:User account is locked for email: {}", email);
                 throw new AuthenticationException("User account is locked") {};
             }
             identity = identityRepository.save(identity);

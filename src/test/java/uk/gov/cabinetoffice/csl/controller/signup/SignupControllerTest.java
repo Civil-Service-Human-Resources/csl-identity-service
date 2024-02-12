@@ -54,7 +54,7 @@ public class SignupControllerTest {
     private InviteService inviteService;
 
     @MockBean
-    private IdentityService identityService;;
+    private IdentityService identityService;
 
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
@@ -127,8 +127,8 @@ public class SignupControllerTest {
                 post("/signup/request")
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", "userdomain.org")
-                        .param("confirmEmail", "userdomain.org")
+                        .param("email", "userDomain.org")
+                        .param("confirmEmail", "userDomain.org")
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Email address is not valid")));
