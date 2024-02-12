@@ -19,9 +19,8 @@ public class AuthenticationEvents {
 
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent success) {
-        log.info("AuthenticationEvents:onSuccess:success: {}", success);
         Authentication authentication = success.getAuthentication();
-        log.info("AuthenticationEvents:onSuccess:authentication: {}", authentication);
+        log.debug("AuthenticationEvents:onSuccess:authentication: {}", authentication);
         if (authentication.getPrincipal() != null
                 && authentication.getPrincipal() instanceof IdentityDetails identityDetails){
             loginService.loginSucceeded(identityDetails.getIdentity());
@@ -30,12 +29,11 @@ public class AuthenticationEvents {
 
     @EventListener
     public void onFailure(AbstractAuthenticationFailureEvent failure) {
-        log.info("AuthenticationEvents:onFailure:failure: {}", failure);
         Authentication authentication = failure.getAuthentication();
-        log.info("AuthenticationFailureListener: authentication: {}", authentication);
+        log.debug("AuthenticationFailureListener.onFailure:authentication: {}", authentication);
         if (authentication.getPrincipal() != null
                 && authentication.getPrincipal() instanceof String email) {
-            log.info("AuthenticationFailureListener: email: {}", email);
+            log.info("AuthenticationFailureListener.onFailure: authentication failed for email: {}", email);
             loginService.loginFailed(email);
         }
     }
