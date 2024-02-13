@@ -56,7 +56,7 @@ public class ResetController {
         if (identityService.isIdentityExistsForEmail(email)) {
             resetService.notifyForResetRequest(email);
             log.info("Reset request email sent to {}", email);
-            model.addAttribute("resetValidityMessage", validityMessage("The link will expire in %s", validityInSeconds));
+            model.addAttribute("resetValidityMessage", validityMessage("The link will expire in %s.", validityInSeconds));
             return "reset/checkEmail";
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
