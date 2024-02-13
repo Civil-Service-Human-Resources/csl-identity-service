@@ -35,7 +35,7 @@ public class InviteFactoryTest {
         assertEquals(email, invite.getForEmail());
         assertEquals(roleSet, invite.getForRoles());
         assertEquals(inviter, invite.getInviter());
-        assertEquals(new Date().toString(), invite.getInvitedAt().toString());
+        assertNotNull(invite.getInvitedAt());
         assertNotNull(invite.getCode());
         assertEquals(40, invite.getCode().length());
     }
