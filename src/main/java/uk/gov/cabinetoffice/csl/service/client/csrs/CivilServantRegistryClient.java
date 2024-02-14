@@ -10,9 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
-import uk.gov.cabinetoffice.csl.domain.AgencyToken;
-import uk.gov.cabinetoffice.csl.domain.DomainsResponse;
-import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.DomainsResponse;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
 
 import java.util.List;
 import java.util.Optional;

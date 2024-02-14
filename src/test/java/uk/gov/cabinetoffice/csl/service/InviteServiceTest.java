@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
-import uk.gov.cabinetoffice.csl.domain.factory.InviteFactory;
+import uk.gov.cabinetoffice.csl.factory.InviteFactory;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 

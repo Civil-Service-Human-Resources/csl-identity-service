@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.service.client.csrs.CivilServantRegistryClient;
-import uk.gov.cabinetoffice.csl.domain.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

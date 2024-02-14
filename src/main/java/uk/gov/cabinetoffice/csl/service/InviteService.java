@@ -10,7 +10,7 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
 import uk.gov.cabinetoffice.csl.domain.Role;
-import uk.gov.cabinetoffice.csl.domain.factory.InviteFactory;
+import uk.gov.cabinetoffice.csl.factory.InviteFactory;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 

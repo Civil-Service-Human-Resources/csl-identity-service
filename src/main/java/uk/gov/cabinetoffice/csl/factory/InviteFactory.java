@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.domain.factory;
+package uk.gov.cabinetoffice.csl.factory;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
