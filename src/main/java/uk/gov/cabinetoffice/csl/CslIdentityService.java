@@ -29,6 +29,9 @@ public class CslIdentityService {
 		return bean;
 	}
 
+	// This will publish the events for the login success and failure
+	// which will be listened by AuthenticationEvents.onSuccess and AuthenticationEvents.onFailure
+	// to invoke LoginService.loginSucceeded or LoginService.loginFailed methods
 	@Bean
 	public AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher eventPublisher) {
 		return new DefaultAuthenticationEventPublisher(eventPublisher);
