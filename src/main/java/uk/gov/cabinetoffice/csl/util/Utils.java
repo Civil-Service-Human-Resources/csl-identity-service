@@ -1,8 +1,11 @@
 package uk.gov.cabinetoffice.csl.util;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Utils {
 
-    public static String validityMessage(String validityMessage, long validityInSeconds) {
+    public String validityMessage(String validityMessage, long validityInSeconds) {
         long hours = validityInSeconds / 3600;
         if(hours < 1) {
             long minutes = (validityInSeconds % 3600) / 60;

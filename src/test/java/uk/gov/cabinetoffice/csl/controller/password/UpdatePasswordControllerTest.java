@@ -62,7 +62,7 @@ public class UpdatePasswordControllerTest {
     @Test
     public void shouldLoadPasswordResetFormWithCurrentPasswordIncorrectError() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
-        when(passwordService.checkPassword(identity.getEmail(), "currentPassword123")).thenReturn(false);
+        when(passwordService.isPasswordMatches(identity.getEmail(), "currentPassword123")).thenReturn(false);
 
         mockMvc.perform(post("/account/password")
                         .param("password", "currentPassword123")
@@ -82,7 +82,7 @@ public class UpdatePasswordControllerTest {
     public void shouldUpdatePassword() throws Exception {
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(passwordService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
+        when(passwordService.isPasswordMatches(identity.getEmail(), PASSWORD)).thenReturn(true);
         doNothing().when(passwordService).updatePasswordAndNotify(identity, PASSWORD);
 
         mockMvc.perform(post("/account/password")

@@ -22,27 +22,34 @@ public class LoginService {
         this.identityRepository = identityRepository;
     }
 
-    public Identity loginSucceeded(Identity identity) {
+    public void loginSucceeded(Identity identity) {
         log.debug("LoginService.loginSucceeded: {}", identity);
         identity.setLastLoggedIn(Instant.now());
         identity.setFailedLoginAttempts(0);
-        return identityRepository.save(identity);
+        identityRepository.save(identity);
     }
 
-    public Identity loginFailed(String email) {
+    public void loginFailed(String email) {
         log.debug("LoginService:loginFailed: {}", email);
         Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(email);
         if(identity != null && email.equalsIgnoreCase(identity.getEmail())) {
-            Integer currentFailedLoginAttempts = identity.getFailedLoginAttempts();
-            identity.setFailedLoginAttempts(currentFailedLoginAttempts + 1);
+            incrementFailedLoginAttempt(identity);
             if(identity.getFailedLoginAttempts() >= maxLoginAttempts) {
-                identity.setLocked(true);
-                identityRepository.save(identity);
-                log.info("LoginService.loginFailed:User account is locked for email: {}", email);
-                throw new AuthenticationException("User account is locked") {};
+                lockIdentity(identity);
             }
-            identity = identityRepository.save(identity);
+            identityRepository.save(identity);
         }
-        return identity;
+    }
+
+    private void incrementFailedLoginAttempt(Identity identity) {
+        Integer currentFailedLoginAttempts = identity.getFailedLoginAttempts();
+        identity.setFailedLoginAttempts(currentFailedLoginAttempts + 1);
+    }
+
+    private void lockIdentity(Identity identity) {
+        identity.setLocked(true);
+        identityRepository.save(identity);
+        log.info("LoginService.loginFailed:User account is locked for email: {}", identity.getEmail());
+        throw new AuthenticationException("User account is locked") {};
     }
 }

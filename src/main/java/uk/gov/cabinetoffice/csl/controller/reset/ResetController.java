@@ -14,9 +14,8 @@ import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
+import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
-
-import static uk.gov.cabinetoffice.csl.util.Utils.validityMessage;
 
 @Slf4j
 @Controller
@@ -37,12 +36,16 @@ public class ResetController {
 
     private final ResetFormValidator resetFormValidator;
 
+    private final Utils utils;
+
     public ResetController(ResetService resetService, PasswordService passwordService,
-                           IdentityService identityService, ResetFormValidator resetFormValidator) {
+                           IdentityService identityService, ResetFormValidator resetFormValidator,
+                           Utils utils) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
         this.resetFormValidator = resetFormValidator;
+        this.utils = utils;
     }
 
     @GetMapping
@@ -56,7 +59,7 @@ public class ResetController {
         if (identityService.isIdentityExistsForEmail(email)) {
             resetService.notifyForResetRequest(email);
             log.info("Reset request email sent to {}", email);
-            model.addAttribute("resetValidityMessage", validityMessage("The link will expire in %s.", validityInSeconds));
+            model.addAttribute("resetValidityMessage", utils.validityMessage("The link will expire in %s.", validityInSeconds));
             return "reset/checkEmail";
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);

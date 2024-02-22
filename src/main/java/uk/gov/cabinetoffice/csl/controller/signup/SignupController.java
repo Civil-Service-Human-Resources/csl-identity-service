@@ -20,12 +20,11 @@ import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
+import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Date;
 import java.util.Optional;
-
-import static uk.gov.cabinetoffice.csl.util.Utils.validityMessage;
 
 @Slf4j
 @Controller
@@ -66,14 +65,18 @@ public class SignupController {
 
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private final Utils utils;
+
     public SignupController(InviteService inviteService,
                             IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
-                            AgencyTokenCapacityService agencyTokenCapacityService) {
+                            AgencyTokenCapacityService agencyTokenCapacityService,
+                            Utils utils) {
         this.inviteService = inviteService;
         this.identityService = identityService;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.utils = utils;
     }
 
     @GetMapping(path = "/request")
@@ -108,7 +111,7 @@ public class SignupController {
                             "You have been sent an email with a link to register your account. " +
                                     "Please check your spam or junk mail folders.\n" +
                                     "If you have not received the email, " +
-                                    validityMessage("please wait %s", durationAfterReRegAllowedInSeconds) +
+                                    utils.validityMessage("please wait %s", durationAfterReRegAllowedInSeconds) +
                                     " and re-enter your details to create an account.");
                     return REDIRECT_SIGNUP_REQUEST;
                 } else {

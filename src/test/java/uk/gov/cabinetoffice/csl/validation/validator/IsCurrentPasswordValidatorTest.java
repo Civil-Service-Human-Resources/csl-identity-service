@@ -39,7 +39,7 @@ public class IsCurrentPasswordValidatorTest {
 
         ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
 
-        when(passwordService.checkPassword(email, value)).thenReturn(true);
+        when(passwordService.isPasswordMatches(email, value)).thenReturn(true);
 
         assertTrue(validator.isValid(value, constraintValidatorContext));
     }
@@ -55,7 +55,7 @@ public class IsCurrentPasswordValidatorTest {
 
         ConstraintValidatorContext constraintValidatorContext = mock(ConstraintValidatorContext.class);
 
-        when(passwordService.checkPassword(email, value)).thenReturn(false);
+        when(passwordService.isPasswordMatches(email, value)).thenReturn(false);
 
         assertFalse(validator.isValid(value, constraintValidatorContext));
     }

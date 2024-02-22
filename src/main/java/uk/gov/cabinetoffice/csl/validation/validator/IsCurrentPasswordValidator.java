@@ -20,6 +20,6 @@ public class IsCurrentPasswordValidator implements ConstraintValidator<IsCurrent
 
    public boolean isValid(String value, ConstraintValidatorContext context) {
       Identity identity = userAuthService.getIdentity();
-      return passwordService.checkPassword(identity.getEmail(), value);
+      return passwordService.isPasswordMatches(identity.getEmail(), value);
    }
 }

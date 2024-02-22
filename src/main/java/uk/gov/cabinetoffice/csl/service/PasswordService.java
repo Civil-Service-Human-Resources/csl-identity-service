@@ -40,7 +40,7 @@ public class PasswordService {
         notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId);
     }
 
-    public boolean checkPassword(String username, String password) {
+    public boolean isPasswordMatches(String username, String password) {
         Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
         return passwordEncoder.matches(password, identity.getPassword());
     }
