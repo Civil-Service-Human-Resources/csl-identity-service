@@ -10,7 +10,7 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
 import uk.gov.cabinetoffice.csl.domain.Role;
-import uk.gov.cabinetoffice.csl.domain.factory.InviteFactory;
+import uk.gov.cabinetoffice.csl.factory.InviteFactory;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -45,44 +45,6 @@ public class InviteService {
         this.inviteFactory = inviteFactory;
     }
 
-    @ReadOnlyProperty
-    public Invite findByCode(String code) {
-        return inviteRepository.findByCode(code);
-    }
-
-    @ReadOnlyProperty
-    public Invite findByForEmail(String email) {
-        return inviteRepository.findByForEmail(email);
-    }
-
-    @ReadOnlyProperty
-    public Optional<Invite> findByForEmailAndStatus(String email, InviteStatus status) {
-        return inviteRepository.findByForEmailAndStatus(email, status);
-    }
-
-    public boolean isCodeExpired(String code) {
-        Invite invite = inviteRepository.findByCode(code);
-        if(invite == null) {
-            log.info("Invite not found for code: {}", code);
-            return true;
-        }
-        return isInviteCodeExpired(invite);
-    }
-
-    public boolean isInviteCodeExpired(Invite invite) {
-        long diffInMs = new Date().getTime() - invite.getInvitedAt().getTime();
-        return diffInMs > validityInSeconds * 1000L;
-    }
-
-    public void updateInviteByCode(String code, InviteStatus newStatus) {
-        Invite invite = inviteRepository.findByCode(code);
-        invite.setStatus(newStatus);
-        if(InviteStatus.ACCEPTED.equals(newStatus)) {
-            invite.setAcceptedAt(new Date());
-        }
-        inviteRepository.save(invite);
-    }
-
     public void createNewInviteForEmailAndRoles(String email, Set<Role> roleSet, Identity inviter)
             throws NotificationClientException {
         Invite invite = inviteFactory.create(email, roleSet, inviter);
@@ -97,15 +59,57 @@ public class InviteService {
         notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
     }
 
-    public boolean isInviteValid(String code) {
-        return inviteRepository.existsByCode(code) && !isCodeExpired(code);
+    public Invite saveInvite(Invite invite) {
+        return inviteRepository.save(invite);
     }
 
-    public boolean isCodeExists(String code) {
+    public void updateInviteStatus(String code, InviteStatus newStatus) {
+        Invite invite = inviteRepository.findByCode(code);
+        invite.setStatus(newStatus);
+        if(InviteStatus.ACCEPTED.equals(newStatus)) {
+            invite.setAcceptedAt(new Date());
+        }
+        inviteRepository.save(invite);
+    }
+
+    @ReadOnlyProperty
+    public Invite getInviteForCode(String code) {
+        return inviteRepository.findByCode(code);
+    }
+
+    @ReadOnlyProperty
+    public Invite getInviteForEmail(String email) {
+        return inviteRepository.findByForEmailIgnoreCase(email);
+    }
+
+    @ReadOnlyProperty
+    public Optional<Invite> getInviteForEmailAndStatus(String email, InviteStatus status) {
+        return inviteRepository.findByForEmailIgnoreCaseAndStatus(email, status);
+    }
+
+    public boolean isInviteCodeExpired(String code) {
+        Invite invite = inviteRepository.findByCode(code);
+        if(invite == null) {
+            log.info("Invite not found for code: {}", code);
+            return true;
+        }
+        return isInviteExpired(invite);
+    }
+
+    public boolean isInviteExpired(Invite invite) {
+        long diffInMs = new Date().getTime() - invite.getInvitedAt().getTime();
+        return diffInMs > validityInSeconds * 1000L;
+    }
+
+    public boolean isInviteValid(String code) {
+        return inviteRepository.existsByCode(code) && !isInviteCodeExpired(code);
+    }
+
+    public boolean isInviteCodeExists(String code) {
         return inviteRepository.existsByCode(code);
     }
 
     public boolean isEmailInvited(String email) {
-        return inviteRepository.existsByForEmailAndInviterIdIsNotNull(email);
+        return inviteRepository.existsByForEmailIgnoreCaseAndInviterIdIsNotNull(email);
     }
 }

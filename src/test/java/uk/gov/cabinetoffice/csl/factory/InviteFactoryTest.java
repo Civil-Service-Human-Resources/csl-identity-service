@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.domain.factory;
+package uk.gov.cabinetoffice.csl.factory;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InviteFactoryTest {
+
     @Mock
     private RoleRepository roleRepository;
 
@@ -27,14 +28,14 @@ public class InviteFactoryTest {
     public void shouldReturnInvite() {
         String email = "user@domain.org";
         Identity inviter = new Identity();
-        Role role1 = new Role("role1", "description");
-        Role role2 = new Role("role2", "description");
+        Role role1 = new Role(1L, "role1", "description");
+        Role role2 = new Role(2L, "role2", "description");
         Set<Role> roleSet = new HashSet<>(Arrays.asList(role1, role2));
         Invite invite = inviteFactory.create(email, roleSet, inviter);
         assertEquals(email, invite.getForEmail());
         assertEquals(roleSet, invite.getForRoles());
         assertEquals(inviter, invite.getInviter());
-        assertEquals(new Date().toString(), invite.getInvitedAt().toString());
+        assertNotNull(invite.getInvitedAt());
         assertNotNull(invite.getCode());
         assertEquals(40, invite.getCode().length());
     }
@@ -42,7 +43,7 @@ public class InviteFactoryTest {
     @Test
     public void shouldReturnSelfSignUpInvite() {
         String email = "user@domain.org";
-        Role role = new Role();
+        Role role = new Role(1L, "role1", "description");
         when(roleRepository.findFirstByNameEquals("LEARNER")).thenReturn(role);
         Invite invite = inviteFactory.createSelfSignUpInvite(email);
         assertEquals(email, invite.getForEmail());

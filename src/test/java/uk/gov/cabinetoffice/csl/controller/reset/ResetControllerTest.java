@@ -12,8 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
-import uk.gov.cabinetoffice.csl.repository.ResetRepository;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 
@@ -49,10 +48,7 @@ public class ResetControllerTest {
     private ResetService resetService;
 
     @MockBean
-    private ResetRepository resetRepository;
-
-    @MockBean
-    private IdentityRepository identityRepository;
+    private IdentityService identityService;
 
     @Test
     public void shouldLoadRequestResetForm() throws Exception {
@@ -71,7 +67,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadCheckEmailPageIfIdentityExistsForTheGivenEmailId() throws Exception {
-        when(identityRepository.existsByEmail(EMAIL)).thenReturn(true);
+        when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
         mockMvc.perform(post("/reset")
                         .param("email", EMAIL)
                         .with(csrf())
@@ -90,14 +86,14 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExistForTheGivenEmailId() throws Exception {
-        when(identityRepository.existsByEmail(EMAIL)).thenReturn(false);
+        when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(false);
         mockMvc.perform(post("/reset")
                         .param("email", EMAIL)
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/requestReset"))
-                .andExpect(content().string(containsString("Invalid email id. Submit the reset request for the valid email id.")))
+                .andExpect(content().string(containsString("Invalid email id.\nSubmit the reset request for the valid email id.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
@@ -107,14 +103,14 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeDoesNotExist() throws Exception {
-        when(resetRepository.findByCode(CODE)).thenReturn(null);
+        when(resetService.getResetByCode(CODE)).thenReturn(null);
         mockMvc.perform(
                         get("/reset/" + CODE)
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/requestReset"))
-                .andExpect(content().string(containsString("Invalid reset code. Submit the reset request again.")))
+                .andExpect(content().string(containsString("The reset link is invalid.\nPlease re-submit the reset request.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
@@ -127,7 +123,7 @@ public class ResetControllerTest {
         Reset reset = createReset();
         reset.setRequestedAt(new Date(2323223232L));
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(true);
 
         mockMvc.perform(
@@ -136,7 +132,7 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/requestReset"))
-                .andExpect(content().string(containsString("Reset code expired. Submit the reset request again.")))
+                .andExpect(content().string(containsString("The reset link is expired.\nPlease re-submit the reset request.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
@@ -150,7 +146,7 @@ public class ResetControllerTest {
         reset.setResetStatus(RESET);
         reset.setRequestedAt(new Date(2323223232L));
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetComplete(reset)).thenReturn(true);
 
@@ -160,7 +156,7 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/requestReset"))
-                .andExpect(content().string(containsString("Reset code is already used. Submit the reset request again.")))
+                .andExpect(content().string(containsString("The reset link is already used.\nPlease re-submit the reset request.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
@@ -172,7 +168,7 @@ public class ResetControllerTest {
     public void shouldLoadPasswordFormIfCodeIsPending() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
@@ -198,13 +194,13 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfNumberIsMissingFromPassword() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password")
                         .param("confirmPassword", "Password")
@@ -230,13 +226,13 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfLowerCaseCharacterMissingFromPassword() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "PASSWORD123")
                         .param("confirmPassword", "PASSWORD123")
@@ -262,13 +258,13 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfUpperCaseCharacterMissingFromPassword() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "password123")
                         .param("confirmPassword", "password123")
@@ -294,13 +290,13 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfPasswordLengthIsLessThan8Characters() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Pass123")
                         .param("confirmPassword", "Pass123")
@@ -326,13 +322,13 @@ public class ResetControllerTest {
     public void shouldShowPasswordMismatchErrorMessageIfPasswordAndConfirmPasswordMismatch() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
                         .param("confirmPassword", "PasswordMisMatch")
@@ -358,10 +354,10 @@ public class ResetControllerTest {
     public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExist() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetComplete(reset)).thenReturn(false);
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(null);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(null);
 
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
@@ -370,7 +366,7 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/requestReset"))
-                .andExpect(content().string(containsString("Invalid reset code. Submit the reset request for the valid email id.")))
+                .andExpect(content().string(containsString("The reset link is invalid.\nPlease submit the reset request for the valid email id.")))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("Reset your password")))
                 .andExpect(content().string(containsString("Enter your email")))
@@ -382,13 +378,13 @@ public class ResetControllerTest {
     public void shouldLoadPasswordResetSuccessful() throws Exception {
         Reset reset = createReset();
 
-        when(resetRepository.findByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetByCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
-        when(identityRepository.findFirstByEmailEquals(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
         mockMvc.perform(post("/reset/" + CODE)
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123")

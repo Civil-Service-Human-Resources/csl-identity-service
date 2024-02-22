@@ -3,8 +3,8 @@ package uk.gov.cabinetoffice.csl.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.cabinetoffice.csl.domain.AgencyToken;
-import uk.gov.cabinetoffice.csl.domain.AgencyTokenCapacityUsedDTO;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.AgencyTokenCapacityUsedDTO;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 @Slf4j

@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.service.client.csrs.CivilServantRegistryClient;
-import uk.gov.cabinetoffice.csl.domain.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +19,7 @@ public class AgencyTokenServiceTest {
     private static final String DOMAIN = "someone@kainos.com";
 
     @Mock
-    private UserService userService;
+    private IdentityService identityService;
 
     @Mock
     private CivilServantRegistryClient civilServantRegistryClient;
@@ -29,7 +29,7 @@ public class AgencyTokenServiceTest {
 
     @Test
     public void givenAllowListedDomain_whenIsDomainAllowListed_thenShouldReturnTrue() {
-        when(userService.isAllowListedDomain(anyString())).thenReturn(true);
+        when(identityService.isAllowListedDomain(anyString())).thenReturn(true);
 
         boolean actual = agencyTokenService.isDomainAllowListed(DOMAIN);
 
@@ -38,7 +38,7 @@ public class AgencyTokenServiceTest {
 
     @Test
     public void givenANonAllowListedDomain_whenIsDomainAllowListed_thenShouldReturnFalse() {
-        when(userService.isAllowListedDomain(anyString())).thenReturn(false);
+        when(identityService.isAllowListedDomain(anyString())).thenReturn(false);
 
         boolean actual = agencyTokenService.isDomainAllowListed(DOMAIN);
 

@@ -22,11 +22,12 @@ public class NotifyServiceTest {
     private NotifyService notifyService;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         notificationClient = mock(NotificationClient.class);
         notifyService = new NotifyServiceImpl(notificationClient);
         ReflectionTestUtils.setField(notifyService, "notificationClient", notificationClient);
     }
+
     @Test
     public void shouldSendNotificationWithEmailAddressAndTemplateId() throws NotificationClientException {
         String email = "learner@domain.com";

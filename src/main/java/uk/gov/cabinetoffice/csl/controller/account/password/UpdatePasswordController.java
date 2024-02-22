@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.service.UserService;
+import uk.gov.cabinetoffice.csl.service.PasswordService;
 
 @Controller
 @RequestMapping("/account/password")
@@ -20,10 +20,10 @@ public class UpdatePasswordController {
     @Value("${lpg.uiSignOutUrl}")
     private String lpgUiSignOutUrl;
 
-    private final UserService userService;
+    private final PasswordService passwordService;
 
-    public UpdatePasswordController(UserService userService) {
-        this.userService = userService;
+    public UpdatePasswordController(PasswordService passwordService) {
+        this.passwordService = passwordService;
     }
 
     @GetMapping
@@ -41,7 +41,7 @@ public class UpdatePasswordController {
             return "account/updatePassword";
         }
 
-        userService.updatePasswordAndNotify(
+        passwordService.updatePasswordAndNotify(
                 ((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 form.getNewPassword());
         return "redirect:/account/password/passwordUpdated";

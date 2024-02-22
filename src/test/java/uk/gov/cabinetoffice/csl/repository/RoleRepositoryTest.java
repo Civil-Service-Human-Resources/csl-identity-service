@@ -40,10 +40,6 @@ public class RoleRepositoryTest {
     }
 
     private Role createRole() {
-        return createRole("name", "description");
-    }
-
-    private Role createRole(String name, String description) {
-        return new Role(name, description);
+        return new Role( "name", "description");
     }
 }

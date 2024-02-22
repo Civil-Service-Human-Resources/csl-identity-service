@@ -14,13 +14,13 @@ import java.util.Optional;
 @Repository
 public interface IdentityRepository extends JpaRepository<Identity, Long> {
 
-        Identity findFirstByActiveTrueAndEmailEquals(String email);
+        Identity findFirstByActiveTrueAndEmailEqualsIgnoreCase(String email);
 
-        Identity findFirstByEmailEquals(String email);
+        Identity findFirstByEmailEqualsIgnoreCase(String email);
 
-        Optional<Identity> findFirstByActiveFalseAndEmailEquals(String email);
+        Optional<Identity> findFirstByActiveFalseAndEmailEqualsIgnoreCase(String email);
 
-        boolean existsByEmail(String email);
+        boolean existsByEmailIgnoreCase(String email);
 
         @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i.email, i.uid) " +
                 "from Identity i where i.uid in (?1)")

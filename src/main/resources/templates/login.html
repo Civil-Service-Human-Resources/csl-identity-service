@@ -12,11 +12,12 @@
                             <span th:case="'deactivated'">Your account has been deactivated</span>
                             <span th:case="'deactivated-expired'">Your reactivation email link has expired</span>
                             <span th:case="'pending-reactivation'">Your account is pending reactivation</span>
-                            <span th:case="*">Your sign-in details are incorrect</span>
+                            <span th:case="'locked'">Your account is locked</span>
+                            <span th:case="'failed'">Your sign-in details are incorrect</span>
                         </h2>
                         <p>
-                            <span th:if="${param.error[0] == 'failed'}">Check your email and password are correct. After 5 unsuccessful attempts, your account will be locked.</span>
-                            <span th:if="${param.error[0] == 'locked'}"><a href="/reset" class="push-bottom">Reset your password to unlock your account</a></span>
+                            <span th:if="${param.error[0] == 'failed'}">Check your email and password are correct.<br>After <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts, your account will be locked.</span>
+                            <span th:if="${param.error[0] == 'locked'}">Your account is locked due to <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts.<br><a href="/reset" class="push-bottom">Reset your password to unlock your account</a></span>
                             <span th:if="${param.error[0] == 'blocked'}">Your account has been blocked and cannot access this website.<br>Please <a href="mailto:feedback@cslearning.gov.uk">contact us</a> for more information.</span>
                             <span th:if="${param.error[0] == 'deactivated' || param.error[0] == 'deactivated-expired'}">You will need to <a th:href="@{/account/reactivate(code=${param.username[0]})}">reactivate your account</a> to keep using Civil Service Learning. You have 24 hours to click the reactivation link within the email.</span>
                             <span th:if="${param.error[0] == 'pending-reactivation'}">We recently sent you a message to reactivate your account. Please check your emails (including the junk/spam folder)</span>

@@ -12,19 +12,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.TokenRequest;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
-import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
-import uk.gov.cabinetoffice.csl.service.UserService;
 
 import java.util.Date;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.anyString;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
@@ -56,13 +57,10 @@ public class SignupControllerTest {
     private InviteService inviteService;
 
     @MockBean
-    private UserService userService;
+    private IdentityService identityService;
 
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
-
-    @MockBean
-    private InviteRepository inviteRepository;
 
     @Test
     public void shouldReturnCreateAccountForm() throws Exception {
@@ -80,10 +78,9 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(inviteRepository.existsByForEmailAndStatus(email, PENDING)).thenReturn(false);
-        when(userService.existsByEmail(email)).thenReturn(false);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(userService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
         mockMvc.perform(
                 post("/signup/request")
@@ -109,11 +106,11 @@ public class SignupControllerTest {
         invite.get().setInvitedAt(new Date(System.currentTimeMillis() - 25*60*60*1000));
         invite.get().setCode("code");
 
-        when(inviteService.findByForEmailAndStatus(email, PENDING)).thenReturn(invite);
-        when(inviteService.isInviteCodeExpired(invite.get())).thenReturn(false);
+        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
+        when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
 
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(userService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
         mockMvc.perform(
                 post("/signup/request")
@@ -124,7 +121,7 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk());
 
-        verify(inviteService, times(1)).updateInviteByCode(invite.get().getCode(), EXPIRED);
+        verify(inviteService, times(1)).updateInviteStatus(invite.get().getCode(), EXPIRED);
     }
 
     @Test
@@ -133,8 +130,8 @@ public class SignupControllerTest {
                 post("/signup/request")
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", "userdomain.org")
-                        .param("confirmEmail", "userdomain.org")
+                        .param("email", "userDomain.org")
+                        .param("confirmEmail", "userDomain.org")
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Email address is not valid")));
@@ -143,8 +140,6 @@ public class SignupControllerTest {
     @Test
     public void shouldRedirectToSignupIfUserHasAlreadyBeenInvited() throws Exception {
         String email = "user@domain.com";
-
-        when(inviteRepository.existsByForEmailAndStatus(email, PENDING)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -160,8 +155,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
         String email = "user@domain.com";
 
-        when(inviteRepository.existsByForEmailAndStatus(email, PENDING)).thenReturn(false);
-        when(userService.checkEmailExists(email)).thenReturn(true);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -179,9 +173,8 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(inviteRepository.existsByForEmailAndStatus(email, PENDING)).thenReturn(false);
-        when(userService.existsByEmail(email)).thenReturn(false);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(true);
 
         mockMvc.perform(
@@ -206,10 +199,9 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(inviteRepository.existsByForEmailAndStatus(email, PENDING)).thenReturn(false);
-        when(userService.existsByEmail(email)).thenReturn(false);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(userService.isAllowListedDomain(domain)).thenReturn(false);
+        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(false);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
@@ -243,9 +235,9 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfInviteCodeExpired() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isCodeExists(code)).thenReturn(true);
-        when(inviteService.isCodeExpired(code)).thenReturn(true);
-        doNothing().when(inviteService).updateInviteByCode(code, EXPIRED);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(code)).thenReturn(true);
+        doNothing().when(inviteService).updateInviteStatus(code, EXPIRED);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -259,7 +251,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfInviteCodeDoesNotExists() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isCodeExists(code)).thenReturn(false);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(false);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -275,9 +267,9 @@ public class SignupControllerTest {
         Invite invite = new Invite();
         invite.setAuthorisedInvite(false);
 
-        when(inviteService.isCodeExists(code)).thenReturn(true);
-        when(inviteService.isCodeExpired(code)).thenReturn(false);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(code)).thenReturn(false);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -293,9 +285,9 @@ public class SignupControllerTest {
         Invite invite = new Invite();
         invite.setAuthorisedInvite(true);
 
-        when(inviteService.isCodeExists(code)).thenReturn(true);
-        when(inviteService.isCodeExpired(code)).thenReturn(false);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
+        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(code)).thenReturn(false);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -311,7 +303,7 @@ public class SignupControllerTest {
         String password = "password";
 
         when(inviteService.isInviteValid(code)).thenReturn(false);
-        when(inviteRepository.findByCode(anyString())).thenReturn(new Invite());
+        when(inviteService.getInviteForCode(anyString())).thenReturn(new Invite());
 
         mockMvc.perform(
                 post("/signup/" + code)
@@ -350,7 +342,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(false);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
                 post("/signup/" + code)
@@ -372,9 +364,9 @@ public class SignupControllerTest {
         TokenRequest tokenRequest = new TokenRequest();
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
-        doNothing().when(userService).createIdentityFromInviteCode(code, password, tokenRequest);
-        doNothing().when(inviteService).updateInviteByCode(code, InviteStatus.ACCEPTED);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        doNothing().when(identityService).createIdentityFromInviteCode(code, password, tokenRequest);
+        doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
 
         mockMvc.perform(
                 post("/signup/" + code)
@@ -397,8 +389,8 @@ public class SignupControllerTest {
         TokenRequest tokenRequest = new TokenRequest();
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
-        doThrow(new UnableToAllocateAgencyTokenException("Error")).when(userService)
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        doThrow(new UnableToAllocateAgencyTokenException("Error")).when(identityService)
                 .createIdentityFromInviteCode(code, password, tokenRequest);
 
         mockMvc.perform(
@@ -439,7 +431,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(false);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
@@ -463,7 +455,7 @@ public class SignupControllerTest {
         OrganisationalUnitDTO[] organisationalUnits = new OrganisationalUnitDTO[]{new OrganisationalUnitDTO()};
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
@@ -512,8 +504,8 @@ public class SignupControllerTest {
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
@@ -547,8 +539,8 @@ public class SignupControllerTest {
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
@@ -579,8 +571,8 @@ public class SignupControllerTest {
         Optional<AgencyToken> emptyOptional = Optional.empty();
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
-        when(inviteRepository.findByCode(code)).thenReturn(invite);
-        when(userService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(emptyOptional);
 

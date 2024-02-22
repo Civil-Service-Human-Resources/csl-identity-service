@@ -10,15 +10,15 @@ import java.util.Optional;
 @Repository
 public interface InviteRepository extends CrudRepository<Invite, Long> {
 
-    Invite findByForEmail(String forEmail);
+    Invite findByForEmailIgnoreCase(String forEmail);
 
     Invite findByCode(String code);
 
-    Optional<Invite> findByForEmailAndStatus(String email, InviteStatus status);
+    Optional<Invite> findByForEmailIgnoreCaseAndStatus(String email, InviteStatus status);
 
     boolean existsByCode(String code);
 
-    boolean existsByForEmailAndStatus(String email, InviteStatus status);
+    boolean existsByForEmailIgnoreCaseAndStatus(String email, InviteStatus status);
 
-    boolean existsByForEmailAndInviterIdIsNotNull(String email);
+    boolean existsByForEmailIgnoreCaseAndInviterIdIsNotNull(String email);
 }

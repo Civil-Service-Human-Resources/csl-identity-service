@@ -10,8 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.service.UserService;
-import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
+import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -40,10 +39,7 @@ public class UpdatePasswordControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
-
-    @MockBean
-    private IUserAuthService userAuthService;
+    private PasswordService passwordService;
 
     @Test
     public void shouldLoadPasswordResetForm() throws Exception {
@@ -64,32 +60,30 @@ public class UpdatePasswordControllerTest {
     }
 
     @Test
-    public void shouldLoadPasswordResetFormWithPasswordMismatchError() throws Exception {
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
-        when(userAuthService.getIdentity()).thenReturn(identity);
-        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
-        doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
+    public void shouldLoadPasswordResetFormWithCurrentPasswordIncorrectError() throws Exception {
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
+        when(passwordService.isPasswordMatches(identity.getEmail(), "currentPassword123")).thenReturn(false);
 
         mockMvc.perform(post("/account/password")
-                        .param("password", PASSWORD)
-                        .param("newPassword", PASSWORD)
-                        .param("confirm", "password")
+                        .param("password", "currentPassword123")
+                        .param("newPassword", "Password1234")
+                        .param("confirm", "Password1234")
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/updatePassword"))
                 .andExpect(content().string(containsString("Change your password")))
                 .andExpect(content().string(containsString("There was a problem with your password")))
-                .andExpect(content().string(containsString("New password fields do not match")))
+                .andExpect(content().string(containsString("Current password is incorrect")))
                 .andDo(print());
     }
 
     @Test
     public void shouldUpdatePassword() throws Exception {
-        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD);
-        when(userAuthService.getIdentity()).thenReturn(identity);
-        when(userService.checkPassword(identity.getEmail(), PASSWORD)).thenReturn(true);
-        doNothing().when(userService).updatePasswordAndNotify(identity, PASSWORD);
+        Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
+
+        when(passwordService.isPasswordMatches(identity.getEmail(), PASSWORD)).thenReturn(true);
+        doNothing().when(passwordService).updatePasswordAndNotify(identity, PASSWORD);
 
         mockMvc.perform(post("/account/password")
                         .param("password", PASSWORD)

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.gov.cabinetoffice.csl.domain.AgencyToken;
-import uk.gov.cabinetoffice.csl.domain.AgencyTokenCapacityUsedDTO;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.AgencyTokenCapacityUsedDTO;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 import java.util.UUID;

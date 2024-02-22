@@ -9,18 +9,18 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
-import uk.gov.cabinetoffice.csl.domain.OrganisationalUnitDTO;
-import uk.gov.cabinetoffice.csl.domain.TokenRequest;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
-import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
-import uk.gov.cabinetoffice.csl.service.UserService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
+import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Date;
@@ -59,24 +59,24 @@ public class SignupController {
 
     private final InviteService inviteService;
 
-    private final UserService userService;
+    private final IdentityService identityService;
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
-    private final InviteRepository inviteRepository;
-
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private final Utils utils;
+
     public SignupController(InviteService inviteService,
-                            UserService userService,
+                            IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
-                            InviteRepository inviteRepository,
-                            AgencyTokenCapacityService agencyTokenCapacityService) {
+                            AgencyTokenCapacityService agencyTokenCapacityService,
+                            Utils utils) {
         this.inviteService = inviteService;
-        this.userService = userService;
+        this.identityService = identityService;
         this.civilServantRegistryClient = civilServantRegistryClient;
-        this.inviteRepository = inviteRepository;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.utils = utils;
     }
 
     @GetMapping(path = "/request")
@@ -97,11 +97,11 @@ public class SignupController {
         }
 
         final String email = form.getEmail();
-        Optional<Invite> pendingInvite = inviteService.findByForEmailAndStatus(email, InviteStatus.PENDING);
+        Optional<Invite> pendingInvite = inviteService.getInviteForEmailAndStatus(email, InviteStatus.PENDING);
         if(pendingInvite.isPresent()) {
-            if (inviteService.isInviteCodeExpired(pendingInvite.get())) {
+            if (inviteService.isInviteExpired(pendingInvite.get())) {
                 log.info("{} has already been invited", email);
-                inviteService.updateInviteByCode(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
+                inviteService.updateInviteStatus(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
             } else {
                 long timeForReReg = new Date().getTime() - pendingInvite.get().getInvitedAt().getTime();
                 if (timeForReReg < durationAfterReRegAllowedInSeconds * 1000) {
@@ -110,33 +110,33 @@ public class SignupController {
                             ApplicationConstants.STATUS_ATTRIBUTE,
                             "You have been sent an email with a link to register your account. " +
                                     "Please check your spam or junk mail folders.\n" +
-                                    "If you have not received the email, please wait " +
-                                    (durationAfterReRegAllowedInSeconds/3600) +
-                                    " hours and re-enter your details to create an account.");
+                                    "If you have not received the email, " +
+                                    utils.validityMessage("please wait %s", durationAfterReRegAllowedInSeconds) +
+                                    " and re-enter your details to create an account.");
                     return REDIRECT_SIGNUP_REQUEST;
                 } else {
                     log.info("{} user trying to re-register after re-registration allowed time but " +
                             "before code expired hence setting the current pending invite to expired.", email);
-                    inviteService.updateInviteByCode(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
+                    inviteService.updateInviteStatus(pendingInvite.get().getCode(), InviteStatus.EXPIRED);
                 }
             }
         }
 
-        if (userService.existsByEmail(email)) {
+        if (identityService.isIdentityExistsForEmail(email)) {
             log.info("{} is already a user", email);
             redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                     "User already exists with email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
         }
 
-        final String domain = userService.getDomainFromEmailAddress(email);
+        final String domain = identityService.getDomainFromEmailAddress(email);
 
         if (civilServantRegistryClient.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
         } else {
-            if (userService.isAllowListedDomain(domain)) {
+            if (identityService.isAllowListedDomain(domain)) {
                 log.debug("Sending invite to allowListed user {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
                 return INVITE_SENT_TEMPLATE;
@@ -152,16 +152,16 @@ public class SignupController {
     @GetMapping("/{code}")
     public String signup(Model model, @PathVariable(value = "code") String code,
                                             RedirectAttributes redirectAttributes) {
-        if (inviteService.isCodeExists(code)) {
-            if (inviteService.isCodeExpired(code)) {
+        if (inviteService.isInviteCodeExists(code)) {
+            if (inviteService.isInviteCodeExpired(code)) {
                 log.debug("Signup code for invite is expired - redirecting to signup");
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                         "This registration link has now expired.\n" +
                                 "Please re-enter your details to create an account.");
-                inviteService.updateInviteByCode(code, InviteStatus.EXPIRED);
+                inviteService.updateInviteStatus(code, InviteStatus.EXPIRED);
                 return REDIRECT_SIGNUP_REQUEST;
             } else {
-                Invite invite = inviteRepository.findByCode(code);
+                Invite invite = inviteService.getInviteForCode(code);
 
                 if (!invite.isAuthorisedInvite()) {
                     log.debug("Invite email = {} not yet authorised - redirecting to enter token screen",
@@ -201,19 +201,19 @@ public class SignupController {
                          Model model,
                          RedirectAttributes redirectAttributes) {
         if (signUpFormBindingResult.hasErrors()) {
-            model.addAttribute(INVITE_MODEL, inviteRepository.findByCode(code));
+            model.addAttribute(INVITE_MODEL, inviteService.getInviteForCode(code));
             return SIGNUP_TEMPLATE;
         }
 
         if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
+            Invite invite = inviteService.getInviteForCode(code);
             if (!invite.isAuthorisedInvite()) {
                 return REDIRECT_ENTER_TOKEN + code;
             }
 
             log.debug("Invite and signup credentials valid - creating identity and updating invite to 'Accepted'");
             try {
-                userService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
+                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
             } catch (UnableToAllocateAgencyTokenException e) {
                 log.debug("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
 
@@ -231,7 +231,7 @@ public class SignupController {
 
                 return REDIRECT_LOGIN;
             }
-            inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+            inviteService.updateInviteStatus(code, InviteStatus.ACCEPTED);
 
             // This provides the next template the URL for LPG-UI so a user can begin the login process
             model.addAttribute(LPG_UI_URL, lpgUiUrl);
@@ -245,7 +245,7 @@ public class SignupController {
     @GetMapping(path = "/enterToken/{code}")
     public String enterToken(Model model, @PathVariable(value = "code") String code) {
         if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
+            Invite invite = inviteService.getInviteForCode(code);
             if (invite.isAuthorisedInvite()) {
                 return REDIRECT_SIGNUP + code;
             }
@@ -275,10 +275,10 @@ public class SignupController {
         }
 
         if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
+            Invite invite = inviteService.getInviteForCode(code);
 
             final String emailAddress = invite.getForEmail();
-            final String domain = userService.getDomainFromEmailAddress(emailAddress);
+            final String domain = identityService.getDomainFromEmailAddress(emailAddress);
 
             return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(),
                             form.getOrganisation())
@@ -293,7 +293,7 @@ public class SignupController {
                         }
 
                         invite.setAuthorisedInvite(true);
-                        inviteRepository.save(invite);
+                        inviteService.saveInvite(invite);
 
                         model.addAttribute(INVITE_MODEL, invite);
 

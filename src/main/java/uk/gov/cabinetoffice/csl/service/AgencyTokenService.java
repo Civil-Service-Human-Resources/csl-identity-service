@@ -1,24 +1,19 @@
 package uk.gov.cabinetoffice.csl.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
-@Slf4j
+@AllArgsConstructor
 @Service
 public class AgencyTokenService {
 
-    private final UserService userService;
+    private final IdentityService identityService;
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
-    public AgencyTokenService(UserService userService, ICivilServantRegistryClient civilServantRegistryClient) {
-        this.userService = userService;
-        this.civilServantRegistryClient = civilServantRegistryClient;
-    }
-
     public boolean isDomainAllowListed(String domain) {
-        return userService.isAllowListedDomain(domain);
+        return identityService.isAllowListedDomain(domain);
     }
 
     public boolean isDomainAnAgencyTokenDomain(String domain) {

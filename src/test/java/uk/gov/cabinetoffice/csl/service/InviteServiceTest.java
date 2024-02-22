@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
-import uk.gov.cabinetoffice.csl.domain.factory.InviteFactory;
+import uk.gov.cabinetoffice.csl.factory.InviteFactory;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -39,7 +39,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+        inviteService.updateInviteStatus(code, InviteStatus.ACCEPTED);
 
         ArgumentCaptor<Invite> inviteArgumentCaptor = ArgumentCaptor.forClass(Invite.class);
 
@@ -62,7 +62,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        MatcherAssert.assertThat(inviteService.isCodeExpired(code), equalTo(true));
+        MatcherAssert.assertThat(inviteService.isInviteCodeExpired(code), equalTo(true));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        MatcherAssert.assertThat(inviteService.isCodeExpired(code), equalTo(false));
+        MatcherAssert.assertThat(inviteService.isInviteCodeExpired(code), equalTo(false));
     }
 
     @Test
@@ -98,13 +98,13 @@ public class InviteServiceTest {
 
     @Test
     public void shouldReturnTrueIfEmailInvited() {
-        when(inviteRepository.existsByForEmailAndInviterIdIsNotNull(EMAIL)).thenReturn(true);
+        when(inviteRepository.existsByForEmailIgnoreCaseAndInviterIdIsNotNull(EMAIL)).thenReturn(true);
         assertTrue(inviteService.isEmailInvited(EMAIL));
     }
 
     @Test
     public void shouldReturnFalseIfEmailNotInvited() {
-        when(inviteRepository.existsByForEmailAndInviterIdIsNotNull(EMAIL)).thenReturn(false);
+        when(inviteRepository.existsByForEmailIgnoreCaseAndInviterIdIsNotNull(EMAIL)).thenReturn(false);
         assertFalse(inviteService.isEmailInvited(EMAIL));
     }
 }
