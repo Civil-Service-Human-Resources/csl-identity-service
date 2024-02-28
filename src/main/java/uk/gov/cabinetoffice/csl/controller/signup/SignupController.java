@@ -129,7 +129,7 @@ public class SignupController {
             return REDIRECT_SIGNUP_REQUEST;
         }
 
-        final String domain = identityService.getDomainFromEmailAddress(email);
+        final String domain = utils.getDomainFromEmailAddress(email);
 
         if (civilServantRegistryClient.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
@@ -278,7 +278,7 @@ public class SignupController {
             Invite invite = inviteService.getInviteForCode(code);
 
             final String emailAddress = invite.getForEmail();
-            final String domain = identityService.getDomainFromEmailAddress(emailAddress);
+            final String domain = utils.getDomainFromEmailAddress(emailAddress);
 
             return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(),
                             form.getOrganisation())

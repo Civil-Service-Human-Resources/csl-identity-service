@@ -13,6 +13,7 @@ import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -51,6 +52,9 @@ public class IdentityServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private Utils utils;
+
     @BeforeEach
     public void setUp() {
         identityService = new IdentityService(
@@ -58,7 +62,8 @@ public class IdentityServiceTest {
                 agencyTokenCapacityService,
                 identityRepository,
                 civilServantRegistryClient,
-                passwordEncoder
+                passwordEncoder,
+                utils
         );
         when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowListed.gov.uk", "example.com"));
     }
@@ -98,6 +103,7 @@ public class IdentityServiceTest {
     @Test
     public void createIdentityFromInviteCodeWithoutAgencyButIsAllowListed() {
         final String code = "123abc";
+        final String domain = "example.com";
         final String email = "test@example.com";
         Role role = new Role();
         role.setName("USER");
@@ -113,8 +119,8 @@ public class IdentityServiceTest {
         TokenRequest tokenRequest = new TokenRequest();
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-
         when(passwordEncoder.encode("password")).thenReturn("password");
+        when(utils.getDomainFromEmailAddress(email)).thenReturn(domain);
 
         identityService.createIdentityFromInviteCode(code, "password", tokenRequest);
 

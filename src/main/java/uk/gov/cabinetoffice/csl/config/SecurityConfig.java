@@ -84,6 +84,7 @@ public class SecurityConfig {
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/error",
 					"/signup/**", "/login", "/reset/**",
+					"/account/reactivate/**","/account/verify/agency/**",
 					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated()
 			)

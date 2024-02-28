@@ -15,4 +15,8 @@ public class Utils {
         }
         return validityMessage;
     }
+
+    public String getDomainFromEmailAddress(String emailAddress) {
+        return emailAddress.substring(emailAddress.indexOf('@') + 1);
+    }
 }

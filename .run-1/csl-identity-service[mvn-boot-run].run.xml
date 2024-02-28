@@ -29,7 +29,6 @@
               <entry key="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
               <entry key="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
               <entry key="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
-              <entry key="INVITE_SIGNUP_URL" value="http://localhost:9005/signup/%s" />
               <entry key="INVITE_VALIDITY_SECONDS" value="259200" />
               <entry key="JPA_HIBERNATE_ENABLE_LAZY_LOAD_NO_TRANS" value="true" />
               <entry key="JPA_OPEN_IN_VIEW" value="false" />
@@ -51,7 +50,6 @@
               <entry key="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
               <entry key="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
               <entry key="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
-              <entry key="RESET_URL" value="http://localhost:9005/reset/%s" />
               <entry key="RESET_VALIDITY_SECONDS" value="86400" />
               <entry key="ROOT_LOGGING_LEVEL" value="INFO" />
               <entry key="SESSION_TIMEOUT_SECONDS" value="3600" />

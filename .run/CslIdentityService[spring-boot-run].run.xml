@@ -24,7 +24,6 @@
       <env name="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
       <env name="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
       <env name="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
-      <env name="INVITE_SIGNUP_URL" value="http://localhost:9005/signup/%s" />
       <env name="INVITE_VALIDITY_SECONDS" value="259200" />
       <env name="JPA_HIBERNATE_ENABLE_LAZY_LOAD_NO_TRANS" value="true" />
       <env name="JPA_OPEN_IN_VIEW" value="false" />
@@ -46,7 +45,6 @@
       <env name="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
       <env name="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
       <env name="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
-      <env name="RESET_URL" value="http://localhost:9005/reset/%s" />
       <env name="RESET_VALIDITY_SECONDS" value="86400" />
       <env name="ROOT_LOGGING_LEVEL" value="INFO" />
       <env name="SESSION_TIMEOUT_SECONDS" value="3600" />
