@@ -63,6 +63,7 @@ public class ReactivationService {
         return reactivationRepository.save(reactivation);
     }
 
+    //TODO: this method is not required
     private Date getDateOneDayAgo(){
         LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
         return Date.from(oneDayAgo.toInstant(ZoneOffset.UTC));
