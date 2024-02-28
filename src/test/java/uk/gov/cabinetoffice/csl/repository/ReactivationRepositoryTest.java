@@ -12,9 +12,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 
 @SpringBootTest
@@ -26,7 +28,8 @@ public class ReactivationRepositoryTest {
     private ReactivationRepository reactivationRepository;
 
     @Test
-    public void existsReactivationByEmailAndRequestedAtBeforeReturnsTrueIfReactivationRequestExistsForEmailBeforeGivenDate() throws ParseException {
+    public void existsReactivationByEmailAndRequestedAtBeforeReturnsTrueIfReactivationRequestExistsForEmailBeforeGivenDate()
+            throws ParseException {
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         Date dateOfReactivationRequest = formatter.parse("14-Nov-2022");
@@ -36,11 +39,11 @@ public class ReactivationRepositoryTest {
         String email = "my.name@myorg.gov.uk";
         String code1 = RandomStringUtils.random(40, true, true);
 
-        Reactivation reactivation = new Reactivation();
-        reactivation.setCode(code1);
-        reactivation.setReactivationStatus(PENDING);
-        reactivation.setRequestedAt(dateOfReactivationRequest);
-        reactivation.setEmail(email);
+        Reactivation reactivation1 = new Reactivation();
+        reactivation1.setCode(code1);
+        reactivation1.setReactivationStatus(PENDING);
+        reactivation1.setRequestedAt(dateOfReactivationRequest);
+        reactivation1.setEmail(email);
 
         String code2 = RandomStringUtils.random(40, true, true);
         Reactivation reactivation2 = new Reactivation();
@@ -49,16 +52,23 @@ public class ReactivationRepositoryTest {
         reactivation2.setRequestedAt(dateOfReactivationRequest2);
         reactivation2.setEmail(email);
 
-        reactivationRepository.save(reactivation);
+        reactivationRepository.save(reactivation1);
         reactivationRepository.save(reactivation2);
 
-        boolean reactivationPending = reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(email, PENDING, dateBeforeReactivationRequest);
+        boolean reactivationPending = reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(
+                email, PENDING, dateBeforeReactivationRequest);
+        assertTrue(reactivationPending);
 
-        assertThat(reactivationPending, equalTo(true));
+        Optional<Reactivation> r1 = reactivationRepository.findFirstByCodeAndReactivationStatusEquals(code1, PENDING);
+        assertTrue(r1.isPresent());
+
+        Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatusEquals(code2, PENDING);
+        assertTrue(r2.isPresent());
     }
 
     @Test
-    public void existsReactivationByEmailAndRequestedAtBeforeReturnsFalseIfReactivationRequestDoesNotExistForEmailBeforeGivenDate() throws ParseException {
+    public void existsReactivationByEmailAndRequestedAtBeforeReturnsFalseIfReactivationRequestDoesNotExistForEmailBeforeGivenDate()
+            throws ParseException {
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         Date dateOfReactivationRequest = formatter.parse("14-Nov-2022");
@@ -66,25 +76,31 @@ public class ReactivationRepositoryTest {
         String email = "my.name@myorg.gov.uk";
 
         Reactivation reactivation = new Reactivation();
-        reactivation.setCode(RandomStringUtils.random(40, true, true));
+        String code = RandomStringUtils.random(40, true, true);
+        reactivation.setCode(code);
         reactivation.setReactivationStatus(PENDING);
         reactivation.setRequestedAt(dateOfReactivationRequest);
         reactivation.setEmail(email);
 
         reactivationRepository.save(reactivation);
 
-        boolean reactivationPending = reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(email, PENDING, dateAfterReactivationRequest);
-
+        boolean reactivationPending = reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(
+                email, PENDING, dateAfterReactivationRequest);
         assertThat(reactivationPending, equalTo(false));
+
+        Optional<Reactivation> r = reactivationRepository.findFirstByCodeAndReactivationStatusEquals(code, PENDING);
+        assertTrue(r.isPresent());
     }
 
     @Test
-    public void existsByEmailAndReactivationStatusEqualsReturnsFalseIfReactivationDoesNotExistsForEmailAndReactivationStatus() throws ParseException {
+    public void existsByEmailAndReactivationStatusEqualsReturnsFalseIfReactivationDoesNotExistsForEmailAndReactivationStatus()
+            throws ParseException {
         String email = "my.name2@myorg.gov.uk";
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         Date date = formatter.parse("12-Nov-2022");
 
-        boolean pendingReactivationExists = reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(email, PENDING, date);
+        boolean pendingReactivationExists = reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(
+                email, PENDING, date);
 
         assertThat(pendingReactivationExists, equalTo(false));
     }
