@@ -54,12 +54,14 @@ public class ResetController {
     }
 
     @PostMapping
-    public String requestReset(@RequestParam(value = "email") String email, Model model) throws NotificationClientException {
+    public String requestReset(@RequestParam(value = "email") String email, Model model)
+            throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
         if (identityService.isIdentityExistsForEmail(email)) {
             resetService.notifyForResetRequest(email);
             log.info("Reset request email sent to {}", email);
-            model.addAttribute("resetValidityMessage", utils.validityMessage("The link will expire in %s.", validityInSeconds));
+            model.addAttribute("resetValidityMessage",
+                    utils.validityMessage("The link will expire in %s.", validityInSeconds));
             return "reset/checkEmail";
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
@@ -105,7 +107,8 @@ public class ResetController {
             Identity identity = identityService.getIdentityForEmail(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
-                log.info("Identity does not exist for email {} which is retrieved using the reset code {}", reset.getEmail(), code);
+                log.info("Identity does not exist for email {} which is retrieved using the reset code {}",
+                        reset.getEmail(), code);
                 model.addAttribute("userMessage", "The reset link is invalid.\n" +
                         "Please submit the reset request for the valid email id.");
                 return "reset/requestReset";

@@ -11,9 +11,12 @@ import java.util.Optional;
 @Repository
 public interface ReactivationRepository extends CrudRepository<Reactivation, Long> {
 
-    Optional<Reactivation> findFirstByCodeAndReactivationStatusEquals(String code,
+    Optional<Reactivation> findFirstByCodeAndReactivationStatus(String code,
                                             ReactivationStatus reactivationStatus);
 
-    List<Reactivation> findByEmailIgnoreCaseAndReactivationStatusEquals(String email,
+    Optional<Reactivation> findFirstByEmailIgnoreCaseAndReactivationStatus(String email,
+                                            ReactivationStatus reactivationStatus);
+
+    List<Reactivation> findByEmailIgnoreCaseAndReactivationStatus(String email,
                                             ReactivationStatus reactivationStatus);
 }

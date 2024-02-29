@@ -55,9 +55,17 @@ public class ReactivationService {
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
     }
 
+    public Reactivation getPendingReactivationForEmail(String email) {
+        if(isPendingReactivationExistsForEmail(email)) {
+            reactivationRepository.findFirstByEmailIgnoreCaseAndReactivationStatus(email, PENDING)
+                    .orElseThrow(ResourceNotFoundException::new);
+        }
+        throw new ResourceNotFoundException();
+    }
+
     public boolean isPendingReactivationExistsForEmail(String email) {
         List<Reactivation> pendingReactivations =
-                reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(email, PENDING);
+                reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
 
         if(pendingReactivations != null && pendingReactivations.size() > 1) {
             pendingReactivations.forEach(r -> r.setReactivationStatus(EXPIRED));
@@ -90,7 +98,7 @@ public class ReactivationService {
 
     public Reactivation getReactivationForCodeAndStatus(String code, ReactivationStatus reactivationStatus) {
         return reactivationRepository
-                .findFirstByCodeAndReactivationStatusEquals(code, reactivationStatus)
+                .findFirstByCodeAndReactivationStatus(code, reactivationStatus)
                 .orElseThrow(ResourceNotFoundException::new);
     }
 }

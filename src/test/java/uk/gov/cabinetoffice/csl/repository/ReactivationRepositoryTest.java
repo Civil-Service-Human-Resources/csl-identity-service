@@ -53,13 +53,13 @@ public class ReactivationRepositoryTest {
         reactivationRepository.save(reactivation1);
         reactivationRepository.save(reactivation2);
 
-        Optional<Reactivation> r1 = reactivationRepository.findFirstByCodeAndReactivationStatusEquals(code1, PENDING);
+        Optional<Reactivation> r1 = reactivationRepository.findFirstByCodeAndReactivationStatus(code1, PENDING);
         assertTrue(r1.isPresent());
 
-        Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatusEquals(code2, PENDING);
+        Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatus(code2, PENDING);
         assertTrue(r2.isPresent());
 
-        List<Reactivation> pendingReactivation = reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(email, PENDING);
+        List<Reactivation> pendingReactivation = reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
         assertEquals(2, pendingReactivation.size());
     }
 
@@ -68,10 +68,10 @@ public class ReactivationRepositoryTest {
         String email = "my.name2@myorg.gov.uk";
         String code = random(40, true, true);
 
-        Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatusEquals(code, PENDING);
+        Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatus(code, PENDING);
         assertFalse(r2.isPresent());
 
-        List<Reactivation> pendingReactivation = reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(email, PENDING);
+        List<Reactivation> pendingReactivation = reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
         assertEquals(0, pendingReactivation.size());
     }
 }

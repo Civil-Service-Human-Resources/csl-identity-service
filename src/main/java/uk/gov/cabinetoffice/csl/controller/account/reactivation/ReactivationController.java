@@ -17,6 +17,7 @@ import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,6 +63,9 @@ public class ReactivationController {
     @Value("${textEncryption.encryptionKey}")
     private String encryptionKey;
 
+    @Value("${reactivation.validityInSeconds}")
+    private int reactivationValidityInSeconds;
+
     public ReactivationController(ReactivationService reactivationService,
                                   AgencyTokenService agencyTokenService,
                                   NotifyService notifyService,
@@ -74,11 +78,26 @@ public class ReactivationController {
 
     @SneakyThrows
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code) {
+    public String sendReactivationEmail(@RequestParam String code, Model model) {
         String email = getDecryptedText(code, encryptionKey);
-        if(!reactivationService.isPendingReactivationExistsForEmail(email)) {
+        if(reactivationService.isPendingReactivationExistsForEmail(email)) {
+            Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
+            Date requestedAt = pendingReactivation.getRequestedAt();
+            model.addAttribute("reactivationEmailMessage",
+                    "We've already sent you an email on " + requestedAt + " with a link to reactivate your account.");
+            model.addAttribute("reactivationValidityMessage",
+                    utils.validityMessage(
+                            "You have %s from " + requestedAt + " to click the reactivation link within the email.",
+                            reactivationValidityInSeconds));
+        } else {
             Reactivation reactivation = reactivationService.createPendingReactivation(email);
             notifyUserByEmail(reactivation);
+            model.addAttribute("reactivationEmailMessage",
+                    "We've sent you an email with a link to reactivate your account.");
+            model.addAttribute("reactivationValidityMessage",
+                    utils.validityMessage(
+                            "You have %s to click the reactivation link within the email.",
+                            reactivationValidityInSeconds));
         }
         return "reactivate/reactivate";
     }
@@ -88,11 +107,14 @@ public class ReactivationController {
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = getEncryptedText(reactivation.getEmail(), encryptionKey);
-            if(reactivationService.isReactivationExpired(reactivation)){
+            if(reactivationService.isReactivationExpired(reactivation)) {
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
-                return "redirect:/login?error=deactivated-expired&username=" + encode(email, UTF_8);
+                String reactivationValidityMessage = utils.validityMessage(
+                        "You have %s to click the reactivation link within the email.",
+                        reactivationValidityInSeconds);
+                String qParam = "reactivationValidityMessage=" + reactivationValidityMessage + "&username=" + encode(email, UTF_8);
+                return "redirect:/login?error=deactivated-expired&" + qParam;
             }
-
             String domain = utils.getDomainFromEmailAddress(reactivation.getEmail());
             log.debug("Reactivating account using Reactivation: {}", reactivation);
             if (agencyTokenService.isDomainInAgencyToken(domain)) {

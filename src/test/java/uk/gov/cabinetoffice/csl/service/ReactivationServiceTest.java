@@ -88,7 +88,7 @@ public class ReactivationServiceTest {
         reactivation.setReactivationStatus(PENDING);
 
         when(reactivationRepository
-                .findFirstByCodeAndReactivationStatusEquals(CODE, PENDING))
+                .findFirstByCodeAndReactivationStatus(CODE, PENDING))
                 .thenReturn(Optional.of(reactivation));
 
         assertEquals(reactivation, reactivationService.getReactivationForCodeAndStatus(CODE, PENDING));
@@ -97,7 +97,7 @@ public class ReactivationServiceTest {
     @Test
     public void shouldThrowResourceNotFoundExceptionIfReactivationDoesNotExist() {
         when(reactivationRepository
-                .findFirstByCodeAndReactivationStatusEquals(CODE, PENDING))
+                .findFirstByCodeAndReactivationStatus(CODE, PENDING))
                 .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
@@ -119,7 +119,7 @@ public class ReactivationServiceTest {
         ArrayList<Reactivation> reactivations = new ArrayList<>();
         reactivations.add(reactivation);
 
-        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(eq(email), eq(PENDING)))
+        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(eq(email), eq(PENDING)))
                 .thenReturn(reactivations);
 
         assertFalse(reactivationService.isPendingReactivationExistsForEmail(email));
@@ -129,7 +129,7 @@ public class ReactivationServiceTest {
     public void isPendingExistsByEmailReturnsFalseIfNoPendingReactivationExistForEmail(){
         String email = "my.name@myorg.gov.uk";
 
-        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(eq(email), eq(PENDING)))
+        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(eq(email), eq(PENDING)))
                 .thenReturn(new ArrayList<>());
 
         assertFalse(reactivationService.isPendingReactivationExistsForEmail(email));

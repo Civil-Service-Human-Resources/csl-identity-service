@@ -134,13 +134,18 @@ public class ReactivationControllerTest {
         when(reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING))
                 .thenReturn(expiredReactivation);
         when(reactivationService.isReactivationExpired(expiredReactivation)).thenReturn(true);
+        when(utils.validityMessage("You have %s to click the reactivation link within the email.",
+                86400))
+                .thenReturn("You have 24 hours to click the reactivation link within the email.");
 
         String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
 
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername))
+                .andExpect(redirectedUrl("/login?error=deactivated-expired" +
+                        "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
+                        "&username=" + encryptedUsername))
                 .andDo(print());
     }
 }

@@ -48,7 +48,7 @@ public class ResetRepositoryTest {
         Reset expectedReset = createReset();
         resetRepository.save(expectedReset);
         List<Reset> byEmailIgnoreCaseAndResetStatusIgnoreCase =
-                resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(EMAIL, PENDING);
+                resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING);
         Reset actualReset = byEmailIgnoreCaseAndResetStatusIgnoreCase.get(0);
         assertThat(actualReset.getResetStatus(), equalTo(expectedReset.getResetStatus()));
         assertThat(actualReset.getCode(), equalTo(expectedReset.getCode()));

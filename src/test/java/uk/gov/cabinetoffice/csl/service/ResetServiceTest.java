@@ -40,7 +40,7 @@ public class ResetServiceTest {
         doNothing().when(notifyService).notify(EMAIL, CODE, TEMPLATE_ID, URL);
 
         List<Reset> existingPendingResets = new ArrayList<>();
-        when(resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(EMAIL, PENDING)).thenReturn(existingPendingResets);
+        when(resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING)).thenReturn(existingPendingResets);
 
         resetService.notifyForResetRequest(EMAIL);
 
@@ -62,7 +62,7 @@ public class ResetServiceTest {
         List<Reset> existingPendingResets = new ArrayList<>();
         existingPendingResets.add(reset1);
 
-        when(resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(EMAIL, PENDING)).thenReturn(existingPendingResets);
+        when(resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING)).thenReturn(existingPendingResets);
 
         resetService.notifyForResetRequest(EMAIL);
 
@@ -85,7 +85,7 @@ public class ResetServiceTest {
         List<Reset> existingPendingResets = new ArrayList<>();
         existingPendingResets.add(reset1);
 
-        when(resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(EMAIL, PENDING)).thenReturn(existingPendingResets);
+        when(resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING)).thenReturn(existingPendingResets);
 
         resetService.notifyForResetRequest(EMAIL);
 
@@ -109,7 +109,7 @@ public class ResetServiceTest {
         existingPendingResets.add(reset1);
         existingPendingResets.add(reset2);
 
-        when(resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(EMAIL, PENDING)).thenReturn(existingPendingResets);
+        when(resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING)).thenReturn(existingPendingResets);
 
         resetService.notifyForResetRequest(EMAIL);
 

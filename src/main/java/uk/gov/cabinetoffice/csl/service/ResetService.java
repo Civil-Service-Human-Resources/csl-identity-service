@@ -76,7 +76,7 @@ public class ResetService {
         Reset reset = null;
 
         List<Reset> existingPendingResets =
-                resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(email, PENDING);
+                resetRepository.findByEmailIgnoreCaseAndResetStatus(email, PENDING);
 
         if(existingPendingResets != null && existingPendingResets.size() > 1) {
             existingPendingResets.forEach(r -> r.setResetStatus(EXPIRED));

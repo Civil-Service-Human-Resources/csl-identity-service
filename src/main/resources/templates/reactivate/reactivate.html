@@ -5,7 +5,8 @@
         <div class="container">
             <h1 class="heading-large">We've sent you an email</h1>
             <h2 class="heading-medium">What happens next?</h2>
-            <div>We've sent you an email with a link to <b>reactivate your account.</b></div>
+            <p th:text="${reactivationEmailMessage}"></p>
+            <p th:text="${reactivationValidityMessage}"></p>
         </div>
     </content>
 </page>
