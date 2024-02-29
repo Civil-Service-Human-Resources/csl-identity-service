@@ -32,7 +32,7 @@ import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText
 @RequestMapping("/account/reactivate")
 public class ReactivationController {
 
-    private static final String ACCOUNT_REACTIVATED_TEMPLATE = "account/accountReactivated";
+    private static final String ACCOUNT_REACTIVATED_TEMPLATE = "reactivate/accountReactivated";
 
     private static final String REDIRECT_ACCOUNT_REACTIVATED = "redirect:/account/reactivate/updated";
 
@@ -84,8 +84,7 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code,
-            RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = getEncryptedText(reactivation.getEmail(), encryptionKey);
@@ -111,7 +110,8 @@ public class ReactivationController {
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         } catch (Exception e) {
-            log.error("Unexpected error for code: {} with cause {}", code, e.getCause().toString());
+            log.error("Unexpected error for code: {} with cause {}",
+                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         }
