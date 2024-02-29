@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.domain.ResetStatus;
 import uk.gov.cabinetoffice.csl.repository.ResetRepository;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -14,8 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.RandomStringUtils.random;
-import static uk.gov.cabinetoffice.csl.domain.ResetStatus.EXPIRED;
-import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
+import static uk.gov.cabinetoffice.csl.domain.ResetStatus.*;
 
 @Service
 @Transactional
@@ -50,14 +48,14 @@ public class ResetService {
     }
 
     public boolean isResetExpired(Reset reset) {
-        if(reset.getResetStatus().equals(ResetStatus.EXPIRED) || isResetComplete(reset)) {
+        if(reset.getResetStatus().equals(EXPIRED) || isResetComplete(reset)) {
             return true;
         }
 
         if(isResetPending(reset)) {
             long diffInMs = new Date().getTime() - reset.getRequestedAt().getTime();
             if(diffInMs > validityInSeconds * 1000L) {
-                reset.setResetStatus(ResetStatus.EXPIRED);
+                reset.setResetStatus(EXPIRED);
                 resetRepository.save(reset);
                 return true;
             }
@@ -70,7 +68,7 @@ public class ResetService {
     }
 
     public boolean isResetComplete(Reset reset) {
-        return reset.getResetStatus().equals(ResetStatus.RESET);
+        return reset.getResetStatus().equals(RESET);
     }
 
     public void notifyForResetRequest(String email) throws NotificationClientException {
@@ -78,7 +76,7 @@ public class ResetService {
         Reset reset = null;
 
         List<Reset> existingPendingResets =
-                resetRepository.findByEmailIgnoreCaseAndResetStatus(email, PENDING);
+                resetRepository.findByEmailIgnoreCaseAndResetStatusEquals(email, PENDING);
 
         if(existingPendingResets != null && existingPendingResets.size() > 1) {
             existingPendingResets.forEach(r -> r.setResetStatus(EXPIRED));
@@ -103,7 +101,7 @@ public class ResetService {
 
     public void notifyOfSuccessfulReset(Reset reset) throws NotificationClientException {
         reset.setResetAt(new Date());
-        reset.setResetStatus(ResetStatus.RESET);
+        reset.setResetStatus(RESET);
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
     }

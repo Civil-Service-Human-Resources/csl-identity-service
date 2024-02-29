@@ -14,5 +14,5 @@ public interface ResetRepository extends CrudRepository<Reset, Long> {
 
     Reset findByCode(String code);
 
-    List<Reset> findByEmailIgnoreCaseAndResetStatus(String email, ResetStatus resetStatus);
+    List<Reset> findByEmailIgnoreCaseAndResetStatusEquals(String email, ResetStatus resetStatus);
 }

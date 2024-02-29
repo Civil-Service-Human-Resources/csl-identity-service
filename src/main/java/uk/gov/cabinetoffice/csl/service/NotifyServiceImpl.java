@@ -55,7 +55,7 @@ public class NotifyServiceImpl implements NotifyService {
         try {
             SendEmailResponse response =
                     notificationClient.sendEmail(templateId, email, personalisation, null);
-            log.info("Update email notification sent to {}, {}", email, response.getBody());
+            log.info("Email notification sent to {}, {}", email, response.getBody());
         } catch (NotificationClientException e) {
             throw new NotificationException(e);
         }

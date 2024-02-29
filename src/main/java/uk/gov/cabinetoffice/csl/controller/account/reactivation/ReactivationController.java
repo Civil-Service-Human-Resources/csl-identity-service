@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.controller.account.reactivation;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -16,8 +17,6 @@ import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,30 +72,24 @@ public class ReactivationController {
         this.utils = utils;
     }
 
+    @SneakyThrows
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code){
-        try {
-            String email = getDecryptedText(code, encryptionKey);
-            if(reactivationService.isPendingReactivationExistsForEmail(email)) {
-                //TODO: Update the existing pending reactivation date and resend it
-            } else {
-                Reactivation reactivation = reactivationService.createPendingReactivation(email);
-                notifyUserByEmail(reactivation);
-            }
-            return "reactivate/reactivate";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public String sendReactivationEmail(@RequestParam String code) {
+        String email = getDecryptedText(code, encryptionKey);
+        if(!reactivationService.isPendingReactivationExistsForEmail(email)) {
+            Reactivation reactivation = reactivationService.createPendingReactivation(email);
+            notifyUserByEmail(reactivation);
         }
+        return "reactivate/reactivate";
     }
 
-    //TODO Review the logic in this method
     @GetMapping("/{code}")
     public String reactivateAccount(@PathVariable(value = "code") String code,
             RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = getEncryptedText(reactivation.getEmail(), encryptionKey);
-            if(reactivationRequestHasExpired(reactivation)){
+            if(reactivationService.isReactivationExpired(reactivation)){
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
                 return "redirect:/login?error=deactivated-expired&username=" + encode(email, UTF_8);
             }
@@ -140,12 +133,5 @@ public class ReactivationController {
 
         notifyService.notifyWithPersonalisation(reactivation.getEmail(),
                 reactivationEmailTemplateId, emailPersonalisation);
-    }
-
-    //TODO: Recheck this method and replace with the reactivation validity period
-    private boolean reactivationRequestHasExpired(Reactivation reactivation){
-        Instant oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS);
-        return reactivation.getReactivationStatus() == PENDING
-            && reactivation.getRequestedAt().toInstant().isBefore(oneDayAgo);
     }
 }

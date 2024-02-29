@@ -2,23 +2,25 @@ package uk.gov.cabinetoffice.csl.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
-import uk.gov.cabinetoffice.csl.domain.ReactivationStatus;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.ReactivationRepository;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
 
+import static java.util.Locale.ENGLISH;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 
 @SpringBootTest
 @ActiveProfiles("no-redis")
@@ -28,14 +30,12 @@ public class ReactivationServiceTest {
     private static final String CODE = "code";
     private static final String UID = "UID";
 
-    @Mock
-    private ReactivationRepository reactivationRepository;
+    private final IdentityService identityService = mock (IdentityService.class);
+    private final ReactivationRepository reactivationRepository = mock(ReactivationRepository.class);
+    private final int validityInSeconds = 86400;
 
-    @Mock
-    private IdentityService identityService;
-
-    @InjectMocks
-    private ReactivationService reactivationService;
+    private final ReactivationService reactivationService =
+            new ReactivationService(identityService, reactivationRepository, validityInSeconds);
 
     @Test
     public void shouldReactivateIdentity() {
@@ -58,11 +58,11 @@ public class ReactivationServiceTest {
         verify(reactivationRepository).save(reactivationArgumentCaptor.capture());
 
         Reactivation reactivationArgumentCaptorValue = reactivationArgumentCaptor.getValue();
-        assertEquals(ReactivationStatus.REACTIVATED, reactivationArgumentCaptorValue.getReactivationStatus());
+        assertEquals(REACTIVATED, reactivationArgumentCaptorValue.getReactivationStatus());
     }
 
     @Test
-    public void shouldThrowExceptionIfIdentityNotFound() {
+    public void shouldThrowIdentityNotFoundExceptionIfIdentityNotFound() {
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL);
         reactivation.setCode(CODE);
@@ -70,7 +70,8 @@ public class ReactivationServiceTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
 
-        doThrow(new IdentityNotFoundException("Identity not found")).when(identityService).getIdentityForEmailAndActiveFalse(EMAIL);
+        doThrow(new IdentityNotFoundException("Identity not found"))
+                .when(identityService).getIdentityForEmailAndActiveFalse(EMAIL);
 
         Exception exception = assertThrows(IdentityNotFoundException.class,
                 () -> reactivationService.reactivateIdentity(reactivation, agencyToken));
@@ -84,40 +85,52 @@ public class ReactivationServiceTest {
     public void shouldGetReactivationByCodeAndStatus() {
         Reactivation reactivation = new Reactivation();
         reactivation.setCode(CODE);
+        reactivation.setReactivationStatus(PENDING);
 
         when(reactivationRepository
-                .findFirstByCodeAndReactivationStatusEquals(CODE, ReactivationStatus.PENDING))
+                .findFirstByCodeAndReactivationStatusEquals(CODE, PENDING))
                 .thenReturn(Optional.of(reactivation));
 
-        assertEquals(reactivation, reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING));
+        assertEquals(reactivation, reactivationService.getReactivationForCodeAndStatus(CODE, PENDING));
     }
 
     @Test
     public void shouldThrowResourceNotFoundExceptionIfReactivationDoesNotExist() {
         when(reactivationRepository
-                .findFirstByCodeAndReactivationStatusEquals(CODE, ReactivationStatus.PENDING))
+                .findFirstByCodeAndReactivationStatusEquals(CODE, PENDING))
                 .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING));
+                () -> reactivationService.getReactivationForCodeAndStatus(CODE, PENDING));
     }
 
     @Test
-    public void pendingExistsByEmailReturnsTrueIfPendingReactivationExistForEmail(){
+    public void isPendingExistsByEmailReturnsFalseIfPendingReactivationExpired() throws ParseException {
         String email = "my.name@myorg.gov.uk";
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", ENGLISH);
+        Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
 
-        when(reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(eq(email), eq(ReactivationStatus.PENDING), any(Date.class)))
-                .thenReturn(true);
+        Reactivation reactivation = new Reactivation();
+        reactivation.setCode(CODE);
+        reactivation.setReactivationStatus(PENDING);
+        reactivation.setEmail(email);
+        reactivation.setRequestedAt(dateOfReactivationRequest);
 
-        assertTrue(reactivationService.isPendingReactivationExistsForEmail(email));
+        ArrayList<Reactivation> reactivations = new ArrayList<>();
+        reactivations.add(reactivation);
+
+        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(eq(email), eq(PENDING)))
+                .thenReturn(reactivations);
+
+        assertFalse(reactivationService.isPendingReactivationExistsForEmail(email));
     }
 
     @Test
-    public void pendingExistsByEmailReturnsFalseIfNoPendingReactivationExistForEmail(){
+    public void isPendingExistsByEmailReturnsFalseIfNoPendingReactivationExistForEmail(){
         String email = "my.name@myorg.gov.uk";
 
-        when(reactivationRepository.existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(eq(email), eq(ReactivationStatus.PENDING), any(Date.class)))
-                .thenReturn(false);
+        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(eq(email), eq(PENDING)))
+                .thenReturn(new ArrayList<>());
 
         assertFalse(reactivationService.isPendingReactivationExistsForEmail(email));
     }

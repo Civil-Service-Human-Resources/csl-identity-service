@@ -16,6 +16,7 @@ import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 public class UserService implements UserDetailsService {
 
     private IdentityRepository identityRepository;
+    private ReactivationService reactivationService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -23,11 +24,9 @@ public class UserService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address: " + username);
         } else if (!identity.isActive()) {
-            //TODO: To be implemented as part of the future tickets
-            //boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
-            boolean pendingReactivationExistsForAccount = false;
-            if(pendingReactivationExistsForAccount){
-                throw new PendingReactivationExistsException("Pending reactivation already exists for user: " + username);
+            if(reactivationService.isPendingReactivationExistsForEmail(identity.getEmail())){
+                throw new PendingReactivationExistsException(
+                        "Pending reactivation already exists for user: " + username);
             }
             throw new AccountDeactivatedException("User account is deactivated for user: " + username);
         }

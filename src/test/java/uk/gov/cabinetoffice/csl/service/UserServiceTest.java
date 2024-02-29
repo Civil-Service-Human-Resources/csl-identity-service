@@ -30,9 +30,12 @@ public class UserServiceTest {
     @Mock(name="identityRepository")
     private IdentityRepository identityRepository;
 
+    @Mock(name="reactivationService")
+    private ReactivationService reactivationService;
+
     @BeforeEach
     public void setUp() {
-        userService = new UserService(identityRepository);
+        userService = new UserService(identityRepository, reactivationService);
     }
 
     @Test

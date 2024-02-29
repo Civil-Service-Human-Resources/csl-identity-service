@@ -1,44 +1,42 @@
 package uk.gov.cabinetoffice.csl.service;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.domain.Reactivation;
-import uk.gov.cabinetoffice.csl.domain.ReactivationStatus;
+import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.ReactivationRepository;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.List;
 
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
-import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 
 @Slf4j
-@AllArgsConstructor
 @Service
 @Transactional
 public class ReactivationService {
 
-    private final ReactivationRepository reactivationRepository;
     private final IdentityService identityService;
+    private final ReactivationRepository reactivationRepository;
+    private final int validityInSeconds;
 
-    public Reactivation getReactivationForCodeAndStatus(String code, ReactivationStatus reactivationStatus) {
-        return reactivationRepository
-                .findFirstByCodeAndReactivationStatusEquals(code, reactivationStatus)
-                .orElseThrow(ResourceNotFoundException::new);
+    public ReactivationService(IdentityService identityService,
+                               ReactivationRepository reactivationRepository,
+                               @Value("${reactivation.validityInSeconds}") int validityInSeconds) {
+        this.identityService = identityService;
+        this.reactivationRepository = reactivationRepository;
+        this.validityInSeconds = validityInSeconds;
     }
 
-    public boolean isPendingReactivationExistsForEmail(String email){
-        return reactivationRepository
-                .existsByEmailIgnoreCaseAndReactivationStatusEqualsAndRequestedAtAfter(email,
-                        PENDING, getDateOneDayAgo());
+    public Reactivation createPendingReactivation(String email){
+        String reactivationCode = RandomStringUtils.random(40, true, true);
+        Reactivation reactivation = new Reactivation(reactivationCode, PENDING, new Date(), email);
+        return reactivationRepository.save(reactivation);
     }
 
     public void reactivateIdentity(Reactivation reactivation) {
@@ -57,15 +55,42 @@ public class ReactivationService {
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
     }
 
-    public Reactivation createPendingReactivation(String email){
-        String reactivationCode = RandomStringUtils.random(40, true, true);
-        Reactivation reactivation = new Reactivation(reactivationCode, PENDING, new Date(), email);
-        return reactivationRepository.save(reactivation);
+    public boolean isPendingReactivationExistsForEmail(String email) {
+        List<Reactivation> pendingReactivations =
+                reactivationRepository.findByEmailIgnoreCaseAndReactivationStatusEquals(email, PENDING);
+
+        if(pendingReactivations != null && pendingReactivations.size() > 1) {
+            pendingReactivations.forEach(r -> r.setReactivationStatus(EXPIRED));
+            reactivationRepository.saveAll(pendingReactivations);
+            return false;
+        }
+
+        if(pendingReactivations != null && pendingReactivations.size() == 1) {
+            return !isReactivationExpired(pendingReactivations.get(0));
+        }
+
+        return false;
     }
 
-    //TODO: this method is not required
-    private Date getDateOneDayAgo(){
-        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
-        return Date.from(oneDayAgo.toInstant(ZoneOffset.UTC));
+    public boolean isReactivationExpired(Reactivation reactivation) {
+        if(reactivation.getReactivationStatus().equals(EXPIRED)) {
+            return true;
+        }
+
+        if(reactivation.getReactivationStatus().equals(PENDING)) {
+            long diffInMs = new Date().getTime() - reactivation.getRequestedAt().getTime();
+            if(diffInMs > validityInSeconds * 1000L) {
+                reactivation.setReactivationStatus(EXPIRED);
+                reactivationRepository.save(reactivation);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Reactivation getReactivationForCodeAndStatus(String code, ReactivationStatus reactivationStatus) {
+        return reactivationRepository
+                .findFirstByCodeAndReactivationStatusEquals(code, reactivationStatus)
+                .orElseThrow(ResourceNotFoundException::new);
     }
 }
