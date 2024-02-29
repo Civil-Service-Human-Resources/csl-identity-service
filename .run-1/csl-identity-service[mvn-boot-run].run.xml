@@ -40,6 +40,8 @@
               <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
               <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
               <entry key="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
+              <entry key="REACTIVATION_VALIDITY_SECONDS" value="86400" />
+              <entry key="REACTIVATION_EMAIL_TEMPLATE_ID" value="abfb2e5f-3905-4817-b041-c53afd1eb3e5" />
               <entry key="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
               <entry key="REDIS_CACHE_NULL_VALUES" value="false" />
               <entry key="REDIS_CACHE_TTL_MS" value="86400000" />
