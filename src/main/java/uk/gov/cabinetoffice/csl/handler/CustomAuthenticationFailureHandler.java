@@ -24,7 +24,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     private int maxLoginAttempts;
 
     @Value("${reactivation.validityInSeconds}")
-    private int validityInSeconds;
+    private int reactivationValidityInSeconds;
 
     private final Utils utils;
 
@@ -36,10 +36,13 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
-        String reactivationValidityMessage = utils.validityMessage("You have %s to click the reactivation link within the email.", validityInSeconds);
+        String reactivationValidityMessage =
+                utils.validityMessage("You have %s to click the reactivation link within the email.",
+                        reactivationValidityInSeconds);
         String exceptionMessage = exception.getMessage();
         switch (exceptionMessage) {
-            case ("User account is locked") -> response.sendRedirect("/login?error=locked&maxLoginAttempts=" + maxLoginAttempts);
+            case ("User account is locked") -> response.sendRedirect("/login?error=locked&maxLoginAttempts=" +
+                    maxLoginAttempts);
             case ("User account is blocked") -> response.sendRedirect("/login?error=blocked");
             case ("User account is deactivated") -> {
                 String username = request.getParameter("username");
