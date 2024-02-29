@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -22,10 +23,20 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Value("${account.lockout.maxLoginAttempts}")
     private int maxLoginAttempts;
 
+    @Value("${reactivation.validityInSeconds}")
+    private int validityInSeconds;
+
+    private final Utils utils;
+
+    public CustomAuthenticationFailureHandler(Utils utils) {
+        this.utils = utils;
+    }
+
     @SneakyThrows
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
+        String reactivationValidityMessage = utils.validityMessage("You have %s to click the reactivation link within the email.", validityInSeconds);
         String exceptionMessage = exception.getMessage();
         switch (exceptionMessage) {
             case ("User account is locked") -> response.sendRedirect("/login?error=locked&maxLoginAttempts=" + maxLoginAttempts);
@@ -33,14 +44,16 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is deactivated") -> {
                 String username = request.getParameter("username");
                 String encryptedUsername = getEncryptedText(username, encryptionKey);
-                response.sendRedirect("/login?error=deactivated&username=" +
-                        encode(encryptedUsername, StandardCharsets.UTF_8));
+                response.sendRedirect("/login?error=deactivated" +
+                        "&reactivationValidityMessage=" + reactivationValidityMessage +
+                        "&username=" + encode(encryptedUsername, StandardCharsets.UTF_8));
             }
             case ("Pending reactivation already exists for user") ->
                     response.sendRedirect("/login?error=pending-reactivation");
             case ("Reactivation request has expired") ->
-                    response.sendRedirect("/login?error=deactivated-expired&username=" +
-                            getEncryptedText(request.getParameter("username"), encryptionKey));
+                    response.sendRedirect("/login?error=deactivated-expired" +
+                            "&reactivationValidityMessage=" + reactivationValidityMessage +
+                            "&username=" + getEncryptedText(request.getParameter("username"), encryptionKey));
             default -> response.sendRedirect("/login?error=failed&maxLoginAttempts=" + maxLoginAttempts);
         }
     }

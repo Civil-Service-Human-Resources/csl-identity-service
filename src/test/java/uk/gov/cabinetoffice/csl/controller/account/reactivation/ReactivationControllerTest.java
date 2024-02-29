@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
 
@@ -93,7 +94,8 @@ public class ReactivationControllerTest {
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, "Reactivation code is not valid"));
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, "Reactivation code is not valid"))
+                .andDo(print());
     }
 
     @Test
@@ -107,7 +109,8 @@ public class ReactivationControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE,
-                        "There was an error processing account reactivation. Please try again later."));
+                        "There was an error processing account reactivation. Please try again later."))
+                .andDo(print());
     }
 
     @Test
@@ -137,6 +140,7 @@ public class ReactivationControllerTest {
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername));
+                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername))
+                .andDo(print());
     }
 }

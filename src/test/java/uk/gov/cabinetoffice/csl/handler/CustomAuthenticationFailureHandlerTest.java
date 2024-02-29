@@ -18,21 +18,19 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("no-redis")
 public class CustomAuthenticationFailureHandlerTest {
 
-    private final int maxLoginAttempts = 5;
-
     @Autowired
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Test
     public void shouldSetErrorToFailedOnFailedLogin() throws IOException {
         HttpServletResponse response = executeHandler("Some other error");
-        verify(response).sendRedirect("/login?error=failed&maxLoginAttempts=" + maxLoginAttempts);
+        verify(response).sendRedirect("/login?error=failed&maxLoginAttempts=5");
     }
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException {
         HttpServletResponse response = executeHandler("User account is locked");
-        verify(response).sendRedirect("/login?error=locked&maxLoginAttempts=" + maxLoginAttempts);
+        verify(response).sendRedirect("/login?error=locked&maxLoginAttempts=5");
     }
 
     @Test
@@ -52,7 +50,9 @@ public class CustomAuthenticationFailureHandlerTest {
     public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
-        verify(response).sendRedirect("/login?error=deactivated&username=" + encode(encryptedUsername, UTF_8));
+        verify(response).sendRedirect("/login?error=deactivated" +
+                "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
+                "&username=" + encode(encryptedUsername, UTF_8));
     }
 
     private HttpServletResponse executeHandler(String message) {
