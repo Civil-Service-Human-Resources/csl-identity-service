@@ -67,6 +67,6 @@ public class UserServiceTest {
         UsernameNotFoundException thrown = assertThrows(
                 UsernameNotFoundException.class, () -> userService.loadUserByUsername(emailAddress));
 
-        assertEquals("No user found with email address: " + emailAddress, thrown.getMessage());
+        assertEquals("No user found with email address " + emailAddress, thrown.getMessage());
     }
 }

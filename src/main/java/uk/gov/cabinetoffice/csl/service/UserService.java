@@ -22,13 +22,12 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
         if (identity == null) {
-            throw new UsernameNotFoundException("No user found with email address: " + username);
+            throw new UsernameNotFoundException("No user found with email address " + username);
         } else if (!identity.isActive()) {
             if(reactivationService.isPendingReactivationExistsForEmail(identity.getEmail())){
-                throw new PendingReactivationExistsException(
-                        "Pending reactivation already exists for user: " + username);
+                throw new PendingReactivationExistsException("Pending reactivation already exists for user");
             }
-            throw new AccountDeactivatedException("User account is deactivated for user: " + username);
+            throw new AccountDeactivatedException("User account is deactivated");
         }
         return new IdentityDetails(identity);
     }
