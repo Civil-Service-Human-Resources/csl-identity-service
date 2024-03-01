@@ -10,7 +10,7 @@
 
                         <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1" th:switch="${param.error[0]}">
                             <span th:case="'deactivated'">Your account has been deactivated</span>
-                            <span th:case="'deactivated-expired'">Your reactivation email link has expired</span>
+                            <span th:case="'deactivated-expired'">Your reactivation link has expired</span>
                             <span th:case="'pending-reactivation'">Your account is pending reactivation</span>
                             <span th:case="'locked'">Your account is locked</span>
                             <span th:case="'failed'">Your sign-in details are incorrect</span>
