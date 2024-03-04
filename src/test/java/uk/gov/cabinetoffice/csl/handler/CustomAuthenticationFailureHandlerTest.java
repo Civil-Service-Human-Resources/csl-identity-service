@@ -11,12 +11,12 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.io.IOException;
+import java.time.*;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.Month.FEBRUARY;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 
@@ -31,19 +31,19 @@ public class CustomAuthenticationFailureHandlerTest {
     private ReactivationService reactivationService;
 
     @Test
-    public void shouldSetErrorToFailedOnFailedLogin() throws Exception {
+    public void shouldSetErrorToFailedOnFailedLogin() throws IOException {
         HttpServletResponse response = executeHandler("Some other error");
         verify(response).sendRedirect("/login?error=failed&maxLoginAttempts=5");
     }
 
     @Test
-    public void shouldSetErrorToLockedOnAccountLock() throws Exception {
+    public void shouldSetErrorToLockedOnAccountLock() throws IOException {
         HttpServletResponse response = executeHandler("User account is locked");
         verify(response).sendRedirect("/login?error=locked&maxLoginAttempts=5");
     }
 
     @Test
-    public void shouldSetErrorToFailedOnAccountBlocked() throws Exception {
+    public void shouldSetErrorToFailedOnAccountBlocked() throws IOException {
         HttpServletResponse response = executeHandler("User account is blocked");
         verify(response).sendRedirect("/login?error=blocked");
     }
@@ -53,12 +53,12 @@ public class CustomAuthenticationFailureHandlerTest {
             throws Exception {
         HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
         verify(response).sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage=" +
-                "We've already sent you an email on Thu Feb 01 00:00:00 GMT 2024 with a link to reactivate your account. " +
+                "We've already sent you an email on 2024-02-01T11:30 with a link to reactivate your account. " +
                 "Please check your emails (including the junk/spam folder)");
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws Exception {
+    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=deactivated" +
@@ -66,7 +66,7 @@ public class CustomAuthenticationFailureHandlerTest {
                 "&username=" + encode(encryptedUsername, UTF_8));
     }
 
-    private HttpServletResponse executeHandler(String message) throws Exception {
+    private HttpServletResponse executeHandler(String message) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
@@ -79,14 +79,13 @@ public class CustomAuthenticationFailureHandlerTest {
         return response;
     }
 
-    private Reactivation createPendingReactivation(String email) throws Exception {
+    private Reactivation createPendingReactivation(String email) {
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(email);
         reactivation.setCode("code");
         reactivation.setReactivationStatus(PENDING);
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-        Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
-        reactivation.setRequestedAt(dateOfReactivationRequest);
+        LocalDateTime dateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        reactivation.setRequestedAt(dateTime);
         return reactivation;
     }
 }

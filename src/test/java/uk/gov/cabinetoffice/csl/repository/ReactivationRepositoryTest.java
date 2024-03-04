@@ -7,13 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Locale.ENGLISH;
+import static java.time.Month.FEBRUARY;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,11 +26,10 @@ public class ReactivationRepositoryTest {
     private ReactivationRepository reactivationRepository;
 
     @Test
-    public void shouldReturnPendingReactivations() throws ParseException {
+    public void shouldReturnPendingReactivations() {
 
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", ENGLISH);
-        Date dateOfReactivationRequest = formatter.parse("02-Feb-2024");
-        Date dateOfReactivationRequest2 = formatter.parse("01-Feb-2024");
+        LocalDateTime dateOfReactivationRequest1 = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        LocalDateTime dateOfReactivationRequest2 = LocalDateTime.of(2024, FEBRUARY, 2, 11, 30);
 
         String email = "my.name@myorg.gov.uk";
 
@@ -40,7 +37,7 @@ public class ReactivationRepositoryTest {
         Reactivation reactivation1 = new Reactivation();
         reactivation1.setCode(code1);
         reactivation1.setReactivationStatus(PENDING);
-        reactivation1.setRequestedAt(dateOfReactivationRequest);
+        reactivation1.setRequestedAt(dateOfReactivationRequest1);
         reactivation1.setEmail(email);
 
         String code2 = random(40, true, true);
@@ -59,7 +56,8 @@ public class ReactivationRepositoryTest {
         Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatus(code2, PENDING);
         assertTrue(r2.isPresent());
 
-        List<Reactivation> pendingReactivation = reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
+        List<Reactivation> pendingReactivation =
+                reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
         assertEquals(2, pendingReactivation.size());
     }
 
@@ -71,7 +69,8 @@ public class ReactivationRepositoryTest {
         Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatus(code, PENDING);
         assertFalse(r2.isPresent());
 
-        List<Reactivation> pendingReactivation = reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
+        List<Reactivation> pendingReactivation =
+                reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
         assertEquals(0, pendingReactivation.size());
     }
 }

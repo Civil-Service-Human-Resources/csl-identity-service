@@ -11,13 +11,11 @@ import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.ReactivationRepository;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Optional;
 
-import static java.util.Locale.ENGLISH;
+import static java.time.Month.FEBRUARY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
@@ -33,9 +31,10 @@ public class ReactivationServiceTest {
     private final IdentityService identityService = mock (IdentityService.class);
     private final ReactivationRepository reactivationRepository = mock(ReactivationRepository.class);
     private final int validityInSeconds = 86400;
+    private final Clock clock = Clock.fixed(Instant.parse("2023-01-01T10:00:00Z"), ZoneId.of("UTC"));
 
     private final ReactivationService reactivationService =
-            new ReactivationService(identityService, reactivationRepository, validityInSeconds);
+            new ReactivationService(identityService, reactivationRepository, clock, validityInSeconds);
 
     @Test
     public void shouldReactivateIdentity() {
@@ -105,11 +104,9 @@ public class ReactivationServiceTest {
     }
 
     @Test
-    public void isPendingExistsByEmailReturnsFalseIfPendingReactivationExpired() throws ParseException {
+    public void isPendingExistsByEmailReturnsFalseIfPendingReactivationExpired() {
         String email = "my.name@myorg.gov.uk";
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", ENGLISH);
-        Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
-
+        LocalDateTime dateOfReactivationRequest = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
         Reactivation reactivation = new Reactivation();
         reactivation.setCode(CODE);
         reactivation.setReactivationStatus(PENDING);

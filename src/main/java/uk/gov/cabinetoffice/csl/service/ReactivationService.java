@@ -11,9 +11,13 @@ import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.ReactivationRepository;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.time.Clock.systemDefaultZone;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 
 @Slf4j
@@ -23,19 +27,22 @@ public class ReactivationService {
 
     private final IdentityService identityService;
     private final ReactivationRepository reactivationRepository;
+    private final Clock clock;
     private final int validityInSeconds;
 
     public ReactivationService(IdentityService identityService,
                                ReactivationRepository reactivationRepository,
+                               Clock clock,
                                @Value("${reactivation.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.reactivationRepository = reactivationRepository;
+        this.clock = clock;
         this.validityInSeconds = validityInSeconds;
     }
 
     public Reactivation createPendingReactivation(String email){
         String reactivationCode = RandomStringUtils.random(40, true, true);
-        Reactivation reactivation = new Reactivation(reactivationCode, PENDING, new Date(), email);
+        Reactivation reactivation = new Reactivation(reactivationCode, PENDING, now(systemDefaultZone()), email);
         return saveReactivation(reactivation);
     }
 
@@ -50,7 +57,7 @@ public class ReactivationService {
         identityService.reactivateIdentity(identity, agencyToken);
         log.info("Identity reactivated for email: {}", email);
         reactivation.setReactivationStatus(REACTIVATED);
-        reactivation.setReactivatedAt(new Date());
+        reactivation.setReactivatedAt(now(systemDefaultZone()));
         saveReactivation(reactivation);
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
     }
@@ -86,7 +93,7 @@ public class ReactivationService {
         }
 
         if(reactivation.getReactivationStatus().equals(PENDING)) {
-            long diffInMs = new Date().getTime() - reactivation.getRequestedAt().getTime();
+            long diffInMs = MILLIS.between(LocalDateTime.now(clock), reactivation.getRequestedAt());
             if(diffInMs > validityInSeconds * 1000L) {
                 reactivation.setReactivationStatus(EXPIRED);
                 saveReactivation(reactivation);

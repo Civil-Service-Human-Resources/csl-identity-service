@@ -12,7 +12,7 @@ import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static java.net.URLEncoder.encode;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
@@ -60,7 +60,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("Pending reactivation already exists for user") -> {
                 String username = request.getParameter("username");
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
-                Date requestedAt = pendingReactivation.getRequestedAt();
+                LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
                 String pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
                         " with a link to reactivate your account. Please check your emails (including the junk/spam folder)";
                 response.sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage="

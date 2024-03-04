@@ -19,7 +19,7 @@ import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,7 +96,7 @@ public class ReactivationController {
 
         if(reactivationService.isPendingReactivationExistsForEmail(email)) {
             Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
-            Date requestedAt = pendingReactivation.getRequestedAt();
+            LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
             model.addAttribute("reactivationEmailMessage",
                     "We've already sent you an email on "
                             + requestedAt + " with a link to reactivate your account.");

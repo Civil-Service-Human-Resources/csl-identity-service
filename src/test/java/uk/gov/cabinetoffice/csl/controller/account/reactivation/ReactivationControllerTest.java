@@ -18,10 +18,9 @@ import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.time.LocalDateTime;
 
+import static java.time.Month.FEBRUARY;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -137,7 +136,7 @@ public class ReactivationControllerTest {
                 .andExpect(view().name("reactivate/accountReactivated"));
     }
 
-    private Reactivation createPendingActivationAndMockServicesInvocation() throws Exception {
+    private Reactivation createPendingActivationAndMockServicesInvocation() {
         Identity identity = new Identity();
         identity.setEmail(EMAIL_ADDRESS);
         identity.setActive(false);
@@ -147,8 +146,7 @@ public class ReactivationControllerTest {
         reactivation.setEmail(EMAIL_ADDRESS);
         reactivation.setCode(CODE);
         reactivation.setReactivationStatus(PENDING);
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-        Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
+        LocalDateTime dateOfReactivationRequest = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
         reactivation.setRequestedAt(dateOfReactivationRequest);
 
         when(reactivationService.getReactivationForCodeAndStatus(CODE, PENDING))

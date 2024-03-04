@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,14 +28,14 @@ public class Reactivation {
     private ReactivationStatus reactivationStatus;
 
     @Column(nullable = false)
-    private Date requestedAt;
+    private LocalDateTime requestedAt;
 
-    private Date reactivatedAt;
+    private LocalDateTime reactivatedAt;
 
     @Column(length = 150, nullable = false)
     private String email;
 
-    public Reactivation(String code, ReactivationStatus reactivationStatus, Date requestedAt, String email) {
+    public Reactivation(String code, ReactivationStatus reactivationStatus, LocalDateTime requestedAt, String email) {
         this.code = code;
         this.reactivationStatus = reactivationStatus;
         this.requestedAt = requestedAt;
