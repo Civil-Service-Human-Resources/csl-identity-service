@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.EXPIRED;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
@@ -88,28 +89,21 @@ public class ReactivationController {
     public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
         String email = getDecryptedText(code, encryptionKey);
 
-        Identity identityForEmail = identityService.getIdentityForEmail(email);
-        if(identityForEmail == null) {
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE);
-            return REDIRECT_LOGIN;
-        }
-
-        if(identityForEmail.isActive()) {
-            Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
-            pendingReactivation.setReactivationStatus(EXPIRED);
-            reactivationService.saveReactivation(pendingReactivation);
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_ACCOUNT_IS_ALREADY_ACTIVE);
-            return REDIRECT_LOGIN;
+        String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
+        if(isNotBlank(resultIdentityActive)) {
+            return resultIdentityActive;
         }
 
         if(reactivationService.isPendingReactivationExistsForEmail(email)) {
             Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
             Date requestedAt = pendingReactivation.getRequestedAt();
             model.addAttribute("reactivationEmailMessage",
-                    "We've already sent you an email on " + requestedAt + " with a link to reactivate your account.");
+                    "We've already sent you an email on "
+                            + requestedAt + " with a link to reactivate your account.");
             model.addAttribute("reactivationValidityMessage",
                     utils.validityMessage(
-                            "You have %s from " + requestedAt + " to click the reactivation link within the email.",
+                            "You have %s from " + requestedAt
+                                    + " to click the reactivation link within the email.",
                             reactivationValidityInSeconds));
         } else {
             Reactivation reactivation = reactivationService.createPendingReactivation(email);
@@ -129,15 +123,23 @@ public class ReactivationController {
     public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
-            String email = getEncryptedText(reactivation.getEmail(), encryptionKey);
+            String email = reactivation.getEmail();
+
+            String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
+            if(isNotBlank(resultIdentityActive)) {
+                return resultIdentityActive;
+            }
+
             if(reactivationService.isReactivationExpired(reactivation)) {
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
                 String reactivationValidityMessage = utils.validityMessage(
                         "You have %s to click the reactivation link within the email.",
                         reactivationValidityInSeconds);
-                String qParam = "reactivationValidityMessage=" + reactivationValidityMessage + "&username=" + encode(email, UTF_8);
+                String qParam = "reactivationValidityMessage=" + reactivationValidityMessage +
+                        "&username=" + encode(getEncryptedText(email, encryptionKey), UTF_8);
                 return "redirect:/login?error=deactivated-expired&" + qParam;
             }
+
             String domain = utils.getDomainFromEmailAddress(reactivation.getEmail());
             log.debug("Reactivating account using Reactivation: {}", reactivation);
             if (agencyTokenService.isDomainInAgencyToken(domain)) {
@@ -145,7 +147,8 @@ public class ReactivationController {
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
-                log.info("Account reactivation is not agency and can reactivate without further validation for Reactivation: {}",
+                log.info("Account reactivation is not agency and can reactivate without further validation for " +
+                                "Reactivation: {}",
                         reactivation);
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
@@ -167,6 +170,25 @@ public class ReactivationController {
         log.info("Account reactivation complete");
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl + "/login");
         return ACCOUNT_REACTIVATED_TEMPLATE;
+    }
+
+    private String checkIdentityActive(String email, RedirectAttributes redirectAttributes) {
+        Identity identityForEmail = identityService.getIdentityForEmail(email);
+
+        if(identityForEmail == null) {
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE);
+            return REDIRECT_LOGIN;
+        }
+
+        if(identityForEmail.isActive()) {
+            Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
+            pendingReactivation.setReactivationStatus(EXPIRED);
+            reactivationService.saveReactivation(pendingReactivation);
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_ACCOUNT_IS_ALREADY_ACTIVE);
+            return REDIRECT_LOGIN;
+        }
+
+        return null;
     }
 
     private void notifyUserByEmail(Reactivation reactivation){

@@ -10,10 +10,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.domain.ReactivationStatus;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
+import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
@@ -45,6 +47,9 @@ public class ReactivationControllerTest {
     private ReactivationService reactivationService;
 
     @MockBean
+    private IdentityService identityService;
+
+    @MockBean
     private AgencyTokenService agencyTokenService;
 
     @MockBean
@@ -52,6 +57,11 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldRedirectIfAccountDomainIsAgencyToken() throws Exception {
+        Identity identity = new Identity();
+        identity.setEmail(EMAIL_ADDRESS);
+        identity.setActive(false);
+        when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
+
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL_ADDRESS);
 
@@ -69,9 +79,13 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldReactivateAccountIfNotAgencyToken() throws Exception {
+        Identity identity = new Identity();
+        identity.setEmail(EMAIL_ADDRESS);
+        identity.setActive(false);
+        when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
+
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL_ADDRESS);
-
         when(reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING))
                 .thenReturn(reactivation);
         when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
@@ -122,9 +136,13 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldShowUserReactivationRequestHasExpired() throws Exception {
+        Identity identity = new Identity();
+        identity.setEmail(EMAIL_ADDRESS);
+        identity.setActive(false);
+        when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
+
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
-
         Reactivation expiredReactivation = new Reactivation();
         expiredReactivation.setReactivationStatus(ReactivationStatus.PENDING);
         expiredReactivation.setRequestedAt(dateOfReactivationRequest);
