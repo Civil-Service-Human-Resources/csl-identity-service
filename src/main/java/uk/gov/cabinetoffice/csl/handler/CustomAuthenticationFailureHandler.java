@@ -11,10 +11,10 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
 
 @Configuration
@@ -42,38 +42,27 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
-        String reactivationValidityMessage =
-                utils.validityMessage("You have %s to click the reactivation link within the email.",
-                        reactivationValidityInSeconds);
-        String exceptionMessage = exception.getMessage();
-        switch (exceptionMessage) {
-            case ("User account is locked") -> response.sendRedirect("/login?error=locked&maxLoginAttempts=" +
-                    maxLoginAttempts);
-            case ("User account is blocked") -> response.sendRedirect("/login?error=blocked");
-            case ("User account is deactivated") -> {
-                String username = request.getParameter("username");
-                String encryptedUsername = getEncryptedText(username, encryptionKey);
-                response.sendRedirect("/login?error=deactivated" +
-                        "&reactivationValidityMessage=" + reactivationValidityMessage +
-                        "&username=" + encode(encryptedUsername, StandardCharsets.UTF_8));
-            }
+        String reactivationValidityMessage = utils.validityMessage(
+        "You have %s to click the reactivation link within the email.", reactivationValidityInSeconds);
+        String username = request.getParameter("username");
+        String encryptedUsername = getEncryptedText(username, encryptionKey);
+        String encodedUsername = encode(encryptedUsername, UTF_8);
+        String redirect = "/login?error=failed&maxLoginAttempts=" + maxLoginAttempts;
+        switch (exception.getMessage()) {
+            case ("User account is locked") -> redirect = "/login?error=locked&maxLoginAttempts=" + maxLoginAttempts;
+            case ("User account is blocked") -> redirect = "/login?error=blocked";
+            case ("User account is deactivated") -> redirect = "/login?error=deactivated&reactivationValidityMessage="
+                    + reactivationValidityMessage + "&username=" + encodedUsername;
+            case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&" +
+                    "reactivationValidityMessage=" + reactivationValidityMessage + "&username=" + encodedUsername;
             case ("Pending reactivation already exists for user") -> {
-                String username = request.getParameter("username");
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
                 String pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
                 " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
-                response.sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage="
-                        + pendingReactivationMessage);
+                redirect = "/login?error=pending-reactivation&pendingReactivationMessage=" + pendingReactivationMessage;
             }
-            case ("Reactivation request has expired") -> {
-                String username = request.getParameter("username");
-                String encryptedUsername = getEncryptedText(username, encryptionKey);
-                response.sendRedirect("/login?error=deactivated-expired" +
-                            "&reactivationValidityMessage=" + reactivationValidityMessage +
-                            "&username=" + encode(encryptedUsername, StandardCharsets.UTF_8));
-            }
-            default -> response.sendRedirect("/login?error=failed&maxLoginAttempts=" + maxLoginAttempts);
         }
+        response.sendRedirect(redirect);
     }
 }

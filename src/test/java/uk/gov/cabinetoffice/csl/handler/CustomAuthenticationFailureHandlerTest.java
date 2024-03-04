@@ -43,18 +43,9 @@ public class CustomAuthenticationFailureHandlerTest {
     }
 
     @Test
-    public void shouldSetErrorToFailedOnAccountBlocked() throws IOException {
+    public void shouldSetErrorToBlockedOnAccountBlocked() throws IOException {
         HttpServletResponse response = executeHandler("User account is blocked");
         verify(response).sendRedirect("/login?error=blocked");
-    }
-
-    @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
-            throws Exception {
-        HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
-        verify(response).sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage=" +
-                "We've already sent you an email on 2024-02-01T11:30 with a link to reactivate your account. " +
-                "Please check your emails (including the junk/spam folder).");
     }
 
     @Test
@@ -64,6 +55,24 @@ public class CustomAuthenticationFailureHandlerTest {
         verify(response).sendRedirect("/login?error=deactivated" +
                 "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
                 "&username=" + encode(encryptedUsername, UTF_8));
+    }
+
+    @Test
+    public void shouldSetErrorToDeactivatedExpiredOnDeactivationExpired() throws IOException {
+        HttpServletResponse response = executeHandler("Reactivation request has expired");
+        String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
+        verify(response).sendRedirect("/login?error=deactivated-expired" +
+                "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
+                "&username=" + encode(encryptedUsername, UTF_8));
+    }
+
+    @Test
+    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
+            throws Exception {
+        HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
+        verify(response).sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage=" +
+                "We've already sent you an email on 2024-02-01T11:30 with a link to reactivate your account. " +
+                "Please check your emails (including the junk/spam folder).");
     }
 
     private HttpServletResponse executeHandler(String message) {
