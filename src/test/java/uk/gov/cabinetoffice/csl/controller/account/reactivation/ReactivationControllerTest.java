@@ -12,7 +12,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
-import uk.gov.cabinetoffice.csl.domain.ReactivationStatus;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
@@ -27,6 +26,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
 
 @SpringBootTest
@@ -57,18 +57,9 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldRedirectIfAccountDomainIsAgencyToken() throws Exception {
-        Identity identity = new Identity();
-        identity.setEmail(EMAIL_ADDRESS);
-        identity.setActive(false);
-        when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
+        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
 
-        Reactivation reactivation = new Reactivation();
-        reactivation.setEmail(EMAIL_ADDRESS);
-
-        when(reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING))
-                .thenReturn(reactivation);
         when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
-        when(utils.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
 
         mockMvc.perform(
@@ -79,17 +70,9 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldReactivateAccountIfNotAgencyToken() throws Exception {
-        Identity identity = new Identity();
-        identity.setEmail(EMAIL_ADDRESS);
-        identity.setActive(false);
-        when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
+        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
 
-        Reactivation reactivation = new Reactivation();
-        reactivation.setEmail(EMAIL_ADDRESS);
-        when(reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING))
-                .thenReturn(reactivation);
         when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
-        when(utils.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 
         mockMvc.perform(
@@ -99,10 +82,30 @@ public class ReactivationControllerTest {
     }
 
     @Test
+    public void shouldShowUserReactivationRequestHasExpired() throws Exception {
+        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
+
+        when(reactivationService.isReactivationExpired(reactivation)).thenReturn(true);
+        when(utils.validityMessage("You have %s to click the reactivation link within the email.",
+                86400))
+                .thenReturn("You have 24 hours to click the reactivation link within the email.");
+
+        String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
+
+        mockMvc.perform(
+                        get("/account/reactivate/" + CODE))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error=deactivated-expired" +
+                        "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
+                        "&username=" + encryptedUsername))
+                .andDo(print());
+    }
+
+    @Test
     public void shouldRedirectToLoginIfReactivationNotFound() throws Exception {
 
         doThrow(new ResourceNotFoundException()).when(reactivationService)
-                .getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING);
+                .getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
@@ -116,7 +119,7 @@ public class ReactivationControllerTest {
     public void shouldRedirectToLoginIfTechnicalExceptionOccurs() throws Exception {
 
         doThrow(new RuntimeException()).when(reactivationService).
-                getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING);
+                getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
@@ -134,36 +137,25 @@ public class ReactivationControllerTest {
                 .andExpect(view().name("reactivate/accountReactivated"));
     }
 
-    @Test
-    public void shouldShowUserReactivationRequestHasExpired() throws Exception {
+    private Reactivation createPendingActivationAndMockServicesInvocation() throws Exception {
         Identity identity = new Identity();
         identity.setEmail(EMAIL_ADDRESS);
         identity.setActive(false);
         when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
 
+        Reactivation reactivation = new Reactivation();
+        reactivation.setEmail(EMAIL_ADDRESS);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
-        Reactivation expiredReactivation = new Reactivation();
-        expiredReactivation.setReactivationStatus(ReactivationStatus.PENDING);
-        expiredReactivation.setRequestedAt(dateOfReactivationRequest);
-        expiredReactivation.setCode(CODE);
-        expiredReactivation.setEmail(EMAIL_ADDRESS);
+        reactivation.setReactivationStatus(PENDING);
+        reactivation.setRequestedAt(dateOfReactivationRequest);
+        reactivation.setCode(CODE);
+        reactivation.setEmail(EMAIL_ADDRESS);
 
-        when(reactivationService.getReactivationForCodeAndStatus(CODE, ReactivationStatus.PENDING))
-                .thenReturn(expiredReactivation);
-        when(reactivationService.isReactivationExpired(expiredReactivation)).thenReturn(true);
-        when(utils.validityMessage("You have %s to click the reactivation link within the email.",
-                86400))
-                .thenReturn("You have 24 hours to click the reactivation link within the email.");
+        when(reactivationService.getReactivationForCodeAndStatus(CODE, PENDING))
+                .thenReturn(reactivation);
+        when(utils.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
 
-        String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
-
-        mockMvc.perform(
-                get("/account/reactivate/" + CODE))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired" +
-                        "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
-                        "&username=" + encryptedUsername))
-                .andDo(print());
+        return reactivation;
     }
 }
