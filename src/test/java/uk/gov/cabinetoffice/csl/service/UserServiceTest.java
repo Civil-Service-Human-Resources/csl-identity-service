@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Instant;
 
@@ -27,29 +27,37 @@ public class UserServiceTest {
 
     private UserService userService;
 
-    @Mock(name="identityRepository")
-    private IdentityRepository identityRepository;
+    @Mock
+    private IdentityService identityService;
 
-    @Mock(name="reactivationService")
+    @Mock
     private ReactivationService reactivationService;
+
+    @Mock
+    private Utils utils;
 
     @BeforeEach
     public void setUp() {
-        userService = new UserService(identityRepository, reactivationService);
+        userService = new UserService(identityService, reactivationService, utils);
     }
 
     @Test
     public void shouldLoadIdentityByEmailAddress() {
 
-        final String emailAddress = "test@example.org";
-        final String uid = "uid";
-        final Identity identity = new Identity(uid, emailAddress, "password", true, false,
-                emptySet(), Instant.now(), false, null);
+        String email = "test@example.org";
+        String domain = "example.org";
+        String uid = "uid";
+        String agencyTokenUid = "agencyTokenUid";
+        Identity identity = new Identity(uid, email, "password", true, false,
+                emptySet(), Instant.now(), false, agencyTokenUid, null);
 
-        when(identityRepository.findFirstByEmailEqualsIgnoreCase(emailAddress))
-                .thenReturn(identity);
+        when(identityService.getIdentityForEmail(email)).thenReturn(identity);
+        when(utils.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.isDomainInAgency(domain)).thenReturn(true);
+        when(identityService.isEmailInvited(email)).thenReturn(true);
 
-        IdentityDetails identityDetails = (IdentityDetails) userService.loadUserByUsername(emailAddress);
+        IdentityDetails identityDetails = (IdentityDetails) userService.loadUserByUsername(email);
 
         assertThat(identityDetails, notNullValue());
         assertThat(identityDetails.getUsername(), equalTo(uid));
@@ -59,10 +67,9 @@ public class UserServiceTest {
     @Test
     public void shouldThrowErrorWhenNoClientFound() {
 
-        final String emailAddress = "test@example.org";
+        String emailAddress = "test@example.org";
 
-        when(identityRepository.findFirstByEmailEqualsIgnoreCase(emailAddress))
-                .thenReturn(null);
+        when(identityService.getIdentityForEmail(emailAddress)).thenReturn(null);
 
         UsernameNotFoundException thrown = assertThrows(
                 UsernameNotFoundException.class, () -> userService.loadUserByUsername(emailAddress));

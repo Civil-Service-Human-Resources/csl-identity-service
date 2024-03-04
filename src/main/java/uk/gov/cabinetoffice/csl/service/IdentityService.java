@@ -96,4 +96,12 @@ public class IdentityService {
     public boolean isAllowListedDomain(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
     }
+
+    public boolean isDomainInAgency(String domain) {
+        return civilServantRegistryClient.isDomainInAgency(domain);
+    }
+
+    public boolean isEmailInvited(String email) {
+        return inviteService.isEmailInvited(email);
+    }
 }
