@@ -24,7 +24,7 @@ public class UserService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else if (!identity.isActive()) {
-            if(reactivationService.isPendingReactivationExistsForEmail(identity.getEmail())){
+            if(reactivationService.isPendingReactivationExistsForEmail(identity.getEmail())) {
                 throw new PendingReactivationExistsException("Pending reactivation already exists for user");
             }
             throw new AccountDeactivatedException("User account is deactivated");

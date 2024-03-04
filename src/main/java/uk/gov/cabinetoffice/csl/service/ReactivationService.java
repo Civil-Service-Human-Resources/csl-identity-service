@@ -36,7 +36,7 @@ public class ReactivationService {
     public Reactivation createPendingReactivation(String email){
         String reactivationCode = RandomStringUtils.random(40, true, true);
         Reactivation reactivation = new Reactivation(reactivationCode, PENDING, new Date(), email);
-        return reactivationRepository.save(reactivation);
+        return saveReactivation(reactivation);
     }
 
     public void reactivateIdentity(Reactivation reactivation) {
@@ -51,7 +51,7 @@ public class ReactivationService {
         log.info("Identity reactivated for email: {}", email);
         reactivation.setReactivationStatus(REACTIVATED);
         reactivation.setReactivatedAt(new Date());
-        reactivationRepository.save(reactivation);
+        saveReactivation(reactivation);
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
     }
 
@@ -89,7 +89,7 @@ public class ReactivationService {
             long diffInMs = new Date().getTime() - reactivation.getRequestedAt().getTime();
             if(diffInMs > validityInSeconds * 1000L) {
                 reactivation.setReactivationStatus(EXPIRED);
-                reactivationRepository.save(reactivation);
+                saveReactivation(reactivation);
                 return true;
             }
         }
@@ -100,5 +100,9 @@ public class ReactivationService {
         return reactivationRepository
                 .findFirstByCodeAndReactivationStatus(code, reactivationStatus)
                 .orElseThrow(ResourceNotFoundException::new);
+    }
+
+    public Reactivation saveReactivation(Reactivation reactivation) {
+        return reactivationRepository.save(reactivation);
     }
 }

@@ -52,6 +52,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                         "&username=" + encode(encryptedUsername, StandardCharsets.UTF_8));
             }
             case ("Pending reactivation already exists for user") ->
+                    //TODO: Display the date and time of requested by calling ReactivationService.getPendingReactivationForEmail())
                     response.sendRedirect("/login?error=pending-reactivation");
             case ("Reactivation request has expired") ->
                     response.sendRedirect("/login?error=deactivated-expired" +
