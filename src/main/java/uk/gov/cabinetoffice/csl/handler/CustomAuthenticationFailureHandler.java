@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import uk.gov.cabinetoffice.csl.domain.Reactivation;
+import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 import static java.net.URLEncoder.encode;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
@@ -26,9 +29,12 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Value("${reactivation.validityInSeconds}")
     private int reactivationValidityInSeconds;
 
+    private final ReactivationService reactivationService;
+
     private final Utils utils;
 
-    public CustomAuthenticationFailureHandler(Utils utils) {
+    public CustomAuthenticationFailureHandler(ReactivationService reactivationService, Utils utils) {
+        this.reactivationService = reactivationService;
         this.utils = utils;
     }
 
@@ -51,9 +57,15 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                         "&reactivationValidityMessage=" + reactivationValidityMessage +
                         "&username=" + encode(encryptedUsername, StandardCharsets.UTF_8));
             }
-            case ("Pending reactivation already exists for user") ->
-                    //TODO: Display the date and time of requested by calling ReactivationService.getPendingReactivationForEmail())
-                    response.sendRedirect("/login?error=pending-reactivation");
+            case ("Pending reactivation already exists for user") -> {
+                String username = request.getParameter("username");
+                Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
+                Date requestedAt = pendingReactivation.getRequestedAt();
+                String pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
+                        " with a link to reactivate your account. Please check your emails (including the junk/spam folder)";
+                response.sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage="
+                        + pendingReactivationMessage);
+            }
             case ("Reactivation request has expired") ->
                     response.sendRedirect("/login?error=deactivated-expired" +
                             "&reactivationValidityMessage=" + reactivationValidityMessage +

@@ -145,12 +145,11 @@ public class ReactivationControllerTest {
 
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL_ADDRESS);
+        reactivation.setCode(CODE);
+        reactivation.setReactivationStatus(PENDING);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         Date dateOfReactivationRequest = formatter.parse("01-Feb-2024");
-        reactivation.setReactivationStatus(PENDING);
         reactivation.setRequestedAt(dateOfReactivationRequest);
-        reactivation.setCode(CODE);
-        reactivation.setEmail(EMAIL_ADDRESS);
 
         when(reactivationService.getReactivationForCodeAndStatus(CODE, PENDING))
                 .thenReturn(reactivation);
