@@ -67,13 +67,13 @@ public class UserServiceTest {
     @Test
     public void shouldThrowErrorWhenNoClientFound() {
 
-        String emailAddress = "test@example.org";
+        String email = "test@example.org";
 
-        when(identityService.getIdentityForEmail(emailAddress)).thenReturn(null);
+        when(identityService.getIdentityForEmail(email)).thenReturn(null);
 
         UsernameNotFoundException thrown = assertThrows(
-                UsernameNotFoundException.class, () -> userService.loadUserByUsername(emailAddress));
+                UsernameNotFoundException.class, () -> userService.loadUserByUsername(email));
 
-        assertEquals("No user found with email address " + emailAddress, thrown.getMessage());
+        assertEquals("No user found with email address " + email, thrown.getMessage());
     }
 }
