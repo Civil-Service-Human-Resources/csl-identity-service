@@ -97,14 +97,12 @@ public class ReactivationController {
         if(reactivationService.isPendingReactivationExistsForEmail(email)) {
             Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
             LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-            model.addAttribute("reactivationEmailMessage",
-                    "We've already sent you an email on "
-                            + requestedAt + " with a link to reactivate your account.");
-            model.addAttribute("reactivationValidityMessage",
-                    utils.validityMessage(
-                            "You have %s from " + requestedAt
-                                    + " to click the reactivation link within the email.",
-                            reactivationValidityInSeconds));
+            String reactivationEmailMessage = "We've already sent you an email on " + requestedAt +
+                    " with a link to reactivate your account.";
+            model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
+            String reactivationValidityMessage = utils.validityMessage("You have %s from " + requestedAt +
+                            " to click the reactivation link within the email.", reactivationValidityInSeconds);
+            model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
         } else {
             Reactivation reactivation = reactivationService.createPendingReactivation(email);
             notifyUserByEmail(reactivation);

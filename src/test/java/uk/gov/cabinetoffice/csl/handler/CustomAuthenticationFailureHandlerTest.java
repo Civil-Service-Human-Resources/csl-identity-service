@@ -54,7 +54,7 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
         verify(response).sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage=" +
                 "We've already sent you an email on 2024-02-01T11:30 with a link to reactivate your account. " +
-                "Please check your emails (including the junk/spam folder)");
+                "Please check your emails (including the junk/spam folder).");
     }
 
     @Test

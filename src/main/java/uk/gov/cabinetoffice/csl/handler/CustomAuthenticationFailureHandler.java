@@ -62,14 +62,17 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
                 String pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
-                        " with a link to reactivate your account. Please check your emails (including the junk/spam folder)";
+                " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
                 response.sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage="
                         + pendingReactivationMessage);
             }
-            case ("Reactivation request has expired") ->
-                    response.sendRedirect("/login?error=deactivated-expired" +
+            case ("Reactivation request has expired") -> {
+                String username = request.getParameter("username");
+                String encryptedUsername = getEncryptedText(username, encryptionKey);
+                response.sendRedirect("/login?error=deactivated-expired" +
                             "&reactivationValidityMessage=" + reactivationValidityMessage +
-                            "&username=" + getEncryptedText(request.getParameter("username"), encryptionKey));
+                            "&username=" + encode(encryptedUsername, StandardCharsets.UTF_8));
+            }
             default -> response.sendRedirect("/login?error=failed&maxLoginAttempts=" + maxLoginAttempts);
         }
     }
