@@ -1,7 +1,6 @@
 package uk.gov.cabinetoffice.csl.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +17,7 @@ import java.util.List;
 import static java.time.Clock.systemDefaultZone;
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 
 @Slf4j
@@ -41,7 +41,7 @@ public class ReactivationService {
     }
 
     public Reactivation createPendingReactivation(String email){
-        String reactivationCode = RandomStringUtils.random(40, true, true);
+        String reactivationCode = random(40, true, true);
         Reactivation reactivation = new Reactivation(reactivationCode, PENDING, now(systemDefaultZone()), email);
         return saveReactivation(reactivation);
     }

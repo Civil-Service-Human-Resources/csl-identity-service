@@ -50,11 +50,26 @@ public class ReactivationRepositoryTest {
         reactivationRepository.save(reactivation1);
         reactivationRepository.save(reactivation2);
 
-        Optional<Reactivation> r1 = reactivationRepository.findFirstByCodeAndReactivationStatus(code1, PENDING);
-        assertTrue(r1.isPresent());
+        Optional<Reactivation> r1Optional = reactivationRepository.findFirstByCodeAndReactivationStatus(code1, PENDING);
+        assertTrue(r1Optional.isPresent());
+        Reactivation r1 = r1Optional.get();
+        assertEquals(code1, r1.getCode());
+        assertEquals(PENDING, r1.getReactivationStatus());
+        assertEquals(dateOfReactivationRequest1, r1.getRequestedAt());
 
-        Optional<Reactivation> r2 = reactivationRepository.findFirstByCodeAndReactivationStatus(code2, PENDING);
-        assertTrue(r2.isPresent());
+        Optional<Reactivation> r2Optional = reactivationRepository.findFirstByCodeAndReactivationStatus(code2, PENDING);
+        assertTrue(r2Optional.isPresent());
+        Reactivation r2 = r2Optional.get();
+        assertEquals(code2, r2.getCode());
+        assertEquals(PENDING, r2.getReactivationStatus());
+        assertEquals(dateOfReactivationRequest2, r2.getRequestedAt());
+
+        Optional<Reactivation> r3Optional = reactivationRepository.findFirstByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
+        assertTrue(r3Optional.isPresent());
+        Reactivation r3 = r3Optional.get();
+        assertEquals(email, r3.getEmail());
+        assertEquals(PENDING, r3.getReactivationStatus());
+        assertEquals(dateOfReactivationRequest1, r3.getRequestedAt());
 
         List<Reactivation> pendingReactivation =
                 reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
