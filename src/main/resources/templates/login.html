@@ -16,11 +16,26 @@
                             <span th:case="'failed'">Your sign-in details are incorrect</span>
                         </h2>
                         <p>
-                            <span th:if="${param.error[0] == 'failed'}">Check your email and password are correct.<br>After <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts, your account will be locked.</span>
-                            <span th:if="${param.error[0] == 'locked'}">Your account is locked due to <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts.<br><a href="/reset" class="push-bottom">Reset your password to unlock your account</a></span>
-                            <span th:if="${param.error[0] == 'blocked'}">Your account has been blocked and cannot access this website.<br>Please <a href="mailto:feedback@cslearning.gov.uk">contact us</a> for more information.</span>
-                            <span th:if="${param.error[0] == 'deactivated' || param.error[0] == 'deactivated-expired'}">You will need to <a th:href="@{/account/reactivate(code=${param.username[0]})}">reactivate your account</a> to keep using Civil Service Learning. <span th:text="${param.reactivationValidityMessage[0]}"></span></span>
-                            <span th:if="${param.error[0] == 'pending-reactivation'}"><span th:text="${param.pendingReactivationMessage[0]}"></span></span>
+                            <span th:if="${param.error[0] == 'failed'}">
+                                Check your email and password are correct.<br>
+                                After <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts, your account will be locked.
+                            </span>
+                            <span th:if="${param.error[0] == 'locked'}">
+                                Your account is locked due to <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts.<br>
+                                <a href="/reset" class="push-bottom">Reset your password to unlock your account</a>
+                            </span>
+                            <span th:if="${param.error[0] == 'blocked'}">
+                                Your account has been blocked and cannot access this website.<br>
+                                Please <a href="mailto:feedback@cslearning.gov.uk">contact us</a> for more information.
+                            </span>
+                            <span th:if="${param.error[0] == 'deactivated' || param.error[0] == 'deactivated-expired'}">
+                                You will need to <a th:href="@{/account/reactivate(code=${param.username[0]})}">reactivate your account</a> to keep using Civil Service Learning.<br>
+                                You have <span th:text="${param.reactivationValidityDuration[0]}"></span> to click the reactivation link within the email.
+                            </span>
+                            <span th:if="${param.error[0] == 'pending-reactivation'}">
+                                We've already sent you an email on <span th:text="${param.requestedAt[0]}"></span> with a link to reactivate your account.<br>
+                                Please check your emails (including the junk/spam folder).
+                            </span>
                         </p>
                     </div>
 

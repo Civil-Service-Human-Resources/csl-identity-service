@@ -53,7 +53,7 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = executeHandler("User account is deactivated");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=deactivated" +
-                "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
+                "&reactivationValidityDuration=24 hours" +
                 "&username=" + encode(encryptedUsername, UTF_8));
     }
 
@@ -62,7 +62,7 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = executeHandler("Reactivation request has expired");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=deactivated-expired" +
-                "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
+                "&reactivationValidityDuration=24 hours" +
                 "&username=" + encode(encryptedUsername, UTF_8));
     }
 
@@ -70,9 +70,7 @@ public class CustomAuthenticationFailureHandlerTest {
     public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
             throws Exception {
         HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
-        verify(response).sendRedirect("/login?error=pending-reactivation&pendingReactivationMessage=" +
-                "We've already sent you an email on 2024-02-01T11:30 with a link to reactivate your account. " +
-                "Please check your emails (including the junk/spam folder).");
+        verify(response).sendRedirect("/login?error=pending-reactivation&requestedAt=2024-02-01T11:30");
     }
 
     private HttpServletResponse executeHandler(String message) {

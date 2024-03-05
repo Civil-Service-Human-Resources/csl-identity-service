@@ -44,8 +44,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
-        String reactivationValidityMessage = utils.validityMessage(
-        "You have %s to click the reactivation link within the email.", reactivationValidityInSeconds);
         String username = request.getParameter("username");
         String encryptedUsername = getEncryptedText(username, encryptionKey);
         String encodedUsername = encode(encryptedUsername, UTF_8);
@@ -53,22 +51,20 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         switch (exception.getMessage()) {
             case ("User account is locked") -> redirect = "/login?error=locked&maxLoginAttempts=" + maxLoginAttempts;
             case ("User account is blocked") -> redirect = "/login?error=blocked";
-            case ("User account is deactivated") -> redirect = "/login?error=deactivated&reactivationValidityMessage="
-                    + reactivationValidityMessage + "&username=" + encodedUsername;
+            case ("User account is deactivated") -> redirect = "/login?error=deactivated&" +
+                    "reactivationValidityDuration=" + utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds)
+                    + "&username=" + encodedUsername;
             case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&" +
-                    "reactivationValidityMessage=" + reactivationValidityMessage + "&username=" + encodedUsername;
+                    "reactivationValidityDuration=" + utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds)
+                    + "&username=" + encodedUsername;
             case ("Pending reactivation already exists for user") -> {
-                String pendingReactivationMessage;
+                String requestedAtStr = "";
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                     LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                    pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
-                            " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
-                } catch(Exception e) {
-                    pendingReactivationMessage = "We've already sent you an email" +
-                            " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
-                }
-                redirect = "/login?error=pending-reactivation&pendingReactivationMessage=" + pendingReactivationMessage;
+                    requestedAtStr = requestedAt.toString();
+                } catch(Exception ignored) {}
+                redirect = "/login?error=pending-reactivation&requestedAt=" + requestedAtStr;
             }
         }
         response.sendRedirect(redirect);

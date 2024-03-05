@@ -18,6 +18,7 @@
       <env name="DATASOURCE_PASSWORD" value="password" />
       <env name="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
       <env name="DATASOURCE_USERNAME" value="root" />
+      <env name="DURATION_AFTER_REREG_ALLOWED_SECONDS" value="86400" />
       <env name="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
       <env name="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
       <env name="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
@@ -46,7 +47,6 @@
       <env name="REDIS_USE_KEY_PREFIX" value="true" />
       <env name="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
       <env name="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
-      <env name="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
       <env name="RESET_VALIDITY_SECONDS" value="86400" />
       <env name="ROOT_LOGGING_LEVEL" value="INFO" />
       <env name="SESSION_TIMEOUT_SECONDS" value="3600" />

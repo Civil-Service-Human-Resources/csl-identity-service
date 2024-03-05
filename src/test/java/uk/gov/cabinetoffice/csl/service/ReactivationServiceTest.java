@@ -31,7 +31,7 @@ public class ReactivationServiceTest {
     private final IdentityService identityService = mock (IdentityService.class);
     private final ReactivationRepository reactivationRepository = mock(ReactivationRepository.class);
     private final int validityInSeconds = 86400;
-    private final Clock clock = Clock.fixed(Instant.parse("2023-01-01T10:00:00Z"), ZoneId.of("UTC"));
+    private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"), ZoneId.of("UTC"));
 
     private final ReactivationService reactivationService =
             new ReactivationService(identityService, reactivationRepository, clock, validityInSeconds);
@@ -104,7 +104,7 @@ public class ReactivationServiceTest {
     }
 
     @Test
-    public void isPendingExistsByEmailReturnsFalseIfPendingReactivationExpired() {
+    public void isPendingReactivationExistsForEmailReturnsFalseIfPendingReactivationExpired() {
         String email = "my.name@myorg.gov.uk";
         LocalDateTime dateOfReactivationRequest = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
         Reactivation reactivation = new Reactivation();
