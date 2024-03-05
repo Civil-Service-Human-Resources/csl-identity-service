@@ -3,6 +3,7 @@ package uk.gov.cabinetoffice.csl.handler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
@@ -17,6 +18,7 @@ import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
 
+@Slf4j
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
@@ -56,10 +58,16 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&" +
                     "reactivationValidityMessage=" + reactivationValidityMessage + "&username=" + encodedUsername;
             case ("Pending reactivation already exists for user") -> {
-                Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
-                LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                String pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
-                " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
+                String pendingReactivationMessage;
+                try {
+                    Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
+                    LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
+                    pendingReactivationMessage = "We've already sent you an email on " + requestedAt +
+                            " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
+                } catch(Exception e) {
+                    pendingReactivationMessage = "We've already sent you an email" +
+                            " with a link to reactivate your account. Please check your emails (including the junk/spam folder).";
+                }
                 redirect = "/login?error=pending-reactivation&pendingReactivationMessage=" + pendingReactivationMessage;
             }
         }

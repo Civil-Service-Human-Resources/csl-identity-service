@@ -64,7 +64,7 @@ public class ReactivationService {
 
     public Reactivation getPendingReactivationForEmail(String email) {
         if(isPendingReactivationExistsForEmail(email)) {
-            reactivationRepository.findFirstByEmailIgnoreCaseAndReactivationStatus(email, PENDING)
+            return reactivationRepository.findFirstByEmailIgnoreCaseAndReactivationStatus(email, PENDING)
                     .orElseThrow(ResourceNotFoundException::new);
         }
         throw new ResourceNotFoundException();
@@ -73,17 +73,14 @@ public class ReactivationService {
     public boolean isPendingReactivationExistsForEmail(String email) {
         List<Reactivation> pendingReactivations =
                 reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(email, PENDING);
-
-        if(pendingReactivations != null && pendingReactivations.size() > 1) {
-            pendingReactivations.forEach(r -> r.setReactivationStatus(EXPIRED));
-            reactivationRepository.saveAll(pendingReactivations);
-            return false;
-        }
-
-        if(pendingReactivations != null && pendingReactivations.size() == 1) {
+        if(pendingReactivations != null && pendingReactivations.size() != 0) {
+            if (pendingReactivations.size() > 1) {
+                pendingReactivations.forEach(r -> r.setReactivationStatus(EXPIRED));
+                reactivationRepository.saveAll(pendingReactivations);
+                return false;
+            }
             return !isReactivationExpired(pendingReactivations.get(0));
         }
-
         return false;
     }
 
@@ -93,7 +90,7 @@ public class ReactivationService {
         }
 
         if(reactivation.getReactivationStatus().equals(PENDING)) {
-            long diffInMs = MILLIS.between(LocalDateTime.now(clock), reactivation.getRequestedAt());
+            long diffInMs = MILLIS.between(reactivation.getRequestedAt(), LocalDateTime.now(clock));
             if(diffInMs > validityInSeconds * 1000L) {
                 reactivation.setReactivationStatus(EXPIRED);
                 saveReactivation(reactivation);
