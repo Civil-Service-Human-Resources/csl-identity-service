@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Instant;
 
@@ -32,9 +33,12 @@ public class UserServiceTest {
     @Mock
     private ReactivationService reactivationService;
 
+    @Mock
+    private Utils utils;
+
     @BeforeEach
     public void setUp() {
-        userService = new UserService(identityService, reactivationService);
+        userService = new UserService(identityService, reactivationService, utils);
     }
 
     @Test
@@ -48,6 +52,7 @@ public class UserServiceTest {
                 emptySet(), Instant.now(), false, agencyTokenUid, null);
 
         when(identityService.getIdentityForEmail(email)).thenReturn(identity);
+        when(utils.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(identityService.isDomainInAgency(domain)).thenReturn(true);
         when(identityService.isEmailInvited(email)).thenReturn(true);

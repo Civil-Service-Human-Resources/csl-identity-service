@@ -23,9 +23,12 @@ public class UserAuthService implements IUserAuthService {
 
     @Override
     public Jwt getBearerTokenFromUserAuth() {
-        Object principal = getAuthentication().getPrincipal();
-        if (principal instanceof Jwt jwtPrincipal) {
-            return jwtPrincipal;
+        Authentication authentication = getAuthentication();
+        if(authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof Jwt jwtPrincipal) {
+                return jwtPrincipal;
+            }
         }
         return null;
     }
