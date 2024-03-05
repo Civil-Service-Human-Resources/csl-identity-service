@@ -61,8 +61,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 String requestedAtStr = "";
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
-                    LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                    requestedAtStr = requestedAt.toString();
+                    requestedAtStr = utils.convertDateTimeFormat(pendingReactivation.getRequestedAt().toString());
                 } catch(Exception ignored) {}
                 redirect = "/login?error=pending-reactivation&requestedAt=" + requestedAtStr;
             }

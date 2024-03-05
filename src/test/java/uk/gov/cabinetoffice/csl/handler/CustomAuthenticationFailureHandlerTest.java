@@ -70,7 +70,7 @@ public class CustomAuthenticationFailureHandlerTest {
     public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
             throws Exception {
         HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
-        verify(response).sendRedirect("/login?error=pending-reactivation&requestedAt=2024-02-01T11:30");
+        verify(response).sendRedirect("/login?error=pending-reactivation&requestedAt=01 Feb 2024 15:30:20");
     }
 
     private HttpServletResponse executeHandler(String message) {
@@ -91,7 +91,7 @@ public class CustomAuthenticationFailureHandlerTest {
         reactivation.setEmail(email);
         reactivation.setCode("code");
         reactivation.setReactivationStatus(PENDING);
-        LocalDateTime dateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        LocalDateTime dateTime = LocalDateTime.of(2024, FEBRUARY, 1, 15, 30, 20);
         reactivation.setRequestedAt(dateTime);
         return reactivation;
     }
