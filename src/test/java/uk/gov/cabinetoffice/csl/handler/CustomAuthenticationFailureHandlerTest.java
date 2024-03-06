@@ -24,6 +24,8 @@ import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 @ActiveProfiles("no-redis")
 public class CustomAuthenticationFailureHandlerTest {
 
+    private final int maxLoginAttempts = 5;
+
     @Autowired
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
 
@@ -33,13 +35,13 @@ public class CustomAuthenticationFailureHandlerTest {
     @Test
     public void shouldSetErrorToFailedOnFailedLogin() throws IOException {
         HttpServletResponse response = executeHandler("Some other error");
-        verify(response).sendRedirect("/login?error=failed&maxLoginAttempts=5");
+        verify(response).sendRedirect("/login?error=failed&maxLoginAttempts=" + maxLoginAttempts);
     }
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException {
         HttpServletResponse response = executeHandler("User account is locked");
-        verify(response).sendRedirect("/login?error=locked&maxLoginAttempts=5");
+        verify(response).sendRedirect("/login?error=locked&maxLoginAttempts=" + maxLoginAttempts);
     }
 
     @Test

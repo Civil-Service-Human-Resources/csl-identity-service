@@ -108,12 +108,12 @@ public class SignupController {
                     log.info("{} user trying to re-register before re-registration allowed time", email);
                     redirectAttributes.addFlashAttribute(
                             ApplicationConstants.STATUS_ATTRIBUTE,
-                            "You have been sent an email with a link to register your account." +
-                                    " Please check your spam or junk mail folders.\n" +
-                                    "If you have not received the email," +
-                                    " please wait %s"
-                                            .formatted(utils.convertSecondsIntoMinutesOrHours(durationAfterReRegAllowedInSeconds)) +
-                                    " and re-enter your details to create an account.");
+                            "You have been sent an email with a link to register your account."
+                                    + " Please check your spam or junk mail folders.\n"
+                                    + "If you have not received the email,"
+                                    + " please wait %s".formatted(
+                                      utils.convertSecondsIntoMinutesOrHours(durationAfterReRegAllowedInSeconds))
+                                    + " and re-enter your details to create an account.");
                     return REDIRECT_SIGNUP_REQUEST;
                 } else {
                     log.info("{} user trying to re-register after re-registration allowed time but " +
