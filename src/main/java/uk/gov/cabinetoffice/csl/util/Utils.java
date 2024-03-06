@@ -1,10 +1,12 @@
 package uk.gov.cabinetoffice.csl.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class Utils {
 
@@ -23,7 +25,9 @@ public class Utils {
             SimpleDateFormat targetDateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
             Date parsedDate = sourceDateFormat.parse(localDateTime);
             return targetDateFormat.format(parsedDate);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            log.warn("Invalid date string value: {}, Exception: {}", localDateTime, e.toString());
+        }
         return "";
     }
 
