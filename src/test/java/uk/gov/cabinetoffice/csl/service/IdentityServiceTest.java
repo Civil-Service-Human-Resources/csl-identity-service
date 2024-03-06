@@ -52,8 +52,7 @@ public class IdentityServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private Utils utils;
+    private final Utils utils = new Utils();
 
     @BeforeEach
     public void setUp() {
@@ -103,7 +102,6 @@ public class IdentityServiceTest {
     @Test
     public void createIdentityFromInviteCodeWithoutAgencyButIsAllowListed() {
         final String code = "123abc";
-        final String domain = "example.com";
         final String email = "test@example.com";
         Role role = new Role();
         role.setName("USER");
@@ -120,7 +118,6 @@ public class IdentityServiceTest {
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
-        when(utils.getDomainFromEmailAddress(email)).thenReturn(domain);
 
         identityService.createIdentityFromInviteCode(code, "password", tokenRequest);
 

@@ -33,8 +33,7 @@ public class UserServiceTest {
     @Mock
     private ReactivationService reactivationService;
 
-    @Mock
-    private Utils utils;
+    private final Utils utils = new Utils();
 
     @BeforeEach
     public void setUp() {
@@ -52,7 +51,6 @@ public class UserServiceTest {
                 emptySet(), Instant.now(), false, agencyTokenUid, null);
 
         when(identityService.getIdentityForEmail(email)).thenReturn(identity);
-        when(utils.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(identityService.isDomainInAgency(domain)).thenReturn(true);
         when(identityService.isEmailInvited(email)).thenReturn(true);

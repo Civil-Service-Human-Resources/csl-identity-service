@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.account.reactivation;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -84,37 +83,42 @@ public class ReactivationController {
         this.utils = utils;
     }
 
-    @SneakyThrows
     @GetMapping
     public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
-        String email = getDecryptedText(code, encryptionKey);
+        try {
+            String email = getDecryptedText(code, encryptionKey);
 
-        String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
-        if(isNotBlank(resultIdentityActive)) {
-            return resultIdentityActive;
+            String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
+            if(isNotBlank(resultIdentityActive)) {
+                return resultIdentityActive;
+            }
+
+            if(reactivationService.isPendingReactivationExistsForEmail(email)) {
+                Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
+                LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
+                String reactivationEmailMessage = "We've already sent you an email on %s with a link to reactivate your account."
+                        .formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+                model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
+                String reactivationValidityMessage = "You have %s from %s to click the reactivation link within the email."
+                        .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds),
+                                utils.convertDateTimeFormat(requestedAt.toString()));
+                model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
+            } else {
+                Reactivation reactivation = reactivationService.createPendingReactivation(email);
+                notifyUserByEmail(reactivation);
+                String reactivationEmailMessage = "We've sent you an email with a link to reactivate your account.";
+                model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
+                String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
+                        .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds));
+                model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
+            }
+            return "reactivate/reactivate";
+        } catch (Exception e) {
+            log.warn("Unexpected error for code: {} with cause {}",
+                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
+            return REDIRECT_LOGIN;
         }
-
-        if(reactivationService.isPendingReactivationExistsForEmail(email)) {
-            Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
-            LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-            String reactivationEmailMessage = "We've already sent you an email on " + requestedAt +
-                    " with a link to reactivate your account.";
-            model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
-            String reactivationValidityMessage = utils.validityMessage("You have %s from " + requestedAt +
-                            " to click the reactivation link within the email.", reactivationValidityInSeconds);
-            model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
-        } else {
-            Reactivation reactivation = reactivationService.createPendingReactivation(email);
-            notifyUserByEmail(reactivation);
-            model.addAttribute("reactivationEmailMessage",
-                    "We've sent you an email with a link to reactivate your account.");
-            model.addAttribute("reactivationValidityMessage",
-                    utils.validityMessage(
-                            "You have %s to click the reactivation link within the email.",
-                            reactivationValidityInSeconds));
-        }
-
-        return "reactivate/reactivate";
     }
 
     @GetMapping("/{code}")
@@ -130,12 +134,8 @@ public class ReactivationController {
 
             if(reactivationService.isReactivationExpired(reactivation)) {
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
-                String reactivationValidityMessage = utils.validityMessage(
-                        "You have %s to click the reactivation link within the email.",
-                        reactivationValidityInSeconds);
-                String qParam = "reactivationValidityMessage=" + reactivationValidityMessage +
-                        "&username=" + encode(getEncryptedText(email, encryptionKey), UTF_8);
-                return "redirect:/login?error=deactivated-expired&" + qParam;
+                return "redirect:/login?error=deactivated-expired&username="
+                        + encode(getEncryptedText(email, encryptionKey), UTF_8);
             }
 
             String domain = utils.getDomainFromEmailAddress(reactivation.getEmail());
@@ -152,11 +152,11 @@ public class ReactivationController {
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }
         } catch (ResourceNotFoundException e) {
-            log.error("ResourceNotFoundException for code: {}, with status {}", code, PENDING);
+            log.warn("ResourceNotFoundException for code: {}, with status {}", code, PENDING);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         } catch (Exception e) {
-            log.error("Unexpected error for code: {} with cause {}",
+            log.warn("Unexpected error for code: {} with cause {}",
                     code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;

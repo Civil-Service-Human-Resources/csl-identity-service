@@ -108,10 +108,11 @@ public class SignupController {
                     log.info("{} user trying to re-register before re-registration allowed time", email);
                     redirectAttributes.addFlashAttribute(
                             ApplicationConstants.STATUS_ATTRIBUTE,
-                            "You have been sent an email with a link to register your account. " +
-                                    "Please check your spam or junk mail folders.\n" +
-                                    "If you have not received the email, " +
-                                    utils.validityMessage("please wait %s", durationAfterReRegAllowedInSeconds) +
+                            "You have been sent an email with a link to register your account." +
+                                    " Please check your spam or junk mail folders.\n" +
+                                    "If you have not received the email," +
+                                    " please wait %s"
+                                            .formatted(utils.convertSecondsIntoMinutesOrHours(durationAfterReRegAllowedInSeconds)) +
                                     " and re-enter your details to create an account.");
                     return REDIRECT_SIGNUP_REQUEST;
                 } else {
@@ -233,7 +234,6 @@ public class SignupController {
             }
             inviteService.updateInviteStatus(code, InviteStatus.ACCEPTED);
 
-            // This provides the next template the URL for LPG-UI so a user can begin the login process
             model.addAttribute(LPG_UI_URL, lpgUiUrl);
 
             return SIGNUP_SUCCESS_TEMPLATE;

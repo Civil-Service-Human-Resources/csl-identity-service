@@ -12,8 +12,6 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.time.LocalDateTime;
-
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
@@ -27,9 +25,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     @Value("${account.lockout.maxLoginAttempts}")
     private int maxLoginAttempts;
-
-    @Value("${reactivation.validityInSeconds}")
-    private int reactivationValidityInSeconds;
 
     private final ReactivationService reactivationService;
 
@@ -51,12 +46,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         switch (exception.getMessage()) {
             case ("User account is locked") -> redirect = "/login?error=locked&maxLoginAttempts=" + maxLoginAttempts;
             case ("User account is blocked") -> redirect = "/login?error=blocked";
-            case ("User account is deactivated") -> redirect = "/login?error=deactivated&" +
-                    "reactivationValidityDuration=" + utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds)
-                    + "&username=" + encodedUsername;
-            case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&" +
-                    "reactivationValidityDuration=" + utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds)
-                    + "&username=" + encodedUsername;
+            case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
+            case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&username=" + encodedUsername;
             case ("Pending reactivation already exists for user") -> {
                 String requestedAtStr = "";
                 try {

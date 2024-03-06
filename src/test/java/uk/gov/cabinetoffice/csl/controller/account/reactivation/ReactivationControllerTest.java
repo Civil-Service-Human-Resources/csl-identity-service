@@ -16,7 +16,6 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
-import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
 
 @SpringBootTest
@@ -50,9 +50,6 @@ public class ReactivationControllerTest {
 
     @MockBean
     private AgencyTokenService agencyTokenService;
-
-    @MockBean
-    private Utils utils;
 
     @Test
     public void shouldRedirectIfAccountDomainIsAgencyToken() throws Exception {
@@ -85,18 +82,13 @@ public class ReactivationControllerTest {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
 
         when(reactivationService.isReactivationExpired(reactivation)).thenReturn(true);
-        when(utils.validityMessage("You have %s to click the reactivation link within the email.",
-                86400))
-                .thenReturn("You have 24 hours to click the reactivation link within the email.");
 
         String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
 
         mockMvc.perform(
                         get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired" +
-                        "&reactivationValidityMessage=You have 24 hours to click the reactivation link within the email." +
-                        "&username=" + encryptedUsername))
+                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername))
                 .andDo(print());
     }
 
@@ -110,7 +102,7 @@ public class ReactivationControllerTest {
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, "Reactivation code is not valid"))
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE))
                 .andDo(print());
     }
 
@@ -151,7 +143,6 @@ public class ReactivationControllerTest {
 
         when(reactivationService.getReactivationForCodeAndStatus(CODE, PENDING))
                 .thenReturn(reactivation);
-        when(utils.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
 
         return reactivation;
     }

@@ -52,18 +52,16 @@ public class CustomAuthenticationFailureHandlerTest {
     public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
-        verify(response).sendRedirect("/login?error=deactivated" +
-                "&reactivationValidityDuration=24 hours" +
-                "&username=" + encode(encryptedUsername, UTF_8));
+        verify(response).sendRedirect("/login?error=deactivated&username="
+                + encode(encryptedUsername, UTF_8));
     }
 
     @Test
     public void shouldSetErrorToDeactivatedExpiredOnDeactivationExpired() throws IOException {
         HttpServletResponse response = executeHandler("Reactivation request has expired");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
-        verify(response).sendRedirect("/login?error=deactivated-expired" +
-                "&reactivationValidityDuration=24 hours" +
-                "&username=" + encode(encryptedUsername, UTF_8));
+        verify(response).sendRedirect("/login?error=deactivated-expired&username="
+                + encode(encryptedUsername, UTF_8));
     }
 
     @Test

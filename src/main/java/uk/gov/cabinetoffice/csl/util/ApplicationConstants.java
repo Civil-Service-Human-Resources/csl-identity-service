@@ -18,7 +18,7 @@ public class ApplicationConstants {
 
     public static final String ACCOUNT_REACTIVATION_ERROR_MESSAGE = "There was an error processing account reactivation. Please try again later.";
 
-    public static final String REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE = "Reactivation code is not valid";
+    public static final String REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE = "Reactivation link is not valid";
 
     public static final String REACTIVATION_ACCOUNT_IS_ALREADY_ACTIVE = "Account is already active.";
 }
