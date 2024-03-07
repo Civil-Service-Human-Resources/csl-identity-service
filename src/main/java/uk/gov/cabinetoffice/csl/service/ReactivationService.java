@@ -65,9 +65,9 @@ public class ReactivationService {
     public Reactivation getPendingReactivationForEmail(String email) {
         if(isPendingReactivationExistsForEmail(email)) {
             return reactivationRepository.findFirstByEmailIgnoreCaseAndReactivationStatus(email, PENDING)
-                    .orElseThrow(ResourceNotFoundException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException("Pending Reactivation not found for email: " + email));
         }
-        throw new ResourceNotFoundException();
+        throw new ResourceNotFoundException("Pending Reactivation not found for email: " + email);
     }
 
     public boolean isPendingReactivationExistsForEmail(String email) {
@@ -103,7 +103,7 @@ public class ReactivationService {
     public Reactivation getReactivationForCodeAndStatus(String code, ReactivationStatus reactivationStatus) {
         return reactivationRepository
                 .findFirstByCodeAndReactivationStatus(code, reactivationStatus)
-                .orElseThrow(ResourceNotFoundException::new);
+                .orElseThrow(() -> new ResourceNotFoundException(reactivationStatus + " Reactivation not found for code: " + code));
     }
 
     public Reactivation saveReactivation(Reactivation reactivation) {

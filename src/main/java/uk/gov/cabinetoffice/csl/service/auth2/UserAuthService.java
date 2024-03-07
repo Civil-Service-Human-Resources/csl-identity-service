@@ -1,6 +1,7 @@
 package uk.gov.cabinetoffice.csl.service.auth2;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import uk.gov.cabinetoffice.csl.exception.ClientAuthenticationErrorException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class UserAuthService implements IUserAuthService {
@@ -41,7 +43,8 @@ public class UserAuthService implements IUserAuthService {
             username = (String) jwtPrincipal.getClaims().get("user_name");
         }
         if (isBlank(username)) {
-            throw new ClientAuthenticationErrorException("Learner Id is missing from authentication token");
+            log.error("Learner Id is missing from authentication token");
+            throw new ClientAuthenticationErrorException("System error");
         }
         return username;
     }

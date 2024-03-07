@@ -1,13 +1,16 @@
 package uk.gov.cabinetoffice.csl.service.auth2;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
+import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class RestTemplateOAuthInterceptor implements ClientHttpRequestInterceptor {
 
@@ -18,9 +21,14 @@ public class RestTemplateOAuthInterceptor implements ClientHttpRequestIntercepto
     }
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        String token = bearerTokenService.getBearerToken();
-        request.getHeaders().setBearerAuth(token);
-        return execution.execute(request, body);
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) {
+        try {
+            String token = bearerTokenService.getBearerToken();
+            request.getHeaders().setBearerAuth(token);
+            return execution.execute(request, body);
+        } catch (IOException e) {
+            log.error("RestTemplateOAuthInterceptor.intercept: Error has occurred {}", e.toString());
+            throw new GenericServerException("System error");
+        }
     }
 }

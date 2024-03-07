@@ -57,12 +57,13 @@ public class IdentityService {
                                     agencyToken.getUid() + " has no spaces available. Identity not created");
                         }
                     })
-                    .orElseThrow(ResourceNotFoundException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException("Agency token not found"));
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
         } else if (!isAllowListedDomain(domain) && !inviteService.isEmailInvited(email)) {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Invited request neither agency, nor allowListed, nor invited via IDM for email: "
+                    + email);
         }
         Identity identity = new Identity(randomUUID().toString(), email, passwordEncoder.encode(password),
                 true, false, newRoles, now(), false, agencyTokenUid, 0);

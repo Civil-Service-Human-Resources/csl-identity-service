@@ -30,10 +30,10 @@ public class AuthenticationEvents {
     @EventListener
     public void onFailure(AbstractAuthenticationFailureEvent failure) {
         Authentication authentication = failure.getAuthentication();
-        log.debug("AuthenticationFailureListener.onFailure:authentication: {}", authentication);
+        log.debug("AuthenticationEvents.onFailure:authentication: {}", authentication);
         if (authentication.getPrincipal() != null
                 && authentication.getPrincipal() instanceof String email) {
-            log.info("AuthenticationFailureListener.onFailure: authentication failed for email: {}", email);
+            log.info("AuthenticationEvents.onFailure: authentication failed for email: {}", email);
             loginService.loginFailed(email);
         }
     }

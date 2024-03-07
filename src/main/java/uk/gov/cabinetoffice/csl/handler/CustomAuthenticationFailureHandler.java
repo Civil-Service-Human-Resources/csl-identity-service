@@ -44,6 +44,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         String encodedUsername = encode(encryptedUsername, UTF_8);
         String redirect = "/login?error=failed&maxLoginAttempts=" + maxLoginAttempts;
         switch (exception.getMessage()) {
+            case ("System error") -> redirect = "/error.html";
             case ("User account is locked") -> redirect = "/login?error=locked&maxLoginAttempts=" + maxLoginAttempts;
             case ("User account is blocked") -> redirect = "/login?error=blocked";
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;

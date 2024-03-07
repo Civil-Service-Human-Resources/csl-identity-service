@@ -95,8 +95,8 @@ public class ReactivationControllerTest {
     @Test
     public void shouldRedirectToLoginIfReactivationNotFound() throws Exception {
 
-        doThrow(new ResourceNotFoundException()).when(reactivationService)
-                .getReactivationForCodeAndStatus(CODE, PENDING);
+        doThrow(new ResourceNotFoundException(PENDING + " Reactivation not found for code: " + CODE))
+                .when(reactivationService).getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
