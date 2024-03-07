@@ -19,7 +19,7 @@ public class TextEncryptionUtils {
             byte[] encrypted = cipher.doFinal(rawText.getBytes());
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
-            log.error("TextEncryptionUtils.getEncryptedText: Error has occurred: {}", e.toString());
+            log.error("TextEncryptionUtils.getEncryptedText: Error has occurred", e);
             throw new GenericServerException("System error");
         }
     }
@@ -32,7 +32,7 @@ public class TextEncryptionUtils {
         byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
         return new String(plainText);
         } catch (Exception e) {
-            log.error("TextEncryptionUtils.getDecryptedText: Error has occurred: {}", e.toString());
+            log.error("TextEncryptionUtils.getDecryptedText: Error has occurred", e);
             throw new GenericServerException("System error");
         }
     }

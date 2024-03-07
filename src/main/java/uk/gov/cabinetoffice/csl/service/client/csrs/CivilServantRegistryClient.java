@@ -88,9 +88,9 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    @Cacheable("allowlistdomains")
+    @Cacheable("allowListDomains")
     public List<String> getAllowListDomains() {
-        log.info("Fetching allowlist domains from CSRS API");
+        log.info("Fetching allowlist domains from Civil Servant Registry");
         try {
             RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
             DomainsResponse domainsResponse = httpClient.executeRequest(request, DomainsResponse.class);
@@ -106,7 +106,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    @CacheEvict(value = "allowlistdomains", allEntries = true)
+    @CacheEvict(value = "allowListDomains", allEntries = true)
     @Scheduled(fixedRateString = "${civilServantRegistry.cache.allowListDomainsTTL}")
     public void evictAllowListDomainCache() {
         log.info("Evicting Allowlist Domains cache");
