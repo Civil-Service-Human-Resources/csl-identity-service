@@ -145,8 +145,7 @@ public class ReactivationController {
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
-                log.info("Account reactivation is not agency and can reactivate without further validation for " +
-                                "Reactivation: {}",
+                log.info("Account reactivation is not agency and can reactivate without further validation for Reactivation: {}",
                         reactivation);
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
