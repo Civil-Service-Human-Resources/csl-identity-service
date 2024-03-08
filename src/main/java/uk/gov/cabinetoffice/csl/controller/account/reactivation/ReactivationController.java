@@ -96,11 +96,11 @@ public class ReactivationController {
             if(reactivationService.isPendingReactivationExistsForEmail(email)) {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                String reactivationEmailMessage = "We've already sent you an email on %s with a link to reactivate your account."
-                        .formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+                String reactivationEmailMessage = ("We've already sent you an email on %s with a link to reactivate your " +
+                        "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
                 model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
-                String reactivationValidityMessage = "You have %s from %s to click the reactivation link within the email."
-                        .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds),
+                String reactivationValidityMessage = ("You have %s from %s to click the reactivation link within the " +
+                        "email.").formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds),
                                 utils.convertDateTimeFormat(requestedAt.toString()));
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
             } else {
@@ -145,8 +145,8 @@ public class ReactivationController {
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
-                log.info("Account reactivation is not agency and can reactivate without further validation for Reactivation: {}",
-                        reactivation);
+                log.info("Account reactivation is not agency and can reactivate without further validation for " +
+                                "Reactivation: {}", reactivation);
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }
@@ -178,13 +178,18 @@ public class ReactivationController {
         }
 
         if(identityForEmail.isActive()) {
-            Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
-            pendingReactivation.setReactivationStatus(EXPIRED);
-            reactivationService.saveReactivation(pendingReactivation);
+            try {
+                Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
+                pendingReactivation.setReactivationStatus(EXPIRED);
+                reactivationService.saveReactivation(pendingReactivation);
+                log.info("Pending reactivations are marked as expired because user is already active fpr email: {}",
+                        email);
+            } catch(Exception e) {
+                log.debug("Pending reactivation not found for email: {}", email);
+            }
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_ACCOUNT_IS_ALREADY_ACTIVE);
             return REDIRECT_LOGIN;
         }
-
         return null;
     }
 
