@@ -114,7 +114,7 @@ public class ReactivationController {
             }
             return "reactivate/reactivate";
         } catch (Exception e) {
-            log.warn("Unexpected error for code: {} with cause {}",
+            log.error("Unexpected error for code: {} with cause {}",
                     code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
@@ -155,7 +155,7 @@ public class ReactivationController {
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         } catch (Exception e) {
-            log.warn("Unexpected error for code: {} with cause {}",
+            log.error("Unexpected error for code: {} with cause {}",
                     code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
