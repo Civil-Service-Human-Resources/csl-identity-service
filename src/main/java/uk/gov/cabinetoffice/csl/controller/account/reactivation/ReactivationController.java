@@ -114,7 +114,7 @@ public class ReactivationController {
             }
             return "reactivate/reactivate";
         } catch (Exception e) {
-            log.error("Unexpected error for code: {} with cause {}",
+            log.error("There was an error while creating link reactivation for code: {} with cause: {}",
                     code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
@@ -151,11 +151,11 @@ public class ReactivationController {
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }
         } catch (ResourceNotFoundException e) {
-            log.warn("ResourceNotFoundException for code: {}, with status {}", code, PENDING);
+            log.warn("ResourceNotFoundException for code: {}, with status: {}", code, PENDING);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         } catch (Exception e) {
-            log.error("Unexpected error for code: {} with cause {}",
+            log.error("There was an error processing account reactivation for code: {} with cause: {}",
                     code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
@@ -164,7 +164,7 @@ public class ReactivationController {
 
     @GetMapping("/updated")
     public String accountActivated(Model model) {
-        log.info("Account reactivation complete");
+        log.info("Account reactivation complete.");
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl + "/login");
         return ACCOUNT_REACTIVATED_TEMPLATE;
     }
