@@ -8,8 +8,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 
-import java.io.IOException;
-
 @Slf4j
 @Component
 public class RestTemplateOAuthInterceptor implements ClientHttpRequestInterceptor {
@@ -26,7 +24,7 @@ public class RestTemplateOAuthInterceptor implements ClientHttpRequestIntercepto
             String token = bearerTokenService.getBearerToken();
             request.getHeaders().setBearerAuth(token);
             return execution.execute(request, body);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("RestTemplateOAuthInterceptor.intercept: Error has occurred {}", e.toString());
             throw new GenericServerException("System error");
         }
