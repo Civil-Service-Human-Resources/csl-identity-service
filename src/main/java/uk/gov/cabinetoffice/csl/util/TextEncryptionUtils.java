@@ -26,11 +26,11 @@ public class TextEncryptionUtils {
 
     public static String getDecryptedText(String encryptedText, String encryptionKey) {
         try {
-        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, aesKey);
-        byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
-        return new String(plainText);
+            Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, aesKey);
+            byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
+            return new String(plainText);
         } catch (Exception e) {
             log.error("TextEncryptionUtils.getDecryptedText: Error has occurred", e);
             throw new GenericServerException("System error");
