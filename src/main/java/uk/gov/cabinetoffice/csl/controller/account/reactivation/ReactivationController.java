@@ -114,8 +114,8 @@ public class ReactivationController {
             }
             return "reactivate/reactivate";
         } catch (Exception e) {
-            log.error("There was an error while creating link reactivation for code: {} with cause: {}",
-                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
+            log.error("There was an error while creating the reactivation link for the code: {} with cause: {}",
+                    code, e.toString());
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         }
