@@ -69,7 +69,7 @@ public class CustomAuthenticationFailureHandlerTest {
     @Test
     public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
             throws Exception {
-        HttpServletResponse response = executeHandler("Pending reactivation already exists for user");
+        HttpServletResponse response = executeHandler("Pending reactivation exists for user");
         verify(response).sendRedirect("/login?error=pending-reactivation&requestedAt=01 Feb 2024 15:30:20");
     }
 

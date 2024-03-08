@@ -96,7 +96,7 @@ public class ReactivationController {
             if(reactivationService.isPendingReactivationExistsForEmail(email)) {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                String reactivationEmailMessage = ("We've already sent you an email on %s with a link to reactivate your " +
+                String reactivationEmailMessage = ("We've sent you an email on %s with a link to reactivate your " +
                         "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
                 model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
                 String reactivationValidityMessage = ("You have %s from %s to click the reactivation link within the " +
@@ -182,7 +182,7 @@ public class ReactivationController {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 pendingReactivation.setReactivationStatus(EXPIRED);
                 reactivationService.saveReactivation(pendingReactivation);
-                log.info("Pending reactivations are marked as expired because user is already active fpr email: {}",
+                log.info("Pending reactivations are marked as expired because user is active for email: {}",
                         email);
             } catch(Exception e) {
                 log.debug("Pending reactivation not found for email: {}", email);
