@@ -99,9 +99,10 @@ public class ReactivationController {
                 String reactivationEmailMessage = ("We've sent you an email on %s with a link to reactivate your " +
                         "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
                 model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
-                String reactivationValidityMessage = ("You have %s from %s to click the reactivation link within the " +
-                        "email.").formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds),
-                                utils.convertDateTimeFormat(requestedAt.toString()));
+                LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
+                String reactivationValidityMessage = "The link in the email will expire on %s."
+                        .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
+
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
             } else {
                 Reactivation reactivation = reactivationService.createPendingReactivation(email);

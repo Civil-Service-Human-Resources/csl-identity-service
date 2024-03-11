@@ -15,9 +15,11 @@ import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+import static java.time.Month.FEBRUARY;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -41,6 +43,7 @@ public class ResetControllerTest {
     private static final String PASSWORD = "Password123";
     private static final String CODE = "abc123";
 
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,6 +52,8 @@ public class ResetControllerTest {
 
     @MockBean
     private IdentityService identityService;
+
+    private final Utils utils = new Utils();
 
     @Test
     public void shouldLoadRequestResetForm() throws Exception {
@@ -85,6 +90,37 @@ public class ResetControllerTest {
     }
 
     @Test
+    public void shouldLoadCheckEmailPageWithPendingResetDateIfUserTryToResetAgainWhilePendingResetExistsForTheGivenEmailId() throws Exception {
+        final long validityInSeconds = 86400;
+        when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
+        Reset reset = createReset();
+        LocalDateTime requestedAt = LocalDateTime.now();
+        reset.setRequestedAt(requestedAt);
+
+        LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
+        String setRequestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
+        String resetLinkExpiryDateTimeStr = utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString());
+        String resetValidityMessage = "Email was sent on %s. The link in the email will expire on %s."
+        .formatted(setRequestedAtStr, resetLinkExpiryDateTimeStr);
+        when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
+
+        mockMvc.perform(post("/reset")
+                        .param("email", EMAIL)
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("reset/checkEmail"))
+                .andExpect(content().string(containsString("Now check your email")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
+                .andExpect(content().string(containsString(resetValidityMessage)))
+                .andExpect(content().string(containsString("Haven't received the email?")))
+                .andExpect(content().string(containsString("Check your spam folder.")))
+                .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andDo(print());
+    }
+
+    @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExistForTheGivenEmailId() throws Exception {
         when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(false);
         mockMvc.perform(post("/reset")
@@ -103,7 +139,7 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeDoesNotExist() throws Exception {
-        when(resetService.getResetByCode(CODE)).thenReturn(null);
+        when(resetService.getResetForCode(CODE)).thenReturn(null);
         mockMvc.perform(
                         get("/reset/" + CODE)
                         .with(csrf())
@@ -121,9 +157,10 @@ public class ResetControllerTest {
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsExpired() throws Exception {
         Reset reset = createReset();
-        reset.setRequestedAt(new Date(2323223232L));
+        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        reset.setRequestedAt(requestDateTime);
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(true);
 
         mockMvc.perform(
@@ -144,9 +181,10 @@ public class ResetControllerTest {
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsAlreadyUsed() throws Exception {
         Reset reset = createReset();
         reset.setResetStatus(RESET);
-        reset.setRequestedAt(new Date(2323223232L));
+        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        reset.setRequestedAt(requestDateTime);
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetComplete(reset)).thenReturn(true);
 
@@ -168,9 +206,8 @@ public class ResetControllerTest {
     public void shouldLoadPasswordFormIfCodeIsPending() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         mockMvc.perform(
                         get("/reset/" + CODE)
@@ -194,9 +231,8 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfNumberIsMissingFromPassword() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
@@ -226,9 +262,8 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfLowerCaseCharacterMissingFromPassword() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
@@ -258,9 +293,8 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfUpperCaseCharacterMissingFromPassword() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
@@ -290,9 +324,8 @@ public class ResetControllerTest {
     public void shouldShowPasswordInvalidErrorMessageIfPasswordLengthIsLessThan8Characters() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
@@ -322,9 +355,8 @@ public class ResetControllerTest {
     public void shouldShowPasswordMismatchErrorMessageIfPasswordAndConfirmPasswordMismatch() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
@@ -354,7 +386,7 @@ public class ResetControllerTest {
     public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExist() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetComplete(reset)).thenReturn(false);
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(null);
@@ -378,9 +410,8 @@ public class ResetControllerTest {
     public void shouldLoadPasswordResetSuccessful() throws Exception {
         Reset reset = createReset();
 
-        when(resetService.getResetByCode(CODE)).thenReturn(reset);
+        when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
-        when(resetService.isResetPending(reset)).thenReturn(true);
 
         Identity identity = TestUtil.createIdentity(ID, UID, EMAIL, PASSWORD, null);
 
@@ -404,7 +435,8 @@ public class ResetControllerTest {
         reset.setCode(CODE);
         reset.setEmail(EMAIL);
         reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date());
+        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        reset.setRequestedAt(requestDateTime);
         return reset;
     }
 }

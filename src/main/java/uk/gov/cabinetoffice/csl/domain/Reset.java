@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,12 +34,12 @@ public class Reset {
     private ResetStatus resetStatus;
 
     @Column(nullable = false)
-    private Date requestedAt;
+    private LocalDateTime requestedAt;
 
     @Column
-    private Date resetAt;
+    private LocalDateTime resetAt;
 
-    public Reset(String code, String email, ResetStatus resetStatus, Date requestedAt) {
+    public Reset(String code, String email, ResetStatus resetStatus, LocalDateTime requestedAt) {
         this.code = code;
         this.email = email;
         this.resetStatus = resetStatus;

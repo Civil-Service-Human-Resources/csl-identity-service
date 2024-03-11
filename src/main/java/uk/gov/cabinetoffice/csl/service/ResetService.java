@@ -9,9 +9,13 @@ import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.repository.ResetRepository;
 import uk.gov.service.notify.NotificationClientException;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.time.Clock.systemDefaultZone;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.*;
 
@@ -30,6 +34,8 @@ public class ResetService {
 
     private final int validityInSeconds;
 
+    private final Clock clock;
+
     private final ResetRepository resetRepository;
 
     private final NotifyService notifyService;
@@ -37,14 +43,16 @@ public class ResetService {
     @Autowired
     public ResetService(ResetRepository resetRepository,
                         @Qualifier("notifyServiceImpl") NotifyService notifyService,
+                        Clock clock,
                         @Value("${reset.validityInSeconds}") int validityInSeconds) {
         this.resetRepository = resetRepository;
         this.notifyService = notifyService;
+        this.clock = clock;
         this.validityInSeconds = validityInSeconds;
     }
 
-    public Reset getResetByCode(String code) {
-        return resetRepository.findByCode(code);
+    public boolean isResetComplete(Reset reset) {
+        return reset.getResetStatus().equals(RESET);
     }
 
     public boolean isResetExpired(Reset reset) {
@@ -52,8 +60,8 @@ public class ResetService {
             return true;
         }
 
-        if(isResetPending(reset)) {
-            long diffInMs = new Date().getTime() - reset.getRequestedAt().getTime();
+        if(reset.getResetStatus().equals(PENDING)) {
+            long diffInMs = MILLIS.between(reset.getRequestedAt(), LocalDateTime.now(clock));
             if(diffInMs > validityInSeconds * 1000L) {
                 reset.setResetStatus(EXPIRED);
                 resetRepository.save(reset);
@@ -63,50 +71,40 @@ public class ResetService {
         return false;
     }
 
-    public boolean isResetPending(Reset reset) {
-        return reset.getResetStatus().equals(PENDING);
+    public Reset getResetForCode(String code) {
+        return resetRepository.findByCode(code);
     }
 
-    public boolean isResetComplete(Reset reset) {
-        return reset.getResetStatus().equals(RESET);
-    }
-
-    public void notifyForResetRequest(String email) throws NotificationClientException {
-
+    public Reset getPendingResetForEmail(String email) {
         Reset reset = null;
-
         List<Reset> existingPendingResets =
                 resetRepository.findByEmailIgnoreCaseAndResetStatus(email, PENDING);
 
         if(existingPendingResets != null && existingPendingResets.size() > 1) {
             existingPendingResets.forEach(r -> r.setResetStatus(EXPIRED));
             resetRepository.saveAll(existingPendingResets);
+            return null;
         }
 
         if(existingPendingResets != null && existingPendingResets.size() == 1) {
             reset = existingPendingResets.get(0);
             if(isResetExpired(reset)) {
-                reset = null;
-            } else {
-                reset.setRequestedAt(new Date());
+                return null;
             }
         }
+        return reset;
+    }
 
-        if(reset == null) {
-            reset = createPendingReset(email);
-        }
+    public void createPendingResetRequestAndAndNotifyUser(String email) throws NotificationClientException {
+        Reset reset = new Reset(random(40, true, true), email, PENDING, now(systemDefaultZone()));
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
     }
 
-    public void notifyOfSuccessfulReset(Reset reset) throws NotificationClientException {
-        reset.setResetAt(new Date());
+    public void notifyUserForSuccessfulReset(Reset reset) throws NotificationClientException {
+        reset.setResetAt(now(systemDefaultZone()));
         reset.setResetStatus(RESET);
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
-    }
-
-    private Reset createPendingReset(String email) {
-        return new Reset(random(40, true, true), email, PENDING, new Date());
     }
 }
