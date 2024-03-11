@@ -63,34 +63,6 @@ public class ReactivationControllerTest {
 
     private final Utils utils = new Utils();
 
-    private void executeSendReactivationEmail(Reactivation reactivation,
-                                              boolean isPendingReactivation,
-                                              String reactivationEmailMessage,
-                                              String reactivationValidityMessage)  throws Exception {
-        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(isPendingReactivation);
-        when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
-        when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
-
-        Map<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("learnerName", EMAIL);
-        emailPersonalisation.put("reactivationUrl", "/account/reactivate/" + reactivation.getCode());
-        doNothing().when(notifyService).notifyWithPersonalisation(reactivation.getEmail(),
-                "reactivationEmailTemplateId", emailPersonalisation);
-
-        String encryptionKey = "0123456789abcdef0123456789abcdef";
-        String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
-
-        mockMvc.perform(
-                        get("/account/reactivate").param("code", encryptedUsername))
-                .andExpect(status().isOk())
-                .andExpect(view().name("reactivate/reactivate"))
-                .andExpect(content().string(containsString("We've sent you an email")))
-                .andExpect(content().string(containsString("What happens next?")))
-                .andExpect(content().string(containsString(reactivationEmailMessage)))
-                .andExpect(content().string(containsString(reactivationValidityMessage)))
-                .andDo(print());
-    }
-
     @Test
     public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
@@ -192,6 +164,34 @@ public class ReactivationControllerTest {
         mockMvc.perform(get("/account/reactivate/updated"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/accountReactivated"));
+    }
+
+    private void executeSendReactivationEmail(Reactivation reactivation,
+                                              boolean isPendingReactivation,
+                                              String reactivationEmailMessage,
+                                              String reactivationValidityMessage)  throws Exception {
+        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(isPendingReactivation);
+        when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
+        when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
+
+        Map<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("learnerName", EMAIL);
+        emailPersonalisation.put("reactivationUrl", "/account/reactivate/" + reactivation.getCode());
+        doNothing().when(notifyService).notifyWithPersonalisation(reactivation.getEmail(),
+                "reactivationEmailTemplateId", emailPersonalisation);
+
+        String encryptionKey = "0123456789abcdef0123456789abcdef";
+        String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
+
+        mockMvc.perform(
+                        get("/account/reactivate").param("code", encryptedUsername))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reactivate/reactivate"))
+                .andExpect(content().string(containsString("We've sent you an email")))
+                .andExpect(content().string(containsString("What happens next?")))
+                .andExpect(content().string(containsString(reactivationEmailMessage)))
+                .andExpect(content().string(containsString(reactivationValidityMessage)))
+                .andDo(print());
     }
 
     private Reactivation createPendingActivationAndMockServicesInvocation() {
