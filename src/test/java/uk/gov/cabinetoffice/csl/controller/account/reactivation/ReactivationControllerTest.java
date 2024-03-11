@@ -44,7 +44,6 @@ public class ReactivationControllerTest {
     private static final String CODE = "abc123";
     private static final String EMAIL = "test@example.com";
     private static final String DOMAIN = "example.com";
-    private final String reactivationEmailTemplateId = "ChangeMe";
     private final int reactivationValidityInSeconds = 86400;
 
     @Autowired
@@ -64,22 +63,19 @@ public class ReactivationControllerTest {
 
     private final Utils utils = new Utils();
 
-    @Test
-    public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
-        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
-
-        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(false);
+    private void executeSendReactivationEmail(Reactivation reactivation,
+                                              boolean isPendingReactivation,
+                                              String reactivationEmailMessage,
+                                              String reactivationValidityMessage)  throws Exception {
+        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(isPendingReactivation);
         when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
+        when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
 
         Map<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("learnerName", EMAIL);
         emailPersonalisation.put("reactivationUrl", "/account/reactivate/" + reactivation.getCode());
         doNothing().when(notifyService).notifyWithPersonalisation(reactivation.getEmail(),
-                reactivationEmailTemplateId, emailPersonalisation);
-
-        String reactivationEmailMessage = "We&#39;ve sent you an email with a link to reactivate your account.";
-        String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
-                .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds));
+                "reactivationEmailTemplateId", emailPersonalisation);
 
         String encryptionKey = "0123456789abcdef0123456789abcdef";
         String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
@@ -96,13 +92,21 @@ public class ReactivationControllerTest {
     }
 
     @Test
+    public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
+        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
+
+        String reactivationEmailMessage = "We&#39;ve sent you an email with a link to reactivate your account.";
+        String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
+                .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds));
+
+        executeSendReactivationEmail(reactivation, false, reactivationEmailMessage, reactivationValidityMessage);
+    }
+
+    @Test
     public void shouldNotCreatePendingReactivationAndNotSendEmailIfPendingReactivationExists() throws Exception {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
         LocalDateTime requestedAt = LocalDateTime.now();
         reactivation.setRequestedAt(requestedAt);
-
-        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(true);
-        when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
 
         String reactivationEmailMessage = ("We&#39;ve sent you an email on %s with a link to reactivate your " +
                 "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
@@ -110,18 +114,7 @@ public class ReactivationControllerTest {
         String reactivationValidityMessage = "The link in the email will expire on %s."
                 .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
 
-        String encryptionKey = "0123456789abcdef0123456789abcdef";
-        String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
-
-        mockMvc.perform(
-                        get("/account/reactivate").param("code", encryptedUsername))
-                .andExpect(status().isOk())
-                .andExpect(view().name("reactivate/reactivate"))
-                .andExpect(content().string(containsString("We've sent you an email")))
-                .andExpect(content().string(containsString("What happens next?")))
-                .andExpect(content().string(containsString(reactivationEmailMessage)))
-                .andExpect(content().string(containsString(reactivationValidityMessage)))
-                .andDo(print());
+        executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage);
     }
 
     @Test
