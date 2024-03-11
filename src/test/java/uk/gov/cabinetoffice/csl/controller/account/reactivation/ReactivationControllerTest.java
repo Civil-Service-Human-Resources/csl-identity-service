@@ -15,11 +15,16 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.time.Month.FEBRUARY;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -27,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,8 +42,10 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUT
 public class ReactivationControllerTest {
 
     private static final String CODE = "abc123";
-    private static final String EMAIL_ADDRESS = "test@example.com";
+    private static final String EMAIL = "test@example.com";
     private static final String DOMAIN = "example.com";
+    private final String reactivationEmailTemplateId = "ChangeMe";
+    private final int reactivationValidityInSeconds = 86400;
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,6 +58,71 @@ public class ReactivationControllerTest {
 
     @MockBean
     private AgencyTokenService agencyTokenService;
+
+    @MockBean
+    private NotifyService notifyService;
+
+    private final Utils utils = new Utils();
+
+    @Test
+    public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
+        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
+
+        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(false);
+        when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
+
+        Map<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("learnerName", EMAIL);
+        emailPersonalisation.put("reactivationUrl", "/account/reactivate/" + reactivation.getCode());
+        doNothing().when(notifyService).notifyWithPersonalisation(reactivation.getEmail(),
+                reactivationEmailTemplateId, emailPersonalisation);
+
+        String reactivationEmailMessage = "We&#39;ve sent you an email with a link to reactivate your account.";
+        String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
+                .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds));
+
+        String encryptionKey = "0123456789abcdef0123456789abcdef";
+        String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
+
+        mockMvc.perform(
+                        get("/account/reactivate").param("code", encryptedUsername))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reactivate/reactivate"))
+                .andExpect(content().string(containsString("We've sent you an email")))
+                .andExpect(content().string(containsString("What happens next?")))
+                .andExpect(content().string(containsString(reactivationEmailMessage)))
+                .andExpect(content().string(containsString(reactivationValidityMessage)))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldNotCreatePendingReactivationAndNotSendEmailIfPendingReactivationExists() throws Exception {
+        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
+        LocalDateTime requestedAt = LocalDateTime.now();
+        reactivation.setRequestedAt(requestedAt);
+
+        when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(true);
+        when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
+
+        String reactivationEmailMessage = ("We&#39;ve sent you an email on %s with a link to reactivate your " +
+                "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+        LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
+        String reactivationValidityMessage = "The link in the email will expire on %s."
+                .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
+
+        String encryptionKey = "0123456789abcdef0123456789abcdef";
+        String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
+
+        mockMvc.perform(
+                        get("/account/reactivate").param("code", encryptedUsername))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reactivate/reactivate"))
+                .andExpect(content().string(containsString("We've sent you an email")))
+                .andExpect(content().string(containsString("What happens next?")))
+                .andExpect(content().string(containsString(reactivationEmailMessage)))
+                .andExpect(content().string(containsString(reactivationValidityMessage)))
+                .andDo(print());
+    }
 
     @Test
     public void shouldRedirectIfAccountDomainIsAgencyToken() throws Exception {
@@ -130,12 +203,12 @@ public class ReactivationControllerTest {
 
     private Reactivation createPendingActivationAndMockServicesInvocation() {
         Identity identity = new Identity();
-        identity.setEmail(EMAIL_ADDRESS);
+        identity.setEmail(EMAIL);
         identity.setActive(false);
-        when(identityService.getIdentityForEmail(EMAIL_ADDRESS)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
 
         Reactivation reactivation = new Reactivation();
-        reactivation.setEmail(EMAIL_ADDRESS);
+        reactivation.setEmail(EMAIL);
         reactivation.setCode(CODE);
         reactivation.setReactivationStatus(PENDING);
         LocalDateTime dateOfReactivationRequest = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);

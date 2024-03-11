@@ -38,12 +38,9 @@ public class ReactivationServiceTest {
 
     @Test
     public void shouldReactivateIdentity() {
-        Reactivation reactivation = new Reactivation();
-        reactivation.setEmail(EMAIL);
-        reactivation.setCode(CODE);
+        Reactivation reactivation = createPendingReactivation();
 
-        AgencyToken agencyToken = new AgencyToken();
-        agencyToken.setUid(UID);
+        AgencyToken agencyToken = createAgencyToken();
 
         Identity identity = new Identity();
 
@@ -62,12 +59,9 @@ public class ReactivationServiceTest {
 
     @Test
     public void shouldThrowIdentityNotFoundExceptionIfIdentityNotFound() {
-        Reactivation reactivation = new Reactivation();
-        reactivation.setEmail(EMAIL);
-        reactivation.setCode(CODE);
+        Reactivation reactivation = createPendingReactivation();
 
-        AgencyToken agencyToken = new AgencyToken();
-        agencyToken.setUid(UID);
+        AgencyToken agencyToken = createAgencyToken();
 
         doThrow(new IdentityNotFoundException("Identity not found"))
                 .when(identityService).getIdentityForEmailAndActiveFalse(EMAIL);
@@ -82,9 +76,7 @@ public class ReactivationServiceTest {
 
     @Test
     public void shouldGetReactivationByCodeAndStatus() {
-        Reactivation reactivation = new Reactivation();
-        reactivation.setCode(CODE);
-        reactivation.setReactivationStatus(PENDING);
+        Reactivation reactivation = createPendingReactivation();
 
         when(reactivationRepository
                 .findFirstByCodeAndReactivationStatus(CODE, PENDING))
@@ -105,30 +97,38 @@ public class ReactivationServiceTest {
 
     @Test
     public void isPendingReactivationExistsForEmailReturnsFalseIfPendingReactivationExpired() {
-        String email = "my.name@myorg.gov.uk";
-        LocalDateTime dateOfReactivationRequest = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
-        Reactivation reactivation = new Reactivation();
-        reactivation.setCode(CODE);
-        reactivation.setReactivationStatus(PENDING);
-        reactivation.setEmail(email);
-        reactivation.setRequestedAt(dateOfReactivationRequest);
+        Reactivation reactivation = createPendingReactivation();
 
         ArrayList<Reactivation> reactivations = new ArrayList<>();
         reactivations.add(reactivation);
 
-        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(eq(email), eq(PENDING)))
+        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(eq(EMAIL), eq(PENDING)))
                 .thenReturn(reactivations);
 
-        assertFalse(reactivationService.isPendingReactivationExistsForEmail(email));
+        assertFalse(reactivationService.isPendingReactivationExistsForEmail(EMAIL));
     }
 
     @Test
     public void isPendingExistsByEmailReturnsFalseIfNoPendingReactivationExistForEmail(){
-        String email = "my.name@myorg.gov.uk";
-
-        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(eq(email), eq(PENDING)))
+        when(reactivationRepository.findByEmailIgnoreCaseAndReactivationStatus(eq(EMAIL), eq(PENDING)))
                 .thenReturn(new ArrayList<>());
 
-        assertFalse(reactivationService.isPendingReactivationExistsForEmail(email));
+        assertFalse(reactivationService.isPendingReactivationExistsForEmail(EMAIL));
+    }
+
+    private Reactivation createPendingReactivation() {
+        LocalDateTime requestedAt = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        Reactivation reactivation = new Reactivation();
+        reactivation.setCode(CODE);
+        reactivation.setReactivationStatus(PENDING);
+        reactivation.setEmail(EMAIL);
+        reactivation.setRequestedAt(requestedAt);
+        return reactivation;
+    }
+
+    private AgencyToken createAgencyToken() {
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setUid(UID);
+        return agencyToken;
     }
 }
