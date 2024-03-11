@@ -79,7 +79,7 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/checkEmail"))
-                .andExpect(content().string(containsString("Now check your email")))
+                .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
                 .andExpect(content().string(containsString("The link will expire in 24 hours.")))
@@ -100,8 +100,8 @@ public class ResetControllerTest {
         LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
         String setRequestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
         String resetLinkExpiryDateTimeStr = utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString());
-        String resetValidityMessage = "The email was sent on %s. The link in the email will expire on %s."
-        .formatted(setRequestedAtStr, resetLinkExpiryDateTimeStr);
+        String resetValidityMessage1 = "The email was sent on %s.".formatted(setRequestedAtStr);
+        String resetValidityMessage2 = "The link in the email will expire on %s.".formatted(resetLinkExpiryDateTimeStr);
         when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
 
         mockMvc.perform(post("/reset")
@@ -110,10 +110,11 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/checkEmail"))
-                .andExpect(content().string(containsString("Now check your email")))
+                .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
-                .andExpect(content().string(containsString(resetValidityMessage)))
+                .andExpect(content().string(containsString(resetValidityMessage1)))
+                .andExpect(content().string(containsString(resetValidityMessage2)))
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))

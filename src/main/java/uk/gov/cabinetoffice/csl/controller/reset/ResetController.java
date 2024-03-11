@@ -61,21 +61,24 @@ public class ResetController {
         log.debug("Reset request received for email {}", email);
         if (identityService.isIdentityExistsForEmail(email)) {
             Reset pendingReset = resetService.getPendingResetForEmail(email);
-            String resetValidityMessage;
+            String resetValidityMessage1;
+            String resetValidityMessage2 = "";
             if(pendingReset == null) {
                 resetService.createPendingResetRequestAndAndNotifyUser(email);
                 log.info("Reset request email sent to {}", email);
-                resetValidityMessage = "The link will expire in %s."
+                resetValidityMessage1 = "The link will expire in %s."
                         .formatted(utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
             } else {
                 log.info("Pending Reset exists for email {}", email);
                 LocalDateTime requestedAt = pendingReset.getRequestedAt();
                 LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
-                resetValidityMessage = "The email was sent on %s. The link in the email will expire on %s."
-                        .formatted(utils.convertDateTimeFormat(requestedAt.toString()),
-                                utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString()));
+                resetValidityMessage1 = "The email was sent on %s."
+                        .formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+                resetValidityMessage2 = "The link in the email will expire on %s."
+                        .formatted(utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString()));
             }
-            model.addAttribute("resetValidityMessage", resetValidityMessage);
+            model.addAttribute("resetValidityMessage1", resetValidityMessage1);
+            model.addAttribute("resetValidityMessage2", resetValidityMessage2);
             return "reset/checkEmail";
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
