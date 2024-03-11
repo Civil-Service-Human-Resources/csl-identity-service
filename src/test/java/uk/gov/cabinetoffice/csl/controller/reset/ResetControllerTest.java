@@ -100,7 +100,7 @@ public class ResetControllerTest {
         LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
         String setRequestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
         String resetLinkExpiryDateTimeStr = utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString());
-        String resetValidityMessage = "Email was sent on %s. The link in the email will expire on %s."
+        String resetValidityMessage = "The email was sent on %s. The link in the email will expire on %s."
         .formatted(setRequestedAtStr, resetLinkExpiryDateTimeStr);
         when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
 

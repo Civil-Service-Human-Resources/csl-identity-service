@@ -71,7 +71,7 @@ public class ResetController {
                 log.info("Pending Reset exists for email {}", email);
                 LocalDateTime requestedAt = pendingReset.getRequestedAt();
                 LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
-                resetValidityMessage = "Email was sent on %s. The link in the email will expire on %s."
+                resetValidityMessage = "The email was sent on %s. The link in the email will expire on %s."
                         .formatted(utils.convertDateTimeFormat(requestedAt.toString()),
                                 utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString()));
             }
