@@ -13,6 +13,7 @@ import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -51,6 +52,8 @@ public class IdentityServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    private final Utils utils = new Utils();
+
     @BeforeEach
     public void setUp() {
         identityService = new IdentityService(
@@ -58,7 +61,8 @@ public class IdentityServiceTest {
                 agencyTokenCapacityService,
                 identityRepository,
                 civilServantRegistryClient,
-                passwordEncoder
+                passwordEncoder,
+                utils
         );
         when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowListed.gov.uk", "example.com"));
     }
@@ -113,7 +117,6 @@ public class IdentityServiceTest {
         TokenRequest tokenRequest = new TokenRequest();
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-
         when(passwordEncoder.encode("password")).thenReturn("password");
 
         identityService.createIdentityFromInviteCode(code, "password", tokenRequest);

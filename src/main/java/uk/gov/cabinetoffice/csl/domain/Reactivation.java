@@ -3,10 +3,7 @@ package uk.gov.cabinetoffice.csl.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +14,7 @@ import java.time.LocalDateTime;
 @JsonDeserialize
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-public class Reset {
+public class Reactivation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,23 +23,22 @@ public class Reset {
     @Column(unique = true, length = 40, nullable = false)
     private String code;
 
-    @Column(length = 150, nullable = false)
-    private String email;
-
-    @Column(length = 10, nullable = false)
+    @Column(length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    private ResetStatus resetStatus;
+    private ReactivationStatus reactivationStatus;
 
     @Column(nullable = false)
     private LocalDateTime requestedAt;
 
-    @Column
-    private LocalDateTime resetAt;
+    private LocalDateTime reactivatedAt;
 
-    public Reset(String code, String email, ResetStatus resetStatus, LocalDateTime requestedAt) {
+    @Column(length = 150, nullable = false)
+    private String email;
+
+    public Reactivation(String code, ReactivationStatus reactivationStatus, LocalDateTime requestedAt, String email) {
         this.code = code;
-        this.email = email;
-        this.resetStatus = resetStatus;
+        this.reactivationStatus = reactivationStatus;
         this.requestedAt = requestedAt;
+        this.email = email;
     }
 }

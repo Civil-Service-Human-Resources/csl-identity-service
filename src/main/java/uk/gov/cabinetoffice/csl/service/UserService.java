@@ -7,30 +7,52 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
+import uk.gov.cabinetoffice.csl.exception.AccountBlockedException;
 import uk.gov.cabinetoffice.csl.exception.AccountDeactivatedException;
 import uk.gov.cabinetoffice.csl.exception.PendingReactivationExistsException;
-import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 @AllArgsConstructor
 @Service
 public class UserService implements UserDetailsService {
 
-    private IdentityRepository identityRepository;
+    private IdentityService identityService;
+    private ReactivationService reactivationService;
+    private Utils utils;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(username);
+        Identity identity = identityService.getIdentityForEmail(username);
+
         if (identity == null) {
-            throw new UsernameNotFoundException("No user found with email address: " + username);
-        } else if (!identity.isActive()) {
-            //TODO: To be implemented as part of the future tickets
-            //boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
-            boolean pendingReactivationExistsForAccount = false;
-            if(pendingReactivationExistsForAccount){
-                throw new PendingReactivationExistsException("Pending reactivation already exists for user: " + username);
+            throw new UsernameNotFoundException("No user found with email address " + username);
+        } else {
+            String email = identity.getEmail();
+            String domain = utils.getDomainFromEmailAddress(email);
+            if (!isAllowListedDomain(domain)
+                    && !isAgencyDomain(domain, identity)
+                    && !isEmailInvited(email)) {
+                throw new AccountBlockedException("User account is blocked");
             }
-            throw new AccountDeactivatedException("User account is deactivated for user: " + username);
+            if (!identity.isActive()) {
+                if (reactivationService.isPendingReactivationExistsForEmail(identity.getEmail())) {
+                    throw new PendingReactivationExistsException("Pending reactivation exists for user");
+                }
+                throw new AccountDeactivatedException("User account is deactivated");
+            }
         }
         return new IdentityDetails(identity);
+    }
+
+    private boolean isAllowListedDomain(String domain) {
+        return identityService.isAllowListedDomain(domain);
+    }
+
+    private boolean isAgencyDomain(String domain, Identity identity) {
+        return identityService.isDomainInAgency(domain) && identity.getAgencyTokenUid() != null;
+    }
+
+    private boolean isEmailInvited(String email) {
+        return identityService.isEmailInvited(email);
     }
 }

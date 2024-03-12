@@ -9,6 +9,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.DomainsResponse;
@@ -47,7 +48,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             RequestEntity<Void> request = RequestEntity.get(url).build();
             return httpClient.executeRequest(request, Boolean.class);
         } catch (HttpClientErrorException e) {
-            log.error("An error occurred while checking if domain in agency", e);
+            log.error("An error has occurred while checking if domain in agency using Civil Servant registry", e);
             return false;
         }
     }
@@ -59,7 +60,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             RequestEntity<Void> request = RequestEntity.get(url).build();
             return Optional.of(httpClient.executeRequest(request, AgencyToken.class));
         } catch (HttpClientErrorException e) {
-            log.error("An error occurred while getting Agency Token For Domain Token Organisation", e);
+            log.error("An error has occurred while getting Agency Token For Domain Token Organisation from Civil Servant registry", e);
             return Optional.empty();
         }
     }
@@ -70,7 +71,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             RequestEntity<Void> request = RequestEntity.get(organisationalUnitsFlatUrl).build();
             return httpClient.executeRequest(request, OrganisationalUnitDTO[].class);
         } catch (HttpClientErrorException e) {
-            log.error("An error occurred while getting Organisational Units Formatted", e);
+            log.error("An error has occurred while getting Organisational Units Formatted from Civil Servant registry", e);
             return new OrganisationalUnitDTO[0];
         }
     }
@@ -81,30 +82,31 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             RequestEntity<Void> request = RequestEntity.get(agencyTokensByDomainFormat).build();
             return httpClient.executeRequest(request, AgencyToken[].class);
         } catch (HttpClientErrorException e) {
-            log.error("An error occurred while getting Agency Tokens", e);
+            log.error("An error has occurred while getting Agency Tokens from Civil Servant registry", e);
             return new AgencyToken[]{};
         }
     }
 
     @Override
-    @Cacheable("allowlistdomains")
+    @Cacheable("allowListDomains")
     public List<String> getAllowListDomains() {
-        log.info("Fetching allowlist domains from CSRS API");
+        log.info("Fetching allowlist domains from Civil Servant Registry");
         try {
             RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
             DomainsResponse domainsResponse = httpClient.executeRequest(request, DomainsResponse.class);
             if (domainsResponse == null) {
-                throw new RuntimeException("Allowlist Domains returned null");
+                log.error("Allowlist Domains returned null");
+                throw new GenericServerException("System error");
             }
             return domainsResponse.getDomains().stream().map(d -> d.getDomain().toLowerCase()).collect(Collectors.toList());
         } catch (HttpClientErrorException e) {
-            log.error("An error occurred while getting Agency Token For Domain Token Organisation", e);
-            throw e;
+            log.error("An error has occurred while getting allow listed domains from Civil Servant Registry", e);
+            throw new GenericServerException("System error");
         }
     }
 
     @Override
-    @CacheEvict(value = "allowlistdomains", allEntries = true)
+    @CacheEvict(value = "allowListDomains", allEntries = true)
     @Scheduled(fixedRateString = "${civilServantRegistry.cache.allowListDomainsTTL}")
     public void evictAllowListDomainCache() {
         log.info("Evicting Allowlist Domains cache");

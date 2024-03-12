@@ -8,9 +8,10 @@ import uk.gov.cabinetoffice.csl.service.client.identity.IIdentityClient;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
-import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 @Slf4j
@@ -39,8 +40,7 @@ public class BearerTokenService implements IBearerTokenService {
             OAuthToken serviceToken = identityClient.getServiceToken();
             LocalDateTime tokenExpiry = serviceToken.getExpiryDateTime();
             log.debug("serviceToken: expiryDateTime: {}", tokenExpiry);
-            long secondsRemainingToExpire = tokenExpiry != null ?
-                    ChronoUnit.SECONDS.between(LocalDateTime.now(clock), tokenExpiry) : 0;
+            long secondsRemainingToExpire = tokenExpiry != null ? SECONDS.between(now(clock), tokenExpiry) : 0;
             log.debug("serviceToken: seconds remaining to service token expiry: {}", secondsRemainingToExpire);
             log.debug("serviceToken: seconds remaining to refresh the service token cache: {}",
                     (secondsRemainingToExpire - refreshServiceTokenCacheBeforeSecondsToExpire));

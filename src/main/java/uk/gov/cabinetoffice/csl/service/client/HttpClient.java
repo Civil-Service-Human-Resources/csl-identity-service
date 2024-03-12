@@ -6,6 +6,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 
 @Slf4j
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class HttpClient implements IHttpClient {
             }
             msg = String.format("%s Error was: %s", msg, e.getMessage());
             log.error(msg);
-            throw e;
+            throw new GenericServerException("System error");
         }
     }
 }

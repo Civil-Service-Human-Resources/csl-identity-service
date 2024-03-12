@@ -18,13 +18,13 @@
       <env name="DATASOURCE_PASSWORD" value="password" />
       <env name="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
       <env name="DATASOURCE_USERNAME" value="root" />
+      <env name="DURATION_AFTER_REREG_ALLOWED_SECONDS" value="86400" />
       <env name="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
       <env name="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
       <env name="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
       <env name="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
       <env name="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
       <env name="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
-      <env name="INVITE_SIGNUP_URL" value="http://localhost:9005/signup/%s" />
       <env name="INVITE_VALIDITY_SECONDS" value="259200" />
       <env name="JPA_HIBERNATE_ENABLE_LAZY_LOAD_NO_TRANS" value="true" />
       <env name="JPA_OPEN_IN_VIEW" value="false" />
@@ -36,6 +36,8 @@
       <env name="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
       <env name="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
       <env name="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
+      <env name="REACTIVATION_VALIDITY_SECONDS" value="86400" />
+      <env name="REACTIVATION_EMAIL_TEMPLATE_ID" value="abfb2e5f-3905-4817-b041-c53afd1eb3e5" />
       <env name="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
       <env name="REDIS_CACHE_NULL_VALUES" value="false" />
       <env name="REDIS_CACHE_TTL_MS" value="86400000" />
@@ -45,8 +47,6 @@
       <env name="REDIS_USE_KEY_PREFIX" value="true" />
       <env name="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
       <env name="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
-      <env name="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
-      <env name="RESET_URL" value="http://localhost:9005/reset/%s" />
       <env name="RESET_VALIDITY_SECONDS" value="86400" />
       <env name="ROOT_LOGGING_LEVEL" value="INFO" />
       <env name="SESSION_TIMEOUT_SECONDS" value="3600" />

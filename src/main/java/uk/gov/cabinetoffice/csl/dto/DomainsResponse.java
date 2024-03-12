@@ -2,7 +2,6 @@ package uk.gov.cabinetoffice.csl.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import uk.gov.cabinetoffice.csl.dto.Domain;
 
 import java.util.List;
 import java.util.Map;

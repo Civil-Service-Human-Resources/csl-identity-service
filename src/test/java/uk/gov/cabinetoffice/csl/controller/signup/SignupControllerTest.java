@@ -79,9 +79,9 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+
         mockMvc.perform(
                 post("/signup/request")
                         .with(csrf())
@@ -108,10 +108,9 @@ public class SignupControllerTest {
 
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
         when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
-
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+
         mockMvc.perform(
                 post("/signup/request")
                         .with(csrf())
@@ -174,7 +173,6 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(true);
 
         mockMvc.perform(
@@ -200,7 +198,6 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(identityService.isAllowListedDomain(domain)).thenReturn(false);
         when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
 
@@ -432,7 +429,6 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
         mockMvc.perform(
@@ -456,7 +452,6 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
         mockMvc.perform(
@@ -505,7 +500,6 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
@@ -540,7 +534,6 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
@@ -572,7 +565,6 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(emptyOptional);
 

@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,7 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
 
 @Slf4j
+@AllArgsConstructor
 @Service
 @Transactional
 public class IdentityService {
@@ -31,24 +34,13 @@ public class IdentityService {
     private final IdentityRepository identityRepository;
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
-
-    public IdentityService(InviteService inviteService,
-                           AgencyTokenCapacityService agencyTokenCapacityService,
-                           IdentityRepository identityRepository,
-                           ICivilServantRegistryClient civilServantRegistryClient,
-                           PasswordEncoder passwordEncoder) {
-        this.inviteService = inviteService;
-        this.agencyTokenCapacityService = agencyTokenCapacityService;
-        this.identityRepository = identityRepository;
-        this.civilServantRegistryClient = civilServantRegistryClient;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final Utils utils;
 
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
     public void createIdentityFromInviteCode(String code, String password, TokenRequest tokenRequest) {
         Invite invite = inviteService.getInviteForCode(code);
         String email = invite.getForEmail();
-        final String domain = getDomainFromEmailAddress(email);
+        final String domain = utils.getDomainFromEmailAddress(email);
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
         String agencyTokenUid = null;
         if (tokenRequest != null && tokenRequest.hasData()) {
@@ -65,17 +57,26 @@ public class IdentityService {
                                     agencyToken.getUid() + " has no spaces available. Identity not created");
                         }
                     })
-                    .orElseThrow(ResourceNotFoundException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException("Agency token not found"));
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
         } else if (!isAllowListedDomain(domain) && !inviteService.isEmailInvited(email)) {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Invited request neither agency, nor allowListed, nor invited via IDM for email: "
+                    + email);
         }
         Identity identity = new Identity(randomUUID().toString(), email, passwordEncoder.encode(password),
                 true, false, newRoles, now(), false, agencyTokenUid, 0);
         identityRepository.save(identity);
         log.debug("New identity email = {} successfully created", email);
+    }
+
+    public void reactivateIdentity(Identity identity, AgencyToken agencyToken) {
+        identity.setActive(true);
+        if (agencyToken != null && agencyToken.getUid() != null) {
+            identity.setAgencyTokenUid(agencyToken.getUid());
+        }
+        identityRepository.save(identity);
     }
 
     @ReadOnlyProperty
@@ -93,11 +94,15 @@ public class IdentityService {
                 .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
     }
 
-    public String getDomainFromEmailAddress(String emailAddress) {
-        return emailAddress.substring(emailAddress.indexOf('@') + 1);
-    }
-
     public boolean isAllowListedDomain(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
+    }
+
+    public boolean isDomainInAgency(String domain) {
+        return civilServantRegistryClient.isDomainInAgency(domain);
+    }
+
+    public boolean isEmailInvited(String email) {
+        return inviteService.isEmailInvited(email);
     }
 }

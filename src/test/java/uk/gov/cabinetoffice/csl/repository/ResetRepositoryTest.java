@@ -7,9 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.Reset;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.time.Month.FEBRUARY;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.*;
@@ -60,7 +61,8 @@ public class ResetRepositoryTest {
         reset.setCode(CODE);
         reset.setEmail(EMAIL);
         reset.setResetStatus(PENDING);
-        reset.setRequestedAt(new Date());
+        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
+        reset.setRequestedAt(requestDateTime);
         return reset;
     }
 }

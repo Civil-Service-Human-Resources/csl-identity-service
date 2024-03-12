@@ -17,6 +17,8 @@ import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Controller
 @RequestMapping("/reset")
@@ -54,12 +56,29 @@ public class ResetController {
     }
 
     @PostMapping
-    public String requestReset(@RequestParam(value = "email") String email, Model model) throws NotificationClientException {
+    public String requestReset(@RequestParam(value = "email") String email, Model model)
+            throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
         if (identityService.isIdentityExistsForEmail(email)) {
-            resetService.notifyForResetRequest(email);
-            log.info("Reset request email sent to {}", email);
-            model.addAttribute("resetValidityMessage", utils.validityMessage("The link will expire in %s.", validityInSeconds));
+            Reset pendingReset = resetService.getPendingResetForEmail(email);
+            String resetValidityMessage1;
+            String resetValidityMessage2 = "";
+            if(pendingReset == null) {
+                resetService.createPendingResetRequestAndAndNotifyUser(email);
+                log.info("Reset request email sent to {}", email);
+                resetValidityMessage1 = "The link will expire in %s."
+                        .formatted(utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
+            } else {
+                log.info("Pending Reset exists for email {}", email);
+                LocalDateTime requestedAt = pendingReset.getRequestedAt();
+                LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
+                resetValidityMessage1 = "The email was sent on %s."
+                        .formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+                resetValidityMessage2 = "The link in the email will expire on %s."
+                        .formatted(utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString()));
+            }
+            model.addAttribute("resetValidityMessage1", resetValidityMessage1);
+            model.addAttribute("resetValidityMessage2", resetValidityMessage2);
             return "reset/checkEmail";
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
@@ -73,7 +92,7 @@ public class ResetController {
     public String loadResetForm(@PathVariable(value = "code") String code, Model model) {
         log.debug("User on reset screen with code {}", code);
 
-        Reset reset = resetService.getResetByCode(code);
+        Reset reset = resetService.getResetForCode(code);
         String checkResetValidityResult = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(checkResetValidityResult)) {
@@ -98,21 +117,22 @@ public class ResetController {
             return "reset/passwordForm";
         }
 
-        Reset reset = resetService.getResetByCode(code);
+        Reset reset = resetService.getResetForCode(code);
         String result = checkResetValidity(reset, code, model);
 
         if(StringUtils.isBlank(result)) {
             Identity identity = identityService.getIdentityForEmail(reset.getEmail());
 
             if (identity == null || identity.getEmail() == null) {
-                log.info("Identity does not exist for email {} which is retrieved using the reset code {}", reset.getEmail(), code);
+                log.info("Identity does not exist for email {} which is retrieved using the reset code {}",
+                        reset.getEmail(), code);
                 model.addAttribute("userMessage", "The reset link is invalid.\n" +
                         "Please submit the reset request for the valid email id.");
                 return "reset/requestReset";
             }
 
             passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
-            resetService.notifyOfSuccessfulReset(reset);
+            resetService.notifyUserForSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
             model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
             return "reset/passwordReset";
