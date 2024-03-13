@@ -14,9 +14,9 @@ import java.util.Optional;
 @Repository
 public interface IdentityRepository extends JpaRepository<Identity, Long> {
 
-        Identity findFirstByActiveTrueAndEmailEqualsIgnoreCase(String email);
-
         Identity findFirstByEmailEqualsIgnoreCase(String email);
+
+        Identity findFirstByActiveTrueAndEmailEqualsIgnoreCase(String email);
 
         Optional<Identity> findFirstByActiveFalseAndEmailEqualsIgnoreCase(String email);
 
@@ -27,6 +27,9 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
         List<IdentityDTO> findAllNormalised();
 
         Optional<Identity> findFirstByUid(String uid);
+
+        @Query("select i from Identity i where i.uid in (?1)")
+        List<Identity> findIdentitiesByUids(List<String> uids);
 
         @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i)" +
                 " from Identity i where i.uid in (?1)")

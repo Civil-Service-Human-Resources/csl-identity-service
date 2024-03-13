@@ -43,8 +43,11 @@ public class IdentityServiceTest {
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
-    @Mock(name="identityRepository")
+    @Mock
     private IdentityRepository identityRepository;
+
+    @Mock
+    private CompoundRoleRepository compoundRoleRepository;
 
     @Mock
     private ICivilServantRegistryClient civilServantRegistryClient;
@@ -60,6 +63,7 @@ public class IdentityServiceTest {
                 inviteService,
                 agencyTokenCapacityService,
                 identityRepository,
+                compoundRoleRepository,
                 civilServantRegistryClient,
                 passwordEncoder,
                 utils
@@ -185,7 +189,7 @@ public class IdentityServiceTest {
 
         when(identityRepository.findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL)).thenReturn(Optional.of(identity));
 
-        Identity actualIdentity = identityService.getIdentityForEmailAndActiveFalse(EMAIL);
+        Identity actualIdentity = identityService.getInActiveIdentityForEmail(EMAIL);
 
         assertEquals(UID, actualIdentity.getUid());
         assertFalse(actualIdentity.isActive());
@@ -196,7 +200,7 @@ public class IdentityServiceTest {
         doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL);
 
         IdentityNotFoundException thrown = assertThrows(
-                IdentityNotFoundException.class, () -> identityService.getIdentityForEmailAndActiveFalse(EMAIL));
+                IdentityNotFoundException.class, () -> identityService.getInActiveIdentityForEmail(EMAIL));
 
         assertEquals("Identity not found", thrown.getMessage());
     }

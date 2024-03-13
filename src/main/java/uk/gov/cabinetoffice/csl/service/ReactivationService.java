@@ -53,7 +53,7 @@ public class ReactivationService {
     public void reactivateIdentity(Reactivation reactivation, AgencyToken agencyToken)
             throws IdentityNotFoundException {
         String email = reactivation.getEmail();
-        Identity identity = identityService.getIdentityForEmailAndActiveFalse(email);
+        Identity identity = identityService.getInActiveIdentityForEmail(email);
         identityService.reactivateIdentity(identity, agencyToken);
         log.info("Identity reactivated for email: {}", email);
         reactivation.setReactivationStatus(REACTIVATED);
