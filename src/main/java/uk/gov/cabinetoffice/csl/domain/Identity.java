@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.lang.String.format;
 
 @Slf4j
 @NoArgsConstructor
@@ -99,7 +100,7 @@ public class Identity implements Serializable {
 
     @JsonIgnore
     public void removeRoles(Collection<String> roleNamesToRemove) {
-        log.info(String.format("Removing roles: %s", roleNamesToRemove));
+        log.info(format("Removing roles: %s", roleNamesToRemove));
         Set<Role> newRoles = this.getRoles()
                 .stream()
                 .filter(role -> !roleNamesToRemove.contains(role.getName()))
