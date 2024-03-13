@@ -1,8 +1,8 @@
 package uk.gov.cabinetoffice.csl.controller.identity;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +22,11 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
+@AllArgsConstructor
 @RestController
 public class ListIdentitiesController {
 
     private final IdentityService identityService;
-
-    @Autowired
-    public ListIdentitiesController(IdentityService identityService) {
-        this.identityService = identityService;
-    }
 
     @PostMapping("/api/identities/remove-reporting-roles")
     @ResponseBody
