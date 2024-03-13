@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.identity;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.util.TestUtil;
 
-import java.time.Instant;
-
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,9 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ListIdentitiesControllerTest {
 
     private static final String GET_IDENTITY_AGENCY_TOKEN_UID_URL = "/api/identity/agency/";
-    private static final String EMAIL = "test@example.org";
     private static final String IDENTITY_UID = "abc123";
+    private static final String EMAIL = "test@example.org";
     private static final String PASSWORD = "password123";
+    private static final String AGENCY_TOKEN_UID = "456";
 
     @MockBean
     private IdentityService identityService;
@@ -43,14 +43,14 @@ public class ListIdentitiesControllerTest {
 
     @Test
     public void shouldReturnIdentityAgencyDTOSuccessfully() throws Exception {
-        Identity identity = createIdentity();
+        Identity identity = TestUtil.createIdentity(IDENTITY_UID, EMAIL, PASSWORD, AGENCY_TOKEN_UID);
         when(identityService.getIdentityForUid(eq(IDENTITY_UID))).thenReturn(identity);
 
         mockMvc.perform(
                 get(GET_IDENTITY_AGENCY_TOKEN_UID_URL + IDENTITY_UID))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.uid", CoreMatchers.is(IDENTITY_UID)))
-                .andExpect(jsonPath("$.agencyTokenUid", CoreMatchers.is(identity.getAgencyTokenUid())));
+                .andExpect(jsonPath("$.uid", is(IDENTITY_UID)))
+                .andExpect(jsonPath("$.agencyTokenUid", is(identity.getAgencyTokenUid())));
     }
 
     @Test
@@ -70,20 +70,6 @@ public class ListIdentitiesControllerTest {
         mockMvc.perform(
                 get(GET_IDENTITY_AGENCY_TOKEN_UID_URL + IDENTITY_UID))
                 .andExpect(status().isInternalServerError());
-    }
-
-    private Identity createIdentity() {
-        return new Identity(
-                IDENTITY_UID,
-                EMAIL,
-                PASSWORD,
-                true,
-                false,
-                null,
-                Instant.now(),
-                false,
-                "456",
-                0);
     }
 }
 
