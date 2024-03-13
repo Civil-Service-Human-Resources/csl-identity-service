@@ -17,6 +17,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 public class Identity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column(unique = true, length = 36)
@@ -48,7 +51,7 @@ public class Identity implements Serializable {
     private boolean locked;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = EAGER)
     @JoinTable(name = "identity_role",
             joinColumns = @JoinColumn(name = "identity_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")

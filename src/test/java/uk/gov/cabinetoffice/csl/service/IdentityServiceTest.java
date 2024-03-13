@@ -19,6 +19,7 @@ import uk.gov.cabinetoffice.csl.util.Utils;
 import java.time.Instant;
 import java.util.*;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -64,7 +65,7 @@ public class IdentityServiceTest {
                 passwordEncoder,
                 utils
         );
-        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowListed.gov.uk", "example.com"));
+        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(asList("allowListed.gov.uk", "example.com"));
     }
 
     @Test
@@ -226,17 +227,17 @@ public class IdentityServiceTest {
         Role learner = new Role("LEARNER", "");
 
         Identity reporter = createIdentity("uid123", "reporter@email.com", null);
-        reporter.setRoles(new HashSet<>(Arrays.asList(learner, orgReporter)));
+        reporter.setRoles(new HashSet<>(asList(learner, orgReporter)));
 
         Identity reporter1 = createIdentity("uid456", "reporter1@email.com", null);
-        reporter1.setRoles(new HashSet<>(Arrays.asList(learner, orgReporter, professionReporter)));
+        reporter1.setRoles(new HashSet<>(asList(learner, orgReporter, professionReporter)));
 
         Identity user = createIdentity("uid789", "user@email.com", null);
         user.setRoles(new HashSet<>(Collections.singletonList(learner)));
-        List<Identity> identities = Arrays.asList(reporter, reporter1, user);
+        List<Identity> identities = asList(reporter, reporter1, user);
 
-        when(identityRepository.findIdentitiesByUids(Arrays.asList("uid123", "uid456", "uid789"))).thenReturn(identities);
-        BatchProcessResponse resp = identityService.removeReportingRoles(Arrays.asList("uid123", "uid456", "uid789"));
+        when(identityRepository.findIdentitiesByUids(asList("uid123", "uid456", "uid789"))).thenReturn(identities);
+        BatchProcessResponse resp = identityService.removeReportingRoles(asList("uid123", "uid456", "uid789"));
         List<String> successfulIds = resp.getSuccessfulIds();
         assertEquals(2, successfulIds.size());
         assertEquals("uid123", successfulIds.get(0));

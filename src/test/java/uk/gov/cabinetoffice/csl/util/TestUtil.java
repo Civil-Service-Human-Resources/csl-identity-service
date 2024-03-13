@@ -7,7 +7,9 @@ import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
+
+import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 
 public class TestUtil {
 
@@ -19,11 +21,11 @@ public class TestUtil {
     }
 
     public static Identity createIdentity(String agencyTokenUid) {
-        return createIdentity(UUID.randomUUID().toString(), UUID.randomUUID().toString(), agencyTokenUid);
+        return createIdentity(randomUUID().toString(), randomUUID().toString(), agencyTokenUid);
     }
 
     public static Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
-        return new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false,
+        return new Identity(uid, format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false,
                 null, Instant.now(), false, agencyTokenUid, 0);
     }
 

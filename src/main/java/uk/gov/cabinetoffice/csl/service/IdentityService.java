@@ -19,10 +19,11 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @AllArgsConstructor
@@ -74,7 +75,7 @@ public class IdentityService {
     }
 
     public BatchProcessResponse removeReportingRoles(List<String> uids) {
-        log.info(String.format("Removing reporting access from the following users: %s", uids));
+        log.info(format("Removing reporting access from the following users: %s", uids));
         BatchProcessResponse response = new BatchProcessResponse();
         List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
         Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
@@ -86,9 +87,9 @@ public class IdentityService {
             }
         });
         if (!identitiesToSave.isEmpty()) {
-            log.info(String.format("Reporting access removed from the following users: %s", uids));
+            log.info(format("Reporting access removed from the following users: %s", uids));
             identityRepository.saveAll(identitiesToSave);
-            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(Collectors.toList()));
+            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
         }
         return response;
     }

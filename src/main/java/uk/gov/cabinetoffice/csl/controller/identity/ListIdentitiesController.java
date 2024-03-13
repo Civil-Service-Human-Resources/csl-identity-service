@@ -3,7 +3,6 @@ package uk.gov.cabinetoffice.csl.controller.identity;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +16,12 @@ import uk.gov.cabinetoffice.csl.service.IdentityService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.ResponseEntity.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -30,14 +32,14 @@ public class ListIdentitiesController {
 
     @PostMapping("/api/identities/remove-reporting-roles")
     @ResponseBody
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(OK)
     public BatchProcessResponse removeAdminAccessFromUsers(@RequestBody @Valid UidList uids) {
         return identityService.removeReportingRoles(uids.getUids());
     }
 
     @GetMapping("/api/identities")
     public ResponseEntity<List<IdentityDTO>> listIdentities() {
-        return ResponseEntity.ok(
+        return ok(
                 identityService.getAllIdentities()
                 .stream()
                 .map(IdentityDTO::new)
@@ -47,39 +49,39 @@ public class ListIdentitiesController {
 
     @GetMapping("/api/identities/map")
     public ResponseEntity<Map<String, IdentityDTO>> listIdentitiesAsMap() {
-        return ResponseEntity.ok(
+        return ok(
                 identityService.getAllNormalisedIdentities()
                 .stream()
-                .collect(Collectors.toMap(IdentityDTO::getUid, o -> o))
+                .collect(toMap(IdentityDTO::getUid, o -> o))
         );
     }
 
     @GetMapping(value ="/api/identities/map-for-uids", params = "uids")
     public ResponseEntity<Map<String, IdentityDTO>> listIdentitiesAsMapForUids(@RequestParam List<String> uids) {
-        return ResponseEntity.ok(
+        return ok(
                 identityService.getIdentitiesByUidsNormalised(uids)
                 .stream()
-                .collect(Collectors.toMap(IdentityDTO::getUid, o -> o)));
+                .collect(toMap(IdentityDTO::getUid, o -> o)));
     }
 
     @GetMapping(value = "/api/identities", params = "emailAddress")
     public ResponseEntity<IdentityDTO> findByEmailAddress(@RequestParam String emailAddress) {
         Identity identity = identityService.getActiveIdentityForEmail(emailAddress);
         if (identity != null) {
-            return ResponseEntity.ok(new IdentityDTO(identity));
+            return ok(new IdentityDTO(identity));
         }
-        return ResponseEntity.notFound().build();
+        return notFound().build();
     }
 
     @GetMapping(value = "/api/identities", params = "uid")
     public ResponseEntity<IdentityDTO> findByUid(@RequestParam String uid) {
         try {
             Identity identity = identityService.getIdentityForUid(uid);
-            return ResponseEntity.ok(new IdentityDTO(identity));
+            return ok(new IdentityDTO(identity));
         } catch(IdentityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return status(INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -88,11 +90,11 @@ public class ListIdentitiesController {
         log.info("Getting agency token uid for identity with uid " + uid);
         try {
             Identity identity = identityService.getIdentityForUid(uid);
-            return ResponseEntity.ok(new IdentityAgencyDTO(identity.getUid(), identity.getAgencyTokenUid()));
+            return ok(new IdentityAgencyDTO(identity.getUid(), identity.getAgencyTokenUid()));
         } catch(IdentityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return status(INTERNAL_SERVER_ERROR).build();
         }
     }
 }
