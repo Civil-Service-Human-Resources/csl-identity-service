@@ -12,6 +12,8 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.LocalDateTime;
+
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
@@ -25,6 +27,9 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     @Value("${account.lockout.maxLoginAttempts}")
     private int maxLoginAttempts;
+
+    @Value("${reactivation.validityInSeconds}")
+    private int reactivationValidityInSeconds;
 
     private final ReactivationService reactivationService;
 
@@ -50,14 +55,19 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
             case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&username=" + encodedUsername;
             case ("Pending reactivation exists for user") -> {
-                String requestedAt = "";
+                String requestedAtStr = "";
+                String reactivationLinkExpiryStr = "";
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
-                    requestedAt = utils.convertDateTimeFormat(pendingReactivation.getRequestedAt().toString());
+                    LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
+                    requestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
+                    LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
+                    reactivationLinkExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry.toString());
                 } catch (Exception e) {
                     log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
                 }
-                redirect = "/login?error=pending-reactivation&requestedAt=" + requestedAt;
+                redirect = "/login?error=pending-reactivation&requestedAt=" + requestedAtStr
+                        + "&reactivationLinkExpiry=" + reactivationLinkExpiryStr;
             }
         }
         log.debug("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);
