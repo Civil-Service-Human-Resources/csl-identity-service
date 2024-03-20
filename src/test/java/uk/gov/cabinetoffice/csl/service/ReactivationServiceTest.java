@@ -46,7 +46,7 @@ public class ReactivationServiceTest {
 
         ArgumentCaptor<Reactivation> reactivationArgumentCaptor = ArgumentCaptor.forClass(Reactivation.class);
 
-        when(identityService.getInActiveIdentityForEmail(EMAIL)).thenReturn(identity);
+        when(identityService.getInactiveIdentityForEmail(EMAIL)).thenReturn(identity);
         doNothing().when(identityService).reactivateIdentity(identity, agencyToken);
 
         reactivationService.reactivateIdentity(reactivation, agencyToken);
@@ -64,7 +64,7 @@ public class ReactivationServiceTest {
         AgencyToken agencyToken = createAgencyToken();
 
         doThrow(new IdentityNotFoundException("Identity not found"))
-                .when(identityService).getInActiveIdentityForEmail(EMAIL);
+                .when(identityService).getInactiveIdentityForEmail(EMAIL);
 
         Exception exception = assertThrows(IdentityNotFoundException.class,
                 () -> reactivationService.reactivateIdentity(reactivation, agencyToken));
