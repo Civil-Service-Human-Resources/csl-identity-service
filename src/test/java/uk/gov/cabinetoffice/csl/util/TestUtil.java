@@ -8,10 +8,25 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
+
 public class TestUtil {
 
-    public static IdentityDetails createIdentityDetails(Long id, String uid, String email, String password) {
-        return new IdentityDetails(createIdentity(id, uid, email, password, "agencyTokenUid"));
+    public static final String EMAIL_TEMPLATE = "%s@example.org";
+    public static final String PASSWORD = "password123";
+
+    public static Identity createIdentity() {
+        return createIdentity(null);
+    }
+
+    public static Identity createIdentity(String agencyTokenUid) {
+        return createIdentity(randomUUID().toString(), randomUUID().toString(), agencyTokenUid);
+    }
+
+    public static Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
+        return new Identity(uid, format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false,
+                null, Instant.now(), false, agencyTokenUid, 0);
     }
 
     public static Identity createIdentity(Long id, String uid, String email, String password, String agencyTokenUid) {
@@ -23,6 +38,10 @@ public class TestUtil {
     public static Identity createIdentity(String uid, String email, String password, String agencyTokenUid) {
         return new Identity(uid, email, password, true, false, createRoles(),
                 Instant.now(), false, agencyTokenUid, 0);
+    }
+
+    public static IdentityDetails createIdentityDetails(Long id, String uid, String email, String password) {
+        return new IdentityDetails(createIdentity(id, uid, email, password, "agencyTokenUid"));
     }
 
     public static Set<Role> createRoles() {

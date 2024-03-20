@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
@@ -16,17 +17,16 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static uk.gov.cabinetoffice.csl.util.TestUtil.createIdentity;
 
 @SpringBootTest
 @ActiveProfiles("no-redis")
@@ -43,7 +43,7 @@ public class IdentityServiceTest {
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
-    @Mock(name="identityRepository")
+    @Mock
     private IdentityRepository identityRepository;
 
     @Mock
@@ -60,11 +60,12 @@ public class IdentityServiceTest {
                 inviteService,
                 agencyTokenCapacityService,
                 identityRepository,
+                new CompoundRoleRepositoryImpl(),
                 civilServantRegistryClient,
                 passwordEncoder,
                 utils
         );
-        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(Arrays.asList("allowListed.gov.uk", "example.com"));
+        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(asList("allowListed.gov.uk", "example.com"));
     }
 
     @Test
@@ -185,7 +186,7 @@ public class IdentityServiceTest {
 
         when(identityRepository.findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL)).thenReturn(Optional.of(identity));
 
-        Identity actualIdentity = identityService.getIdentityForEmailAndActiveFalse(EMAIL);
+        Identity actualIdentity = identityService.getInactiveIdentityForEmail(EMAIL);
 
         assertEquals(UID, actualIdentity.getUid());
         assertFalse(actualIdentity.isActive());
@@ -196,7 +197,7 @@ public class IdentityServiceTest {
         doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL);
 
         IdentityNotFoundException thrown = assertThrows(
-                IdentityNotFoundException.class, () -> identityService.getIdentityForEmailAndActiveFalse(EMAIL));
+                IdentityNotFoundException.class, () -> identityService.getInactiveIdentityForEmail(EMAIL));
 
         assertEquals("Identity not found", thrown.getMessage());
     }
@@ -217,5 +218,29 @@ public class IdentityServiceTest {
     public void testIsAllowListedDomainUpperCase(){
         boolean validDomain = identityService.isAllowListedDomain("EXAMPLE.COM");
         assertTrue(validDomain);
+    }
+
+    @Test
+    public void shouldRemoveReportingRoles() {
+        Role orgReporter = new Role("ORGANISATION_REPORTER", "");
+        Role professionReporter = new Role("PROFESSION_REPORTER", "");
+        Role learner = new Role("LEARNER", "");
+
+        Identity reporter = createIdentity("uid123", "reporter@email.com", null);
+        reporter.setRoles(new HashSet<>(asList(learner, orgReporter)));
+
+        Identity reporter1 = createIdentity("uid456", "reporter1@email.com", null);
+        reporter1.setRoles(new HashSet<>(asList(learner, orgReporter, professionReporter)));
+
+        Identity user = createIdentity("uid789", "user@email.com", null);
+        user.setRoles(new HashSet<>(Collections.singletonList(learner)));
+        List<Identity> identities = asList(reporter, reporter1, user);
+
+        when(identityRepository.findIdentitiesByUids(asList("uid123", "uid456", "uid789"))).thenReturn(identities);
+        BatchProcessResponse resp = identityService.removeReportingRoles(asList("uid123", "uid456", "uid789"));
+        List<String> successfulIds = resp.getSuccessfulIds();
+        assertEquals(2, successfulIds.size());
+        assertEquals("uid123", successfulIds.get(0));
+        assertEquals("uid456", successfulIds.get(1));
     }
 }

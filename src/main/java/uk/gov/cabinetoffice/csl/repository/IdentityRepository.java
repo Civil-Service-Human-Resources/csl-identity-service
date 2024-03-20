@@ -14,22 +14,32 @@ import java.util.Optional;
 @Repository
 public interface IdentityRepository extends JpaRepository<Identity, Long> {
 
-        Identity findFirstByActiveTrueAndEmailEqualsIgnoreCase(String email);
-
         Identity findFirstByEmailEqualsIgnoreCase(String email);
+
+        Identity findFirstByActiveTrueAndEmailEqualsIgnoreCase(String email);
 
         Optional<Identity> findFirstByActiveFalseAndEmailEqualsIgnoreCase(String email);
 
         boolean existsByEmailIgnoreCase(String email);
 
-        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i.email, i.uid) " +
-                "from Identity i where i.uid in (?1)")
-        List<IdentityDTO> findIdentitiesByUIDsNormalised(List<String> UIDs);
+        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i.email, i.uid)" +
+                " from Identity i")
+        List<IdentityDTO> findAllNormalised();
+
+        Optional<Identity> findFirstByUid(String uid);
+
+        @Query("select i from Identity i where i.uid in (?1)")
+        List<Identity> findIdentitiesByUids(List<String> uids);
+
+        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i)" +
+                " from Identity i where i.uid in (?1)")
+        List<IdentityDTO> findIdentitiesByUidsNormalised(List<String> uids);
 
         Long countByAgencyTokenUid(String uid);
 
         @Transactional
         @Modifying(flushAutomatically = true, clearAutomatically = true)
-        @Query("UPDATE Identity SET agencyTokenUid = null WHERE agencyTokenUid IS NOT NULL AND agencyTokenUid = :agencyTokenUid")
+        @Query("UPDATE Identity SET agencyTokenUid = null WHERE agencyTokenUid IS NOT NULL" +
+                " AND agencyTokenUid = :agencyTokenUid")
         void removeAgencyToken(String agencyTokenUid);
 }

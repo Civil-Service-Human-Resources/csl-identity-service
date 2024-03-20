@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @Slf4j
 @Component
@@ -32,6 +33,6 @@ public class Utils {
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {
-        return emailAddress.substring(emailAddress.indexOf('@') + 1);
+        return emailAddress.substring(emailAddress.indexOf('@') + 1).toLowerCase(Locale.ROOT);
     }
 }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
+import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
 import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
@@ -16,12 +18,12 @@ import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @AllArgsConstructor
@@ -32,6 +34,7 @@ public class IdentityService {
     private final InviteService inviteService;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
     private final IdentityRepository identityRepository;
+    private final CompoundRoleRepository compoundRoleRepository;
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
@@ -71,6 +74,26 @@ public class IdentityService {
         log.debug("New identity email = {} successfully created", email);
     }
 
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        log.info(format("Removing reporting access from the following users: %s", uids));
+        BatchProcessResponse response = new BatchProcessResponse();
+        List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
+        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
+        List<Identity> identitiesToSave = new ArrayList<>();
+        identities.forEach(i -> {
+            if (i.hasAnyRole(reportingRoles)) {
+                i.removeRoles(reportingRoles);
+                identitiesToSave.add(i);
+            }
+        });
+        if (!identitiesToSave.isEmpty()) {
+            log.info(format("Reporting access removed from the following users: %s", uids));
+            identityRepository.saveAll(identitiesToSave);
+            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
+        }
+        return response;
+    }
+
     public void reactivateIdentity(Identity identity, AgencyToken agencyToken) {
         identity.setActive(true);
         if (agencyToken != null && agencyToken.getUid() != null) {
@@ -88,10 +111,20 @@ public class IdentityService {
         return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
     }
 
-    public Identity getIdentityForEmailAndActiveFalse(String email) {
+    public Identity getActiveIdentityForEmail(String email) {
+        return identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email);
+    }
+
+    public Identity getInactiveIdentityForEmail(String email) {
         return identityRepository
                 .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
                 .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
+    }
+
+    public Identity getIdentityForUid(String uid) {
+        return identityRepository
+                .findFirstByUid(uid)
+                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for uid: " + uid));
     }
 
     public boolean isAllowListedDomain(String domain) {
@@ -104,5 +137,17 @@ public class IdentityService {
 
     public boolean isEmailInvited(String email) {
         return inviteService.isEmailInvited(email);
+    }
+
+    public List<Identity> getAllIdentities() {
+        return identityRepository.findAll();
+    }
+
+    public List<IdentityDTO> getAllNormalisedIdentities() {
+        return identityRepository.findAllNormalised();
+    }
+
+    public List<IdentityDTO> getIdentitiesByUidsNormalised(List<String> uids) {
+        return identityRepository.findIdentitiesByUidsNormalised(uids);
     }
 }
