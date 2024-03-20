@@ -115,7 +115,7 @@ public class IdentityService {
         return identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email);
     }
 
-    public Identity getInActiveIdentityForEmail(String email) {
+    public Identity getInactiveIdentityForEmail(String email) {
         return identityRepository
                 .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
                 .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));

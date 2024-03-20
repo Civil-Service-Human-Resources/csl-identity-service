@@ -55,19 +55,18 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
             case ("Reactivation request has expired") -> redirect = "/login?error=deactivated-expired&username=" + encodedUsername;
             case ("Pending reactivation exists for user") -> {
-                String requestedAtStr = "";
-                String reactivationLinkExpiryStr = "";
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                     LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                    requestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
+                    String requestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
-                    reactivationLinkExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry.toString());
+                    String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry.toString());
+                    log.debug("Pending reactivation for the email {} requested at {} and expires on {}",
+                            pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {
                     log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
                 }
-                redirect = "/login?error=pending-reactivation&requestedAt=" + requestedAtStr
-                        + "&reactivationLinkExpiry=" + reactivationLinkExpiryStr;
+                redirect = "/login?error=pending-reactivation";
             }
         }
         log.debug("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);

@@ -186,7 +186,7 @@ public class IdentityServiceTest {
 
         when(identityRepository.findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL)).thenReturn(Optional.of(identity));
 
-        Identity actualIdentity = identityService.getInActiveIdentityForEmail(EMAIL);
+        Identity actualIdentity = identityService.getInactiveIdentityForEmail(EMAIL);
 
         assertEquals(UID, actualIdentity.getUid());
         assertFalse(actualIdentity.isActive());
@@ -197,7 +197,7 @@ public class IdentityServiceTest {
         doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL);
 
         IdentityNotFoundException thrown = assertThrows(
-                IdentityNotFoundException.class, () -> identityService.getInActiveIdentityForEmail(EMAIL));
+                IdentityNotFoundException.class, () -> identityService.getInactiveIdentityForEmail(EMAIL));
 
         assertEquals("Identity not found", thrown.getMessage());
     }
