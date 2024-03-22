@@ -16,6 +16,7 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
 
@@ -41,19 +42,22 @@ public class ChangeEmailController {
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
     private static final String REDIRECT_ACCOUNT_ENTER_TOKEN = "redirect:/account/verify/agency/";
 
+    @Value("${lpg.uiUrl}")
+    private String lpgUiUrl;
+
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final AgencyTokenService agencyTokenService;
-    private final String lpgUiUrl;
+    private final Utils utils;
 
     public ChangeEmailController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
                                  AgencyTokenService agencyTokenService,
-                                 @Value("${lpg.uiUrl}") String lpgUiUrl) {
+                                 Utils utils) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
         this.agencyTokenService = agencyTokenService;
-        this.lpgUiUrl = lpgUiUrl;
+        this.utils = utils;
     }
 
     @GetMapping
@@ -73,13 +77,13 @@ public class ChangeEmailController {
         String newEmail = form.getEmail();
         log.info("Change email requested, sending email to {} for verification", newEmail);
 
-        if (identityService.checkEmailExists(newEmail)) {
+        if (identityService.isIdentityExistsForEmail(newEmail)) {
             log.error("Email already in use: {}", newEmail);
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
-        if (!identityService.checkValidEmail(newEmail)) {
+        if (!identityService.isValidEmailDomain(newEmail)) {
             log.error("Email is neither allowlisted or for an agency token: {}", newEmail);
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
@@ -105,7 +109,7 @@ public class ChangeEmailController {
         }
 
         EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
-        String newDomain = identityService.getDomainFromEmailAddress(emailUpdate.getEmail());
+        String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getEmail());
 
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
@@ -151,7 +155,7 @@ public class ChangeEmailController {
     }
 
     private boolean isAllowListed(String newDomain) {
-        return identityService.isAllowlistedDomain(newDomain);
+        return identityService.isAllowListedDomain(newDomain);
     }
 
     private boolean isAgencyDomain(String newDomain) {

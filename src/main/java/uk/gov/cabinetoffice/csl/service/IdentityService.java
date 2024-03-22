@@ -108,6 +108,11 @@ public class IdentityService {
                 .orElseThrow(() -> new IdentityNotFoundException("Identity not found for uid: " + uid));
     }
 
+    public boolean isValidEmailDomain(String email) {
+        final String domain = utils.getDomainFromEmailAddress(email);
+        return (isAllowListedDomain(domain) || civilServantRegistryClient.isDomainInAgency(domain));
+    }
+
     public boolean isAllowListedDomain(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
     }
