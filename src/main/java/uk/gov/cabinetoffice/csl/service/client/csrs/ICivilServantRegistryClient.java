@@ -16,8 +16,6 @@ public interface ICivilServantRegistryClient {
 
     OrganisationalUnitDTO[] getOrganisationalUnitsFormatted();
 
-    AgencyToken[] getAgencyTokensForDomain(String domain);
-
     List<String> getAllowListDomains();
 
     void evictAllowListDomainCache();

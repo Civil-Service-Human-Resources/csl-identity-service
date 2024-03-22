@@ -90,18 +90,6 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    public AgencyToken[] getAgencyTokensForDomain(String domain) {
-        try {
-            String url = format(agencyTokensByDomainFormat, domain);
-            RequestEntity<Void> request = RequestEntity.get(url).build();
-            return httpClient.executeRequest(request, AgencyToken[].class);
-        } catch (HttpClientErrorException e) {
-            log.error("An error has occurred while getting Agency Tokens from Civil Servant registry", e);
-            return new AgencyToken[]{};
-        }
-    }
-
-    @Override
     @Cacheable("allowListDomains")
     public List<String> getAllowListDomains() {
         log.info("Fetching allowlist domains from Civil Servant Registry");

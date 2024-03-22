@@ -13,7 +13,6 @@ import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
-import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.util.Utils;
@@ -47,16 +46,13 @@ public class ChangeEmailController {
 
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
-    private final AgencyTokenService agencyTokenService;
     private final Utils utils;
 
     public ChangeEmailController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
-                                 AgencyTokenService agencyTokenService,
                                  Utils utils) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
-        this.agencyTokenService = agencyTokenService;
         this.utils = utils;
     }
 
@@ -159,6 +155,6 @@ public class ChangeEmailController {
     }
 
     private boolean isAgencyDomain(String newDomain) {
-        return agencyTokenService.isDomainInAgencyToken(newDomain);
+        return identityService.isDomainInAgency(newDomain);
     }
 }
