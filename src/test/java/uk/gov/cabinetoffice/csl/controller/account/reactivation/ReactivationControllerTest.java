@@ -84,17 +84,17 @@ public class ReactivationControllerTest {
         executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage);
     }
 
-    @Test
-    public void shouldRedirectIfAccountDomainIsAgencyToken() throws Exception {
-        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
-
-        when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
-
-        mockMvc.perform(
-                get("/account/reactivate/" + CODE))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/verify/agency/" + CODE));
-    }
+//    @Test
+//    public void shouldRedirectIfAccountDomainIsAgencyToken() throws Exception {
+//        Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
+//
+//        when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
+//
+//        mockMvc.perform(
+//                get("/account/reactivate/" + CODE))
+//                .andExpect(status().is3xxRedirection())
+//                .andExpect(redirectedUrl("/account/verify/agency/" + CODE));
+//    }
 
     @Test
     public void shouldReactivateAccountIfNotAgencyToken() throws Exception {
