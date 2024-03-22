@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ICivilServantRegistryClient {
 
+    void removeOrganisationalUnitFromCivilServant(String uid);
+
     Boolean isDomainInAgency(String domain);
 
     Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation);

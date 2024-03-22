@@ -19,9 +19,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 @Slf4j
 @Component
 public class CivilServantRegistryClient implements ICivilServantRegistryClient {
+
+    @Value("${civilServantRegistry.civilServantUrl}")
+    private String civilServantUrl;
 
     @Value("${civilServantRegistry.agencyTokensFormat}")
     private String agencyTokensFormat;
@@ -42,9 +47,17 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
+    public void removeOrganisationalUnitFromCivilServant(String uid) {
+        log.info(format("Removing organisation from user %s", uid));
+        String url = format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
+        RequestEntity<Void> request = RequestEntity.post(url).build();
+        httpClient.executeRequest(request, Void.class);
+    }
+
+    @Override
     public Boolean isDomainInAgency(String domain) {
         try {
-            String url = String.format(agencyTokensByDomainFormat, domain);
+            String url = format(agencyTokensByDomainFormat, domain);
             RequestEntity<Void> request = RequestEntity.get(url).build();
             return httpClient.executeRequest(request, Boolean.class);
         } catch (HttpClientErrorException e) {
@@ -56,7 +69,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     @Override
     public Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation) {
         try {
-            String url = String.format(agencyTokensFormat, domain, token, organisation);
+            String url = format(agencyTokensFormat, domain, token, organisation);
             RequestEntity<Void> request = RequestEntity.get(url).build();
             return Optional.of(httpClient.executeRequest(request, AgencyToken.class));
         } catch (HttpClientErrorException e) {

@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.VerificationCodeDetermination;
@@ -16,6 +17,7 @@ import uk.gov.cabinetoffice.csl.exception.NotEnoughSpaceAvailableException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.VerificationCodeTypeNotFound;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
+import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.service.VerificationCodeDeterminationService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
@@ -39,7 +41,7 @@ public class AgencyTokenVerificationController {
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
     private static final String EMAIL_ATTRIBUTE = "email";
 
-//    private final EmailUpdateService emailUpdateService;
+    private final EmailUpdateService emailUpdateService;
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
@@ -105,9 +107,9 @@ public class AgencyTokenVerificationController {
             switch (verificationCodeType) {
                 case EMAIL_UPDATE -> {
                     log.info("EMAIL_UPDATE agency verification for {}", verificationCodeDetermination);
-//                    EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
-//                    emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
-//                    redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
+                    EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
+                    emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
+                    redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
                     return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
                 }
                 case REACTIVATION -> {
