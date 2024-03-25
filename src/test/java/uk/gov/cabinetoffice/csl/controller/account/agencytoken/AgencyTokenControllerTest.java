@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.cabinetoffice.csl.dto.AgencyTokenCapacityUsedDTO;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -43,16 +43,16 @@ public class AgencyTokenControllerTest {
 
     @Test
     public void getSpacesUsedForAgencyToken() throws Exception {
-        AgencyTokenCapacityUsedDTO agencyTokenCapacityUsedDto = new AgencyTokenCapacityUsedDTO(100L);
+        AgencyToken agencyToken = new AgencyToken(100L);
 
-        when(agencyTokenCapacityService.getSpacesUsedByAgencyToken(UID)).thenReturn(agencyTokenCapacityUsedDto);
+        when(agencyTokenCapacityService.getSpacesUsedByAgencyToken(UID)).thenReturn(agencyToken);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get(String.format("/agency/%s", UID))
                         .accept(APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(agencyTokenCapacityUsedDto)));
+                .andExpect(content().json(gson.toJson(agencyToken)));
     }
 
     @Test

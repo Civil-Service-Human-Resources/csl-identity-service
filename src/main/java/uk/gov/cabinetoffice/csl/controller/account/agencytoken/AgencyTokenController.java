@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.cabinetoffice.csl.dto.AgencyTokenCapacityUsedDTO;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -19,7 +19,7 @@ public class AgencyTokenController {
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
     @GetMapping("/{uid}")
-    public ResponseEntity<AgencyTokenCapacityUsedDTO> getSpacesUsedForAgencyToken(
+    public ResponseEntity<AgencyToken> getSpacesUsedForAgencyToken(
             @PathVariable(value = "uid") String uid) {
         log.debug("Getting spaces used for agency token {}", uid);
         try {

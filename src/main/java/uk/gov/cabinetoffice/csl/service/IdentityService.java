@@ -10,7 +10,6 @@ import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
-import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
@@ -41,24 +40,24 @@ public class IdentityService {
     private final Utils utils;
 
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
-    public void createIdentityFromInviteCode(String code, String password, TokenRequest tokenRequest) {
+    public void createIdentityFromInviteCode(String code, String password, AgencyToken agencyToken) {
         Invite invite = inviteService.getInviteForCode(code);
         String email = invite.getForEmail();
         final String domain = utils.getDomainFromEmailAddress(email);
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
         String agencyTokenUid = null;
-        if (tokenRequest != null && tokenRequest.hasData()) {
+        if (agencyToken != null && agencyToken.hasData()) {
             Optional<AgencyToken> agencyTokenForDomainTokenOrganisation =
-                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenRequest.getDomain(),
-                            tokenRequest.getToken(), tokenRequest.getOrg());
+                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(agencyToken.getDomain(),
+                            agencyToken.getToken(), agencyToken.getOrg());
 
             agencyTokenUid = agencyTokenForDomainTokenOrganisation
-                    .map(agencyToken -> {
-                        if (agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                            return agencyToken.getUid();
+                    .map(at -> {
+                        if (agencyTokenCapacityService.hasSpaceAvailable(at)) {
+                            return at.getUid();
                         } else {
                             throw new UnableToAllocateAgencyTokenException("Agency token uid " +
-                                    agencyToken.getUid() + " has no spaces available. Identity not created");
+                                    at.getUid() + " has no spaces available. Identity not created");
                         }
                     })
                     .orElseThrow(() -> new ResourceNotFoundException("Agency token not found"));
