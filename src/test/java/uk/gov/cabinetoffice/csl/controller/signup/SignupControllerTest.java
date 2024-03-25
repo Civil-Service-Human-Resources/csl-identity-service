@@ -80,7 +80,7 @@ public class SignupControllerTest {
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+        when(identityService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -109,7 +109,7 @@ public class SignupControllerTest {
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
         when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+        when(identityService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -173,7 +173,7 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(true);
+        when(identityService.isDomainInAgency(domain)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -199,7 +199,7 @@ public class SignupControllerTest {
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(identityService.isAllowListedDomain(domain)).thenReturn(false);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+        when(identityService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")

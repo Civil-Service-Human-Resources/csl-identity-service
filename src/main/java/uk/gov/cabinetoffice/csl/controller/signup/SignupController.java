@@ -132,7 +132,7 @@ public class SignupController {
 
         final String domain = utils.getDomainFromEmailAddress(email);
 
-        if (civilServantRegistryClient.isDomainInAgency(domain)) {
+        if (identityService.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
