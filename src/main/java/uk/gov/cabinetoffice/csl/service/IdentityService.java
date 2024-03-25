@@ -74,6 +74,55 @@ public class IdentityService {
         log.debug("New identity email = {} successfully created", email);
     }
 
+    public BatchProcessResponse removeRoles(List<String> uids, CompoundRole compoundRole) {
+        return removeRoles(uids, singletonList(compoundRole));
+    }
+
+    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoleList) {
+        log.info(format("Removing %s access from the following users: %s", compoundRoleList, uids));
+        BatchProcessResponse response = new BatchProcessResponse();
+        List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
+        Collection<String> reportingRoles = compoundRoleList
+                .stream()
+                .flatMap(cr ->
+                        compoundRoles.getRoles(cr)
+                                .stream())
+                .collect(toList());
+        List<Identity> identitiesToSave = new ArrayList<>();
+        identities.forEach(i -> {
+            if (i.hasAnyRole(reportingRoles)) {
+                i.removeRoles(reportingRoles);
+                identitiesToSave.add(i);
+            }
+        });
+        if (!identitiesToSave.isEmpty()) {
+            log.info(format("%s access removed from the following users: %s", compoundRoleList, uids));
+            identityRepository.saveAll(identitiesToSave);
+            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
+        }
+        return response;
+    }
+
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        return removeRoles(uids, CompoundRole.REPORTER);
+    }
+
+    public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
+        if (newAgencyToken != null && newAgencyToken.getUid() != null) {
+            log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
+            identity.setAgencyTokenUid(newAgencyToken.getUid());
+        } else {
+            log.debug("Setting existing agency token UID to null");
+            identity.setAgencyTokenUid(null);
+        }
+        identity.setEmail(email);
+        identity.removeRoles(compoundRoles.getRoles(Arrays.asList(
+                CompoundRole.REPORTER,
+                CompoundRole.UNRESTRICTED_ORGANISATION
+        )));
+        identityRepository.save(identity);
+    }
+
     public void reactivateIdentity(Identity identity, AgencyToken agencyToken) {
         identity.setActive(true);
         if (agencyToken != null && agencyToken.getUid() != null) {
@@ -134,54 +183,5 @@ public class IdentityService {
 
     public List<IdentityDTO> getIdentitiesByUidsNormalised(List<String> uids) {
         return identityRepository.findIdentitiesByUidsNormalised(uids);
-    }
-
-    public BatchProcessResponse removeRoles(List<String> uids, CompoundRole compoundRole) {
-        return removeRoles(uids, singletonList(compoundRole));
-    }
-
-    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoleList) {
-        log.info(format("Removing %s access from the following users: %s", compoundRoleList, uids));
-        BatchProcessResponse response = new BatchProcessResponse();
-        List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
-        Collection<String> reportingRoles = compoundRoleList
-                .stream()
-                .flatMap(cr ->
-                        compoundRoles.getRoles(cr)
-                           .stream())
-                            .collect(toList());
-        List<Identity> identitiesToSave = new ArrayList<>();
-        identities.forEach(i -> {
-            if (i.hasAnyRole(reportingRoles)) {
-                i.removeRoles(reportingRoles);
-                identitiesToSave.add(i);
-            }
-        });
-        if (!identitiesToSave.isEmpty()) {
-            log.info(format("%s access removed from the following users: %s", compoundRoleList, uids));
-            identityRepository.saveAll(identitiesToSave);
-            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
-        }
-        return response;
-    }
-
-    public BatchProcessResponse removeReportingRoles(List<String> uids) {
-        return removeRoles(uids, CompoundRole.REPORTER);
-    }
-
-    public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
-        if (newAgencyToken != null && newAgencyToken.getUid() != null) {
-            log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
-            identity.setAgencyTokenUid(newAgencyToken.getUid());
-        } else {
-            log.debug("Setting existing agency token UID to null");
-            identity.setAgencyTokenUid(null);
-        }
-        identity.setEmail(email);
-        identity.removeRoles(compoundRoles.getRoles(Arrays.asList(
-                CompoundRole.REPORTER,
-                CompoundRole.UNRESTRICTED_ORGANISATION
-        )));
-        identityRepository.save(identity);
     }
 }
