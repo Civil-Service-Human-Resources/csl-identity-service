@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
@@ -66,18 +65,4 @@ public class AgencyTokenControllerTest {
 
         verify(agencyTokenCapacityService, times(1)).deleteAgencyToken(agencyTokenUid);
     }
-
-//    @Test
-//    public void deleteAgencyToken_callsAgencyTokenCapacityServiceDeleteAgencyTokenError() throws Exception {
-//        String agencyTokenUid = UUID.randomUUID().toString();
-//
-//        doThrow(Exception.class).when(agencyTokenCapacityService).deleteAgencyToken(agencyTokenUid);
-//
-//        mockMvc.perform(
-//                MockMvcRequestBuilders.delete(String.format("/agency/%s", agencyTokenUid))
-//                        .with(csrf())
-//        ).andExpect(status().is5xxServerError());
-//
-//        verify(agencyTokenCapacityService, times(1)).deleteAgencyToken(agencyTokenUid);
-//    }
 }
