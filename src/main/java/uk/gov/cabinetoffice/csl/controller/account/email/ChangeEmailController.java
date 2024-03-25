@@ -65,7 +65,8 @@ public class ChangeEmailController {
     }
 
     @PostMapping
-    public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form, BindingResult bindingResult, Authentication authentication) {
+    public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form,
+                                        BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors()) {
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return UPDATE_EMAIL_TEMPLATE;
