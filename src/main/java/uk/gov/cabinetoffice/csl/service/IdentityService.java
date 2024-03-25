@@ -74,6 +74,10 @@ public class IdentityService {
         log.debug("New identity email = {} successfully created", email);
     }
 
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        return removeRoles(uids, CompoundRole.REPORTER);
+    }
+
     public BatchProcessResponse removeRoles(List<String> uids, CompoundRole compoundRole) {
         return removeRoles(uids, singletonList(compoundRole));
     }
@@ -101,10 +105,6 @@ public class IdentityService {
             response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
         }
         return response;
-    }
-
-    public BatchProcessResponse removeReportingRoles(List<String> uids) {
-        return removeRoles(uids, CompoundRole.REPORTER);
     }
 
     public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
