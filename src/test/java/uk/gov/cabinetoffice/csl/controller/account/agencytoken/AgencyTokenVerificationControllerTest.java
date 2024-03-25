@@ -79,12 +79,12 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private Utils utils;
 
-    private OrganisationalUnitDTO[] organisations;
+    private OrganisationalUnit[] organisations;
 
     @BeforeEach
     public void setup() {
-        organisations = new OrganisationalUnitDTO[1];
-        organisations[0] = new OrganisationalUnitDTO();
+        organisations = new OrganisationalUnit[1];
+        organisations[0] = new OrganisationalUnit();
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisations);
     }
 

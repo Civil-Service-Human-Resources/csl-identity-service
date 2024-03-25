@@ -1,7 +1,7 @@
 package uk.gov.cabinetoffice.csl.service.client.csrs;
 
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
-import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +14,7 @@ public interface ICivilServantRegistryClient {
 
     Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation);
 
-    OrganisationalUnitDTO[] getOrganisationalUnitsFormatted();
+    OrganisationalUnit[] getOrganisationalUnitsFormatted();
 
     List<String> getAllowListDomains();
 

@@ -13,7 +13,7 @@ import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
-import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
@@ -252,7 +252,7 @@ public class SignupController {
 
             log.debug("Invite email = {} accessing enter token screen for validation", invite.getForEmail());
 
-            OrganisationalUnitDTO[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
+            OrganisationalUnit[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
 
             model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
             model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());

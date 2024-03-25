@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
-import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
@@ -420,7 +420,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String email = "test@example.com";
 
-        OrganisationalUnitDTO[] organisationalUnits = new OrganisationalUnitDTO[]{new OrganisationalUnitDTO()};
+        OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
 
         Invite invite = new Invite();
         invite.setForEmail(email);
@@ -447,7 +447,7 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        OrganisationalUnitDTO[] organisationalUnits = new OrganisationalUnitDTO[]{new OrganisationalUnitDTO()};
+        OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);

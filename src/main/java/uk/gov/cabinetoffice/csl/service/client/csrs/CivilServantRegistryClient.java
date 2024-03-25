@@ -13,7 +13,7 @@ import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.DomainsResponse;
-import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,13 +79,13 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    public OrganisationalUnitDTO[] getOrganisationalUnitsFormatted() {
+    public OrganisationalUnit[] getOrganisationalUnitsFormatted() {
         try {
             RequestEntity<Void> request = RequestEntity.get(organisationalUnitsFlatUrl).build();
-            return httpClient.executeRequest(request, OrganisationalUnitDTO[].class);
+            return httpClient.executeRequest(request, OrganisationalUnit[].class);
         } catch (HttpClientErrorException e) {
             log.error("An error has occurred while getting Organisational Units Formatted from Civil Servant registry", e);
-            return new OrganisationalUnitDTO[0];
+            return new OrganisationalUnit[0];
         }
     }
 
