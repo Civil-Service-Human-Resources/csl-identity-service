@@ -59,7 +59,7 @@ public class IdentityServiceTest {
                 inviteService,
                 agencyTokenCapacityService,
                 identityRepository,
-                new CompoundRoleRepositoryImpl(),
+                new CompoundRolesImpl(),
                 civilServantRegistryClient,
                 passwordEncoder,
                 utils

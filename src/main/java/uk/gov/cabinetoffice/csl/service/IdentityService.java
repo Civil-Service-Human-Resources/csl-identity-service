@@ -34,7 +34,7 @@ public class IdentityService {
     private final InviteService inviteService;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
     private final IdentityRepository identityRepository;
-    private final CompoundRoleRepository compoundRoleRepository;
+    private final CompoundRoles compoundRoles;
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
@@ -140,14 +140,14 @@ public class IdentityService {
         return removeRoles(uids, singletonList(compoundRole));
     }
 
-    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoles) {
-        log.info(format("Removing %s access from the following users: %s", compoundRoles, uids));
+    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoleList) {
+        log.info(format("Removing %s access from the following users: %s", compoundRoleList, uids));
         BatchProcessResponse response = new BatchProcessResponse();
         List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
-        Collection<String> reportingRoles = compoundRoles
+        Collection<String> reportingRoles = compoundRoleList
                 .stream()
                 .flatMap(cr ->
-                        compoundRoleRepository.getRoles(cr)
+                        compoundRoles.getRoles(cr)
                            .stream())
                             .collect(toList());
         List<Identity> identitiesToSave = new ArrayList<>();
@@ -158,7 +158,7 @@ public class IdentityService {
             }
         });
         if (!identitiesToSave.isEmpty()) {
-            log.info(format("%s access removed from the following users: %s", compoundRoles, uids));
+            log.info(format("%s access removed from the following users: %s", compoundRoleList, uids));
             identityRepository.saveAll(identitiesToSave);
             response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
         }
@@ -178,7 +178,7 @@ public class IdentityService {
             identity.setAgencyTokenUid(null);
         }
         identity.setEmail(email);
-        identity.removeRoles(compoundRoleRepository.getRoles(Arrays.asList(
+        identity.removeRoles(compoundRoles.getRoles(Arrays.asList(
                 CompoundRole.REPORTER,
                 CompoundRole.UNRESTRICTED_ORGANISATION
         )));

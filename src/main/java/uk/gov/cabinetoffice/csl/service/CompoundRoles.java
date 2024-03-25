@@ -5,7 +5,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-public interface CompoundRoleRepository {
+public interface CompoundRoles {
 
     List<String> getRoles(ICompoundRole role);
 
