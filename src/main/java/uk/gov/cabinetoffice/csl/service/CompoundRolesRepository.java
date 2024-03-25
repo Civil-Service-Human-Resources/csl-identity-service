@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class CompoundRolesImpl implements CompoundRoles {
+public class CompoundRolesRepository implements CompoundRoles {
 
     @Override
     public List<String> getRoles(ICompoundRole role) {
