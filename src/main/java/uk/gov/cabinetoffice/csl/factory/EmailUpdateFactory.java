@@ -12,10 +12,11 @@ import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.PENDING;
 public class EmailUpdateFactory {
     public EmailUpdate create(Identity identity, String email) {
         EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setIdentity(identity);
-        emailUpdate.setEmail(email);
+        emailUpdate.setPreviousEmail(identity.getEmail());
+        emailUpdate.setNewEmail(email);
         emailUpdate.setRequestedAt(now(systemDefaultZone()));
         emailUpdate.setEmailUpdateStatus(PENDING);
+        emailUpdate.setIdentity(identity);
         return emailUpdate;
     }
 }

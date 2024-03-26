@@ -24,7 +24,7 @@ public class VerificationCodeDeterminationService {
             return new VerificationCodeDetermination(reactivation.getEmail(), REACTIVATION);
         } else if(emailUpdateService.existsByCode(code)) {
             EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
-            return new VerificationCodeDetermination(emailUpdate.getEmail(), EMAIL_UPDATE);
+            return new VerificationCodeDetermination(emailUpdate.getNewEmail(), EMAIL_UPDATE);
         } else {
             throw new VerificationCodeTypeNotFound(String.format("Verification code type not found for code: %s", code));
         }

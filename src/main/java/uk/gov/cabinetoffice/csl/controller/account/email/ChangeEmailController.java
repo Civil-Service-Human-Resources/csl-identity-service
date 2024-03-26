@@ -106,21 +106,21 @@ public class ChangeEmailController {
         }
 
         EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
-        String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getEmail());
+        String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getNewEmail());
 
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
         if (isAgencyDomain(newDomain)) {
             log.debug("New email is agency: oldEmail = {}, newEmail = {}", identity.getEmail(),
-                    emailUpdate.getEmail());
-            redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
+                    emailUpdate.getNewEmail());
+            redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
         } else if (isAllowListed(newDomain)) {
             log.debug("New email is allowlisted: oldEmail = {}, newEmail = {}", identity.getEmail(),
-                    emailUpdate.getEmail());
+                    emailUpdate.getNewEmail());
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
-                redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
+                redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (ResourceNotFoundException e) {
                 log.error("Unable to update email, redirecting to enter token screen: {} {}", code, identity);
@@ -132,7 +132,7 @@ public class ChangeEmailController {
             }
         } else {
             log.error("User trying to verify change email where new email is not allowlisted or agency: " +
-                    "oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
+                    "oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getNewEmail());
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
 
             return REDIRECT_LOGIN;

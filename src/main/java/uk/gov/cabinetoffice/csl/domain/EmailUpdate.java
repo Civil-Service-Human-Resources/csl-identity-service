@@ -27,10 +27,10 @@ public class EmailUpdate {
     private String code = random(40, true, true);
 
     @Column
-    private String email;
+    private String previousEmail;
 
-    @ManyToOne
-    private Identity identity;
+    @Column
+    private String newEmail;
 
     @Column
     private LocalDateTime requestedAt;
@@ -38,10 +38,10 @@ public class EmailUpdate {
     @Column
     private LocalDateTime updatedAt;
 
-    @Column
-    private String newEmail;
-
     @Column(length = 10, nullable = false)
     @Enumerated(EnumType.STRING)
     private EmailUpdateStatus emailUpdateStatus;
+
+    @ManyToOne
+    private Identity identity;
 }

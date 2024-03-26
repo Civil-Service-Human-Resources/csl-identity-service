@@ -85,7 +85,7 @@ public class EmailUpdateService {
         Identity existingIdentity = identityService.getIdentityForEmail(emailUpdateIdentity.getEmail());
         String existingEmail = existingIdentity.getEmail();
 
-        String newEmail = emailUpdate.getEmail();
+        String newEmail = emailUpdate.getNewEmail();
 
         log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);

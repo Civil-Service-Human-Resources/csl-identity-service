@@ -137,7 +137,7 @@ public class AgencyTokenVerificationControllerTest {
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setEmail(EMAIL);
+        emailUpdate.setNewEmail(EMAIL);
         Identity identity = new Identity();
         identity.setEmail(EMAIL);
 
@@ -223,7 +223,7 @@ public class AgencyTokenVerificationControllerTest {
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setEmail(EMAIL);
+        emailUpdate.setNewEmail(EMAIL);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
@@ -278,7 +278,7 @@ public class AgencyTokenVerificationControllerTest {
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setEmail(EMAIL);
+        emailUpdate.setNewEmail(EMAIL);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
