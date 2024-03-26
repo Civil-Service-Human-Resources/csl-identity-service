@@ -107,7 +107,7 @@ public class AgencyTokenVerificationController {
             switch (verificationCodeType) {
                 case EMAIL_UPDATE -> {
                     log.info("EMAIL_UPDATE agency verification for {}", verificationCodeDetermination);
-                    EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
+                    EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
                     emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
                     redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
                     return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;

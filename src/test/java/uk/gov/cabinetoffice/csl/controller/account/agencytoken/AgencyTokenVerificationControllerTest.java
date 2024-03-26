@@ -143,7 +143,7 @@ public class AgencyTokenVerificationControllerTest {
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenReturn(emailUpdate);
         doNothing().when(emailUpdateService).updateEmailAddress(emailUpdate, agencyToken);
 
         mockMvc.perform(
@@ -199,7 +199,7 @@ public class AgencyTokenVerificationControllerTest {
         EmailUpdate emailUpdate = new EmailUpdate();
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenReturn(emailUpdate);
 
         mockMvc.perform(
                 post(VERIFY_TOKEN_URL + CODE)
@@ -227,8 +227,8 @@ public class AgencyTokenVerificationControllerTest {
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenReturn(emailUpdate);
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenReturn(emailUpdate);
 
         doThrow(new ResourceNotFoundException("Resource Not Found Exception")).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class), any(AgencyToken.class));
 
@@ -254,7 +254,7 @@ public class AgencyTokenVerificationControllerTest {
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenThrow(new NotEnoughSpaceAvailableException("No space available"));
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenThrow(new NotEnoughSpaceAvailableException("No space available"));
 
         mockMvc.perform(
                 post(VERIFY_TOKEN_URL + CODE)
@@ -282,7 +282,7 @@ public class AgencyTokenVerificationControllerTest {
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenReturn(emailUpdate);
         doThrow(new NullPointerException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class), any(AgencyToken.class));
 
         mockMvc.perform(
@@ -307,7 +307,7 @@ public class AgencyTokenVerificationControllerTest {
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
-        when(emailUpdateService.getEmailUpdateByCode(CODE)).thenThrow(new NotEnoughSpaceAvailableException("No space available"));
+        when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenThrow(new NotEnoughSpaceAvailableException("No space available"));
 
         mockMvc.perform(
                 post(VERIFY_TOKEN_URL + CODE)

@@ -100,12 +100,12 @@ public class ChangeEmailController {
 
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
 
-        if (!emailUpdateService.existsByCode(code)) {
+        if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
             log.error("Unable to verify email update code: {}", code);
             return "redirect:/account/email?invalidCode=true";
         }
 
-        EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateByCode(code);
+        EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
         String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getNewEmail());
 
         log.debug("Attempting update email verification with domain: {}", newDomain);

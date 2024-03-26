@@ -65,11 +65,11 @@ public class EmailUpdateService {
         notifyService.notifyWithPersonalisation(email, updateEmailTemplateId, personalisation);
     }
 
-    public boolean existsByCode(String code) {
+    public boolean isEmailUpdateRequestExistsForCode(String code) {
         return emailUpdateRepository.existsByCode(code);
     }
 
-    public EmailUpdate getEmailUpdateByCode(String code) {
+    public EmailUpdate getEmailUpdateRequestForCode(String code) {
         return emailUpdateRepository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Email update entry not found in database"));
     }
