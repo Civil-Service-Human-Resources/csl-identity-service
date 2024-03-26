@@ -13,6 +13,7 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,23 +27,29 @@ public class EmailUpdateService {
     private final NotifyService notifyService;
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final IdentityService identityService;
-    private final String updateEmailTemplateId;
-    private final String inviteUrlFormat;
+    private final Clock clock;
+    private final int validityInSeconds;
+
+    @Value("${govNotify.template.emailUpdate}")
+    private String updateEmailTemplateId;
+
+    @Value("${emailUpdate.urlFormat}")
+    private String inviteUrlFormat;
 
     public EmailUpdateService(EmailUpdateRepository emailUpdateRepository,
                               EmailUpdateFactory emailUpdateFactory,
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
                               ICivilServantRegistryClient civilServantRegistryClient,
                               IdentityService identityService,
-                              @Value("${govNotify.template.emailUpdate}") String updateEmailTemplateId,
-                              @Value("${emailUpdate.urlFormat}") String inviteUrlFormat) {
+                              Clock clock,
+                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.emailUpdateRepository = emailUpdateRepository;
         this.emailUpdateFactory = emailUpdateFactory;
         this.notifyService = notifyService;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.identityService = identityService;
-        this.updateEmailTemplateId = updateEmailTemplateId;
-        this.inviteUrlFormat = inviteUrlFormat;
+        this.clock = clock;
+        this.validityInSeconds = validityInSeconds;
     }
 
     public void saveEmailUpdateAndNotify(Identity identity, String email) {
