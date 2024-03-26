@@ -17,6 +17,10 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.Clock.systemDefaultZone;
+import static java.time.LocalDateTime.now;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
+
 @Slf4j
 @Service
 @Transactional
@@ -55,14 +59,10 @@ public class EmailUpdateService {
     public void saveEmailUpdateAndNotify(Identity identity, String email) {
         EmailUpdate emailUpdate = emailUpdateFactory.create(identity, email);
         emailUpdateRepository.save(emailUpdate);
-
         String activationUrl = String.format(inviteUrlFormat, emailUpdate.getCode());
         Map<String, String> personalisation = new HashMap<>();
         personalisation.put("activationUrl", activationUrl);
-
         notifyService.notifyWithPersonalisation(email, updateEmailTemplateId, personalisation);
-
-        emailUpdate.getCode();
     }
 
     public boolean existsByCode(String code) {
@@ -87,12 +87,14 @@ public class EmailUpdateService {
 
         String newEmail = emailUpdate.getNewEmail();
 
-        log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
+        log.debug("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
         civilServantRegistryClient.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
 
-        log.info("Deleting emailUpdateObject: {}", emailUpdate);
-        emailUpdateRepository.delete(emailUpdate);
+        emailUpdate.setUpdatedAt(now(systemDefaultZone()));
+        emailUpdate.setEmailUpdateStatus(UPDATED);
+        log.info("Saving the emailUpdate in DB: {}", emailUpdate);
+        emailUpdateRepository.save(emailUpdate);
 
         log.info("Email address {} has been updated to {} successfully", existingEmail, newEmail);
     }

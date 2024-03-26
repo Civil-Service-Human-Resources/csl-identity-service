@@ -14,6 +14,7 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 @JsonDeserialize
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
