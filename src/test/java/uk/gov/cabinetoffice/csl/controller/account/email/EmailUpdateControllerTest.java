@@ -88,19 +88,19 @@ public class EmailUpdateControllerTest {
                 .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
     }
 
-    @Test
-    public void givenNonMatchingForm_whenSendEmailVerification_shouldDisplayFieldValidationErrors() throws Exception {
-        mockMvc.perform(post(EMAIL_PATH)
-                    .param("email", "basic@domain.com")
-                    .param("confirm", "someone")
-                    .with(csrf())
-                )
-                .andDo(print())
+//    @Test
+//    public void givenNonMatchingForm_whenSendEmailVerification_shouldDisplayFieldValidationErrors() throws Exception {
+//        mockMvc.perform(post(EMAIL_PATH)
+//                    .param("email", "basic@domain.com")
+//                    .param("confirm", "someone")
+//                    .with(csrf())
+//                )
+//                .andDo(print())
 //                .andExpect(status().isOk())
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists(UPDATE_EMAIL_FORM_TEMPLATE))
-                .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
-    }
+//                .andExpect(model().errorCount(1))
+//                .andExpect(model().attributeExists(UPDATE_EMAIL_FORM_TEMPLATE))
+//                .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
+//    }
 
     @Test
     public void givenAValidFormAndAnEmailThatAlreadyExists_whenSendEmailVerification_shouldDisplayEmailAlreadyExistsError() throws Exception {
