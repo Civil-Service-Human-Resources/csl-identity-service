@@ -110,13 +110,18 @@ public class EmailUpdateController {
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
-            log.error("Unable to verify email update code: {}", code);
+            log.warn("Email update code does not exist: {}", code);
             return "redirect:/account/email?invalidCode=true";
         }
 
         EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
-        String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getNewEmail());
 
+        if(emailUpdateService.isEmailUpdateExpired(emailUpdate)) {
+            log.info("Email update code expired: {}", code);
+            return "redirect:/account/email?codeExpired=true";
+        }
+
+        String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getNewEmail());
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
         if (isAgencyDomain(newDomain)) {

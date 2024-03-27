@@ -32,6 +32,15 @@
                     <li class="error-message">Your organisation is unable to use this service.  Please contact your line manager.</li>
                 </ul>
             </div>
+            <div th:if="${param.codeExpired}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-5">
+                    Your email update request is expired
+                </h2>
+                <ul class="error-summary-list">
+                    <li class="error-message">Please submit the request again</li>
+                </ul>
+            </div>
             <div th:if="${#fields.hasErrors('${updateEmailForm.*}')}" class="error-summary" role="alert"
                  aria-labelledby="error-summary-heading-example-1" tabindex="-1">
                 <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">
