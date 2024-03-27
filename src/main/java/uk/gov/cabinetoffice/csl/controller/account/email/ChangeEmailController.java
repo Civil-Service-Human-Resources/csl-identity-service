@@ -26,6 +26,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUT
 @Controller
 @RequestMapping("/account/email")
 public class ChangeEmailController {
+    private static final String LPG_UI_SIGNOUT_URL_ATTRIBUTE = "lpgUiSignOutUrl";
     private static final String LPG_UI_URL_ATTRIBUTE = "lpgUiUrl";
     private static final String EMAIL_ATTRIBUTE = "email";
 
@@ -43,6 +44,9 @@ public class ChangeEmailController {
 
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
+
+    @Value("${lpg.uiSignOutUrl}")
+    private String lpgUiSignOutUrl;
 
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
@@ -89,6 +93,7 @@ public class ChangeEmailController {
         emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 newEmail);
 
+        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
         return EMAIL_VERIFICATION_SENT_TEMPLATE;
     }
 
@@ -145,7 +150,7 @@ public class ChangeEmailController {
         String updatedEmail = String.valueOf(modelMap.get(EMAIL_ATTRIBUTE));
 
         model.addAttribute("updatedEmail", updatedEmail);
-        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl + "/sign-out");
+        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
 
         log.debug("Email updated success for: {}", updatedEmail);
         return EMAIL_UPDATED_TEMPLATE;

@@ -11,7 +11,22 @@
             <div class="column-two-thirds">
                 <h2 class="heading-medium">What happens next?</h2>
                 <p>We have sent you an email with a link to your new email address. Please use this to verify changes to your account.</p>
+                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">logout</a> and check your email.</p>
             </div>
+            <details role="group">
+                <summary role="button" aria-controls="details-content-0" aria-expanded="false">
+                    <span class="summary">Haven't received the email?</span>
+                </summary>
+                <div class="panel panel-border-narrow" id="details-content-0" aria-hidden="true">
+                    <div class="text">
+                        <p>Check your spam folder.</p>
+                        <p>If you don't see the email after 30 minutes, you can contact the Learning Platform
+                            for Government helpdesk on <a href="tel:+442036407985">020 3640 7985</a> or by email on
+                            <a href="mailto:support@governmentcampus.co.uk">support@governmentcampus.co.uk</a>.
+                        </p>
+                    </div>
+                </div>
+            </details>
         </div>
     </div>
 </div>
