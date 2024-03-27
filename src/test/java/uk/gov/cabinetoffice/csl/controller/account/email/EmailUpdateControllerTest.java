@@ -88,20 +88,6 @@ public class EmailUpdateControllerTest {
                 .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
     }
 
-//    @Test
-//    public void givenNonMatchingForm_whenSendEmailVerification_shouldDisplayFieldValidationErrors() throws Exception {
-//        mockMvc.perform(post(EMAIL_PATH)
-//                    .param("email", "basic@domain.com")
-//                    .param("confirm", "someone")
-//                    .with(csrf())
-//                )
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(model().errorCount(1))
-//                .andExpect(model().attributeExists(UPDATE_EMAIL_FORM_TEMPLATE))
-//                .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
-//    }
-
     @Test
     public void givenAValidFormAndAnEmailThatAlreadyExists_whenSendEmailVerification_shouldDisplayEmailAlreadyExistsError() throws Exception {
         when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(true);
@@ -135,7 +121,7 @@ public class EmailUpdateControllerTest {
     }
 
     @Test
-    public void givenAValidFormAndEmailDoesntAlreadyExistAndIsAValidEmail_whenSendEmailVerification_shouldDisplayEmailVerificationSentScreen() throws Exception {
+    public void givenAValidFormAndEmailDoesNotAlreadyExistAndIsAValidEmail_whenSendEmailVerification_shouldDisplayEmailVerificationSentScreen() throws Exception {
         when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(false);
         when(identityService.isValidEmailDomain(anyString())).thenReturn(true);
         mockMvc.perform(post(EMAIL_PATH)
@@ -149,6 +135,41 @@ public class EmailUpdateControllerTest {
 
         verify(identityService, times(1)).isIdentityExistsForEmail(eq("basic@domain.com"));
         verify(identityService, times(1)).isValidEmailDomain(eq("basic@domain.com"));
+    }
+
+    @Test
+    public void shouldRedirectToErrorOccurredIfNewEmailIsNotAllowListedAndNotAgency() throws Exception {
+        EmailUpdate emailUpdate = new EmailUpdate();
+        emailUpdate.setCode(VERIFY_CODE);
+        emailUpdate.setNewEmail("basic@domain.com");
+
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
+        when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
+
+        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isDomainInAgency(DOMAIN)).thenReturn(false);
+
+        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
+                        .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE))
+                .andExpect(redirectedUrl("/login"))
+                .andDo(print());
+    }
+
+    @Test
+    public void givenAInvalidCode_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnInvalidCodeError() throws Exception {
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(anyString())).thenReturn(false);
+
+        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
+                        .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/account/email?invalidCode=true"))
+                .andDo(print());
+
+        verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
     }
 
 //    @Test
@@ -196,40 +217,7 @@ public class EmailUpdateControllerTest {
 //                .andDo(print());
 //    }
 
-    @Test
-    public void shouldRedirectToErrorOccurredIfNewEmailIsNotAllowListedAndNotAgency() throws Exception {
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setCode(VERIFY_CODE);
-        emailUpdate.setNewEmail("basic@domain.com");
 
-        when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
-        when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
-
-        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(false);
-        when(identityService.isDomainInAgency(DOMAIN)).thenReturn(false);
-
-        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
-                    .with(csrf())
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE))
-                .andExpect(redirectedUrl("/login"))
-                .andDo(print());
-    }
-
-    @Test
-    public void givenAInvalidCode_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnInvalidCodeError() throws Exception {
-        when(emailUpdateService.isEmailUpdateRequestExistsForCode(anyString())).thenReturn(false);
-
-        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
-                    .with(csrf())
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email?invalidCode=true"))
-                .andDo(print());
-
-        verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
-    }
 
 //    @Test
 //    public void givenAValidCodeAndNonExistentIdentity_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnInvalidEmailError() throws Exception {
