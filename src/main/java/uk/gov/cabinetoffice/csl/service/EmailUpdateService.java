@@ -16,6 +16,7 @@ import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.time.Clock.systemDefaultZone;
@@ -76,12 +77,30 @@ public class EmailUpdateService {
     }
 
     public void saveEmailUpdateAndNotify(Identity identity, String newEmail) {
-        //TODO: If any Pending request is present for the same exising old and new email id
-        // Then check if it is expired by calling isEmailUpdateExpired (it will set it to EXPIRED),
-        // if yes then create a new request
-        // If the existing request not expired then use the same code and update the requestedAt timestamp
-        // Else create the new request
-        EmailUpdate emailUpdate = emailUpdateFactory.create(identity, newEmail);
+        EmailUpdate emailUpdate = null;
+
+        List<EmailUpdate> pendingEmailUpdates = emailUpdateRepository
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                        newEmail, identity.getEmail(), PENDING);
+
+        if(pendingEmailUpdates != null && pendingEmailUpdates.size() > 1) {
+            pendingEmailUpdates.forEach(r -> r.setEmailUpdateStatus(EXPIRED));
+            emailUpdateRepository.saveAll(pendingEmailUpdates);
+        }
+
+        if(pendingEmailUpdates != null && pendingEmailUpdates.size() == 1) {
+            emailUpdate = pendingEmailUpdates.get(0);
+            if(isEmailUpdateExpired(emailUpdate)) {
+                emailUpdate = emailUpdateFactory.create(identity, newEmail);
+            } else {
+                emailUpdate.setRequestedAt(now(systemDefaultZone()));
+            }
+        }
+
+        if(emailUpdate == null) {
+            emailUpdate = emailUpdateFactory.create(identity, newEmail);
+        }
+
         emailUpdateRepository.save(emailUpdate);
         String activationUrl = String.format(inviteUrlFormat, emailUpdate.getCode());
         Map<String, String> personalisation = new HashMap<>();

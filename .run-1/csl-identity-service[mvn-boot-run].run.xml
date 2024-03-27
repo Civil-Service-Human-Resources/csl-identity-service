@@ -24,8 +24,10 @@
               <entry key="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
               <entry key="DATASOURCE_USERNAME" value="root" />
               <entry key="DURATION_AFTER_REREG_ALLOWED_SECONDS" value="86400" />
+              <entry key="EMAIL_UPDATE_VALIDITY_SECONDS" value="86400" />
               <entry key="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
               <entry key="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
+              <entry key="GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID" value="f4c2ece1-5159-4736-92cb-4fe0df719308" />
               <entry key="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
               <entry key="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
               <entry key="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
