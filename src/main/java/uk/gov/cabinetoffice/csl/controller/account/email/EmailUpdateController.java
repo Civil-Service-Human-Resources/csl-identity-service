@@ -82,13 +82,13 @@ public class EmailUpdateController {
         log.info("Change email requested, sending email to {} for verification", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
-            log.error("Email already in use: {}", newEmail);
+            log.warn("Email already in use: {}", newEmail);
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
         if (!identityService.isValidEmailDomain(newEmail)) {
-            log.error("Email is neither allowlisted or for an agency token: {}", newEmail);
+            log.warn("Email is neither allow listed or for an agency token: {}", newEmail);
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
@@ -130,14 +130,14 @@ public class EmailUpdateController {
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
         } else if (isAllowListed(newDomain)) {
-            log.debug("New email is allowlisted: oldEmail = {}, newEmail = {}", identity.getEmail(),
+            log.debug("New email is allow listed: oldEmail = {}, newEmail = {}", identity.getEmail(),
                     emailUpdate.getNewEmail());
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (ResourceNotFoundException e) {
-                log.error("Unable to update email, redirecting to enter token screen: {} {}", code, identity);
+                log.warn("Unable to update email, redirecting to enter token screen: {} {}", code, identity);
                 return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
@@ -145,7 +145,7 @@ public class EmailUpdateController {
                 return REDIRECT_LOGIN;
             }
         } else {
-            log.error("User trying to verify change email where new email is not allowlisted or agency: " +
+            log.warn("User trying to verify change email where new email is not allow listed or agency: " +
                     "oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getNewEmail());
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
 
