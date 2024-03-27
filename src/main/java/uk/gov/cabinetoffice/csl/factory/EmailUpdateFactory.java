@@ -10,10 +10,10 @@ import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.PENDING;
 
 @Component
 public class EmailUpdateFactory {
-    public EmailUpdate create(Identity identity, String email) {
+    public EmailUpdate create(Identity identity, String newEmail) {
         EmailUpdate emailUpdate = new EmailUpdate();
         emailUpdate.setPreviousEmail(identity.getEmail());
-        emailUpdate.setNewEmail(email);
+        emailUpdate.setNewEmail(newEmail);
         emailUpdate.setRequestedAt(now(systemDefaultZone()));
         emailUpdate.setEmailUpdateStatus(PENDING);
         emailUpdate.setIdentity(identity);

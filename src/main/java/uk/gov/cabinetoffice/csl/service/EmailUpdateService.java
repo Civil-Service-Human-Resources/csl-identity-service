@@ -14,12 +14,14 @@ import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.time.Clock.systemDefaultZone;
 import static java.time.LocalDateTime.now;
-import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
+import static java.time.temporal.ChronoUnit.MILLIS;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.*;
 
 @Slf4j
 @Service
@@ -56,13 +58,35 @@ public class EmailUpdateService {
         this.validityInSeconds = validityInSeconds;
     }
 
-    public void saveEmailUpdateAndNotify(Identity identity, String email) {
-        EmailUpdate emailUpdate = emailUpdateFactory.create(identity, email);
+    public boolean isEmailUpdateExpired(EmailUpdate emailUpdate) {
+        if(emailUpdate.getEmailUpdateStatus().equals(EXPIRED) ||
+                emailUpdate.getEmailUpdateStatus().equals(UPDATED)) {
+            return true;
+        }
+
+        if(emailUpdate.getEmailUpdateStatus().equals(PENDING)) {
+            long diffInMs = MILLIS.between(emailUpdate.getRequestedAt(), LocalDateTime.now(clock));
+            if(diffInMs > validityInSeconds * 1000L) {
+                emailUpdate.setEmailUpdateStatus(EXPIRED);
+                emailUpdateRepository.save(emailUpdate);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void saveEmailUpdateAndNotify(Identity identity, String newEmail) {
+        //TODO: If any Pending request is present for the same exising old and new email id
+        // Then check if it is expired by calling isEmailUpdateExpired (it will set it to EXPIRED),
+        // if yes then create a new request
+        // If the existing request not expired then use the same code and update the requestedAt timestamp
+        // Else create the new request
+        EmailUpdate emailUpdate = emailUpdateFactory.create(identity, newEmail);
         emailUpdateRepository.save(emailUpdate);
         String activationUrl = String.format(inviteUrlFormat, emailUpdate.getCode());
         Map<String, String> personalisation = new HashMap<>();
         personalisation.put("activationUrl", activationUrl);
-        notifyService.notifyWithPersonalisation(email, updateEmailTemplateId, personalisation);
+        notifyService.notifyWithPersonalisation(newEmail, updateEmailTemplateId, personalisation);
     }
 
     public boolean isEmailUpdateRequestExistsForCode(String code) {
