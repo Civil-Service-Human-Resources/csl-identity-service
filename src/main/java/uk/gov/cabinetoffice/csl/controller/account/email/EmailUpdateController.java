@@ -25,7 +25,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUT
 @Slf4j
 @Controller
 @RequestMapping("/account/email")
-public class ChangeEmailController {
+public class EmailUpdateController {
     private static final String LPG_UI_SIGNOUT_URL_ATTRIBUTE = "lpgUiSignOutUrl";
     private static final String LPG_UI_URL_ATTRIBUTE = "lpgUiUrl";
     private static final String EMAIL_ATTRIBUTE = "email";
@@ -52,7 +52,7 @@ public class ChangeEmailController {
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
 
-    public ChangeEmailController(IdentityService identityService,
+    public EmailUpdateController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
                                  Utils utils) {
         this.identityService = identityService;
