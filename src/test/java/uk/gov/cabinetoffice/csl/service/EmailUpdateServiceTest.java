@@ -59,9 +59,7 @@ public class EmailUpdateServiceTest {
     @Test
     public void givenAValidCodeForIdentity_whenVerifyCode_thenReturnsTrue() {
         when(emailUpdateRepository.existsByCode(anyString())).thenReturn(true);
-
         boolean actual = emailUpdateService.isEmailUpdateRequestExistsForCode("co");
-
         assertTrue(actual);
         verify(emailUpdateRepository, times(1)).existsByCode(eq("co"));
     }
@@ -69,9 +67,7 @@ public class EmailUpdateServiceTest {
     @Test
     public void givenAInvalidCodeForIdentity_whenVerifyCode_thenReturnsFalse() {
         when(emailUpdateRepository.existsByCode(anyString())).thenReturn(false);
-
         boolean actual = emailUpdateService.isEmailUpdateRequestExistsForCode("co");
-
         assertFalse(actual);
         verify(emailUpdateRepository, times(1)).existsByCode(eq("co"));
     }
@@ -87,7 +83,6 @@ public class EmailUpdateServiceTest {
         emailUpdate.setIdentity(identity);
 
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
-
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), isNull());
 
         emailUpdateService.updateEmailAddress(emailUpdate);
@@ -114,7 +109,6 @@ public class EmailUpdateServiceTest {
         agencyToken.setUid(UID);
 
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
-
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), eq(agencyToken));
 
         emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
@@ -130,9 +124,7 @@ public class EmailUpdateServiceTest {
     @Test
     public void shouldGetEmailUpdate() {
         EmailUpdate emailUpdate = new EmailUpdate();
-
         when(emailUpdateRepository.findByCode(anyString())).thenReturn(Optional.of(emailUpdate));
-
         assertEquals(emailUpdateService.getEmailUpdateRequestForCode(CODE), emailUpdate);
     }
 }
