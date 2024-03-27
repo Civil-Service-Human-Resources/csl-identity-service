@@ -15,6 +15,8 @@ import uk.gov.cabinetoffice.csl.service.*;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
+import static java.time.Clock.systemDefaultZone;
+import static java.time.LocalDateTime.now;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.PENDING;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
 
 @SpringBootTest
@@ -175,26 +178,23 @@ public class EmailUpdateControllerTest {
         verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
     }
 
-//    @Test
-//    public void givenAValidCode_whenUpdateEmailExpired_shouldRedirectToUpdateEmailPageWithCodeExpiredError() throws Exception {
-//        EmailUpdate emailUpdate = createEmailUpdate();
-//        EmailUpdate emailUpdate = new EmailUpdate();
-//        emailUpdate.setCode(VERIFY_CODE);
-//        emailUpdate.setNewEmail(NEW_EMAIL);
-//
-//        when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
-//        when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
-//        when(emailUpdateService.isEmailUpdateExpired(emailUpdate)).thenReturn(false);
-//
-//        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
-//                    .with(csrf())
-//                )
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl("/account/email?codeExpired=true"))
-//                .andDo(print());
-//
-//        verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
-//    }
+    @Test
+    public void givenAValidCode_whenUpdateEmailExpired_shouldRedirectToUpdateEmailPageWithCodeExpiredError() throws Exception {
+        EmailUpdate emailUpdate = createEmailUpdate();
+
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
+        when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
+        when(emailUpdateService.isEmailUpdateExpired(emailUpdate)).thenReturn(true);
+
+        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
+                    .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/account/email?codeExpired=true"))
+                .andDo(print());
+
+        verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
+    }
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsAllowListedButNotAgency() throws Exception {
@@ -298,13 +298,13 @@ public class EmailUpdateControllerTest {
                 .andExpect(view().name("account/emailUpdated"));
     }
 
-//    private EmailUpdate createEmailUpdate() {
-//        EmailUpdate emailUpdate = new EmailUpdate();
-//        emailUpdate.setCode(VERIFY_CODE);
-//        emailUpdate.setPreviousEmail(PREVIOUS_EMAIL);
-//        emailUpdate.setNewEmail(NEW_EMAIL);
-//        emailUpdate.setRequestedAt(now(systemDefaultZone()));
-//        emailUpdate.setEmailUpdateStatus(PENDING);
-//        return emailUpdate;
-//    }
+    private EmailUpdate createEmailUpdate() {
+        EmailUpdate emailUpdate = new EmailUpdate();
+        emailUpdate.setCode(VERIFY_CODE);
+        emailUpdate.setPreviousEmail(PREVIOUS_EMAIL);
+        emailUpdate.setNewEmail(NEW_EMAIL);
+        emailUpdate.setRequestedAt(now(systemDefaultZone()));
+        emailUpdate.setEmailUpdateStatus(PENDING);
+        return emailUpdate;
+    }
 }
