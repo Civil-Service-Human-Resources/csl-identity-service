@@ -145,9 +145,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToErrorOccurredIfNewEmailIsNotAllowListedAndNotAgency() throws Exception {
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setCode(VERIFY_CODE);
-        emailUpdate.setNewEmail(NEW_EMAIL);
+        EmailUpdate emailUpdate = createEmailUpdate();
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -198,9 +196,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsAllowListedButNotAgency() throws Exception {
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setCode(VERIFY_CODE);
-        emailUpdate.setNewEmail(NEW_EMAIL);
+        EmailUpdate emailUpdate = createEmailUpdate();
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -220,9 +216,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsNotAllowListedButIsAgency() throws Exception {
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setCode(VERIFY_CODE);
-        emailUpdate.setNewEmail(NEW_EMAIL);
+        EmailUpdate emailUpdate = createEmailUpdate();
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -243,9 +237,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void givenAValidCodeAndNonExistentIdentity_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnInvalidEmailError() throws Exception {
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setCode(VERIFY_CODE);
-        emailUpdate.setNewEmail(NEW_EMAIL);
+        EmailUpdate emailUpdate = createEmailUpdate();
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -266,9 +258,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void givenAValidCodeAndATechnicalErrorWhenUpdating_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnErrorOccurredError() throws Exception {
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setCode(VERIFY_CODE);
-        emailUpdate.setNewEmail(NEW_EMAIL);
+        EmailUpdate emailUpdate = createEmailUpdate();
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
