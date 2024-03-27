@@ -51,13 +51,16 @@ public class EmailUpdateController {
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
+    private final int validityInSeconds;
 
     public EmailUpdateController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
-                                 Utils utils) {
+                                 Utils utils,
+                                 @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
         this.utils = utils;
+        this.validityInSeconds = validityInSeconds;
     }
 
     @GetMapping
@@ -93,6 +96,7 @@ public class EmailUpdateController {
         emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 newEmail);
 
+        model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
         model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
         return EMAIL_VERIFICATION_SENT_TEMPLATE;
     }

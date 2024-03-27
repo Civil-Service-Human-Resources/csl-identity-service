@@ -10,7 +10,9 @@
         <div class="grid-row push-bottom">
             <div class="column-two-thirds">
                 <h2 class="heading-medium">What happens next?</h2>
-                <p>We have sent you an email with a link to your new email address. Please use this to verify changes to your account.</p>
+                <p>We have sent you an email with a link to your new email address.</p>
+                <p>Please use this to verify changes to your account.</p>
+                <p>The link will expire in <span th:text="${resetValidity}"></span></p>
                 <p>Please click here to <a th:href="${lpgUiSignOutUrl}">logout</a> and check your email.</p>
             </div>
             <details role="group">
