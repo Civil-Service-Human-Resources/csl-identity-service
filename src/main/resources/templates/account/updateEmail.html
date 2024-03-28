@@ -4,7 +4,7 @@
 <div class="container">
     <div class="grid-row">
         <div class="column-two-thirds">
-            <a th:href="${lpgUiUrl}/profile" class="link-back">Back</a>
+            <a th:href="${lpgUiUrl} + '/profile'" class="link-back">Back</a>
             <div th:if="${param.emailAlreadyTaken}" class="error-summary" role="alert"
                  aria-labelledby="error-summary-heading-example-1" tabindex="-1">
                 <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">
