@@ -8,7 +8,7 @@ import org.springframework.security.authentication.AccountStatusException;
  * Makes no assertion whether the credentials were valid or not.
  */
 public class AccountBlockedException extends AccountStatusException {
-    public AccountBlockedException(String msg) {
-        super(msg);
+    public AccountBlockedException(String message) {
+        super(message);
     }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class IdentityAgencyDTO {
+public class IdentityAgencyToken {
     private String uid;
     private String agencyTokenUid;
 }

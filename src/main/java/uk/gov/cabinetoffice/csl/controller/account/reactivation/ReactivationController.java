@@ -12,7 +12,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
-import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
@@ -50,8 +49,6 @@ public class ReactivationController {
 
     private final IdentityService identityService;
 
-    private final AgencyTokenService agencyTokenService;
-
     private final NotifyService notifyService;
 
     private final Utils utils;
@@ -73,12 +70,10 @@ public class ReactivationController {
 
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
-                                  AgencyTokenService agencyTokenService,
                                   NotifyService notifyService,
                                   Utils utils) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
-        this.agencyTokenService = agencyTokenService;
         this.notifyService = notifyService;
         this.utils = utils;
     }
@@ -141,7 +136,7 @@ public class ReactivationController {
 
             String domain = utils.getDomainFromEmailAddress(reactivation.getEmail());
             log.debug("Reactivating account using Reactivation: {}", reactivation);
-            if (agencyTokenService.isDomainInAgencyToken(domain)) {
+            if (identityService.isDomainInAgency(domain)) {
                 log.info("Account reactivation is agency, requires token validation for Reactivation: {}",
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;

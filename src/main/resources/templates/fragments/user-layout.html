@@ -1,6 +1,4 @@
-<html xmlns:th="https://www.thymeleaf.org" th:fragment="page(title,content)"
-      lang="en">
-
+<html xmlns:th="https://www.thymeleaf.org" th:fragment="page(title,content)" lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,17 +7,14 @@
     <link rel="stylesheet" type="text/css" th:href="${#strings.isEmpty(@assetCdnService.getAssetCdn())} ? '/assets/css/main.css' : ${@assetCdnService.getAssetCdn()} + '/assets/css/main.css'" />
     <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
 </head>
-
 <body>
-<a href="#content" class="govuk-skip-link">Skip to main content</a>
-<header th:replace="~{fragments/user-header :: div}"> </header>
+    <a href="#content" class="govuk-skip-link">Skip to main content</a>
+    <header th:replace="~{fragments/user-header :: div}"> </header>
     <div id="content" class="col  align-self-center">
         <th:block th:insert="${content}" />
     </div>
     <footer th:replace="~{fragments/user-footer :: footer}"> </footer>
-
     <script>document.body.className = document.body.className.replace('', 'js-enabled');</script>
-
 </body>
 </html>
 

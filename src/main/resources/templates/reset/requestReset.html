@@ -1,45 +1,44 @@
 <page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
-    <title>Reset your password - Civil Service Learning</title>
-
-    <content>
-        <div class="container">
-            <div class="grid-row">
-                <div class="column-two-thirds">
-                    <div th:if="${param.error}" class="error-summary" role="alert"
-                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
-                        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">
-                            There was a problem with your input
-                        </h2>
-                        <ul class="error-summary-list">
-                            <li th:if="${param.error}">
-                                <a href="#email" th:errors="${param.error}">Email address is invalid</a></li>
-                        </ul>
-                    </div>
-                    <div th:if="${userMessage}" class="error-summary" role="alert"
-                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
-                        <pre><h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1" th:text="${userMessage}"></h2></pre>
-                    </div>
-                    <h1 class="heading-xlarge heading heading--page-heading">
-                        <span class="heading-secondary">Reset your password</span>
-                        Enter your email
-                    </h1>
-                    <h3 th:text="${status}"></h3>
-                    <form autocomplete="off" action="#" th:action="@{/reset}" method="POST" class="push-bottom">
-                        <div class="form-group">
-                            <label for="email" class="form-label">
-                                Email address
-                            </label>
-                            <input class="form-control form-control-2-3" id="email" name="email"
-                                   type="email" autocomplete="off">
-                        </div>
-                        <div>
-                            <input type="submit" class="button" value="Continue">
-                        </div>
-                    </form>
-                    <a href="/login">Cancel</a>
-                    <p></p>
-                </div>
+<title>Reset your password - Civil Service Learning</title>
+<content>
+<div class="container">
+    <div class="grid-row">
+        <div class="column-two-thirds">
+            <div th:if="${param.error}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">
+                    There was a problem with your input
+                </h2>
+                <ul class="error-summary-list">
+                    <li th:if="${param.error}">
+                        <a href="#email" th:errors="${param.error}">Email address is invalid</a>
+                    </li>
+                </ul>
             </div>
+            <div th:if="${userMessage}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <pre>
+                    <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1" th:text="${userMessage}"></h2>
+                </pre>
+            </div>
+            <h1 class="heading-xlarge heading heading--page-heading">
+                <span class="heading-secondary">Reset your password</span>
+                Enter your email
+            </h1>
+            <h3 th:text="${status}"></h3>
+            <form autocomplete="off" action="#" th:action="@{/reset}" method="POST" class="push-bottom">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email address</label>
+                    <input class="form-control form-control-2-3" id="email" name="email" type="email" autocomplete="off">
+                </div>
+                <div>
+                    <input type="submit" class="button" value="Continue">
+                </div>
+            </form>
+            <a href="/login">Cancel</a>
+            <p></p>
         </div>
-    </content>
+    </div>
+</div>
+</content>
 </page>

@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
-import uk.gov.cabinetoffice.csl.service.AgencyTokenService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
@@ -43,7 +42,6 @@ public class ReactivationControllerTest {
 
     private static final String CODE = "abc123";
     private static final String EMAIL = "test@example.com";
-    private static final String DOMAIN = "example.com";
     private final int reactivationValidityInSeconds = 86400;
 
     @Autowired
@@ -54,9 +52,6 @@ public class ReactivationControllerTest {
 
     @MockBean
     private IdentityService identityService;
-
-    @MockBean
-    private AgencyTokenService agencyTokenService;
 
     @MockBean
     private NotifyService notifyService;
@@ -94,7 +89,7 @@ public class ReactivationControllerTest {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
 
         when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
+        when(identityService.isDomainInAgency(utils.getDomainFromEmailAddress(EMAIL))).thenReturn(true);
 
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))

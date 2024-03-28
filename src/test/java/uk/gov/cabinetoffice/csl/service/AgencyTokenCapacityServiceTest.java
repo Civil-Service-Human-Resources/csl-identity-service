@@ -5,7 +5,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
-import uk.gov.cabinetoffice.csl.dto.AgencyTokenCapacityUsedDTO;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 import java.util.UUID;
@@ -28,7 +27,7 @@ public class AgencyTokenCapacityServiceTest {
     public void shouldReturnTrueIfManySpacesAvailable() {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
-        agencyToken.setCapacity(100);
+        agencyToken.setCapacity(100L);
 
         when(identityRepository.countByAgencyTokenUid(UID)).thenReturn(1L);
 
@@ -39,7 +38,7 @@ public class AgencyTokenCapacityServiceTest {
     public void shouldReturnTrueIfOneSpaceAvailable() {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
-        agencyToken.setCapacity(100);
+        agencyToken.setCapacity(100L);
 
         when(identityRepository.countByAgencyTokenUid(UID)).thenReturn(99L);
 
@@ -50,7 +49,7 @@ public class AgencyTokenCapacityServiceTest {
     public void shouldReturnFalseIfNoSpaceAvailable() {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
-        agencyToken.setCapacity(100);
+        agencyToken.setCapacity(100L);
 
         when(identityRepository.countByAgencyTokenUid(UID)).thenReturn(100L);
 
@@ -61,7 +60,7 @@ public class AgencyTokenCapacityServiceTest {
     public void shouldReturnFalseIfNoSpaceAvailableWhereCapacityReduced() {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
-        agencyToken.setCapacity(100);
+        agencyToken.setCapacity(100L);
 
         when(identityRepository.countByAgencyTokenUid(UID)).thenReturn(101L);
 
@@ -70,7 +69,7 @@ public class AgencyTokenCapacityServiceTest {
 
     @Test
     public void shouldReturnSpacesUsedByAgencyToken() {
-        AgencyTokenCapacityUsedDTO expected = new AgencyTokenCapacityUsedDTO(100L);
+        AgencyToken expected = new AgencyToken(100L);
 
         when(identityRepository.countByAgencyTokenUid(UID)).thenReturn(100L);
 
