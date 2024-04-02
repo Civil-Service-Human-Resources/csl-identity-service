@@ -103,7 +103,7 @@ public class EmailUpdateControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email?emailAlreadyTaken=true"));
+                .andExpect(redirectedUrl("/account/email/update/error?emailAlreadyTaken=true"));
 
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
         verify(identityService, never()).isValidEmailDomain(anyString());
@@ -119,7 +119,7 @@ public class EmailUpdateControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email?notValidEmailDomain=true"));
+                .andExpect(redirectedUrl("/account/email/update/error?notValidEmailDomain=true"));
 
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
         verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
@@ -169,7 +169,7 @@ public class EmailUpdateControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email?invalidCode=true"))
+                .andExpect(redirectedUrl("/account/email/update/error?invalidCode=true"))
                 .andDo(print());
 
         verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
@@ -188,7 +188,7 @@ public class EmailUpdateControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email?codeExpired=true"))
+                .andExpect(redirectedUrl("/account/email/update/error?codeExpired=true"))
                 .andDo(print());
 
         verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
@@ -253,7 +253,7 @@ public class EmailUpdateControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email?invalidEmail=true"))
+                .andExpect(redirectedUrl("/account/email/update/error?invalidEmail=true"))
                 .andDo(print());
 
         verify(emailUpdateService, never()).updateEmailAddress(eq(emailUpdate));

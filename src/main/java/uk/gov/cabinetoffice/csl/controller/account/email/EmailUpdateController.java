@@ -32,14 +32,15 @@ public class EmailUpdateController {
 
     private static final String UPDATE_EMAIL_FORM = "updateEmailForm";
     private static final String UPDATE_EMAIL_TEMPLATE = "account/updateEmail";
+    private static final String UPDATE_EMAIL_ERROR_TEMPLATE = "account/updateEmailError";
     private static final String EMAIL_UPDATED_TEMPLATE = "account/emailUpdated";
     private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "account/emailVerificationSent";
 
-    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE = "redirect:/account/email?invalidEmail=true";
-    private static final String REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE = "redirect:/account/email?emailAlreadyTaken=true";
-    private static final String REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE = "redirect:/account/email?notValidEmailDomain=true";
-    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE = "redirect:/account/email?invalidCode=true";
-    private static final String REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE = "redirect:/account/email?codeExpired=true";
+    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE = "redirect:/account/email/update/error?invalidEmail=true";
+    private static final String REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE = "redirect:/account/email/update/error?emailAlreadyTaken=true";
+    private static final String REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE = "redirect:/account/email/update/error?notValidEmailDomain=true";
+    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE = "redirect:/account/email/update/error?invalidCode=true";
+    private static final String REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE = "redirect:/account/email/update/error?codeExpired=true";
 
     private static final String REDIRECT_LOGIN = "redirect:/login";
 
@@ -90,13 +91,11 @@ public class EmailUpdateController {
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
             log.warn("Email already in use: {}", newEmail);
-            model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
         if (!identityService.isValidEmailDomain(newEmail)) {
             log.warn("Email is neither allow listed or for an agency token: {}", newEmail);
-            model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
 
@@ -172,6 +171,12 @@ public class EmailUpdateController {
 
         log.debug("Email updated success for: {}", updatedEmail);
         return EMAIL_UPDATED_TEMPLATE;
+    }
+
+    @GetMapping("/update/error")
+    public String emailUpdateError(Model model) {
+        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
+        return UPDATE_EMAIL_ERROR_TEMPLATE;
     }
 
     private boolean isAllowListed(String newDomain) {
