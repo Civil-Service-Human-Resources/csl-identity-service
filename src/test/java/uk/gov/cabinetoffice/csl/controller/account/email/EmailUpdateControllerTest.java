@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
-import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.*;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
@@ -149,7 +148,7 @@ public class EmailUpdateControllerTest {
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
-
+        when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
         when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(false);
         when(identityService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
@@ -182,6 +181,7 @@ public class EmailUpdateControllerTest {
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
+        when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
         when(emailUpdateService.isEmailUpdateExpired(emailUpdate)).thenReturn(true);
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
@@ -200,7 +200,7 @@ public class EmailUpdateControllerTest {
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
-
+        when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
         when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(true);
         when(identityService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
@@ -212,6 +212,8 @@ public class EmailUpdateControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/account/email/updated"))
                 .andDo(print());
+
+        verify(emailUpdateService, times(1)).updateEmailAddress(eq(emailUpdate));
     }
 
     @Test
@@ -220,7 +222,7 @@ public class EmailUpdateControllerTest {
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
-
+        when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
         when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(false);
         when(identityService.isDomainInAgency(DOMAIN)).thenReturn(true);
 
@@ -233,6 +235,8 @@ public class EmailUpdateControllerTest {
                 .andExpect(flash().attribute("email", NEW_EMAIL))
                 .andExpect(redirectedUrl(VERIFY_EMAIL_AGENCY_PATH + VERIFY_CODE))
                 .andDo(print());
+
+        verify(emailUpdateService, never()).updateEmailAddress(eq(emailUpdate));
     }
 
     @Test
@@ -241,10 +245,9 @@ public class EmailUpdateControllerTest {
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
+        when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(false);
         when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(true);
         when(identityService.isDomainInAgency(DOMAIN)).thenReturn(false);
-
-        doThrow(new ResourceNotFoundException("Not found")).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
                     .with(csrf())
@@ -253,7 +256,7 @@ public class EmailUpdateControllerTest {
                 .andExpect(redirectedUrl("/account/email?invalidEmail=true"))
                 .andDo(print());
 
-        verify(emailUpdateService, times(1)).updateEmailAddress(eq(emailUpdate));
+        verify(emailUpdateService, never()).updateEmailAddress(eq(emailUpdate));
     }
 
     @Test
@@ -262,7 +265,7 @@ public class EmailUpdateControllerTest {
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
-
+        when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
         when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(true);
         when(identityService.isDomainInAgency(DOMAIN)).thenReturn(false);
 

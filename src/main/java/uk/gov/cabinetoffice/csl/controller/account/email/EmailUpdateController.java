@@ -10,9 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
-import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.util.Utils;
@@ -35,10 +33,14 @@ public class EmailUpdateController {
     private static final String EMAIL_UPDATED_TEMPLATE = "account/emailUpdated";
     private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "account/emailVerificationSent";
 
+    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE = "redirect:/account/email?invalidEmail=true";
     private static final String REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE = "redirect:/account/email?emailAlreadyTaken=true";
     private static final String REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE = "redirect:/account/email?notValidEmailDomain=true";
+    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE = "redirect:/account/email?invalidCode=true";
+    private static final String REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE = "redirect:/account/email?codeExpired=true";
+
     private static final String REDIRECT_LOGIN = "redirect:/login";
-    private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE = "redirect:/account/email?invalidEmail=true";
+
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
     private static final String REDIRECT_ACCOUNT_ENTER_TOKEN = "redirect:/account/verify/agency/";
 
@@ -103,52 +105,53 @@ public class EmailUpdateController {
 
     @GetMapping("/verify/{code}")
     public String verifyEmail(@PathVariable String code,
-                              Authentication authentication,
                               RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
 
-        Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
-
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
             log.warn("Email update code does not exist: {}", code);
-            return "redirect:/account/email?invalidCode=true";
+            return REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE;
         }
 
         EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
+        String oldEmail = emailUpdate.getPreviousEmail();
+        String newEmail = emailUpdate.getNewEmail();
 
-        if(emailUpdateService.isEmailUpdateExpired(emailUpdate)) {
-            log.info("Email update code expired: {}", code);
-            return "redirect:/account/email?codeExpired=true";
+        if(!identityService.isIdentityExistsForEmail(oldEmail)) {
+            log.info("Unable to update email for the code {}. identity not found for email {}", code, oldEmail);
+            return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
         }
 
-        String newDomain = utils.getDomainFromEmailAddress(emailUpdate.getNewEmail());
+        if(emailUpdateService.isEmailUpdateExpired(emailUpdate)) {
+            log.info("Email update code expired: {} oldEmail {}, newEmail: {}", code, oldEmail, newEmail);
+            return REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE;
+        }
+
+        String newDomain = utils.getDomainFromEmailAddress(newEmail);
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
         if (isAgencyDomain(newDomain)) {
-            log.debug("New email is agency: oldEmail = {}, newEmail = {}", identity.getEmail(),
-                    emailUpdate.getNewEmail());
-            redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
+            log.debug("New email is agency: oldEmail = {}, newEmail = {}", oldEmail,
+                    newEmail);
+            redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
         } else if (isAllowListed(newDomain)) {
-            log.debug("New email is allow listed: oldEmail = {}, newEmail = {}", identity.getEmail(),
-                    emailUpdate.getNewEmail());
+            log.debug("New email is allow listed: oldEmail = {}, newEmail = {}", oldEmail,
+                    newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
-                redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
+                redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
-            } catch (ResourceNotFoundException e) {
-                log.warn("Unable to update email, redirecting to enter token screen: {} {}", code, identity);
-                return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
-                log.error("Unable to update email: {} {}. {}", code, identity, e.toString());
+                log.error("Unable to update email oldEmail = {}, newEmail = {}. Exception: {}", oldEmail, newEmail
+                        , e.toString());
                 return REDIRECT_LOGIN;
             }
         } else {
             log.warn("User trying to verify change email where new email is not allow listed or agency: " +
-                    "oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getNewEmail());
+                    "oldEmail = {}, newEmail = {}", oldEmail, newEmail);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
-
             return REDIRECT_LOGIN;
         }
     }
