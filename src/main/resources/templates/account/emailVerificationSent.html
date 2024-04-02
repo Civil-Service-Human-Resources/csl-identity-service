@@ -13,10 +13,10 @@
                 <p>We have sent you an email with a link to your new email address.</p>
                 <p>Please click on the link in the email to verify changes to your account.</p>
                 <p>The link will expire in <span th:text="${resetValidity}"></span></p>
-                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">logout</a> and check your email.</p>
+                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">Sign out</a> and check your email.</p>
             </div>
-            <div id="counter">10</div>
-            <div hidden id="logoutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
+            <div id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
+            <div hidden id="signOutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">
                     <span class="summary">Haven't received the email?</span>
@@ -36,11 +36,11 @@
 </div>
 <script th:inline="javascript">
     setInterval(function() {
-        var div = document.querySelector("#counter");
+        var div = document.querySelector("#signOutTimerInSeconds");
         var count = div.textContent * 1 - 1;
         div.textContent = count;
         if (count <= 0) {
-            window.location.replace(document.querySelector("#logoutLink").textContent);
+            window.location.replace(document.querySelector("#signOutLink").textContent);
         }
     }, 1000);
 </script>

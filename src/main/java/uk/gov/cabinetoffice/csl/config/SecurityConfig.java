@@ -85,6 +85,7 @@ public class SecurityConfig {
 					"/error",
 					"/signup/**", "/login", "/reset/**",
 					"/account/reactivate/**","/account/verify/agency/**",
+					"/account/email/verify/**",
 					actuatorBasePath + "/**").permitAll()
 				.anyRequest().authenticated()
 			)
