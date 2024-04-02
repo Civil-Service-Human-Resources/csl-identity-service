@@ -40,7 +40,7 @@
         var count = div.textContent * 1 - 1;
         div.textContent = count;
         if (count <= 0) {
-            window.location.replace(document.querySelector("#logoutLink"));
+            window.location.replace(document.querySelector("#logoutLink").textContent);
         }
     }, 1000);
 </script>
