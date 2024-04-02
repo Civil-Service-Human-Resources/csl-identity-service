@@ -15,7 +15,7 @@
                 <p>The link will expire in <span th:text="${resetValidity}"></span></p>
                 <p>Please click here to <a th:href="${lpgUiSignOutUrl}">Sign out</a> and check your email.</p>
             </div>
-            <div id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
+            <div hidden id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
             <div hidden id="signOutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">
@@ -38,7 +38,7 @@
     setInterval(function() {
         var div = document.querySelector("#signOutTimerInSeconds");
         var count = div.textContent * 1 - 1;
-        div.textContent = count;
+        // div.textContent = count;
         if (count <= 0) {
             window.location.replace(document.querySelector("#signOutLink").textContent);
         }
