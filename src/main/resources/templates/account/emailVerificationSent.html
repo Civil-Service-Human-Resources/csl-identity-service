@@ -38,7 +38,7 @@
     setInterval(function() {
         var div = document.querySelector("#signOutTimerInSeconds");
         var count = div.textContent * 1 - 1;
-        // div.textContent = count;
+        div.textContent = count;
         if (count <= 0) {
             window.location.replace(document.querySelector("#signOutLink").textContent);
         }
