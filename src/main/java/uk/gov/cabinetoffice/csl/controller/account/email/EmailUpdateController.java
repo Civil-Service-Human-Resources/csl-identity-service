@@ -83,6 +83,7 @@ public class EmailUpdateController {
     public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form,
                                         BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return UPDATE_EMAIL_TEMPLATE;
         }
