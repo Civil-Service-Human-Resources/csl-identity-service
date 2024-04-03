@@ -36,7 +36,6 @@ public class InviteRepositoryTest {
         Invite actualInvite = inviteRepository.findByForEmailIgnoreCase(INVITE_FOR_EMAIL);
         assertThat(actualInvite.getCode(), equalTo(INVITE_CODE));
         assertThat(actualInvite.getForEmail(), equalTo(INVITE_FOR_EMAIL));
-
     }
 
     @Test

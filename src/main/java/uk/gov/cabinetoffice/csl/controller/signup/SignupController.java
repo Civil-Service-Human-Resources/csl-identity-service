@@ -13,8 +13,8 @@ import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
-import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
-import uk.gov.cabinetoffice.csl.dto.TokenRequest;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
+import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
@@ -39,7 +39,7 @@ public class SignupController {
 
     private static final String INVITE_MODEL = "invite";
     private static final String ORGANISATIONS_ATTRIBUTE = "organisations";
-    private static final String TOKEN_INFO_FLASH_ATTRIBUTE = "tokenRequest";
+    private static final String TOKEN_INFO_FLASH_ATTRIBUTE = "agencyToken";
     private static final String REQUEST_INVITE_FORM = "requestInviteForm";
     private static final String SIGNUP_FORM = "signupForm";
     private static final String ENTER_TOKEN_FORM = "enterTokenForm";
@@ -132,7 +132,7 @@ public class SignupController {
 
         final String domain = utils.getDomainFromEmailAddress(email);
 
-        if (civilServantRegistryClient.isDomainInAgency(domain)) {
+        if (identityService.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
@@ -174,10 +174,10 @@ public class SignupController {
                 model.addAttribute(SIGNUP_FORM, new SignupForm());
 
                 if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
-                    TokenRequest tokenRequest = (TokenRequest) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
-                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
+                    AgencyToken agencyToken = (AgencyToken) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
+                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
                 } else {
-                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new TokenRequest());
+                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new AgencyToken());
                 }
                 log.debug("Invite email = {} valid and authorised - redirecting to set password screen",
                         invite.getForEmail());
@@ -198,7 +198,7 @@ public class SignupController {
     public String signup(@PathVariable(value = "code") String code,
                          @ModelAttribute @Valid SignupForm signupForm,
                          BindingResult signUpFormBindingResult,
-                         @ModelAttribute TokenRequest tokenRequest,
+                         @ModelAttribute AgencyToken agencyToken,
                          Model model,
                          RedirectAttributes redirectAttributes) {
         if (signUpFormBindingResult.hasErrors()) {
@@ -214,14 +214,14 @@ public class SignupController {
 
             log.debug("Invite and signup credentials valid - creating identity and updating invite to 'Accepted'");
             try {
-                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
+                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), agencyToken);
             } catch (UnableToAllocateAgencyTokenException e) {
                 log.debug("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
 
                 model.addAttribute(INVITE_MODEL, invite);
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                         ApplicationConstants.SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-                redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
+                redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
                 return REDIRECT_SIGNUP + code;
             } catch (ResourceNotFoundException e) {
                 log.debug("ResourceNotFoundException. Redirecting to set password with error: " + e);
@@ -252,7 +252,7 @@ public class SignupController {
 
             log.debug("Invite email = {} accessing enter token screen for validation", invite.getForEmail());
 
-            OrganisationalUnitDTO[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
+            OrganisationalUnit[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
 
             model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
             model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
@@ -314,11 +314,11 @@ public class SignupController {
         }
     }
 
-    private TokenRequest addAgencyTokenInfo(String domain, String token, String org) {
-        TokenRequest tokenRequest = new TokenRequest();
-        tokenRequest.setDomain(domain);
-        tokenRequest.setToken(token);
-        tokenRequest.setOrg(org);
-        return tokenRequest;
+    private AgencyToken addAgencyTokenInfo(String domain, String token, String org) {
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setDomain(domain);
+        agencyToken.setToken(token);
+        agencyToken.setOrg(org);
+        return agencyToken;
     }
 }

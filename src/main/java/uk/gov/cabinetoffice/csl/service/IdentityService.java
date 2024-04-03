@@ -10,7 +10,6 @@ import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
-import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
@@ -22,6 +21,7 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static java.time.Instant.now;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 
@@ -34,30 +34,30 @@ public class IdentityService {
     private final InviteService inviteService;
     private final AgencyTokenCapacityService agencyTokenCapacityService;
     private final IdentityRepository identityRepository;
-    private final CompoundRoleRepository compoundRoleRepository;
+    private final CompoundRoles compoundRoles;
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
 
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
-    public void createIdentityFromInviteCode(String code, String password, TokenRequest tokenRequest) {
+    public void createIdentityFromInviteCode(String code, String password, AgencyToken agencyToken) {
         Invite invite = inviteService.getInviteForCode(code);
         String email = invite.getForEmail();
         final String domain = utils.getDomainFromEmailAddress(email);
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
         String agencyTokenUid = null;
-        if (tokenRequest != null && tokenRequest.hasData()) {
+        if (agencyToken != null && agencyToken.hasData()) {
             Optional<AgencyToken> agencyTokenForDomainTokenOrganisation =
-                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenRequest.getDomain(),
-                            tokenRequest.getToken(), tokenRequest.getOrg());
+                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(agencyToken.getDomain(),
+                            agencyToken.getToken(), agencyToken.getOrg());
 
             agencyTokenUid = agencyTokenForDomainTokenOrganisation
-                    .map(agencyToken -> {
-                        if (agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                            return agencyToken.getUid();
+                    .map(at -> {
+                        if (agencyTokenCapacityService.hasSpaceAvailable(at)) {
+                            return at.getUid();
                         } else {
                             throw new UnableToAllocateAgencyTokenException("Agency token uid " +
-                                    agencyToken.getUid() + " has no spaces available. Identity not created");
+                                    at.getUid() + " has no spaces available. Identity not created");
                         }
                     })
                     .orElseThrow(() -> new ResourceNotFoundException("Agency token not found"));
@@ -75,10 +75,23 @@ public class IdentityService {
     }
 
     public BatchProcessResponse removeReportingRoles(List<String> uids) {
-        log.info(format("Removing reporting access from the following users: %s", uids));
+        return removeRoles(uids, CompoundRole.REPORTER);
+    }
+
+    public BatchProcessResponse removeRoles(List<String> uids, CompoundRole compoundRole) {
+        return removeRoles(uids, singletonList(compoundRole));
+    }
+
+    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoleList) {
+        log.info(format("Removing %s access from the following users: %s", compoundRoleList, uids));
         BatchProcessResponse response = new BatchProcessResponse();
         List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
-        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
+        Collection<String> reportingRoles = compoundRoleList
+                .stream()
+                .flatMap(cr ->
+                        compoundRoles.getRoles(cr)
+                                .stream())
+                .collect(toList());
         List<Identity> identitiesToSave = new ArrayList<>();
         identities.forEach(i -> {
             if (i.hasAnyRole(reportingRoles)) {
@@ -87,11 +100,27 @@ public class IdentityService {
             }
         });
         if (!identitiesToSave.isEmpty()) {
-            log.info(format("Reporting access removed from the following users: %s", uids));
+            log.info(format("%s access removed from the following users: %s", compoundRoleList, uids));
             identityRepository.saveAll(identitiesToSave);
             response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(toList()));
         }
         return response;
+    }
+
+    public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
+        if (newAgencyToken != null && newAgencyToken.getUid() != null) {
+            log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
+            identity.setAgencyTokenUid(newAgencyToken.getUid());
+        } else {
+            log.debug("Setting existing agency token UID to null");
+            identity.setAgencyTokenUid(null);
+        }
+        identity.setEmail(email);
+        identity.removeRoles(compoundRoles.getRoles(Arrays.asList(
+                CompoundRole.REPORTER,
+                CompoundRole.UNRESTRICTED_ORGANISATION
+        )));
+        identityRepository.save(identity);
     }
 
     public void reactivateIdentity(Identity identity, AgencyToken agencyToken) {
@@ -125,6 +154,11 @@ public class IdentityService {
         return identityRepository
                 .findFirstByUid(uid)
                 .orElseThrow(() -> new IdentityNotFoundException("Identity not found for uid: " + uid));
+    }
+
+    public boolean isValidEmailDomain(String email) {
+        final String domain = utils.getDomainFromEmailAddress(email);
+        return (isAllowListedDomain(domain) || civilServantRegistryClient.isDomainInAgency(domain));
     }
 
     public boolean isAllowListedDomain(String domain) {

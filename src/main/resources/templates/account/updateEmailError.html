@@ -1,0 +1,57 @@
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+<title>Update email error</title>
+<content>
+<div class="container">
+    <div class="grid-row">
+        <div class="column-two-thirds">
+            <a th:href="${lpgUiUrl}" class="link-back">Back</a>
+            <div th:if="${param.invalidEmail}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">
+                    There was a problem with your email address
+                </h2>
+                <ul class="error-summary-list">
+                    <li class="error-message">We were unable to verify your email address.</li>
+                </ul>
+            </div>
+            <div th:if="${param.emailAlreadyTaken}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">
+                    There was a problem with your email address
+                </h2>
+                <ul class="error-summary-list">
+                    <li class="error-message">This email address is already taken</li>
+                </ul>
+            </div>
+            <div th:if="${param.invalidCode}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-3">
+                    There was a problem with your email address
+                </h2>
+                <ul class="error-summary-list">
+                    <li class="error-message">We were unable to verify your email address.</li>
+                </ul>
+            </div>
+            <div th:if="${param.notValidEmailDomain}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-4">
+                    There was a problem with your email address
+                </h2>
+                <ul class="error-summary-list">
+                    <li class="error-message">Your organisation is unable to use this service.  Please contact your line manager.</li>
+                </ul>
+            </div>
+            <div th:if="${param.codeExpired}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-5">
+                    Your email update request is expired
+                </h2>
+                <ul class="error-summary-list">
+                    <li class="error-message">Please submit the request again</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</content>
+</page>

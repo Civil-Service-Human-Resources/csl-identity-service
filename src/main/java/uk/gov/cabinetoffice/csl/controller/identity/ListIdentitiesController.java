@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
-import uk.gov.cabinetoffice.csl.dto.IdentityAgencyDTO;
+import uk.gov.cabinetoffice.csl.dto.IdentityAgencyToken;
 import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
 import uk.gov.cabinetoffice.csl.dto.UidList;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
@@ -86,11 +86,11 @@ public class ListIdentitiesController {
     }
 
     @GetMapping(value = "/api/identity/agency/{uid}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<IdentityAgencyDTO> findAgencyTokenUidByUid(@PathVariable String uid) {
+    public ResponseEntity<IdentityAgencyToken> findAgencyTokenUidByUid(@PathVariable String uid) {
         log.info("Getting agency token uid for identity with uid " + uid);
         try {
             Identity identity = identityService.getIdentityForUid(uid);
-            return ok(new IdentityAgencyDTO(identity.getUid(), identity.getAgencyTokenUid()));
+            return ok(new IdentityAgencyToken(identity.getUid(), identity.getAgencyTokenUid()));
         } catch(IdentityNotFoundException e) {
             return notFound().build();
         } catch (Exception e) {

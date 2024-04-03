@@ -42,7 +42,7 @@ public class ListIdentitiesControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void shouldReturnIdentityAgencyDTOSuccessfully() throws Exception {
+    public void shouldReturnIdentityAgencyTokenSuccessfully() throws Exception {
         Identity identity = TestUtil.createIdentity(IDENTITY_UID, EMAIL, PASSWORD, AGENCY_TOKEN_UID);
         when(identityService.getIdentityForUid(eq(IDENTITY_UID))).thenReturn(identity);
 

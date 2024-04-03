@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
-import uk.gov.cabinetoffice.csl.dto.TokenRequest;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
@@ -60,7 +59,7 @@ public class IdentityServiceTest {
                 inviteService,
                 agencyTokenCapacityService,
                 identityRepository,
-                new CompoundRoleRepositoryImpl(),
+                new CompoundRolesRepository(),
                 civilServantRegistryClient,
                 passwordEncoder,
                 utils
@@ -115,12 +114,12 @@ public class IdentityServiceTest {
         invite.setForEmail(email);
         invite.setForRoles(roles);
 
-        TokenRequest tokenRequest = new TokenRequest();
+        AgencyToken agencyToken = new AgencyToken();
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
 
-        identityService.createIdentityFromInviteCode(code, "password", tokenRequest);
+        identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 
         ArgumentCaptor<Identity> inviteArgumentCaptor = ArgumentCaptor.forClass(Identity.class);
 
@@ -148,24 +147,24 @@ public class IdentityServiceTest {
         invite.setForEmail(email);
         invite.setForRoles(roles);
 
-        TokenRequest tokenRequest = new TokenRequest();
+        String uid = "UID";
         String tokenDomain = "example.com";
         String tokenCode = "co";
         String tokenToken = "token123";
-        tokenRequest.setDomain(tokenDomain);
-        tokenRequest.setOrg(tokenCode);
-        tokenRequest.setToken(tokenToken);
 
-        String uid = "UID";
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(uid);
+        agencyToken.setDomain(tokenDomain);
+        agencyToken.setOrg(tokenCode);
+        agencyToken.setToken(tokenToken);
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenDomain, tokenToken, tokenCode)).thenReturn(Optional.of(agencyToken));
+        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenDomain, tokenToken, tokenCode))
+                .thenReturn(Optional.of(agencyToken));
         when(passwordEncoder.encode("password")).thenReturn("password");
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
-        identityService.createIdentityFromInviteCode(code, "password", tokenRequest);
+        identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 
         ArgumentCaptor<Identity> inviteArgumentCaptor = ArgumentCaptor.forClass(Identity.class);
 

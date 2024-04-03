@@ -13,8 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
-import uk.gov.cabinetoffice.csl.dto.OrganisationalUnitDTO;
-import uk.gov.cabinetoffice.csl.dto.TokenRequest;
+import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
@@ -80,7 +79,7 @@ public class SignupControllerTest {
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+        when(identityService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -109,7 +108,7 @@ public class SignupControllerTest {
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
         when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+        when(identityService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -173,7 +172,7 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(true);
+        when(identityService.isDomainInAgency(domain)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -199,7 +198,7 @@ public class SignupControllerTest {
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(identityService.isAllowListedDomain(domain)).thenReturn(false);
-        when(civilServantRegistryClient.isDomainInAgency(domain)).thenReturn(false);
+        when(identityService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -358,11 +357,11 @@ public class SignupControllerTest {
         String password = "Password1";
         Invite invite = new Invite();
         invite.setAuthorisedInvite(true);
-        TokenRequest tokenRequest = new TokenRequest();
+        AgencyToken agencyToken = new AgencyToken();
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        doNothing().when(identityService).createIdentityFromInviteCode(code, password, tokenRequest);
+        doNothing().when(identityService).createIdentityFromInviteCode(code, password, agencyToken);
         doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
 
         mockMvc.perform(
@@ -371,7 +370,7 @@ public class SignupControllerTest {
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
                         .param("confirmPassword", password)
-                        .flashAttr("exampleEntity", tokenRequest)
+                        .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("signupSuccess"));
@@ -383,12 +382,12 @@ public class SignupControllerTest {
         String password = "Password1";
         Invite invite = new Invite();
         invite.setAuthorisedInvite(true);
-        TokenRequest tokenRequest = new TokenRequest();
+        AgencyToken agencyToken = new AgencyToken();
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         doThrow(new UnableToAllocateAgencyTokenException("Error")).when(identityService)
-                .createIdentityFromInviteCode(code, password, tokenRequest);
+                .createIdentityFromInviteCode(code, password, agencyToken);
 
         mockMvc.perform(
                 post("/signup/" + code)
@@ -396,7 +395,7 @@ public class SignupControllerTest {
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
                         .param("confirmPassword", password)
-                        .flashAttr("exampleEntity", tokenRequest)
+                        .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/signup/" + code));
@@ -421,7 +420,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String email = "test@example.com";
 
-        OrganisationalUnitDTO[] organisationalUnits = new OrganisationalUnitDTO[]{new OrganisationalUnitDTO()};
+        OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
 
         Invite invite = new Invite();
         invite.setForEmail(email);
@@ -448,7 +447,7 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        OrganisationalUnitDTO[] organisationalUnits = new OrganisationalUnitDTO[]{new OrganisationalUnitDTO()};
+        OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
@@ -495,7 +494,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
 
         AgencyToken agencyToken = new AgencyToken();
-        agencyToken.setCapacity(10);
+        agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
@@ -529,7 +528,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
 
         AgencyToken agencyToken = new AgencyToken();
-        agencyToken.setCapacity(10);
+        agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
