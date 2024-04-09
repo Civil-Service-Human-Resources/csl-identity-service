@@ -14,7 +14,8 @@ import uk.gov.cabinetoffice.csl.service.*;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
-import static java.time.Clock.systemDefaultZone;
+import java.time.ZoneId;
+
 import static java.time.LocalDateTime.now;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -296,7 +297,7 @@ public class EmailUpdateControllerTest {
         emailUpdate.setCode(VERIFY_CODE);
         emailUpdate.setPreviousEmail(PREVIOUS_EMAIL);
         emailUpdate.setNewEmail(NEW_EMAIL);
-        emailUpdate.setRequestedAt(now(systemDefaultZone()));
+        emailUpdate.setRequestedAt(now(ZoneId.of("Europe/London")));
         emailUpdate.setEmailUpdateStatus(PENDING);
         return emailUpdate;
     }
