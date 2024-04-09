@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.RequestEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
@@ -109,7 +108,6 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
     @Override
     @CacheEvict(value = "allowListDomains", allEntries = true)
-    @Scheduled(fixedRateString = "${civilServantRegistry.cache.allowListDomainsTTL}")
     public void evictAllowListDomainCache() {
         log.info("Evicting Allowlist Domains cache");
     }

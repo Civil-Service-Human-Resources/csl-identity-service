@@ -27,7 +27,7 @@ public class IdentityClient implements IIdentityClient {
     }
 
     @Override
-    @Cacheable("service-token")
+    @Cacheable("serviceToken")
     public OAuthToken getServiceToken() {
         log.debug("Getting service token from identity service");
         String url = String.format("%s?grant_type=client_credentials", tokenUrl);
@@ -42,7 +42,7 @@ public class IdentityClient implements IIdentityClient {
     }
 
     @Override
-    @CacheEvict(value = "service-token", allEntries = true)
+    @CacheEvict(value = "serviceToken", allEntries = true)
     public void evictServiceTokenFromCache() {
         log.info("Service token is removed from the cache.");
     }
