@@ -56,8 +56,8 @@ public class ReactivationController {
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
-    @Value("${reactivation.emailTemplateId}")
-    private String reactivationEmailTemplateId;
+    @Value("${govNotify.template.reactivation}")
+    private String govNotifyReactivationTemplateId;
 
     @Value("${reactivation.reactivationUrl}")
     private String reactivationBaseUrl;
@@ -197,6 +197,6 @@ public class ReactivationController {
         emailPersonalisation.put("reactivationUrl", reactivationBaseUrl + reactivation.getCode());
 
         notifyService.notifyWithPersonalisation(reactivation.getEmail(),
-                reactivationEmailTemplateId, emailPersonalisation);
+                govNotifyReactivationTemplateId, emailPersonalisation);
     }
 }
