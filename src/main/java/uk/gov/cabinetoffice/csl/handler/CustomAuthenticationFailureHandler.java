@@ -58,9 +58,9 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                     LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                    String requestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
+                    String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
-                    String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry.toString());
+                    String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
                     log.debug("Pending reactivation for the email {} requested at {} and expires on {}",
                             pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {

@@ -9,9 +9,10 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.domain.InviteStatus;
 
-import java.util.Date;
+import java.time.Clock;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -28,6 +29,9 @@ public class InviteRepositoryTest {
 
     @Autowired
     private IdentityRepository identityRepository;
+
+    @Autowired
+    private Clock clock;
 
     @Test
     public void findByForEmailShouldReturnCorrectInvite() {
@@ -93,7 +97,7 @@ public class InviteRepositoryTest {
         invite.setInviter(identity);
         invite.setCode(code);
         invite.setForEmail(forEmail);
-        invite.setInvitedAt(new Date());
+        invite.setInvitedAt(now(clock));
         invite.setStatus(InviteStatus.PENDING);
         return invite;
     }

@@ -92,11 +92,11 @@ public class ReactivationController {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
                 String reactivationEmailMessage = ("We've sent you an email on %s with a link to reactivate your " +
-                        "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+                        "account.").formatted(utils.convertDateTimeFormat(requestedAt));
                 model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
                 LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
                 String reactivationValidityMessage = "The link in the email will expire on %s."
-                        .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
+                        .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime));
 
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
             } else {

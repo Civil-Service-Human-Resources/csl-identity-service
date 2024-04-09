@@ -9,8 +9,11 @@ import uk.gov.cabinetoffice.csl.factory.InviteFactory;
 import uk.gov.cabinetoffice.csl.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,8 +28,10 @@ public class InviteServiceTest {
     private final InviteRepository inviteRepository = mock(InviteRepository.class);
     private final InviteFactory inviteFactory = mock(InviteFactory.class);
     private final NotifyService notifyService = mock(NotifyService.class);
+    private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"), ZoneId.of("Europe/London"));
+
     private final InviteService inviteService = new InviteService(govNotifyTemplateId, validityInSeconds,
-            signupUrlFormat, notifyService, inviteRepository, inviteFactory);
+            signupUrlFormat, notifyService, inviteRepository, inviteFactory, clock);
 
     @Test
     public void updateInviteByCodeShouldUpdateStatusCorrectly() {
@@ -57,10 +62,9 @@ public class InviteServiceTest {
         Invite invite = new Invite();
         invite.setStatus(InviteStatus.PENDING);
         invite.setCode(code);
-        invite.setInvitedAt(new Date(2323223232L));
+        invite.setInvitedAt(now(clock).minusDays(7));
 
-        when(inviteRepository.findByCode(code))
-                .thenReturn(invite);
+        when(inviteRepository.findByCode(code)).thenReturn(invite);
 
         MatcherAssert.assertThat(inviteService.isInviteCodeExpired(code), equalTo(true));
     }
@@ -72,7 +76,7 @@ public class InviteServiceTest {
         Invite invite = new Invite();
         invite.setStatus(InviteStatus.PENDING);
         invite.setCode(code);
-        invite.setInvitedAt(new Date(new Date().getTime() - 1000 * 60 * 60 * 24));
+        invite.setInvitedAt(now(clock));
 
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);

@@ -73,9 +73,9 @@ public class ResetController {
                 LocalDateTime requestedAt = pendingReset.getRequestedAt();
                 LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
                 resetValidityMessage1 = "The email was sent on %s."
-                        .formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+                        .formatted(utils.convertDateTimeFormat(requestedAt));
                 resetValidityMessage2 = "The link in the email will expire on %s."
-                        .formatted(utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString()));
+                        .formatted(utils.convertDateTimeFormat(resetLinkExpiryDateTime));
             }
             model.addAttribute("resetValidityMessage1", resetValidityMessage1);
             model.addAttribute("resetValidityMessage2", resetValidityMessage2);

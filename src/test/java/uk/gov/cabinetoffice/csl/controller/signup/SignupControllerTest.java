@@ -21,9 +21,12 @@ import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.Matchers.containsString;
 
 import static org.mockito.Mockito.*;
@@ -60,6 +63,8 @@ public class SignupControllerTest {
 
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
+
+    private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"), ZoneId.of("Europe/London"));
 
     @Test
     public void shouldReturnCreateAccountForm() throws Exception {
@@ -102,7 +107,7 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
         Optional<Invite> invite = Optional.of(new Invite());
-        invite.get().setInvitedAt(new Date(System.currentTimeMillis() - 25*60*60*1000));
+        invite.get().setInvitedAt(now(clock));
         invite.get().setCode("code");
 
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);

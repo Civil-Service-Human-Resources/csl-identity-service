@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -33,10 +33,10 @@ public class Invite implements Serializable {
     private Identity inviter;
 
     @Column(nullable = false)
-    private Date invitedAt;
+    private LocalDateTime invitedAt;
 
     @Column
-    private Date acceptedAt;
+    private LocalDateTime acceptedAt;
 
     @Column(length = 150, nullable = false)
     private String forEmail;

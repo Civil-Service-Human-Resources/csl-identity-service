@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -30,6 +32,10 @@ public class Utils {
             log.warn("Invalid date string value: {}, Exception: {}", localDateTime, e.toString());
         }
         return "";
+    }
+
+    public String convertDateTimeFormat(LocalDateTime localDateTime) {
+        return localDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"));
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {
