@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.agencytoken;
+package uk.gov.cabinetoffice.csl.controller.agencytoken;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.cabinetoffice.csl.controller.agencytoken.VerifyTokenForm;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;

@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.agencytoken;
+package uk.gov.cabinetoffice.csl.controller.agencytoken;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ public class AgencyTokenVerificationController {
 
     private static final String CODE_ATTRIBUTE = "code";
     private static final String VERIFY_TOKEN_FORM_TEMPLATE = "verifyTokenForm";
-    private static final String VERIFY_TOKEN_TEMPLATE = "verifyToken";
+    private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
     private static final String REDIRECT_VERIFY_TOKEN = "redirect:/account/verify/agency/";
     private static final String REDIRECT_REACTIVATED_SUCCESS = "redirect:/account/reactivate/updated";
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";

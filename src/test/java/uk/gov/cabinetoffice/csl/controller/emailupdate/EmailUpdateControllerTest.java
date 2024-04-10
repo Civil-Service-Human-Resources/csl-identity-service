@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.email;
+package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.agencytoken;
+package uk.gov.cabinetoffice.csl.controller.agencytoken;
 
 import com.nimbusds.jose.shaded.gson.Gson;
 import org.junit.jupiter.api.Test;

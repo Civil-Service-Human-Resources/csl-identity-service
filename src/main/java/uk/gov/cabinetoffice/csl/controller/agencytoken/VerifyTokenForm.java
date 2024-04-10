@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.agencytoken;
+package uk.gov.cabinetoffice.csl.controller.agencytoken;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

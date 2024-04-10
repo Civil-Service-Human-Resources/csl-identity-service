@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.email;
+package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +31,10 @@ public class EmailUpdateController {
     private static final String UPDATED_EMAIL_ATTRIBUTE = "updatedEmail";
 
     private static final String UPDATE_EMAIL_FORM = "updateEmailForm";
-    private static final String UPDATE_EMAIL_TEMPLATE = "account/updateEmail";
-    private static final String UPDATE_EMAIL_ERROR_TEMPLATE = "account/updateEmailError";
-    private static final String EMAIL_UPDATED_TEMPLATE = "account/emailUpdated";
-    private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "account/emailVerificationSent";
+    private static final String UPDATE_EMAIL_TEMPLATE = "emailupdate/updateEmail";
+    private static final String UPDATE_EMAIL_ERROR_TEMPLATE = "emailupdate/updateEmailError";
+    private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
+    private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "emailupdate/emailVerificationSent";
 
     private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE = "redirect:/account/email/update/error?invalidEmail=true";
     private static final String REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE = "redirect:/account/email/update/error?emailAlreadyTaken=true";

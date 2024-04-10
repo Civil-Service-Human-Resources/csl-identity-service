@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.reactivation;
+package uk.gov.cabinetoffice.csl.controller.reactivation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +36,8 @@ import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText
 public class ReactivationController {
 
     private static final String ACCOUNT_REACTIVATED_TEMPLATE = "reactivate/accountReactivated";
+
+    private static final String ACCOUNT_REACTIVATE_TEMPLATE = "reactivate/reactivate";
 
     private static final String REDIRECT_ACCOUNT_REACTIVATED = "redirect:/account/reactivate/updated";
 
@@ -108,7 +110,7 @@ public class ReactivationController {
                         .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds));
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
             }
-            return "reactivate/reactivate";
+            return ACCOUNT_REACTIVATE_TEMPLATE;
         } catch (Exception e) {
             log.error("There was an error while creating the reactivation link for the code: {} with cause: {}",
                     code, e.toString());
@@ -130,7 +132,7 @@ public class ReactivationController {
 
             if(reactivationService.isReactivationExpired(reactivation)) {
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
-                return "redirect:/login?error=deactivated-expired&username="
+                return "redirect:/login?error=reactivation-expired&username="
                         + encode(getEncryptedText(email, encryptionKey), UTF_8);
             }
 

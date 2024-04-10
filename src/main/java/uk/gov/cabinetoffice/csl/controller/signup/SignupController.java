@@ -34,11 +34,11 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @RequestMapping("/signup")
 public class SignupController {
 
-    private static final String ENTER_TOKEN_TEMPLATE = "enterToken";
-    private static final String REQUEST_INVITE_TEMPLATE = "requestInvite";
-    private static final String INVITE_SENT_TEMPLATE = "inviteSent";
-    private static final String SIGNUP_TEMPLATE = "signup";
-    private static final String SIGNUP_SUCCESS_TEMPLATE = "signupSuccess";
+    private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
+    private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
+    private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
+    private static final String SIGNUP_TEMPLATE = "signup/signup";
+    private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
 
     private static final String INVITE_MODEL = "invite";
     private static final String ORGANISATIONS_ATTRIBUTE = "organisations";

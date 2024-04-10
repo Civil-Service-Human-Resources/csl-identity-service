@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.password;
+package uk.gov.cabinetoffice.csl.controller.passwordupdate;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

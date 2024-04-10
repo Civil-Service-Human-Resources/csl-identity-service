@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.password;
+package uk.gov.cabinetoffice.csl.controller.passwordupdate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

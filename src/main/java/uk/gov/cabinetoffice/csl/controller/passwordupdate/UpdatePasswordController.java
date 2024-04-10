@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.password;
+package uk.gov.cabinetoffice.csl.controller.passwordupdate;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +17,10 @@ import uk.gov.cabinetoffice.csl.service.PasswordService;
 @RequestMapping("/account/password")
 public class UpdatePasswordController {
 
+    private static final String UPDATE_PASSWORD_TEMPLATE = "passwordupdate/updatePassword";
+    private static final String PASSWORD_UPDATED_TEMPLATE = "passwordupdate/passwordUpdated";
+    private static final String REDIRECT_PASSWORD_UPDATED = "redirect:/account/password/passwordUpdated";
+
     @Value("${lpg.uiSignOutUrl}")
     private String lpgUiSignOutUrl;
 
@@ -29,7 +33,7 @@ public class UpdatePasswordController {
     @GetMapping
     public String updatePasswordForm(Model model, @ModelAttribute UpdatePasswordForm form) {
         model.addAttribute("updatePasswordForm", form);
-        return "account/updatePassword";
+        return UPDATE_PASSWORD_TEMPLATE;
     }
 
     @PostMapping
@@ -38,18 +42,18 @@ public class UpdatePasswordController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("updatePasswordForm", form);
-            return "account/updatePassword";
+            return UPDATE_PASSWORD_TEMPLATE;
         }
 
         passwordService.updatePasswordAndNotify(
                 ((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 form.getNewPassword());
-        return "redirect:/account/password/passwordUpdated";
+        return REDIRECT_PASSWORD_UPDATED;
     }
 
     @GetMapping("/passwordUpdated")
     public String passwordUpdated(Model model) {
         model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
-        return "account/passwordUpdated";
+        return PASSWORD_UPDATED_TEMPLATE;
     }
 }

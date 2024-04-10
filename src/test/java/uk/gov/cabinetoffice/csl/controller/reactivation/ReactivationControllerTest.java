@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.reactivation;
+package uk.gov.cabinetoffice.csl.controller.reactivation;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -121,7 +121,7 @@ public class ReactivationControllerTest {
         mockMvc.perform(
                         get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername))
+                .andExpect(redirectedUrl("/login?error=reactivation-expired&username=" + encryptedUsername))
                 .andDo(print());
     }
 

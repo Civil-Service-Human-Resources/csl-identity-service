@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.email;
+package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

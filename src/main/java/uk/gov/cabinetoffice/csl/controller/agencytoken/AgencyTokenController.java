@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.controller.account.agencytoken;
+package uk.gov.cabinetoffice.csl.controller.agencytoken;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
