@@ -35,7 +35,9 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUT
 public class EmailUpdateControllerTest {
 
     private static final String UPDATE_EMAIL_FORM_TEMPLATE = "updateEmailForm";
-    private static final String UPDATE_EMAIL_VIEW_NAME_TEMPLATE = "account/updateEmail";
+    private static final String UPDATE_EMAIL_VIEW_NAME_TEMPLATE = "emailupdate/updateEmail";
+    private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
+    private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "emailupdate/emailVerificationSent";
     private static final String EMAIL_PATH = "/account/email";
     private static final String VERIFY_EMAIL_PATH = "/account/email/verify/";
     private static final String VERIFY_EMAIL_AGENCY_PATH = "/account/verify/agency/";
@@ -137,7 +139,7 @@ public class EmailUpdateControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/emailVerificationSent"));
+                .andExpect(view().name(EMAIL_VERIFICATION_SENT_TEMPLATE));
 
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
         verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
@@ -289,7 +291,7 @@ public class EmailUpdateControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/emailUpdated"));
+                .andExpect(view().name(EMAIL_UPDATED_TEMPLATE));
     }
 
     private EmailUpdate createEmailUpdate() {

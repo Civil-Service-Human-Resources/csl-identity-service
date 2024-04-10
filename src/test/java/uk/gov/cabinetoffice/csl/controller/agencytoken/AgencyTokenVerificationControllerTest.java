@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.cabinetoffice.csl.controller.agencytoken.VerifyTokenForm;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
@@ -44,7 +43,7 @@ public class AgencyTokenVerificationControllerTest {
 
     private static final String ACCOUNT_REACTIVATE_UPDATED = "/account/reactivate/updated";
     private static final String VERIFY_TOKEN_FORM = "verifyTokenForm";
-    private static final String VERIFY_TOKEN_TEMPLATE = "verifyToken";
+    private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
     private static final String VERIFY_TOKEN_URL = "/account/verify/agency/";
     private static final String REDIRECT_EMAIL_UPDATED = "/account/email/updated";
     private static final String LOGIN_URL = "/login";

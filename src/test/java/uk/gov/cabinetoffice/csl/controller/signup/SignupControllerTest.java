@@ -49,6 +49,17 @@ public class SignupControllerTest {
 
     private static final String STATUS_ATTRIBUTE = "status";
 
+    private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
+    private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
+    private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
+    private static final String SIGNUP_TEMPLATE = "signup/signup";
+    private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
+
+    private static final String REDIRECT_LOGIN = "/login";
+    private static final String REDIRECT_SIGNUP = "/signup/";
+    private static final String REDIRECT_SIGNUP_REQUEST = "/signup/request";
+    private static final String REDIRECT_ENTER_TOKEN = "/signup/enterToken/";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -73,6 +84,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
+                .andExpect(view().name(REQUEST_INVITE_TEMPLATE))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("id=\"confirmEmail\"")));
     }
@@ -94,6 +106,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().isOk())
+                .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(content().string(containsString("We've sent you an email")))
                 .andExpect(content().string(containsString("What happens next")))
                 .andExpect(content().string(containsString(
@@ -122,7 +135,8 @@ public class SignupControllerTest {
                         .param("email", email)
                         .param("confirmEmail", email)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(view().name(INVITE_SENT_TEMPLATE));
 
         verify(inviteService, times(1)).updateInviteStatus(invite.get().getCode(), EXPIRED);
     }
@@ -137,6 +151,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", "userDomain.org")
                 )
                 .andExpect(status().isOk())
+                .andExpect(view().name(REQUEST_INVITE_TEMPLATE))
                 .andExpect(content().string(containsString("Email address is not valid")));
     }
 
@@ -151,7 +166,8 @@ public class SignupControllerTest {
                         .param("email", email)
                         .param("confirmEmail", email)
                 )
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -168,7 +184,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -187,7 +203,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("inviteSent"))
+                .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(content().string(containsString("We've sent you an email")))
                 .andExpect(content().string(containsString("What happens next")))
                 .andExpect(content().string(containsString(
@@ -213,7 +229,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"))
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE,
                         "Your organisation is unable to use this service. Please contact your line manager."));
     }
@@ -229,7 +245,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -245,7 +261,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -259,7 +275,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -277,7 +293,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
     }
 
     @Test
@@ -295,7 +311,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("signup"));
+                .andExpect(view().name(SIGNUP_TEMPLATE));
     }
 
     @Test 
@@ -313,7 +329,8 @@ public class SignupControllerTest {
                         .param("password", password)
                         .param("confirmPassword", "doesn't match")
                 )
-                .andExpect(view().name("signup"))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SIGNUP_TEMPLATE))
                 .andExpect(model().attributeExists("invite"));
     }
 
@@ -332,7 +349,7 @@ public class SignupControllerTest {
                         .param("confirmPassword", password)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl(REDIRECT_LOGIN));
     }
 
     @Test
@@ -353,7 +370,7 @@ public class SignupControllerTest {
                         .param("confirmPassword", password)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
     }
 
     @Test
@@ -378,7 +395,7 @@ public class SignupControllerTest {
                         .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(view().name("signupSuccess"));
+                .andExpect(view().name(SIGNUP_SUCCESS_TEMPLATE));
     }
 
     @Test
@@ -403,7 +420,7 @@ public class SignupControllerTest {
                         .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
 
     @Test
@@ -417,7 +434,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl(REDIRECT_LOGIN));
     }
 
     @Test
@@ -440,7 +457,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(view().name("enterToken"));
+                .andExpect(view().name(ENTER_TOKEN_TEMPLATE));
     }
 
     @Test
@@ -463,7 +480,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
 
 
@@ -483,7 +500,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl(REDIRECT_LOGIN));
     }
 
     @Test
@@ -516,7 +533,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
 
     @Test
@@ -550,7 +567,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
     }
 
     @Test
@@ -580,7 +597,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code))
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE));
     }
 }

@@ -30,6 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockCustomUser
 public class UpdatePasswordControllerTest {
 
+    private static final String UPDATE_PASSWORD_TEMPLATE = "passwordupdate/updatePassword";
+    private static final String PASSWORD_UPDATED_TEMPLATE = "passwordupdate/passwordUpdated";
+    private static final String REDIRECT_PASSWORD_UPDATED = "/account/password/passwordUpdated";
+
     private static final Long ID = 123L;
     private static final String UID = "uid123";
     private static final String EMAIL = "test@example.com";
@@ -48,7 +52,7 @@ public class UpdatePasswordControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/updatePassword"))
+                .andExpect(view().name(UPDATE_PASSWORD_TEMPLATE))
                 .andExpect(content().string(containsString("Change your password")))
                 .andExpect(content().string(containsString("Current Password")))
                 .andExpect(content().string(containsString("id=\"password\"")))
@@ -71,7 +75,7 @@ public class UpdatePasswordControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/updatePassword"))
+                .andExpect(view().name(UPDATE_PASSWORD_TEMPLATE))
                 .andExpect(content().string(containsString("Change your password")))
                 .andExpect(content().string(containsString("There was a problem with your password")))
                 .andExpect(content().string(containsString("Current password is incorrect")))
@@ -92,8 +96,7 @@ public class UpdatePasswordControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/password/passwordUpdated"))
-                .andExpect(view().name("redirect:/account/password/passwordUpdated"))
+                .andExpect(redirectedUrl(REDIRECT_PASSWORD_UPDATED))
                 .andDo(print());
     }
 
@@ -104,7 +107,7 @@ public class UpdatePasswordControllerTest {
                                 .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/passwordUpdated"))
+                .andExpect(view().name(PASSWORD_UPDATED_TEMPLATE))
                 .andExpect(content().string(containsString("Your password has been updated")))
                 .andExpect(model().attributeExists("lpgUiSignOutUrl"))
                 .andDo(print());

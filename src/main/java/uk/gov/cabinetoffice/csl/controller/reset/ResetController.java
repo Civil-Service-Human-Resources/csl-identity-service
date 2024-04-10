@@ -24,6 +24,11 @@ import java.time.LocalDateTime;
 @RequestMapping("/reset")
 public class ResetController {
 
+    private static final String REQUEST_RESET_TEMPLATE = "reset/requestReset";
+    private static final String CHECK_EMAIL_TEMPLATE = "reset/checkEmail";
+    private static final String PASSWORD_FORM_TEMPLATE = "reset/passwordForm";
+    private static final String PASSWORD_RESET_TEMPLATE = "reset/passwordReset";
+
     @Value("${lpg.uiSignOutUrl}")
     private String lpgUiSignOutUrl;
 
@@ -52,7 +57,7 @@ public class ResetController {
 
     @GetMapping
     public String reset() {
-        return "reset/requestReset";
+        return REQUEST_RESET_TEMPLATE;
     }
 
     @PostMapping
@@ -79,12 +84,12 @@ public class ResetController {
             }
             model.addAttribute("resetValidityMessage1", resetValidityMessage1);
             model.addAttribute("resetValidityMessage2", resetValidityMessage2);
-            return "reset/checkEmail";
+            return CHECK_EMAIL_TEMPLATE;
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
             model.addAttribute("userMessage", "Invalid email id.\n" +
                     "Submit the reset request for the valid email id.");
-            return "reset/requestReset";
+            return REQUEST_RESET_TEMPLATE;
         }
     }
 
@@ -99,7 +104,7 @@ public class ResetController {
             ResetForm resetForm = new ResetForm();
             resetForm.setCode(code);
             model.addAttribute("resetForm", resetForm);
-            return "reset/passwordForm";
+            return PASSWORD_FORM_TEMPLATE;
         }
 
         return checkResetValidityResult;
@@ -114,7 +119,7 @@ public class ResetController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("resetForm", resetForm);
-            return "reset/passwordForm";
+            return PASSWORD_FORM_TEMPLATE;
         }
 
         Reset reset = resetService.getResetForCode(code);
@@ -128,14 +133,14 @@ public class ResetController {
                         reset.getEmail(), code);
                 model.addAttribute("userMessage", "The reset link is invalid.\n" +
                         "Please submit the reset request for the valid email id.");
-                return "reset/requestReset";
+                return REQUEST_RESET_TEMPLATE;
             }
 
             passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyUserForSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
             model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
-            return "reset/passwordReset";
+            return PASSWORD_RESET_TEMPLATE;
         }
         return result;
     }
@@ -153,28 +158,28 @@ public class ResetController {
             log.info("The reset code is blank.");
             model.addAttribute("userMessage", "The reset link is invalid.\n" +
                     "Please re-submit the reset request.");
-            return "reset/requestReset";
+            return REQUEST_RESET_TEMPLATE;
         }
 
         if (reset == null || StringUtils.isBlank(reset.getEmail())) {
             log.info("The reset does not exist for the code {}", code);
             model.addAttribute("userMessage", "The reset link is invalid.\n" +
                     "Please re-submit the reset request.");
-            return "reset/requestReset";
+            return REQUEST_RESET_TEMPLATE;
         }
 
         if (resetService.isResetComplete(reset)) {
             log.info("The reset is already used for the code {}", reset.getCode());
             model.addAttribute("userMessage", "The reset link is already used.\n" +
                     "Please re-submit the reset request.");
-            return "reset/requestReset";
+            return REQUEST_RESET_TEMPLATE;
         }
 
         if (resetService.isResetExpired(reset)) {
             log.info("The reset is expired for the code {}", reset.getCode());
             model.addAttribute("userMessage", "The reset link is expired.\n" +
                     "Please re-submit the reset request.");
-            return "reset/requestReset";
+            return REQUEST_RESET_TEMPLATE;
         }
 
         return "";
