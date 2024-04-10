@@ -15,11 +15,11 @@ import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.time.Instant.now;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +39,7 @@ public class EmailUpdateServiceTest {
     private static final String PASSWORD = "password";
     private static final Set<Role> ROLES = new HashSet<>();
     private static final Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, true, false, ROLES,
-            now(), false, 0);
+            LocalDateTime.now(), false, 0);
 
     @MockBean
     private EmailUpdateRepository emailUpdateRepository;

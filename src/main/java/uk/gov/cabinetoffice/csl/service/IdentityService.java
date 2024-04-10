@@ -17,10 +17,11 @@ import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.Clock;
 import java.util.*;
 
 import static java.lang.String.format;
-import static java.time.Instant.now;
+import static java.time.LocalDateTime.now;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -38,6 +39,7 @@ public class IdentityService {
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
+    private final Clock clock;
 
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
     public void createIdentityFromInviteCode(String code, String password, AgencyToken agencyToken) {
@@ -69,7 +71,7 @@ public class IdentityService {
                     + email);
         }
         Identity identity = new Identity(randomUUID().toString(), email, passwordEncoder.encode(password),
-                true, false, newRoles, now(), false, agencyTokenUid, 0);
+                true, false, newRoles, now(clock), false, agencyTokenUid, 0);
         identityRepository.save(identity);
         log.debug("New identity email = {} successfully created", email);
     }

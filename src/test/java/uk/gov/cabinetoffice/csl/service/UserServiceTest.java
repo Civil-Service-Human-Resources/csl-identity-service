@@ -12,7 +12,7 @@ import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -48,7 +48,7 @@ public class UserServiceTest {
         String uid = "uid";
         String agencyTokenUid = "agencyTokenUid";
         Identity identity = new Identity(uid, email, "password", true, false,
-                emptySet(), Instant.now(), false, agencyTokenUid, null);
+                emptySet(), LocalDateTime.now(), false, agencyTokenUid, null);
 
         when(identityService.getIdentityForEmail(email)).thenReturn(identity);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);

@@ -4,7 +4,7 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,7 +26,7 @@ public class TestUtil {
 
     public static Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
         return new Identity(uid, format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false,
-                null, Instant.now(), false, agencyTokenUid, 0);
+                null, LocalDateTime.now(), false, agencyTokenUid, 0);
     }
 
     public static Identity createIdentity(Long id, String uid, String email, String password, String agencyTokenUid) {
@@ -37,7 +37,7 @@ public class TestUtil {
 
     public static Identity createIdentity(String uid, String email, String password, String agencyTokenUid) {
         return new Identity(uid, email, password, true, false, createRoles(),
-                Instant.now(), false, agencyTokenUid, 0);
+                LocalDateTime.now(), false, agencyTokenUid, 0);
     }
 
     public static IdentityDetails createIdentityDetails(Long id, String uid, String email, String password) {

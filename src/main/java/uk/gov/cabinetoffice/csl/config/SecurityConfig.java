@@ -160,8 +160,8 @@ public class SecurityConfig {
 				context.getClaims().claim("scopes", scopes);
 				Authentication principal = context.getPrincipal();
 				Set<String> authorities = new HashSet<>();
-				context.getClaims().claim("user_name", principal.getName());
 				if (principal instanceof UsernamePasswordAuthenticationToken) {
+					context.getClaims().claim("user_name", principal.getName());
 					authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 							.collect(Collectors.toSet());
 					if (principal.getPrincipal() instanceof IdentityDetails) {
@@ -169,6 +169,7 @@ public class SecurityConfig {
 						context.getClaims().claim("email", email);
 					}
 				} else if (principal instanceof OAuth2ClientAuthenticationToken) {
+					context.getClaims().claim("user_name", principal.getName());
 					authorities.add("CLIENT");
 				}
 				context.getClaims().claim("authorities", authorities);

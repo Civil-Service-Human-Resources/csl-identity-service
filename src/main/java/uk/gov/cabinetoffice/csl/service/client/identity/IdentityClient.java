@@ -11,19 +11,23 @@ import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.service.auth2.OAuthToken;
 import uk.gov.cabinetoffice.csl.exception.InternalAuthErrorException;
 
-import java.time.LocalDateTime;
+import java.time.Clock;
+
+import static java.time.LocalDateTime.now;
 
 @Component
 @Slf4j
 public class IdentityClient implements IIdentityClient {
 
     private final IHttpClient client;
+    private final Clock clock;
 
     @Value("${oauth2.tokenUrl}")
     private String tokenUrl;
 
-    public IdentityClient(@Qualifier("identityHttpClient") IHttpClient client) {
+    public IdentityClient(@Qualifier("identityHttpClient") IHttpClient client, Clock clock) {
         this.client = client;
+        this.clock = clock;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class IdentityClient implements IIdentityClient {
             log.error("Service token response was null");
             throw new InternalAuthErrorException("System error");
         }
-        oAuthToken.setExpiryDateTime(LocalDateTime.now().plusSeconds(oAuthToken.getExpiresIn()));
+        oAuthToken.setExpiryDateTime(now(clock).plusSeconds(oAuthToken.getExpiresIn()));
         return oAuthToken;
     }
 
