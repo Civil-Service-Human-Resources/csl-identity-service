@@ -1,4 +1,6 @@
-package uk.gov.cabinetoffice.csl.service;
+package uk.gov.cabinetoffice.csl.repository;
+
+import uk.gov.cabinetoffice.csl.service.ICompoundRole;
 
 import java.util.Collection;
 import java.util.List;

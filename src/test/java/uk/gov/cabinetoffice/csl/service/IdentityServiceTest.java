@@ -11,6 +11,7 @@ import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
+import uk.gov.cabinetoffice.csl.repository.CompoundRolesRepository;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;

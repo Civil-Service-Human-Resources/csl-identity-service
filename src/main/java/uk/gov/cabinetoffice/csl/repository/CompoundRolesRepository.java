@@ -1,6 +1,7 @@
-package uk.gov.cabinetoffice.csl.service;
+package uk.gov.cabinetoffice.csl.repository;
 
 import org.springframework.stereotype.Repository;
+import uk.gov.cabinetoffice.csl.service.ICompoundRole;
 
 import java.util.List;
 
