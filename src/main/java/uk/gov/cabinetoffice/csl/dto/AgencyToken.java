@@ -1,10 +1,13 @@
 package uk.gov.cabinetoffice.csl.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -13,7 +16,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @AllArgsConstructor
 @JsonDeserialize
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AgencyToken {
+public class AgencyToken implements Serializable {
     private String uid;
     private Long capacity;
     private Long capacityUsed;
@@ -31,6 +34,7 @@ public class AgencyToken {
         this.org = org;
     }
 
+    @JsonIgnore
     public boolean hasData() {
         return isNotBlank(this.getDomain())
                 && isNotBlank(this.getToken())

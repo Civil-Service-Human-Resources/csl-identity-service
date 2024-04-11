@@ -57,6 +57,9 @@ public class SignupController {
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
+    @Value("${invite.validityInSeconds}")
+    private int validityInSeconds;
+
     @Value("${invite.durationAfterReRegAllowedInSeconds}")
     private long durationAfterReRegAllowedInSeconds;
 
@@ -141,11 +144,13 @@ public class SignupController {
         if (identityService.isDomainInAgency(domain)) {
             log.debug("Sending invite to agency user {}", email);
             inviteService.sendSelfSignupInvite(email, false);
+            model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         } else {
             if (identityService.isAllowListedDomain(domain)) {
                 log.debug("Sending invite to allowListed user {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
+                model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
                 return INVITE_SENT_TEMPLATE;
             } else {
                 log.debug("The domain of user {} is neither allowListed nor part of an Agency token", email);
