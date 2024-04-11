@@ -306,11 +306,11 @@ public class SignupController {
                         redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
                                 addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
 
-                        log.info("Enter token form has passed domain, token, organisation validation");
+                        log.info("Enter token form has passed the validation for domain, token and organisation.");
 
                         return REDIRECT_SIGNUP + code;
                     }).orElseGet(() -> {
-                        log.info("Enter token form failed the validation for domain, token and organisation.");
+                        log.info("Enter token form has failed the validation for domain, token and organisation.");
                         redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
                         return REDIRECT_ENTER_TOKEN + code;
                     });
