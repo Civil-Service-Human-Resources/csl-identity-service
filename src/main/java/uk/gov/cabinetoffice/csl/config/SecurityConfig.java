@@ -32,7 +32,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.TEXT_HTML;
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
 import static org.springframework.security.oauth2.server.authorization.OAuth2TokenType.ACCESS_TOKEN;
 
@@ -68,8 +67,6 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(Customizer.withDefaults())
-			.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-					.sessionCreationPolicy(STATELESS))
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
@@ -84,8 +81,6 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(Customizer.withDefaults())
-			.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-						.sessionCreationPolicy(STATELESS))
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
