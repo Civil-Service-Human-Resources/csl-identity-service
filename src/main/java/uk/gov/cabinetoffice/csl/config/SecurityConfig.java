@@ -10,7 +10,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -66,8 +65,6 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(Customizer.withDefaults())
-			.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
@@ -82,8 +79,6 @@ public class SecurityConfig {
 		httpSecurity
 			.cors(Customizer.withDefaults())
 			.csrf(Customizer.withDefaults())
-			.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
