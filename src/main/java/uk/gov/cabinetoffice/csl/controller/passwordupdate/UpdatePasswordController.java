@@ -20,9 +20,14 @@ public class UpdatePasswordController {
     private static final String UPDATE_PASSWORD_TEMPLATE = "passwordupdate/updatePassword";
     private static final String PASSWORD_UPDATED_TEMPLATE = "passwordupdate/passwordUpdated";
     private static final String REDIRECT_PASSWORD_UPDATED = "redirect:/account/password/passwordUpdated";
+    private static final String LPG_UI_SIGNOUT_TIMER_ATTRIBUTE = "signOutTimerInSeconds";
+    private static final String LPG_UI_SIGNOUT_URL_ATTRIBUTE = "lpgUiSignOutUrl";
 
     @Value("${lpg.uiSignOutUrl}")
     private String lpgUiSignOutUrl;
+
+    @Value("${lpg.signOutTimerInSeconds}")
+    private int signOutTimerInSeconds;
 
     private final PasswordService passwordService;
 
@@ -53,7 +58,8 @@ public class UpdatePasswordController {
 
     @GetMapping("/passwordUpdated")
     public String passwordUpdated(Model model) {
-        model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
+        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
+        model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
         return PASSWORD_UPDATED_TEMPLATE;
     }
 }
