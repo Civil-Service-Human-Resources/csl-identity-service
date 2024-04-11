@@ -1,4 +1,4 @@
-package uk.gov.cabinetoffice.csl.util;
+package uk.gov.cabinetoffice.csl.controller.error;
 
 import java.util.Map;
 
