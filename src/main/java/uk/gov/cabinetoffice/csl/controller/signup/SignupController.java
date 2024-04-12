@@ -114,14 +114,15 @@ public class SignupController {
                 log.info("Signup invite for email {} has expired.", email);
                 inviteService.updateInviteStatus(pendingInvite.get().getCode(), EXPIRED);
             } else {
-                long durationBeforeReRegistration = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
-                if (durationBeforeReRegistration < durationAfterReRegAllowedInSeconds) {
+                long durationInSecondsSinceInvited = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
+                long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
+                if (durationInSecondsSinceInvited < durationAfterReRegAllowedInSeconds) {
                     log.info("User with email {} is trying to re-register before re-registration allowed time", email);
                     redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                             "You have been sent an email with a link to register your account.\n" +
                                 "Please check your spam or junk mail folders.\n" +
                                 "If you have not received the email, please wait %s"
-                                .formatted(utils.convertSecondsIntoMinutesOrHours(durationAfterReRegAllowedInSeconds)) +
+                                .formatted(utils.convertSecondsIntoMinutesOrHours(durationInSecondsBeforeReInvite)) +
                                 " before creating an account.");
                     return REDIRECT_SIGNUP_REQUEST;
                 } else {
