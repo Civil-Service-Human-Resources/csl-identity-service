@@ -119,7 +119,7 @@ public class SignupController {
                         "You have been sent an email with a link to register your account.\n" +
                                 "Please check your spam or junk mail folders.\n" +
                                 "If you have not received the email, please wait %s"
-                                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(durationInSecondsBeforeReInvite)) +
+                                .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(durationInSecondsBeforeReInvite)) +
                                 " before creating an account.");
                 return REDIRECT_SIGNUP_REQUEST;
             } else {
