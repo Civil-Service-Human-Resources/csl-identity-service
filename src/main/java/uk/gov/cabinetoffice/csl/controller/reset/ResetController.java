@@ -72,7 +72,7 @@ public class ResetController {
                 resetService.createPendingResetRequestAndAndNotifyUser(email);
                 log.info("Reset request email sent to {}", email);
                 resetValidityMessage1 = "The link will expire in %s."
-                        .formatted(utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
+                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             } else {
                 log.info("Pending Reset exists for email {}", email);
                 LocalDateTime requestedAt = pendingReset.getRequestedAt();

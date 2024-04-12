@@ -119,7 +119,7 @@ public class SignupController {
                         "You have been sent an email with a link to register your account.\n" +
                                 "Please check your spam or junk mail folders.\n" +
                                 "If you have not received the email, please wait %s"
-                                        .formatted(utils.convertSecondsIntoMinutesOrHours(durationInSecondsBeforeReInvite)) +
+                                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(durationInSecondsBeforeReInvite)) +
                                 " before creating an account.");
                 return REDIRECT_SIGNUP_REQUEST;
             } else {
@@ -140,14 +140,14 @@ public class SignupController {
         if (identityService.isDomainInAgency(domain)) {
             log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
-            model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
+            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
 
         if (identityService.isAllowListedDomain(domain)) {
             log.info("Sending invite to allowListed user with email {}", email);
             inviteService.sendSelfSignupInvite(email, true);
-            model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
+            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
 

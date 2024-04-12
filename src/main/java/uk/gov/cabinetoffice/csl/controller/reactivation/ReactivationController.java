@@ -107,7 +107,7 @@ public class ReactivationController {
                 String reactivationEmailMessage = "We've sent you an email with a link to reactivate your account.";
                 model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
                 String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
-                        .formatted(utils.convertSecondsIntoMinutesOrHours(reactivationValidityInSeconds));
+                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
             }
             return ACCOUNT_REACTIVATE_TEMPLATE;

@@ -103,7 +103,7 @@ public class EmailUpdateController {
         emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 newEmail);
 
-        model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
+        model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
         model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
         model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
         return EMAIL_VERIFICATION_SENT_TEMPLATE;
