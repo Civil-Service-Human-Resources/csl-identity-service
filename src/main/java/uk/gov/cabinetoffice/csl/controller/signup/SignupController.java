@@ -287,36 +287,38 @@ public class SignupController {
 
             final String emailAddress = invite.getForEmail();
             final String domain = utils.getDomainFromEmailAddress(emailAddress);
+            Optional<AgencyToken> agencyTokenOptional =
+                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(
+                            domain, form.getToken(), form.getOrganisation());
+            if(agencyTokenOptional.isPresent()) {
+                AgencyToken agencyToken = agencyTokenOptional.get();
+                if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
+                    log.info("Agency token uid {} with capacity {} has no spaces available. " +
+                                    "User with email {} is unable to signup.",
+                            agencyToken.getUid(), agencyToken.getCapacity(), emailAddress);
+                    redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+                    return REDIRECT_ENTER_TOKEN + code;
+                }
 
-            return civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(),
-                            form.getOrganisation())
-                    .map(agencyToken -> {
-                        if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                            log.info("Agency token uid {} with capacity {}, has no spaces available. " +
-                                            "User with email {} unable to signup.",
-                                    agencyToken.getUid(), agencyToken.getCapacity(), emailAddress);
-                            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-                            return REDIRECT_ENTER_TOKEN + code;
-                        }
+                invite.setAuthorisedInvite(true);
+                inviteService.saveInvite(invite);
 
-                        invite.setAuthorisedInvite(true);
-                        inviteService.saveInvite(invite);
+                model.addAttribute(INVITE_MODEL, invite);
 
-                        model.addAttribute(INVITE_MODEL, invite);
+                redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
+                        addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
 
-                        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
-                                addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
+                log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
+                        domain, form.getToken(), form.getOrganisation());
 
-                        log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
-                                domain, form.getToken(), form.getOrganisation());
+                return REDIRECT_SIGNUP + code;
 
-                        return REDIRECT_SIGNUP + code;
-                    }).orElseGet(() -> {
-                        log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
-                                domain, form.getToken(), form.getOrganisation());
-                        redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
-                        return REDIRECT_ENTER_TOKEN + code;
-                    });
+            } else {
+                log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
+                        domain, form.getToken(), form.getOrganisation());
+                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+                return REDIRECT_ENTER_TOKEN + code;
+            }
         } else {
             return REDIRECT_INVALID_SIGNUP_CODE;
         }
