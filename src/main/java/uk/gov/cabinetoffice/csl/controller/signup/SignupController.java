@@ -292,8 +292,8 @@ public class SignupController {
                             form.getOrganisation())
                     .map(agencyToken -> {
                         if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                            log.info("Agency token uid {}, capacity {}, has no spaces available. " +
-                                            "User {} unable to signup",
+                            log.info("Agency token uid {} with capacity {}, has no spaces available. " +
+                                            "User with email {} unable to signup.",
                                     agencyToken.getUid(), agencyToken.getCapacity(), emailAddress);
                             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
                             return REDIRECT_ENTER_TOKEN + code;
@@ -307,11 +307,13 @@ public class SignupController {
                         redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
                                 addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
 
-                        log.info("Enter token form has passed the validation for domain, token and organisation.");
+                        log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
+                                domain, form.getToken(), form.getOrganisation());
 
                         return REDIRECT_SIGNUP + code;
                     }).orElseGet(() -> {
-                        log.info("Enter token form has failed the validation for domain, token and organisation.");
+                        log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
+                                domain, form.getToken(), form.getOrganisation());
                         redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
                         return REDIRECT_ENTER_TOKEN + code;
                     });
