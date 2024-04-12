@@ -167,6 +167,15 @@ public class SignupController {
                          RedirectAttributes redirectAttributes) {
 
         if (inviteService.isInviteCodeExists(code)) {
+
+            if (inviteService.isInviteCodeUsed(code)) {
+                log.info("Signup code for invite is already used. Redirecting to signup page.");
+                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
+                        "This registration link is already used.\n" +
+                                "Please re-enter your details to create an account.");
+                return REDIRECT_SIGNUP_REQUEST;
+            }
+
             if (inviteService.isInviteCodeExpired(code)) {
                 log.info("Signup code for invite is expired. Redirecting to signup page.");
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
@@ -174,28 +183,29 @@ public class SignupController {
                                 "Please re-enter your details to create an account.");
                 inviteService.updateInviteStatus(code, EXPIRED);
                 return REDIRECT_SIGNUP_REQUEST;
-            } else {
-                Invite invite = inviteService.getInviteForCode(code);
-
-                if (!invite.isAuthorisedInvite()) {
-                    log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
-                            invite.getForEmail());
-                    return REDIRECT_ENTER_TOKEN + code;
-                }
-
-                model.addAttribute(INVITE_MODEL, invite);
-                model.addAttribute(SIGNUP_FORM, new SignupForm());
-
-                if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
-                    AgencyToken agencyToken = (AgencyToken) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
-                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
-                } else {
-                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new AgencyToken());
-                }
-                log.info("Invited email {} is valid and authorised. Redirecting to set password page.",
-                        invite.getForEmail());
-                return SIGNUP_TEMPLATE;
             }
+
+            Invite invite = inviteService.getInviteForCode(code);
+
+            if (!invite.isAuthorisedInvite()) {
+                log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
+                        invite.getForEmail());
+                return REDIRECT_ENTER_TOKEN + code;
+            }
+
+            model.addAttribute(INVITE_MODEL, invite);
+            model.addAttribute(SIGNUP_FORM, new SignupForm());
+
+            if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
+                AgencyToken agencyToken = (AgencyToken) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
+                model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
+            } else {
+                model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new AgencyToken());
+            }
+            log.info("Invited email {} is valid and authorised. Redirecting to set password page.",
+                    invite.getForEmail());
+            return SIGNUP_TEMPLATE;
+
         } else {
             log.info("Signup code for invite is not valid. Redirecting to signup page.");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,

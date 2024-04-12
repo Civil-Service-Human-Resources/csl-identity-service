@@ -20,6 +20,8 @@ import java.util.Set;
 
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static uk.gov.cabinetoffice.csl.domain.InviteStatus.ACCEPTED;
+import static uk.gov.cabinetoffice.csl.domain.InviteStatus.EXPIRED;
 
 @Slf4j
 @Service
@@ -104,11 +106,20 @@ public class InviteService {
 
     public boolean isInviteExpired(Invite invite) {
         long diffInSeconds = SECONDS.between(invite.getInvitedAt(), now(clock));
-        return diffInSeconds > validityInSeconds;
+        return invite.getStatus().equals(EXPIRED)
+                || diffInSeconds > validityInSeconds;
     }
 
     public boolean isInviteCodeValid(String code) {
-        return isInviteCodeExists(code) && !isInviteCodeExpired(code);
+        return !isInviteCodeExpired(code) && !isInviteCodeUsed(code);
+    }
+
+    public boolean isInviteCodeUsed(String code) {
+        Invite invite = inviteRepository.findByCode(code);
+        if(invite != null) {
+            return invite.getStatus().equals(ACCEPTED);
+        }
+        return false;
     }
 
     public boolean isInviteCodeExists(String code) {
