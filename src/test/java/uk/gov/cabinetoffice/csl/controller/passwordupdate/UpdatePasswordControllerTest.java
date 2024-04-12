@@ -77,7 +77,7 @@ public class UpdatePasswordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name(UPDATE_PASSWORD_TEMPLATE))
                 .andExpect(content().string(containsString("Change your password")))
-                .andExpect(content().string(containsString("There was a problem with your password")))
+                .andExpect(content().string(containsString("There is a problem with your password")))
                 .andExpect(content().string(containsString("Current password is incorrect")))
                 .andDo(print());
     }

@@ -139,11 +139,11 @@ public class ReactivationController {
             String domain = utils.getDomainFromEmailAddress(reactivation.getEmail());
             log.debug("Reactivating account using Reactivation: {}", reactivation);
             if (identityService.isDomainInAgency(domain)) {
-                log.info("Account reactivation is agency, requires token validation for Reactivation: {}",
+                log.info("Account reactivation is for a agency domain, requires token validation for Reactivation: {}",
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
-                log.info("Account reactivation is not agency and can reactivate without further validation for " +
+                log.info("Account reactivation is not a agency domain and can reactivate without further validation for " +
                                 "Reactivation: {}", reactivation);
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
@@ -154,7 +154,7 @@ public class ReactivationController {
             return REDIRECT_LOGIN;
         } catch (Exception e) {
             log.error("There was an error processing account reactivation for code: {} with cause: {}",
-                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause is null");
+                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause was null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         }
