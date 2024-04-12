@@ -107,7 +107,6 @@ public class SignupController {
         }
 
         final String email = form.getEmail();
-
         Optional<Invite> pendingInvite = inviteService.getInviteForEmailAndStatus(email, PENDING);
 
         if(pendingInvite.isPresent()) {
@@ -141,78 +140,74 @@ public class SignupController {
         }
 
         final String domain = utils.getDomainFromEmailAddress(email);
-
         if (identityService.isDomainInAgency(domain)) {
             log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
-        } else {
-            if (identityService.isAllowListedDomain(domain)) {
-                log.info("Sending invite to allowListed user with email {}", email);
-                inviteService.sendSelfSignupInvite(email, true);
-                model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
-                return INVITE_SENT_TEMPLATE;
-            } else {
-                log.info("The domain of user with email {} is neither allowListed nor part of an Agency token.", email);
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                        "Your organisation is unable to use this service. Please contact your line manager.");
-                return REDIRECT_SIGNUP_REQUEST;
-            }
         }
+
+        if (identityService.isAllowListedDomain(domain)) {
+            log.info("Sending invite to allowListed user with email {}", email);
+            inviteService.sendSelfSignupInvite(email, true);
+            model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
+            return INVITE_SENT_TEMPLATE;
+        }
+
+        log.info("The domain of user with email {} is neither allowListed nor part of an Agency token.", email);
+        redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
+                "Your organisation is unable to use this service. Please contact your line manager.");
+        return REDIRECT_SIGNUP_REQUEST;
     }
 
     @GetMapping("/{code}")
     public String signup(Model model, @PathVariable(value = "code") String code,
                          RedirectAttributes redirectAttributes) {
 
-        if (inviteService.isInviteCodeExists(code)) {
-
-            if (inviteService.isInviteCodeUsed(code)) {
-                log.info("Signup code for invite is already used. Redirecting to signup page.");
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                        "This registration link is already used.\n" +
-                                "Please re-enter your details to create an account.");
-                return REDIRECT_SIGNUP_REQUEST;
-            }
-
-            if (inviteService.isInviteCodeExpired(code)) {
-                log.info("Signup code for invite is expired. Redirecting to signup page.");
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                        "This registration link has now expired.\n" +
-                                "Please re-enter your details to create an account.");
-                inviteService.updateInviteStatus(code, EXPIRED);
-                return REDIRECT_SIGNUP_REQUEST;
-            }
-
-            Invite invite = inviteService.getInviteForCode(code);
-
-            if (!invite.isAuthorisedInvite()) {
-                log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
-                        invite.getForEmail());
-                return REDIRECT_ENTER_TOKEN + code;
-            }
-
-            model.addAttribute(INVITE_MODEL, invite);
-            model.addAttribute(SIGNUP_FORM, new SignupForm());
-
-            if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
-                AgencyToken agencyToken = (AgencyToken) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
-                model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
-            } else {
-                model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new AgencyToken());
-            }
-            log.info("Invited email {} is valid and authorised. Redirecting to set password page.",
-                    invite.getForEmail());
-            return SIGNUP_TEMPLATE;
-
-        } else {
+        if (!inviteService.isInviteCodeExists(code)) {
             log.info("Signup code for invite is not valid. Redirecting to signup page.");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                     "This registration link does not match the one sent to you by email.\n " +
                             "Please check the link and try again.");
             return REDIRECT_SIGNUP_REQUEST;
         }
+
+        if (inviteService.isInviteCodeUsed(code)) {
+            log.info("Signup code for invite is already used. Redirecting to signup page.");
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
+                    "This registration link is already used.\n" +
+                            "Please re-enter your details to create an account.");
+            return REDIRECT_SIGNUP_REQUEST;
+        }
+
+        if (inviteService.isInviteCodeExpired(code)) {
+            log.info("Signup code for invite is expired. Redirecting to signup page.");
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
+                    "This registration link has now expired.\n" +
+                            "Please re-enter your details to create an account.");
+            inviteService.updateInviteStatus(code, EXPIRED);
+            return REDIRECT_SIGNUP_REQUEST;
+        }
+
+        Invite invite = inviteService.getInviteForCode(code);
+        if (!invite.isAuthorisedInvite()) {
+            log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
+                    invite.getForEmail());
+            return REDIRECT_ENTER_TOKEN + code;
+        }
+
+        model.addAttribute(INVITE_MODEL, invite);
+        model.addAttribute(SIGNUP_FORM, new SignupForm());
+        if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
+            AgencyToken agencyToken = (AgencyToken) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
+            model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
+        } else {
+            model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new AgencyToken());
+        }
+
+        log.info("Invited email {} is valid and authorised. Redirecting to set password page.",
+                invite.getForEmail());
+        return SIGNUP_TEMPLATE;
     }
 
     @PostMapping("/{code}")
@@ -229,56 +224,53 @@ public class SignupController {
             return SIGNUP_TEMPLATE;
         }
 
-        if (inviteService.isInviteCodeValid(code)) {
-            Invite invite = inviteService.getInviteForCode(code);
-            if (!invite.isAuthorisedInvite()) {
-                return REDIRECT_ENTER_TOKEN + code;
-            }
-
-            try {
-                log.info("Invite and signup credentials are valid. Creating identity and updating invite to 'Accepted'");
-                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), agencyToken);
-            } catch (UnableToAllocateAgencyTokenException e) {
-                log.info("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
-                model.addAttribute(INVITE_MODEL, invite);
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-                redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
-                return REDIRECT_SIGNUP + code;
-            } catch (ResourceNotFoundException e) {
-                log.info("ResourceNotFoundException. Redirecting to set password with error: " + e);
-                model.addAttribute(INVITE_MODEL, invite);
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
-                return REDIRECT_SIGNUP + code;
-            }
-            inviteService.updateInviteStatus(code, ACCEPTED);
-
-            model.addAttribute(LPG_UI_URL, lpgUiUrl);
-
-            return SIGNUP_SUCCESS_TEMPLATE;
-        } else {
+        if (!inviteService.isInviteCodeValid(code)) {
             return REDIRECT_INVALID_SIGNUP_CODE;
         }
+
+        Invite invite = inviteService.getInviteForCode(code);
+        if (!invite.isAuthorisedInvite()) {
+            return REDIRECT_ENTER_TOKEN + code;
+        }
+
+        try {
+            log.info("Invite and signup credentials are valid. Creating identity and updating invite to 'Accepted'");
+            identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), agencyToken);
+        } catch (UnableToAllocateAgencyTokenException e) {
+            log.info("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
+            model.addAttribute(INVITE_MODEL, invite);
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+            redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyToken);
+            return REDIRECT_SIGNUP + code;
+        } catch (ResourceNotFoundException e) {
+            log.info("ResourceNotFoundException. Redirecting to set password with error: " + e);
+            model.addAttribute(INVITE_MODEL, invite);
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
+            return REDIRECT_SIGNUP + code;
+        }
+
+        inviteService.updateInviteStatus(code, ACCEPTED);
+        model.addAttribute(LPG_UI_URL, lpgUiUrl);
+        return SIGNUP_SUCCESS_TEMPLATE;
     }
 
     @GetMapping(path = "/enterToken/{code}")
     public String enterToken(Model model, @PathVariable(value = "code") String code) {
-        if (inviteService.isInviteCodeValid(code)) {
-            Invite invite = inviteService.getInviteForCode(code);
-            if (invite.isAuthorisedInvite()) {
-                return REDIRECT_SIGNUP + code;
-            }
 
-            log.info("Invite email {} accessing enter token screen for validation", invite.getForEmail());
-
-            OrganisationalUnit[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
-
-            model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
-            model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
-
-            return ENTER_TOKEN_TEMPLATE;
-        } else {
+        if (!inviteService.isInviteCodeValid(code)) {
             return REDIRECT_INVALID_SIGNUP_CODE;
         }
+
+        Invite invite = inviteService.getInviteForCode(code);
+        if (invite.isAuthorisedInvite()) {
+            return REDIRECT_SIGNUP + code;
+        }
+
+        log.info("Invite email {} accessing enter token screen for validation", invite.getForEmail());
+        OrganisationalUnit[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
+        model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
+        model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
+        return ENTER_TOKEN_TEMPLATE;
     }
 
     @PostMapping(path = "/enterToken/{code}")
@@ -292,46 +284,42 @@ public class SignupController {
             return ENTER_TOKEN_TEMPLATE;
         }
 
-        if (inviteService.isInviteCodeValid(code)) {
-            Invite invite = inviteService.getInviteForCode(code);
-
-            final String emailAddress = invite.getForEmail();
-            final String domain = utils.getDomainFromEmailAddress(emailAddress);
-            Optional<AgencyToken> agencyTokenOptional =
-                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(
-                            domain, form.getToken(), form.getOrganisation());
-            if(agencyTokenOptional.isPresent()) {
-                AgencyToken agencyToken = agencyTokenOptional.get();
-                if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                    log.info("Agency token uid {} with capacity {} has no spaces available. " +
-                                    "User with email {} is unable to signup.",
-                            agencyToken.getUid(), agencyToken.getCapacity(), emailAddress);
-                    redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-                    return REDIRECT_ENTER_TOKEN + code;
-                }
-
-                invite.setAuthorisedInvite(true);
-                inviteService.saveInvite(invite);
-
-                model.addAttribute(INVITE_MODEL, invite);
-
-                redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
-                        addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
-
-                log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
-                        domain, form.getToken(), form.getOrganisation());
-
-                return REDIRECT_SIGNUP + code;
-
-            } else {
-                log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
-                        domain, form.getToken(), form.getOrganisation());
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
-                return REDIRECT_ENTER_TOKEN + code;
-            }
-        } else {
+        if (!inviteService.isInviteCodeValid(code)) {
             return REDIRECT_INVALID_SIGNUP_CODE;
         }
+
+        Invite invite = inviteService.getInviteForCode(code);
+        final String emailAddress = invite.getForEmail();
+        final String domain = utils.getDomainFromEmailAddress(emailAddress);
+        Optional<AgencyToken> agencyTokenOptional =
+                civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(
+                        domain, form.getToken(), form.getOrganisation());
+
+        if(agencyTokenOptional.isEmpty()) {
+            log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
+                    domain, form.getToken(), form.getOrganisation());
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+            return REDIRECT_ENTER_TOKEN + code;
+        }
+
+        AgencyToken agencyToken = agencyTokenOptional.get();
+        if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
+            log.info("Agency token uid {} with capacity {} has no spaces available. " +
+                            "User with email {} is unable to signup.",
+                    agencyToken.getUid(), agencyToken.getCapacity(), emailAddress);
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+            return REDIRECT_ENTER_TOKEN + code;
+        }
+
+        invite.setAuthorisedInvite(true);
+        inviteService.saveInvite(invite);
+
+        model.addAttribute(INVITE_MODEL, invite);
+        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
+                addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
+        log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
+                domain, form.getToken(), form.getOrganisation());
+        return REDIRECT_SIGNUP + code;
     }
 
     private AgencyToken addAgencyTokenInfo(String domain, String token, String org) {
