@@ -64,7 +64,6 @@ public class IdentityService {
                         }
                     })
                     .orElseThrow(() -> new ResourceNotFoundException("Agency token not found"));
-
             log.info("Identity request has agency uid = {}", agencyTokenUid);
         } else if (!isAllowListedDomain(domain) && !inviteService.isEmailInvited(email)) {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);

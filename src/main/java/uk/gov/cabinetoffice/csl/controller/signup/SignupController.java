@@ -112,12 +112,12 @@ public class SignupController {
 
         if(pendingInvite.isPresent()) {
             if (inviteService.isInviteExpired(pendingInvite.get())) {
-                log.info("Signup invite to email {} has expired.", email);
+                log.info("Signup invite for email {} has expired.", email);
                 inviteService.updateInviteStatus(pendingInvite.get().getCode(), EXPIRED);
             } else {
-                long timeForReReg = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
-                if (timeForReReg < durationAfterReRegAllowedInSeconds) {
-                    log.info("{} user is trying to re-register before re-registration allowed time", email);
+                long durationBeforeReRegistration = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
+                if (durationBeforeReRegistration < durationAfterReRegAllowedInSeconds) {
+                    log.info("User with email {} is trying to re-register before re-registration allowed time", email);
                     redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                             "You have been sent an email with a link to register your account.\n" +
                                 "Please check your spam or junk mail folders.\n" +
@@ -126,35 +126,35 @@ public class SignupController {
                                 " before creating an account.");
                     return REDIRECT_SIGNUP_REQUEST;
                 } else {
-                    log.info("{} user trying to re-register after re-registration allowed time but " +
-                            "before code expired hence setting the current pending invite to expired.", email);
+                    log.info("User with email {} trying to re-register after re-registration allowed time therefore " +
+                            "setting the current pending invite to expired.", email);
                     inviteService.updateInviteStatus(pendingInvite.get().getCode(), EXPIRED);
                 }
             }
         }
 
         if (identityService.isIdentityExistsForEmail(email)) {
-            log.info("Email {} is already in use.", email);
+            log.info("User is trying to sign-uo with an email {} which is already in use.", email);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                    "User already exists with email address " + email);
+                    "User already exists for email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
         }
 
         final String domain = utils.getDomainFromEmailAddress(email);
 
         if (identityService.isDomainInAgency(domain)) {
-            log.info("Sending invite to agency user {}", email);
+            log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         } else {
             if (identityService.isAllowListedDomain(domain)) {
-                log.info("Sending invite to allowListed user {}", email);
+                log.info("Sending invite to allowListed user with email {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
                 model.addAttribute("resetValidity", utils.convertSecondsIntoMinutesOrHours(validityInSeconds));
                 return INVITE_SENT_TEMPLATE;
             } else {
-                log.info("The domain of user {} is neither allowListed nor part of an Agency token.", email);
+                log.info("The domain of user with email {} is neither allowListed nor part of an Agency token.", email);
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                         "Your organisation is unable to use this service. Please contact your line manager.");
                 return REDIRECT_SIGNUP_REQUEST;
@@ -168,7 +168,7 @@ public class SignupController {
 
         if (inviteService.isInviteCodeExists(code)) {
             if (inviteService.isInviteCodeExpired(code)) {
-                log.info("Signup code for invite is expired - redirecting to signup");
+                log.info("Signup code for invite is expired. Redirecting to signup page.");
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                         "This registration link has now expired.\n" +
                                 "Please re-enter your details to create an account.");
@@ -178,7 +178,7 @@ public class SignupController {
                 Invite invite = inviteService.getInviteForCode(code);
 
                 if (!invite.isAuthorisedInvite()) {
-                    log.info("Invite email {} not yet authorised. Redirecting to enter token screen",
+                    log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
                             invite.getForEmail());
                     return REDIRECT_ENTER_TOKEN + code;
                 }
@@ -192,12 +192,12 @@ public class SignupController {
                 } else {
                     model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new AgencyToken());
                 }
-                log.info("Invite email {} valid and authorised. Redirecting to set password screen",
+                log.info("Invited email {} is valid and authorised. Redirecting to set password page.",
                         invite.getForEmail());
                 return SIGNUP_TEMPLATE;
             }
         } else {
-            log.info("Signup code for invite is not valid - redirecting to signup");
+            log.info("Signup code for invite is not valid. Redirecting to signup page.");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                     "This registration link does not match the one sent to you by email.\n " +
                             "Please check the link and try again.");
@@ -213,6 +213,7 @@ public class SignupController {
                          @ModelAttribute AgencyToken agencyToken,
                          Model model,
                          RedirectAttributes redirectAttributes) {
+
         if (signUpFormBindingResult.hasErrors()) {
             model.addAttribute(INVITE_MODEL, inviteService.getInviteForCode(code));
             return SIGNUP_TEMPLATE;
@@ -237,7 +238,7 @@ public class SignupController {
                 log.info("ResourceNotFoundException. Redirecting to set password with error: " + e);
                 model.addAttribute(INVITE_MODEL, invite);
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
-                return REDIRECT_INVALID_SIGNUP_CODE;
+                return REDIRECT_SIGNUP + code;
             }
             inviteService.updateInviteStatus(code, ACCEPTED);
 

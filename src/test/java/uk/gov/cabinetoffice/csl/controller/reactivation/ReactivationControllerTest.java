@@ -29,8 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
-import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE;
-import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
 
 @SpringBootTest
@@ -149,8 +148,7 @@ public class ReactivationControllerTest {
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE,
-                        "There was an error processing account reactivation. Please try again later."))
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE))
                 .andDo(print());
     }
 

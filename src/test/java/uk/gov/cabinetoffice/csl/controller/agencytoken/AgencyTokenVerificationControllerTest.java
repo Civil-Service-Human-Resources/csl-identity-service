@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 import static uk.gov.cabinetoffice.csl.dto.VerificationCodeType.*;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,9 +55,6 @@ public class AgencyTokenVerificationControllerTest {
     private static final String ORGANISATION = "co";
     private static final String AGENCY_TOKEN_UID = "675fd21d-03f9-4922-a2ff-c19186270b04";
     private static final String EMAIL = "test@example.com";
-    private static final String ERROR_TEXT = "There was a problem with this agency token, please try again later";
-    private static final String NO_SPACE_AVAIL_TEXT = "No spaces available for this token. Please contact your line manager";
-    private static final String INCORRECT_ORG_TOKEN_TEXT = "Incorrect organisation or token";
 
     @Autowired
     private MockMvc mockMvc;
@@ -209,7 +207,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("uid", IDENTITY_UID)
         )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", NO_SPACE_AVAIL_TEXT))
+                .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
     }
 
@@ -240,7 +238,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("uid", IDENTITY_UID)
         )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", INCORRECT_ORG_TOKEN_TEXT))
+                .andExpect(flash().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
     }
 
@@ -264,7 +262,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("uid", IDENTITY_UID)
         )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", NO_SPACE_AVAIL_TEXT))
+                .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
     }
 
@@ -293,7 +291,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("uid", IDENTITY_UID)
         )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", ERROR_TEXT))
+                .andExpect(flash().attribute("status", VERIFY_AGENCY_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(LOGIN_URL));
     }
 
@@ -315,7 +313,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
         )
-                .andExpect(model().attribute("status", INCORRECT_ORG_TOKEN_TEXT))
+                .andExpect(model().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
                 .andExpect(model().attribute("code", CODE))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
