@@ -238,7 +238,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfSignupCodeNotValid() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 get("/signup/" + code)
@@ -319,7 +319,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String password = "password";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
         when(inviteService.getInviteForCode(anyString())).thenReturn(new Invite());
 
         mockMvc.perform(
@@ -339,7 +339,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String password = "Password1";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/" + code)
@@ -359,7 +359,7 @@ public class SignupControllerTest {
         Invite invite = new Invite();
         invite.setAuthorisedInvite(false);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
@@ -381,7 +381,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
         AgencyToken agencyToken = new AgencyToken();
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         doNothing().when(identityService).createIdentityFromInviteCode(code, password, agencyToken);
         doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
@@ -406,7 +406,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
         AgencyToken agencyToken = new AgencyToken();
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         doThrow(new UnableToAllocateAgencyTokenException("Error")).when(identityService)
                 .createIdentityFromInviteCode(code, password, agencyToken);
@@ -427,7 +427,7 @@ public class SignupControllerTest {
     public void shouldRedirectToLoginIfInviteNotValidFromToken() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 get("/signup/enterToken/" + code)
@@ -448,7 +448,7 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(false);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
@@ -471,7 +471,7 @@ public class SignupControllerTest {
 
         OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
@@ -490,7 +490,7 @@ public class SignupControllerTest {
         String organisation = "org";
         String token = "token123";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/enterToken/" + code)
@@ -519,7 +519,7 @@ public class SignupControllerTest {
         agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
@@ -553,7 +553,7 @@ public class SignupControllerTest {
         agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
@@ -584,7 +584,7 @@ public class SignupControllerTest {
 
         Optional<AgencyToken> emptyOptional = Optional.empty();
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(emptyOptional);

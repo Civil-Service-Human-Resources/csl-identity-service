@@ -107,8 +107,8 @@ public class InviteService {
         return diffInSeconds > validityInSeconds;
     }
 
-    public boolean isInviteValid(String code) {
-        return inviteRepository.existsByCode(code) && !isInviteCodeExpired(code);
+    public boolean isInviteCodeValid(String code) {
+        return isInviteCodeExists(code) && !isInviteCodeExpired(code);
     }
 
     public boolean isInviteCodeExists(String code) {

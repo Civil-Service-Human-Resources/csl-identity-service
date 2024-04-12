@@ -219,7 +219,7 @@ public class SignupController {
             return SIGNUP_TEMPLATE;
         }
 
-        if (inviteService.isInviteValid(code)) {
+        if (inviteService.isInviteCodeValid(code)) {
             Invite invite = inviteService.getInviteForCode(code);
             if (!invite.isAuthorisedInvite()) {
                 return REDIRECT_ENTER_TOKEN + code;
@@ -252,7 +252,7 @@ public class SignupController {
 
     @GetMapping(path = "/enterToken/{code}")
     public String enterToken(Model model, @PathVariable(value = "code") String code) {
-        if (inviteService.isInviteValid(code)) {
+        if (inviteService.isInviteCodeValid(code)) {
             Invite invite = inviteService.getInviteForCode(code);
             if (invite.isAuthorisedInvite()) {
                 return REDIRECT_SIGNUP + code;
@@ -282,7 +282,7 @@ public class SignupController {
             return ENTER_TOKEN_TEMPLATE;
         }
 
-        if (inviteService.isInviteValid(code)) {
+        if (inviteService.isInviteCodeValid(code)) {
             Invite invite = inviteService.getInviteForCode(code);
 
             final String emailAddress = invite.getForEmail();
