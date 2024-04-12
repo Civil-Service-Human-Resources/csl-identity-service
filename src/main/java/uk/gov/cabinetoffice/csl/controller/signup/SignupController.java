@@ -164,7 +164,7 @@ public class SignupController {
         if (!inviteService.isInviteCodeExists(code)) {
             log.info("Signup code for invite is not valid. Redirecting to signup page.");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                    "This registration link does not match the one sent to you by email.\n " +
+                    "This registration link is not valid.\n " +
                             "Please check the link and try again.");
             return REDIRECT_SIGNUP_REQUEST;
         }
