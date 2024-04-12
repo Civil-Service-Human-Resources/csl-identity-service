@@ -113,7 +113,9 @@ public class SignupController {
             Invite invite = pendingInvite.get();
             long durationInSecondsSinceInvited = SECONDS.between(invite.getInvitedAt(), now(clock));
             if (durationInSecondsSinceInvited < durationAfterReRegAllowedInSeconds) {
-                log.info("User with email {} is trying to re-register before re-registration allowed time", email);
+                log.info("User with email {} is trying to re-register before re-registration allowed time." +
+                        " No action is taken. Current pending invite will remain valid until re-registration allowed" +
+                        " or until it expires.", email);
                 long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                         "You have been sent an email with a link to register your account.\n" +
