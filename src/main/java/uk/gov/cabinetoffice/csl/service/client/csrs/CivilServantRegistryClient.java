@@ -60,7 +60,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             return httpClient.executeRequest(request, Boolean.class);
         } catch (Exception e) {
             log.error("An error has occurred while checking if domain in agency using Civil Servant registry", e);
-            return false;
+            throw new GenericServerException("System error");
         }
     }
 
