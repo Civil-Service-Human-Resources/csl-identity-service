@@ -55,10 +55,10 @@ public class SignupControllerTest {
     private static final String SIGNUP_TEMPLATE = "signup/signup";
     private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
 
-    private static final String REDIRECT_INVALID_SIGNUP_CODE = "/login?error=invalidSignupCode";
     private static final String REDIRECT_SIGNUP = "/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "/signup/request";
     private static final String REDIRECT_ENTER_TOKEN = "/signup/enterToken/";
+    private static final String REDIRECT_INVALID_SIGNUP_CODE = "/login?error=invalidSignupCode";
 
     @Autowired
     private MockMvc mockMvc;

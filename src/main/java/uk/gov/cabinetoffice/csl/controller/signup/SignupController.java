@@ -47,10 +47,10 @@ public class SignupController {
     private static final String SIGNUP_FORM = "signupForm";
     private static final String ENTER_TOKEN_FORM = "enterTokenForm";
 
-    private static final String REDIRECT_INVALID_SIGNUP_CODE = "redirect:/login?error=invalidSignupCode";
     private static final String REDIRECT_SIGNUP = "redirect:/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "redirect:/signup/request";
     private static final String REDIRECT_ENTER_TOKEN = "redirect:/signup/enterToken/";
+    private static final String REDIRECT_INVALID_SIGNUP_CODE = "redirect:/login?error=invalidSignupCode";
 
     private static final String LPG_UI_URL = "lpgUiUrl";
 
@@ -112,7 +112,7 @@ public class SignupController {
 
         if(pendingInvite.isPresent()) {
             if (inviteService.isInviteExpired(pendingInvite.get())) {
-                log.info("Signup invite to email: {} has expired.", email);
+                log.info("Signup invite to email {} has expired.", email);
                 inviteService.updateInviteStatus(pendingInvite.get().getCode(), EXPIRED);
             } else {
                 long timeForReReg = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
@@ -134,7 +134,7 @@ public class SignupController {
         }
 
         if (identityService.isIdentityExistsForEmail(email)) {
-            log.info("Email: {} is already in use.", email);
+            log.info("Email {} is already in use.", email);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                     "User already exists with email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
