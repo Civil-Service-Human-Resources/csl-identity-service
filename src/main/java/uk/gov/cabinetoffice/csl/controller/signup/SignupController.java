@@ -110,7 +110,8 @@ public class SignupController {
         Optional<Invite> pendingInvite = inviteService.getInviteForEmailAndStatus(email, PENDING);
 
         if(pendingInvite.isPresent()) {
-            long durationInSecondsSinceInvited = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
+            Invite invite = pendingInvite.get();
+            long durationInSecondsSinceInvited = SECONDS.between(invite.getInvitedAt(), now(clock));
             if (durationInSecondsSinceInvited < durationAfterReRegAllowedInSeconds) {
                 log.info("User with email {} is trying to re-register before re-registration allowed time", email);
                 long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
@@ -124,7 +125,7 @@ public class SignupController {
             } else {
                 log.info("User with email {} trying to re-register after re-registration allowed time therefore " +
                         "setting the current pending invite to expired.", email);
-                inviteService.updateInviteStatus(pendingInvite.get().getCode(), EXPIRED);
+                inviteService.updateInviteStatus(invite.getCode(), EXPIRED);
             }
         }
 
