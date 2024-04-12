@@ -46,10 +46,15 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
     @Override
     public void removeOrganisationalUnitFromCivilServant(String uid) {
-        log.info(format("Removing organisation from user %s", uid));
-        String url = format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
-        RequestEntity<Void> request = RequestEntity.post(url).build();
-        httpClient.executeRequest(request, Void.class);
+        try {
+            log.info(format("Removing organisation from user %s", uid));
+            String url = format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
+            RequestEntity<Void> request = RequestEntity.post(url).build();
+            httpClient.executeRequest(request, Void.class);
+        } catch (Exception e) {
+            log.error("An error has occurred while removing organisation from user using Civil Servant registry", e);
+            throw new GenericServerException("System error");
+        }
     }
 
     @Override
