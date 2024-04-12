@@ -173,7 +173,7 @@ public class SignupController {
             log.info("Signup code for invite is already used. Redirecting to signup page.");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                     "This registration link is already used.\n" +
-                            "Please re-enter your details to create an account.");
+                            "Please enter your details to create an account.");
             return REDIRECT_SIGNUP_REQUEST;
         }
 
