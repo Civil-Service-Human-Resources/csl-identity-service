@@ -12,6 +12,7 @@
                     <span th:case="'deactivated'">Your account has been deactivated</span>
                     <span th:case="'reactivation-expired'">Your reactivation link has expired</span>
                     <span th:case="'pending-reactivation'">Your account is pending reactivation</span>
+                    <span th:case="'invalidSignupCode'">Sign-up link is invalid</span>
                 </h2>
                 <p>
                     <span th:if="${param.error[0] == 'failed'}">
@@ -31,6 +32,9 @@
                     </span>
                     <span th:if="${param.error[0] == 'pending-reactivation'}">
                         We've sent you an email with a link to reactivate your account. Please check your emails (including the junk/spam folder).
+                    </span>
+                    <span th:if="${param.error[0] == 'invalidSignupCode'}">
+                        Sign-up link is invalid. Please re-check your sign-up email or <a href="/signup/request">create an account</a>.
                     </span>
                 </p>
             </div>

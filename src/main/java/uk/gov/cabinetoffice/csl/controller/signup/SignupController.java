@@ -47,7 +47,7 @@ public class SignupController {
     private static final String SIGNUP_FORM = "signupForm";
     private static final String ENTER_TOKEN_FORM = "enterTokenForm";
 
-    private static final String REDIRECT_LOGIN = "redirect:/login";
+    private static final String REDIRECT_INVALID_SIGNUP_CODE = "redirect:/login?error=invalidSignupCode";
     private static final String REDIRECT_SIGNUP = "redirect:/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "redirect:/signup/request";
     private static final String REDIRECT_ENTER_TOKEN = "redirect:/signup/enterToken/";
@@ -237,7 +237,7 @@ public class SignupController {
                 log.info("ResourceNotFoundException. Redirecting to set password with error: " + e);
                 model.addAttribute(INVITE_MODEL, invite);
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
-                return REDIRECT_LOGIN;
+                return REDIRECT_INVALID_SIGNUP_CODE;
             }
             inviteService.updateInviteStatus(code, ACCEPTED);
 
@@ -245,7 +245,7 @@ public class SignupController {
 
             return SIGNUP_SUCCESS_TEMPLATE;
         } else {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
     }
 
@@ -266,7 +266,7 @@ public class SignupController {
 
             return ENTER_TOKEN_TEMPLATE;
         } else {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
     }
 
@@ -315,7 +315,7 @@ public class SignupController {
                         return REDIRECT_ENTER_TOKEN + code;
                     });
         } else {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
     }
 

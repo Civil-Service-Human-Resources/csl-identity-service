@@ -55,7 +55,7 @@ public class SignupControllerTest {
     private static final String SIGNUP_TEMPLATE = "signup/signup";
     private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
 
-    private static final String REDIRECT_LOGIN = "/login";
+    private static final String REDIRECT_INVALID_SIGNUP_CODE = "/login?error=invalidSignupCode";
     private static final String REDIRECT_SIGNUP = "/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "/signup/request";
     private static final String REDIRECT_ENTER_TOKEN = "/signup/enterToken/";
@@ -349,7 +349,7 @@ public class SignupControllerTest {
                         .param("confirmPassword", password)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_LOGIN));
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
@@ -434,7 +434,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_LOGIN));
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
@@ -500,7 +500,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_LOGIN));
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
