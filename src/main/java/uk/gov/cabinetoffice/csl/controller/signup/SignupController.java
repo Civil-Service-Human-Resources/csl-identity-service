@@ -111,9 +111,9 @@ public class SignupController {
 
         if(pendingInvite.isPresent()) {
             long durationInSecondsSinceInvited = SECONDS.between(pendingInvite.get().getInvitedAt(), now(clock));
-            long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
             if (durationInSecondsSinceInvited < durationAfterReRegAllowedInSeconds) {
                 log.info("User with email {} is trying to re-register before re-registration allowed time", email);
+                long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                         "You have been sent an email with a link to register your account.\n" +
                                 "Please check your spam or junk mail folders.\n" +
