@@ -313,13 +313,13 @@ public class SignupController {
 
         model.addAttribute(INVITE_MODEL, invite);
         redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE,
-                addAgencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
+                agencyTokenInfo(domain, form.getToken(), form.getOrganisation()));
         log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
                 domain, form.getToken(), form.getOrganisation());
         return REDIRECT_SIGNUP + code;
     }
 
-    private AgencyToken addAgencyTokenInfo(String domain, String token, String org) {
+    private AgencyToken agencyTokenInfo(String domain, String token, String org) {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setDomain(domain);
         agencyToken.setToken(token);
