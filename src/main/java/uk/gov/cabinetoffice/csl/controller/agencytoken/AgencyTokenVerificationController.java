@@ -123,17 +123,14 @@ public class AgencyTokenVerificationController {
             }
         } catch (ResourceNotFoundException e) {
             log.warn("ResourceNotFoundException during agency verification for form: {}", form);
-
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
             return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (NotEnoughSpaceAvailableException e) {
             log.warn("NotEnoughSpaceAvailableException during agency verification for form: {}", form);
-
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
             return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (Exception e) {
             log.error("Exception during agency verification for form: {}", form.toString());
-
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, VERIFY_AGENCY_TOKEN_ERROR_MESSAGE);
             return "redirect:/login";
         }

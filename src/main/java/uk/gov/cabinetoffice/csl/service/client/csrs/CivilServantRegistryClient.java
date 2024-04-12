@@ -7,7 +7,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
@@ -16,9 +15,9 @@ import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
@@ -59,7 +58,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             String url = format(agencyTokensByDomainFormat, domain);
             RequestEntity<Void> request = RequestEntity.get(url).build();
             return httpClient.executeRequest(request, Boolean.class);
-        } catch (HttpClientErrorException e) {
+        } catch (Exception e) {
             log.error("An error has occurred while checking if domain in agency using Civil Servant registry", e);
             return false;
         }
@@ -70,8 +69,9 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             String url = format(agencyTokensFormat, domain, token, organisation);
             RequestEntity<Void> request = RequestEntity.get(url).build();
-            return Optional.of(httpClient.executeRequest(request, AgencyToken.class));
-        } catch (HttpClientErrorException e) {
+            AgencyToken agencyToken = httpClient.executeRequest(request, AgencyToken.class);
+            return Optional.of(agencyToken);
+        } catch (Exception e) {
             log.error("An error has occurred while getting Agency Token For Domain Token Organisation from Civil Servant registry", e);
             return Optional.empty();
         }
@@ -82,7 +82,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             RequestEntity<Void> request = RequestEntity.get(organisationalUnitsFlatUrl).build();
             return httpClient.executeRequest(request, OrganisationalUnit[].class);
-        } catch (HttpClientErrorException e) {
+        } catch (Exception e) {
             log.error("An error has occurred while getting Organisational Units Formatted from Civil Servant registry", e);
             return new OrganisationalUnit[0];
         }
@@ -99,8 +99,11 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
                 log.error("Allowlist Domains returned null");
                 throw new GenericServerException("System error");
             }
-            return domainsResponse.getDomains().stream().map(d -> d.getDomain().toLowerCase()).collect(Collectors.toList());
-        } catch (HttpClientErrorException e) {
+            return domainsResponse.getDomains()
+                    .stream()
+                    .map(d -> d.getDomain().toLowerCase())
+                    .collect(toList());
+        } catch (Exception e) {
             log.error("An error has occurred while getting allow listed domains from Civil Servant Registry", e);
             throw new GenericServerException("System error");
         }
