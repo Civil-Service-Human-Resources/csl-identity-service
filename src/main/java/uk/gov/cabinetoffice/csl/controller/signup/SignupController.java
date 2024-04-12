@@ -154,7 +154,7 @@ public class SignupController {
             return INVITE_SENT_TEMPLATE;
         }
 
-        log.info("The domain of user with email {} is neither allowListed nor part of an Agency token.", email);
+        log.info("The domain for email {} is neither allowListed nor part of an Agency token.", email);
         redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                 "Your organisation is unable to use this service. Please contact your line manager.");
         return REDIRECT_SIGNUP_REQUEST;
