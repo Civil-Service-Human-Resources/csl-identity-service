@@ -8,19 +8,23 @@ import uk.gov.cabinetoffice.csl.domain.InviteStatus;
 import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.repository.RoleRepository;
 
+import java.time.Clock;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.time.LocalDateTime.now;
 
 @Component
 public class InviteFactory {
 
     private static final String LEARNER_ROLE_NAME = "LEARNER";
     private final RoleRepository roleRepository;
+    private final Clock clock;
 
-    public InviteFactory(RoleRepository roleRepository) {
+    public InviteFactory(RoleRepository roleRepository, Clock clock) {
         this.roleRepository = roleRepository;
+        this.clock = clock;
     }
 
     public Invite create(String email, Set<Role> roleSet, Identity inviter) {
@@ -38,7 +42,7 @@ public class InviteFactory {
         Invite invite = new Invite();
         invite.setForEmail(email);
         invite.setForRoles(roleSet);
-        invite.setInvitedAt(new Date());
+        invite.setInvitedAt(now(clock));
         invite.setStatus(InviteStatus.PENDING);
         invite.setCode(RandomStringUtils.random(40, true, true));
         return invite;

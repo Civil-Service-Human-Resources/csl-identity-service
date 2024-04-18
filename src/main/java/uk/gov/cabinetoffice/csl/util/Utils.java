@@ -1,9 +1,12 @@
 package uk.gov.cabinetoffice.csl.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -11,13 +14,29 @@ import java.util.Locale;
 @Component
 public class Utils {
 
-    public String convertSecondsIntoMinutesOrHours(long seconds) {
-        long hours = seconds / 3600;
-        if(hours < 1) {
-            long minutes = (seconds % 3600) / 60;
-            return String.format("%02d", minutes) + " minutes";
+    public String convertSecondsIntoDaysHoursMinutesSeconds(long totalSeconds) {
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+        long days = 0;
+        if (hours > 24) {
+            days = hours / 24;
+            hours = hours - days * 24;
         }
-        return String.format("%02d", hours) + " hours";
+        String result = "";
+        if (days != 0) {
+            result = result + String.format("%02d", days) + " days ";
+        }
+        if (hours != 0) {
+            result = result + String.format("%02d", hours) + " hours ";
+        }
+        if (minutes != 0) {
+            result = result + String.format("%02d", minutes) + " minutes ";
+        }
+        if (seconds != 0) {
+            result = result + String.format("%02d", seconds) + " seconds";
+        }
+        return StringUtils.removeEnd(result, " ");
     }
 
     public String convertDateTimeFormat(String localDateTime) {
@@ -30,6 +49,10 @@ public class Utils {
             log.warn("Invalid date string value: {}, Exception: {}", localDateTime, e.toString());
         }
         return "";
+    }
+
+    public String convertDateTimeFormat(LocalDateTime localDateTime) {
+        return localDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"));
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {

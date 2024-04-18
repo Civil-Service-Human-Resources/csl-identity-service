@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
-import java.time.Instant;
+import java.time.Clock;
+
+import static java.time.LocalDateTime.now;
 
 @Slf4j
 @Service
@@ -15,16 +17,18 @@ public class LoginService {
 
     private final int maxLoginAttempts;
     private final IdentityRepository identityRepository;
+    private final Clock clock;
 
     public LoginService(@Value("${account.lockout.maxLoginAttempts}") int maxLoginAttempts,
-                        IdentityRepository identityRepository) {
+                        IdentityRepository identityRepository, Clock clock) {
         this.maxLoginAttempts = maxLoginAttempts;
         this.identityRepository = identityRepository;
+        this.clock = clock;
     }
 
     public void loginSucceeded(Identity identity) {
         log.debug("LoginService.loginSucceeded: {}", identity);
-        identity.setLastLoggedIn(Instant.now());
+        identity.setLastLoggedIn(now(clock));
         identity.setFailedLoginAttempts(0);
         identityRepository.save(identity);
     }

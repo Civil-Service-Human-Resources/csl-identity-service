@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
@@ -12,7 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
@@ -32,6 +30,10 @@ import uk.gov.cabinetoffice.csl.handler.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.MediaType.TEXT_HTML;
+import static org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256;
+import static org.springframework.security.oauth2.server.authorization.OAuth2TokenType.ACCESS_TOKEN;
 
 @Configuration
 public class SecurityConfig {
@@ -68,7 +70,7 @@ public class SecurityConfig {
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
-					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+					new MediaTypeRequestMatcher(TEXT_HTML)))
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 		return httpSecurity.build();
 	}
@@ -104,11 +106,9 @@ public class SecurityConfig {
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
-					new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
+					new MediaTypeRequestMatcher(TEXT_HTML))
 			)
-			.oauth2ResourceServer(oauth2 -> oauth2
-				.jwt(Customizer.withDefaults())
-			);
+			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 		return httpSecurity.build();
 	}
 
@@ -144,8 +144,8 @@ public class SecurityConfig {
 	@Bean
 	public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
 		return context -> {
-			if(OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
-				context.getJwsHeader().algorithm(MacAlgorithm.HS256);
+			if(ACCESS_TOKEN.equals(context.getTokenType())) {
+				context.getJwsHeader().algorithm(HS256);
 				context.getJwsHeader().type("JWT");
 				String clientId = context.getRegisteredClient().getClientId();
 				context.getClaims().claim("client_id", clientId);
@@ -164,6 +164,7 @@ public class SecurityConfig {
 						context.getClaims().claim("email", email);
 					}
 				} else if (principal instanceof OAuth2ClientAuthenticationToken) {
+					context.getClaims().claim("user_name", principal.getName());
 					authorities.add("CLIENT");
 				}
 				context.getClaims().claim("authorities", authorities);

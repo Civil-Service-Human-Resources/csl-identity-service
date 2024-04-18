@@ -3,12 +3,14 @@ package uk.gov.cabinetoffice.csl.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -16,14 +18,17 @@ import java.util.Enumeration;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
+@AllArgsConstructor
 public class LogFilter implements Filter {
+
+	private final Clock clock;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		LocalDateTime date = LocalDateTime.now();
+		LocalDateTime date = LocalDateTime.now(clock);
 		log.debug("LogFilter: " + date + " - " + httpRequest.getLocalAddr() + ":" + httpRequest.getLocalPort() + httpRequest.getServletPath());
 		log.debug("Request:");
 		Enumeration<String> headers = httpRequest.getHeaderNames();

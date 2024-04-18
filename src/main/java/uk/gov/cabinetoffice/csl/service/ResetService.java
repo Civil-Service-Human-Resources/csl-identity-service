@@ -13,7 +13,6 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.time.Clock.systemDefaultZone;
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.apache.commons.lang3.RandomStringUtils.random;
@@ -96,13 +95,13 @@ public class ResetService {
     }
 
     public void createPendingResetRequestAndAndNotifyUser(String email) throws NotificationClientException {
-        Reset reset = new Reset(random(40, true, true), email, PENDING, now(systemDefaultZone()));
+        Reset reset = new Reset(random(40, true, true), email, PENDING, now(clock));
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
     }
 
     public void notifyUserForSuccessfulReset(Reset reset) throws NotificationClientException {
-        reset.setResetAt(now(systemDefaultZone()));
+        reset.setResetAt(now(clock));
         reset.setResetStatus(RESET);
         resetRepository.save(reset);
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);

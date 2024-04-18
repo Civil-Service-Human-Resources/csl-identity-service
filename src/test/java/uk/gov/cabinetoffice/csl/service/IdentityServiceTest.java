@@ -11,11 +11,15 @@ import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
+import uk.gov.cabinetoffice.csl.repository.CompoundRolesRepository;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -53,6 +57,8 @@ public class IdentityServiceTest {
 
     private final Utils utils = new Utils();
 
+    private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"), ZoneId.of("Europe/London"));
+
     @BeforeEach
     public void setUp() {
         identityService = new IdentityService(
@@ -62,7 +68,8 @@ public class IdentityServiceTest {
                 new CompoundRolesRepository(),
                 civilServantRegistryClient,
                 passwordEncoder,
-                utils
+                utils,
+                clock
         );
         when(civilServantRegistryClient.getAllowListDomains()).thenReturn(asList("allowListed.gov.uk", "example.com"));
     }
@@ -73,7 +80,7 @@ public class IdentityServiceTest {
         final String emailAddress = "test@example.org";
         final String uid = "uid";
         final Identity identity = new Identity(uid, emailAddress, "password", true, false,
-                emptySet(), Instant.now(), false, null);
+                emptySet(), LocalDateTime.now(), false, null);
 
         when(identityRepository.findFirstByEmailEqualsIgnoreCase(emailAddress))
                 .thenReturn(identity);

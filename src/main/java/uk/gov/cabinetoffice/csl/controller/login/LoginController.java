@@ -39,7 +39,7 @@ public class LoginController {
       model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
       model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
       model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
-      return "maintenance";
+      return "maintenance/maintenance";
     }
 
     DefaultSavedRequest dsr =
@@ -48,10 +48,5 @@ public class LoginController {
       response.sendRedirect(authenticationSuccessTargetUrl);
     }
     return "login";
-  }
-
-  @RequestMapping("/management/login")
-  public String managementLogin() {
-    return "management-login";
   }
 }

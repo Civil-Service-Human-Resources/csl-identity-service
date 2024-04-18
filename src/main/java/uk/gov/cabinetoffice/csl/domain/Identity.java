@@ -12,7 +12,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,7 +60,7 @@ public class Identity implements Serializable {
     private Set<Role> roles;
 
     @Column
-    private Instant lastLoggedIn;
+    private LocalDateTime lastLoggedIn;
 
     @Column
     private boolean deletionNotificationSent;
@@ -72,7 +72,7 @@ public class Identity implements Serializable {
     private Integer failedLoginAttempts;
 
     public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles,
-                    Instant lastLoggedIn, boolean deletionNotificationSent, Integer failedLoginAttempts) {
+                    LocalDateTime lastLoggedIn, boolean deletionNotificationSent, Integer failedLoginAttempts) {
         this.uid = uid;
         this.email = email;
         this.password = password;
@@ -85,7 +85,7 @@ public class Identity implements Serializable {
     }
 
     public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles,
-                    Instant lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid, Integer failedLoginAttempts) {
+                    LocalDateTime lastLoggedIn, boolean deletionNotificationSent, String agencyTokenUid, Integer failedLoginAttempts) {
         this.uid = uid;
         this.email = email;
         this.password = password;

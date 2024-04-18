@@ -62,7 +62,7 @@ public class CustomAuthenticationFailureHandlerTest {
     public void shouldSetErrorToDeactivatedExpiredOnDeactivationExpired() throws IOException {
         HttpServletResponse response = executeHandler("Reactivation request has expired");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
-        verify(response).sendRedirect("/login?error=deactivated-expired&username="
+        verify(response).sendRedirect("/login?error=reactivation-expired&username="
                 + encode(encryptedUsername, UTF_8));
     }
 

@@ -14,7 +14,6 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.time.Clock.systemDefaultZone;
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.apache.commons.lang3.RandomStringUtils.random;
@@ -42,7 +41,7 @@ public class ReactivationService {
 
     public Reactivation createPendingReactivation(String email){
         String reactivationCode = random(40, true, true);
-        Reactivation reactivation = new Reactivation(reactivationCode, PENDING, now(systemDefaultZone()), email);
+        Reactivation reactivation = new Reactivation(reactivationCode, PENDING, now(clock), email);
         return saveReactivation(reactivation);
     }
 
@@ -57,7 +56,7 @@ public class ReactivationService {
         identityService.reactivateIdentity(identity, agencyToken);
         log.info("Identity reactivated for email: {}", email);
         reactivation.setReactivationStatus(REACTIVATED);
-        reactivation.setReactivatedAt(now(systemDefaultZone()));
+        reactivation.setReactivatedAt(now(clock));
         saveReactivation(reactivation);
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
     }

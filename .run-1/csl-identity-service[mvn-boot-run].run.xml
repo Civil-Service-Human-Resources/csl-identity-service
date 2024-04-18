@@ -10,12 +10,13 @@
               <entry key="ACCESS_TOKEN_SCOPE" value="openid, read, write" />
               <entry key="ACCESS_TOKEN_TTL_SECONDS" value="43200" />
               <entry key="ACCOUNT_LOCKOUT_MAX_LOGIN_ATTEMPTS" value="5" />
-              <entry key="ALLOWLIST_DOMAINS_TTL_MS" value="10800000" />
+              <entry key="ALLOWLIST_DOMAINS_TTL_SECONDS" value="43200" />
               <entry key="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
               <entry key="AUTHENTICATION_SUCCESS_TARGET_URL" value="http://localhost:3001" />
               <entry key="CIVIL_SERVANT_REGISTRY_SERVICE_URL" value="http://localhost:9002" />
               <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
               <entry key="CLIENT_SECRET" value="test" />
+              <entry key="CLOCK_ZONE_ID" value="Europe/London" />
               <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
               <entry key="DATABASE_NAME" value="csl_identity" />
               <entry key="DATABASE_USESSL" value="false" />
@@ -30,6 +31,7 @@
               <entry key="GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID" value="f4c2ece1-5159-4736-92cb-4fe0df719308" />
               <entry key="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
               <entry key="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
+              <entry key="GOV_NOTIFY_REACTIVATION_TEMPLATE_ID" value="abfb2e5f-3905-4817-b041-c53afd1eb3e5" />
               <entry key="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
               <entry key="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
               <entry key="INVITE_VALIDITY_SECONDS" value="259200" />
@@ -45,7 +47,6 @@
               <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
               <entry key="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
               <entry key="REACTIVATION_VALIDITY_SECONDS" value="86400" />
-              <entry key="REACTIVATION_EMAIL_TEMPLATE_ID" value="abfb2e5f-3905-4817-b041-c53afd1eb3e5" />
               <entry key="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
               <entry key="REDIS_CACHE_NULL_VALUES" value="false" />
               <entry key="REDIS_CACHE_TTL_MS" value="86400000" />

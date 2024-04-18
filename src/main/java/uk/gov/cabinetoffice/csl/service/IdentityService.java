@@ -13,14 +13,16 @@ import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
+import uk.gov.cabinetoffice.csl.repository.CompoundRoles;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.Clock;
 import java.util.*;
 
 import static java.lang.String.format;
-import static java.time.Instant.now;
+import static java.time.LocalDateTime.now;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -38,6 +40,7 @@ public class IdentityService {
     private final ICivilServantRegistryClient civilServantRegistryClient;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
+    private final Clock clock;
 
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
     public void createIdentityFromInviteCode(String code, String password, AgencyToken agencyToken) {
@@ -47,31 +50,32 @@ public class IdentityService {
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
         String agencyTokenUid = null;
         if (agencyToken != null && agencyToken.hasData()) {
-            Optional<AgencyToken> agencyTokenForDomainTokenOrganisation =
+            Optional<AgencyToken> agencyTokenOptional =
                     civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(agencyToken.getDomain(),
                             agencyToken.getToken(), agencyToken.getOrg());
-
-            agencyTokenUid = agencyTokenForDomainTokenOrganisation
-                    .map(at -> {
-                        if (agencyTokenCapacityService.hasSpaceAvailable(at)) {
-                            return at.getUid();
-                        } else {
-                            throw new UnableToAllocateAgencyTokenException("Agency token uid " +
-                                    at.getUid() + " has no spaces available. Identity not created");
-                        }
-                    })
-                    .orElseThrow(() -> new ResourceNotFoundException("Agency token not found"));
-
-            log.info("Identity request has agency uid = {}", agencyTokenUid);
+            if(agencyTokenOptional.isPresent()) {
+                AgencyToken agencyTokenFromCSRS = agencyTokenOptional.get();
+                agencyTokenUid = agencyTokenFromCSRS.getUid();
+                log.info("Identity request has agency uid = {}", agencyTokenUid);
+                if (!agencyTokenCapacityService.hasSpaceAvailable(agencyTokenFromCSRS)) {
+                    log.info("Agency token uid {} has no spaces available. Identity is not created", agencyTokenUid);
+                    throw new UnableToAllocateAgencyTokenException("Agency token uid " + agencyTokenFromCSRS.getUid()
+                            + " has no spaces available. Identity is not created");
+                }
+            } else {
+                log.info("Agency token not found in CSRS for domain {}, token {} and org {}", agencyToken.getDomain(),
+                        agencyToken.getToken(), agencyToken.getOrg());
+                throw new ResourceNotFoundException("Agency token not found");
+            }
         } else if (!isAllowListedDomain(domain) && !inviteService.isEmailInvited(email)) {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException("Invited request neither agency, nor allowListed, nor invited via IDM for email: "
                     + email);
         }
         Identity identity = new Identity(randomUUID().toString(), email, passwordEncoder.encode(password),
-                true, false, newRoles, now(), false, agencyTokenUid, 0);
+                true, false, newRoles, now(clock), false, agencyTokenUid, 0);
         identityRepository.save(identity);
-        log.debug("New identity email = {} successfully created", email);
+        log.info("New identity for email {} is successfully created.", email);
     }
 
     public BatchProcessResponse removeReportingRoles(List<String> uids) {

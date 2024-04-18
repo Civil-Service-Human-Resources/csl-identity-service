@@ -10,8 +10,9 @@
                     <span th:case="'locked'">Your account is locked</span>
                     <span th:case="'blocked'">Your account is blocked</span>
                     <span th:case="'deactivated'">Your account has been deactivated</span>
-                    <span th:case="'deactivated-expired'">Your reactivation link has expired</span>
+                    <span th:case="'reactivation-expired'">Your reactivation link has expired</span>
                     <span th:case="'pending-reactivation'">Your account is pending reactivation</span>
+                    <span th:case="'invalidSignupCode'">Sign-up link is invalid</span>
                 </h2>
                 <p>
                     <span th:if="${param.error[0] == 'failed'}">
@@ -26,11 +27,14 @@
                         You cannot access this website.<br>
                         Please <a href="mailto:feedback@cslearning.gov.uk">contact us</a> for more information.
                     </span>
-                    <span th:if="${param.error[0] == 'deactivated' || param.error[0] == 'deactivated-expired'}">
+                    <span th:if="${param.error[0] == 'deactivated' || param.error[0] == 'reactivation-expired'}">
                         You will need to <a th:href="@{/account/reactivate(code=${param.username[0]})}">reactivate your account by clicking here</a> to keep using Civil Service Learning.<br>
                     </span>
                     <span th:if="${param.error[0] == 'pending-reactivation'}">
                         We've sent you an email with a link to reactivate your account. Please check your emails (including the junk/spam folder).
+                    </span>
+                    <span th:if="${param.error[0] == 'invalidSignupCode'}">
+                        Sign-up link is invalid. Please re-check your sign-up email or <a href="/signup/request">create an account</a>.
                     </span>
                 </p>
             </div>

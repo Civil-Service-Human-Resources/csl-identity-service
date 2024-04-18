@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.time.Clock.systemDefaultZone;
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.*;
@@ -93,7 +92,7 @@ public class EmailUpdateService {
             if(isEmailUpdateExpired(emailUpdate)) {
                 emailUpdate = emailUpdateFactory.create(identity, newEmail);
             } else {
-                emailUpdate.setRequestedAt(now(systemDefaultZone()));
+                emailUpdate.setRequestedAt(now(clock));
             }
         }
 
@@ -134,7 +133,7 @@ public class EmailUpdateService {
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
         civilServantRegistryClient.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
 
-        emailUpdate.setUpdatedAt(now(systemDefaultZone()));
+        emailUpdate.setUpdatedAt(now(clock));
         emailUpdate.setEmailUpdateStatus(UPDATED);
         log.info("Saving the emailUpdate in DB: {}", emailUpdate);
         emailUpdateRepository.save(emailUpdate);

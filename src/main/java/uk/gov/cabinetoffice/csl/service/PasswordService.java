@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,6 +9,7 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
 
 @Service
+@Transactional
 public class PasswordService {
 
     private final String updatePasswordEmailTemplateId;

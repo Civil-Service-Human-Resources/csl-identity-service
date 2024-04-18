@@ -21,9 +21,12 @@ import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.Matchers.containsString;
 
 import static org.mockito.Mockito.*;
@@ -46,6 +49,17 @@ public class SignupControllerTest {
 
     private static final String STATUS_ATTRIBUTE = "status";
 
+    private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
+    private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
+    private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
+    private static final String SIGNUP_TEMPLATE = "signup/signup";
+    private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
+
+    private static final String REDIRECT_SIGNUP = "/signup/";
+    private static final String REDIRECT_SIGNUP_REQUEST = "/signup/request";
+    private static final String REDIRECT_ENTER_TOKEN = "/signup/enterToken/";
+    private static final String REDIRECT_INVALID_SIGNUP_CODE = "/login?error=invalidSignupCode";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -61,6 +75,8 @@ public class SignupControllerTest {
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"), ZoneId.of("Europe/London"));
+
     @Test
     public void shouldReturnCreateAccountForm() throws Exception {
         mockMvc.perform(
@@ -68,6 +84,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
+                .andExpect(view().name(REQUEST_INVITE_TEMPLATE))
                 .andExpect(content().string(containsString("id=\"email\"")))
                 .andExpect(content().string(containsString("id=\"confirmEmail\"")));
     }
@@ -89,6 +106,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().isOk())
+                .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(content().string(containsString("We've sent you an email")))
                 .andExpect(content().string(containsString("What happens next")))
                 .andExpect(content().string(containsString(
@@ -102,7 +120,7 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
         Optional<Invite> invite = Optional.of(new Invite());
-        invite.get().setInvitedAt(new Date(System.currentTimeMillis() - 25*60*60*1000));
+        invite.get().setInvitedAt(now(clock));
         invite.get().setCode("code");
 
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
@@ -117,7 +135,8 @@ public class SignupControllerTest {
                         .param("email", email)
                         .param("confirmEmail", email)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(view().name(INVITE_SENT_TEMPLATE));
 
         verify(inviteService, times(1)).updateInviteStatus(invite.get().getCode(), EXPIRED);
     }
@@ -132,6 +151,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", "userDomain.org")
                 )
                 .andExpect(status().isOk())
+                .andExpect(view().name(REQUEST_INVITE_TEMPLATE))
                 .andExpect(content().string(containsString("Email address is not valid")));
     }
 
@@ -146,7 +166,8 @@ public class SignupControllerTest {
                         .param("email", email)
                         .param("confirmEmail", email)
                 )
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -163,7 +184,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -182,7 +203,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("inviteSent"))
+                .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(content().string(containsString("We've sent you an email")))
                 .andExpect(content().string(containsString("What happens next")))
                 .andExpect(content().string(containsString(
@@ -208,7 +229,7 @@ public class SignupControllerTest {
                         .param("confirmEmail", email)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"))
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE,
                         "Your organisation is unable to use this service. Please contact your line manager."));
     }
@@ -217,14 +238,14 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfSignupCodeNotValid() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 get("/signup/" + code)
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -240,7 +261,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -254,7 +275,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/request"));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
@@ -272,7 +293,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
     }
 
     @Test
@@ -290,7 +311,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("signup"));
+                .andExpect(view().name(SIGNUP_TEMPLATE));
     }
 
     @Test 
@@ -298,7 +319,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String password = "password";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
         when(inviteService.getInviteForCode(anyString())).thenReturn(new Invite());
 
         mockMvc.perform(
@@ -308,7 +329,8 @@ public class SignupControllerTest {
                         .param("password", password)
                         .param("confirmPassword", "doesn't match")
                 )
-                .andExpect(view().name("signup"))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SIGNUP_TEMPLATE))
                 .andExpect(model().attributeExists("invite"));
     }
 
@@ -317,7 +339,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String password = "Password1";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/" + code)
@@ -327,7 +349,7 @@ public class SignupControllerTest {
                         .param("confirmPassword", password)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
@@ -337,7 +359,7 @@ public class SignupControllerTest {
         Invite invite = new Invite();
         invite.setAuthorisedInvite(false);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
 
         mockMvc.perform(
@@ -348,7 +370,7 @@ public class SignupControllerTest {
                         .param("confirmPassword", password)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
     }
 
     @Test
@@ -359,7 +381,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
         AgencyToken agencyToken = new AgencyToken();
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         doNothing().when(identityService).createIdentityFromInviteCode(code, password, agencyToken);
         doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
@@ -373,7 +395,7 @@ public class SignupControllerTest {
                         .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(view().name("signupSuccess"));
+                .andExpect(view().name(SIGNUP_SUCCESS_TEMPLATE));
     }
 
     @Test
@@ -384,7 +406,7 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
         AgencyToken agencyToken = new AgencyToken();
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         doThrow(new UnableToAllocateAgencyTokenException("Error")).when(identityService)
                 .createIdentityFromInviteCode(code, password, agencyToken);
@@ -398,21 +420,21 @@ public class SignupControllerTest {
                         .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
 
     @Test
     public void shouldRedirectToLoginIfInviteNotValidFromToken() throws Exception {
         String code = "abc123";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 get("/signup/enterToken/" + code)
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
@@ -426,7 +448,7 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(false);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
@@ -435,7 +457,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(view().name("enterToken"));
+                .andExpect(view().name(ENTER_TOKEN_TEMPLATE));
     }
 
     @Test
@@ -449,7 +471,7 @@ public class SignupControllerTest {
 
         OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
 
@@ -458,7 +480,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
 
 
@@ -468,7 +490,7 @@ public class SignupControllerTest {
         String organisation = "org";
         String token = "token123";
 
-        when(inviteService.isInviteValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/enterToken/" + code)
@@ -478,7 +500,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
@@ -497,7 +519,7 @@ public class SignupControllerTest {
         agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
@@ -511,7 +533,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
 
     @Test
@@ -531,7 +553,7 @@ public class SignupControllerTest {
         agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
@@ -545,7 +567,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
     }
 
     @Test
@@ -562,7 +584,7 @@ public class SignupControllerTest {
 
         Optional<AgencyToken> emptyOptional = Optional.empty();
 
-        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
                 .thenReturn(emptyOptional);
@@ -575,7 +597,7 @@ public class SignupControllerTest {
                         .param("token", token)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/enterToken/" + code))
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE));
     }
 }

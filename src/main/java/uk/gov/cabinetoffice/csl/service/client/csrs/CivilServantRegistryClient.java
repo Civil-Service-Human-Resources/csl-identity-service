@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.RequestEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
@@ -17,9 +15,9 @@ import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
@@ -48,10 +46,15 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
     @Override
     public void removeOrganisationalUnitFromCivilServant(String uid) {
-        log.info(format("Removing organisation from user %s", uid));
-        String url = format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
-        RequestEntity<Void> request = RequestEntity.post(url).build();
-        httpClient.executeRequest(request, Void.class);
+        try {
+            log.info(format("Removing organisation from user %s", uid));
+            String url = format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
+            RequestEntity<Void> request = RequestEntity.post(url).build();
+            httpClient.executeRequest(request, Void.class);
+        } catch (Exception e) {
+            log.error("An error has occurred while removing organisation from user using Civil Servant registry", e);
+            throw new GenericServerException("System error");
+        }
     }
 
     @Override
@@ -60,9 +63,9 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             String url = format(agencyTokensByDomainFormat, domain);
             RequestEntity<Void> request = RequestEntity.get(url).build();
             return httpClient.executeRequest(request, Boolean.class);
-        } catch (HttpClientErrorException e) {
+        } catch (Exception e) {
             log.error("An error has occurred while checking if domain in agency using Civil Servant registry", e);
-            return false;
+            throw new GenericServerException("System error");
         }
     }
 
@@ -71,8 +74,9 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             String url = format(agencyTokensFormat, domain, token, organisation);
             RequestEntity<Void> request = RequestEntity.get(url).build();
-            return Optional.of(httpClient.executeRequest(request, AgencyToken.class));
-        } catch (HttpClientErrorException e) {
+            AgencyToken agencyToken = httpClient.executeRequest(request, AgencyToken.class);
+            return Optional.of(agencyToken);
+        } catch (Exception e) {
             log.error("An error has occurred while getting Agency Token For Domain Token Organisation from Civil Servant registry", e);
             return Optional.empty();
         }
@@ -83,7 +87,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             RequestEntity<Void> request = RequestEntity.get(organisationalUnitsFlatUrl).build();
             return httpClient.executeRequest(request, OrganisationalUnit[].class);
-        } catch (HttpClientErrorException e) {
+        } catch (Exception e) {
             log.error("An error has occurred while getting Organisational Units Formatted from Civil Servant registry", e);
             return new OrganisationalUnit[0];
         }
@@ -100,8 +104,11 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
                 log.error("Allowlist Domains returned null");
                 throw new GenericServerException("System error");
             }
-            return domainsResponse.getDomains().stream().map(d -> d.getDomain().toLowerCase()).collect(Collectors.toList());
-        } catch (HttpClientErrorException e) {
+            return domainsResponse.getDomains()
+                    .stream()
+                    .map(d -> d.getDomain().toLowerCase())
+                    .collect(toList());
+        } catch (Exception e) {
             log.error("An error has occurred while getting allow listed domains from Civil Servant Registry", e);
             throw new GenericServerException("System error");
         }
@@ -109,7 +116,6 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
     @Override
     @CacheEvict(value = "allowListDomains", allEntries = true)
-    @Scheduled(fixedRateString = "${civilServantRegistry.cache.allowListDomainsTTL}")
     public void evictAllowListDomainCache() {
         log.info("Evicting Allowlist Domains cache");
     }

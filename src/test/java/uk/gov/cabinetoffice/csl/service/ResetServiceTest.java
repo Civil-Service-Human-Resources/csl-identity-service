@@ -34,7 +34,7 @@ public class ResetServiceTest {
     public static final String TEMPLATE_ID = "template123";
     public static final String URL = "localhost:8080";
     private final int validityInSeconds = 86400;
-    private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"), ZoneId.of("UTC"));
+    private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"), ZoneId.of("Europe/London"));
 
     private final ResetRepository resetRepository = mock(ResetRepository.class);
 
