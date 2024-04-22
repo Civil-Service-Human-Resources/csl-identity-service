@@ -1,0 +1,98 @@
+INSERT INTO oauth2_registered_client 
+(
+	id,
+	client_id,
+	client_id_issued_at,
+	client_secret,
+	client_secret_expires_at,
+	client_name,
+	client_authentication_methods,
+	authorization_grant_types,
+	redirect_uris,
+	post_logout_redirect_uris,
+	scopes,
+	client_settings,
+	token_settings
+) 
+VALUES
+(
+	'116852c8-f968-4dd1-9495-c0edf96f42e4',
+	'9fbd4ae2-2db3-44c7-9545-88e80255b56e',
+	'2023-10-17 11:07:44',
+	'$2a$10$IQ7.gaYFuZ9Ta9lRb6Ft1OeTSqylNncskKx.Wj9/wxji8Zpxu5fBi',
+	NULL,
+	'lpg-ui',
+	'client_secret_jwt,client_secret_basic,client_secret_post',
+	'refresh_token,client_credentials,password,authorization_code,urn:ietf:params:oauth:grant-type:jwt-bearer',
+	'https://staging.learn.civilservice.gov.uk/authenticate',
+	'https://staging.learn.civilservice.gov.uk/authenticate',
+	'read,openid,write',
+	'{"@class":"java.util.Collections$UnmodifiableMap","settings.client.require-proof-key":false,"settings.client.require-authorization-consent":false}',
+	'{"@class":"java.util.Collections$UnmodifiableMap","settings.token.reuse-refresh-tokens":true,"settings.token.id-token-signature-algorithm":["org.springframework.security.oauth2.jose.jws.SignatureAlgorithm","RS256"],"settings.token.access-token-time-to-live":["java.time.Duration",43200.000000000],"settings.token.access-token-format":{"@class":"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat","value":"self-contained"},"settings.token.refresh-token-time-to-live":["java.time.Duration",86400.000000000],"settings.token.authorization-code-time-to-live":["java.time.Duration",300.000000000],"settings.token.device-code-time-to-live":["java.time.Duration",300.000000000]}'
+);
+
+INSERT INTO oauth2_registered_client 
+(
+	id,
+	client_id,
+	client_id_issued_at,
+	client_secret,
+	client_secret_expires_at,
+	client_name,
+	client_authentication_methods,
+	authorization_grant_types,
+	redirect_uris,
+	post_logout_redirect_uris,
+	scopes,
+	client_settings,
+	token_settings
+) 
+VALUES
+(
+	'216852c8-f968-4dd1-9495-c0edf96f42e4',
+	'f90a4080-e5e9-4a81-ace4-f738b4c9c30e',
+	'2023-10-17 11:08:08',
+	'$2a$10$IQ7.gaYFuZ9Ta9lRb6Ft1OeTSqylNncskKx.Wj9/wxji8Zpxu5fBi',
+	NULL,
+	'lpg-management',
+	'client_secret_jwt,client_secret_basic,client_secret_post',
+	'refresh_token,client_credentials,password,authorization_code,urn:ietf:params:oauth:grant-type:jwt-bearer',
+	'https://management.staging.learn.civilservice.gov.uk/authenticate',
+	'https://management.staging.learn.civilservice.gov.uk/authenticate',
+	'read,openid,write',
+	'{"@class":"java.util.Collections$UnmodifiableMap","settings.client.require-proof-key":false,"settings.client.require-authorization-consent":false}',
+	'{"@class":"java.util.Collections$UnmodifiableMap","settings.token.reuse-refresh-tokens":true,"settings.token.id-token-signature-algorithm":["org.springframework.security.oauth2.jose.jws.SignatureAlgorithm","RS256"],"settings.token.access-token-time-to-live":["java.time.Duration",43200.000000000],"settings.token.access-token-format":{"@class":"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat","value":"self-contained"},"settings.token.refresh-token-time-to-live":["java.time.Duration",86400.000000000],"settings.token.authorization-code-time-to-live":["java.time.Duration",300.000000000],"settings.token.device-code-time-to-live":["java.time.Duration",300.000000000]}'
+);
+
+INSERT INTO oauth2_registered_client 
+(
+	id,
+	client_id,
+	client_id_issued_at,
+	client_secret,
+	client_secret_expires_at,
+	client_name,
+	client_authentication_methods,
+	authorization_grant_types,
+	redirect_uris,
+	post_logout_redirect_uris,
+	scopes,
+	client_settings,
+	token_settings
+) 
+VALUES
+(
+	'316852c8-f968-4dd1-9495-c0edf96f42e4',
+	'd0600e00-7fc7-4536-921a-02e2ebee1b39',
+	'2023-10-17 11:08:19',
+	'$2a$10$IQ7.gaYFuZ9Ta9lRb6Ft1OeTSqylNncskKx.Wj9/wxji8Zpxu5fBi',
+	NULL,
+	'identity-management',
+	'client_secret_jwt,client_secret_basic,client_secret_post',
+	'refresh_token,client_credentials,password,authorization_code,urn:ietf:params:oauth:grant-type:jwt-bearer',
+	'https://lpg-lpgstaging-identity-management.azurewebsites.net/mgmt/login',
+	'https://lpg-lpgstaging-identity-management.azurewebsites.net/mgmt/login',
+	'read,openid,write',
+	'{"@class":"java.util.Collections$UnmodifiableMap","settings.client.require-proof-key":false,"settings.client.require-authorization-consent":false}',
+	'{"@class":"java.util.Collections$UnmodifiableMap","settings.token.reuse-refresh-tokens":true,"settings.token.id-token-signature-algorithm":["org.springframework.security.oauth2.jose.jws.SignatureAlgorithm","RS256"],"settings.token.access-token-time-to-live":["java.time.Duration",43200.000000000],"settings.token.access-token-format":{"@class":"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat","value":"self-contained"},"settings.token.refresh-token-time-to-live":["java.time.Duration",86400.000000000],"settings.token.authorization-code-time-to-live":["java.time.Duration",300.000000000],"settings.token.device-code-time-to-live":["java.time.Duration",300.000000000]}'
+);
