@@ -1,3 +1,3 @@
-CREATE DATABASE `csl_identity`;
-
 CREATE DATABASE `identity`;
+
+CREATE DATABASE `csl_identity`;

@@ -13,7 +13,7 @@
       <env name="CLIENT_SECRET" value="test" />
       <env name="CLOCK_ZONE_ID" value="Europe/London" />
       <env name="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
-      <env name="DATABASE_NAME" value="csl_identity" />
+      <env name="DATABASE_NAME" value="identity" />
       <env name="DATABASE_USESSL" value="false" />
       <env name="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
       <env name="DATASOURCE_PASSWORD" value="password" />
