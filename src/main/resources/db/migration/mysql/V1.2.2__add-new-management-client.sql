@@ -1,0 +1,2 @@
+INSERT INTO `client` (active, uid, password, redirect_uri)
+VALUES (true, 'a5881544-6159-4d2f-9b51-8c47ce97454d', '$2a$10$AbxhLGtIx7yv8jhF0BePiOxnb1mlHHq/Ge4R3PxCL2wIsoEov1VaS', 'http://lpg.local.cshr.digital:3005/authenticate');
