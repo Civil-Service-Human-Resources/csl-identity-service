@@ -1,4 +1,4 @@
-INSERT INTO oauth2_registered_client 
+INSERT INTO oauth2_registered_client
 (
 	id,
 	client_id,
