@@ -28,4 +28,10 @@ public class CacheResetController {
         civilServantRegistryClient.evictAllowListDomainCache();
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
+
+    @GetMapping(path = "/organisations", produces = "application/json")
+    public ResponseEntity<?> evictOrganisationsCache() {
+        civilServantRegistryClient.evictOrganisationsCache();
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
 }
