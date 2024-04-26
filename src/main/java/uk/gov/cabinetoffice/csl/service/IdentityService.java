@@ -42,6 +42,43 @@ public class IdentityService {
     private final Utils utils;
     private final Clock clock;
 
+    @ReadOnlyProperty
+    public boolean isIdentityExistsForEmail(String email) {
+        return identityRepository.existsByEmailIgnoreCase(email);
+    }
+
+    public Identity getIdentityForEmail(String email) {
+        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
+    }
+
+    public Identity getActiveIdentityForEmail(String email) {
+        return identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email);
+    }
+
+    public Identity getInactiveIdentityForEmail(String email) {
+        return identityRepository
+                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
+                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
+    }
+
+    public Identity getIdentityForUid(String uid) {
+        return identityRepository
+                .findFirstByUid(uid)
+                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for uid: " + uid));
+    }
+
+    public List<Identity> getAllIdentities() {
+        return identityRepository.findAll();
+    }
+
+    public List<IdentityDTO> getAllNormalisedIdentities() {
+        return identityRepository.findAllNormalised();
+    }
+
+    public List<IdentityDTO> getIdentitiesByUidsNormalised(List<String> uids) {
+        return identityRepository.findIdentitiesByUidsNormalised(uids);
+    }
+
     @Transactional(noRollbackFor = {UnableToAllocateAgencyTokenException.class, ResourceNotFoundException.class})
     public void createIdentityFromInviteCode(String code, String password, AgencyToken agencyToken) {
         Invite invite = inviteService.getInviteForCode(code);
@@ -51,7 +88,7 @@ public class IdentityService {
         String agencyTokenUid = null;
         if (agencyToken != null && agencyToken.hasData()) {
             Optional<AgencyToken> agencyTokenOptional =
-                    civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(agencyToken.getDomain(),
+                    civilServantRegistryClient.getAgencyToken(agencyToken.getDomain(),
                             agencyToken.getToken(), agencyToken.getOrg());
             if(agencyTokenOptional.isPresent()) {
                 AgencyToken agencyTokenFromCSRS = agencyTokenOptional.get();
@@ -135,57 +172,24 @@ public class IdentityService {
         identityRepository.save(identity);
     }
 
-    @ReadOnlyProperty
-    public boolean isIdentityExistsForEmail(String email) {
-        return identityRepository.existsByEmailIgnoreCase(email);
-    }
-
-    public Identity getIdentityForEmail(String email) {
-        return identityRepository.findFirstByEmailEqualsIgnoreCase(email);
-    }
-
-    public Identity getActiveIdentityForEmail(String email) {
-        return identityRepository.findFirstByActiveTrueAndEmailEqualsIgnoreCase(email);
-    }
-
-    public Identity getInactiveIdentityForEmail(String email) {
-        return identityRepository
-                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(email)
-                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for email: " + email));
-    }
-
-    public Identity getIdentityForUid(String uid) {
-        return identityRepository
-                .findFirstByUid(uid)
-                .orElseThrow(() -> new IdentityNotFoundException("Identity not found for uid: " + uid));
-    }
-
-    public boolean isValidEmailDomain(String email) {
-        final String domain = utils.getDomainFromEmailAddress(email);
-        return (isAllowListedDomain(domain) || civilServantRegistryClient.isDomainInAgency(domain));
-    }
-
-    public boolean isAllowListedDomain(String domain) {
-        return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase());
-    }
-
-    public boolean isDomainInAgency(String domain) {
-        return civilServantRegistryClient.isDomainInAgency(domain);
-    }
-
     public boolean isEmailInvited(String email) {
         return inviteService.isEmailInvited(email);
     }
 
-    public List<Identity> getAllIdentities() {
-        return identityRepository.findAll();
+    public boolean isValidEmailDomain(String email) {
+        final String domain = utils.getDomainFromEmailAddress(email);
+        return civilServantRegistryClient.isDomainValid(domain);
     }
 
-    public List<IdentityDTO> getAllNormalisedIdentities() {
-        return identityRepository.findAllNormalised();
+    public boolean isAllowListedDomain(String domain) {
+        return civilServantRegistryClient.isDomainAllowListed(domain);
     }
 
-    public List<IdentityDTO> getIdentitiesByUidsNormalised(List<String> uids) {
-        return identityRepository.findIdentitiesByUidsNormalised(uids);
+    public boolean isDomainInAnAgencyToken(String domain) {
+        return civilServantRegistryClient.isDomainInAnAgencyToken(domain);
+    }
+
+    public boolean isAgencyTokenUidValidForDomain(String agencyTokenUid, String domain) {
+        return civilServantRegistryClient.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
     }
 }

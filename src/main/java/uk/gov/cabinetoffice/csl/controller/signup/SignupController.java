@@ -139,7 +139,7 @@ public class SignupController {
         }
 
         final String domain = utils.getDomainFromEmailAddress(email);
-        if (identityService.isDomainInAgency(domain)) {
+        if (identityService.isDomainInAnAgencyToken(domain)) {
             log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));

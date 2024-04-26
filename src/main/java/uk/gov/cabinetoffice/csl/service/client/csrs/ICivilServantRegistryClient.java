@@ -8,15 +8,31 @@ import java.util.Optional;
 
 public interface ICivilServantRegistryClient {
 
-    void removeOrganisationalUnitFromCivilServant(String uid);
+    boolean isDomainAllowListed(String domain);
 
-    Boolean isDomainInAgency(String domain);
+    boolean isDomainValid(String domain);
 
-    Optional<AgencyToken> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisation);
+    boolean isDomainInAnAgencyToken(String domain);
 
-    OrganisationalUnit[] getOrganisationalUnitsFormatted();
+    boolean isDomainInAnAgencyTokenWithOrg(String domain, String orgCode);
 
-    List<String> getAllowListDomains();
+    List<String> getAllowListDomainsFromCache();
 
     void evictAllowListDomainCache();
+
+    List<OrganisationalUnit> getFilteredOrganisations(String domain);
+
+    List<OrganisationalUnit> getAllOrganisations();
+
+    List<OrganisationalUnit> getAllOrganisationsFromCache();
+
+    void evictOrganisationsCache();
+
+    void removeOrganisationalUnitFromCivilServant(String uid);
+
+    Optional<AgencyToken> getAgencyToken(String domain, String token, String organisation);
+
+    Optional<AgencyToken> getAgencyTokenWithUid(String uid);
+
+    boolean isAgencyTokenUidValidForDomain(String agencyTokenUid, String domain);
 }

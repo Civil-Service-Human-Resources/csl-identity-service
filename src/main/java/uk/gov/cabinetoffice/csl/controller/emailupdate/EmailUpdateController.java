@@ -185,6 +185,6 @@ public class EmailUpdateController {
     }
 
     private boolean isAgencyDomain(String newDomain) {
-        return identityService.isDomainInAgency(newDomain);
+        return identityService.isDomainInAnAgencyToken(newDomain);
     }
 }

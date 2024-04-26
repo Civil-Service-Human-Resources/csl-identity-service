@@ -88,7 +88,7 @@ public class ReactivationControllerTest {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
 
         when(reactivationService.isReactivationExpired(reactivation)).thenReturn(false);
-        when(identityService.isDomainInAgency(utils.getDomainFromEmailAddress(EMAIL))).thenReturn(true);
+        when(identityService.isDomainInAnAgencyToken(utils.getDomainFromEmailAddress(EMAIL))).thenReturn(true);
 
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))

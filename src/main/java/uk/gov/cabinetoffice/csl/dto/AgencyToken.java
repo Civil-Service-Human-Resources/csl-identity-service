@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -23,6 +25,7 @@ public class AgencyToken implements Serializable {
     private String domain;
     private String token;
     private String org;
+    private List<Domain> agencyDomains = Collections.emptyList();
 
     public AgencyToken(Long capacityUsed) {
         this.capacityUsed = capacityUsed;
@@ -39,5 +42,16 @@ public class AgencyToken implements Serializable {
         return isNotBlank(this.getDomain())
                 && isNotBlank(this.getToken())
                 && isNotBlank(this.getOrg());
+    }
+
+    public List<Domain> getAgencyDomains() {
+        if (agencyDomains == null) {
+            agencyDomains = Collections.emptyList();
+        }
+        return agencyDomains;
+    }
+
+    public boolean isDomainAssignedToAgencyToken(String domain) {
+        return this.getAgencyDomains().stream().anyMatch(d -> d.getDomain().equals(domain));
     }
 }

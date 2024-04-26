@@ -52,7 +52,7 @@ public class UserServiceTest {
 
         when(identityService.getIdentityForEmail(email)).thenReturn(identity);
         when(identityService.isAllowListedDomain(domain)).thenReturn(true);
-        when(identityService.isDomainInAgency(domain)).thenReturn(true);
+        when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(true);
         when(identityService.isEmailInvited(email)).thenReturn(true);
 
         IdentityDetails identityDetails = (IdentityDetails) userService.loadUserByUsername(email);
