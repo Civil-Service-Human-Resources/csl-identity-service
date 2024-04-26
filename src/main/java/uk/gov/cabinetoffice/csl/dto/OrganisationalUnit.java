@@ -10,7 +10,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Data
 @AllArgsConstructor
@@ -28,8 +29,12 @@ public class OrganisationalUnit implements Serializable {
     private List<Domain> domains = Collections.emptyList();
     private AgencyToken agencyToken;
     private List<OrganisationalUnit> children = new ArrayList<>();
+
     public List<String> getDomains() {
-        return domains.stream().map(Domain::getDomain).collect(Collectors.toList());
+        return domains
+                .stream()
+                .map(Domain::getDomain)
+                .collect(toList());
     }
 
     public boolean doesDomainExist(String domain) {
@@ -42,7 +47,9 @@ public class OrganisationalUnit implements Serializable {
 
     public boolean isDomainAgencyAssigned(String domain) {
         if (agencyToken != null) {
-            return agencyToken.getAgencyDomains().stream().anyMatch(d -> d.getDomain().equals(domain));
+            return agencyToken.getAgencyDomains()
+                    .stream()
+                    .anyMatch(d -> d.getDomain().equals(domain));
         }
         return false;
     }
