@@ -22,6 +22,7 @@ import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.time.Clock;
+import java.util.List;
 import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
@@ -266,7 +267,7 @@ public class SignupController {
         }
 
         log.info("Invite email {} accessing enter token screen for validation", invite.getForEmail());
-        OrganisationalUnit[] organisations = civilServantRegistryClient.getOrganisationalUnitsFormatted();
+        List<OrganisationalUnit> organisations = civilServantRegistryClient.getAllOrganisationsFromCache();
         model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
         model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
         return ENTER_TOKEN_TEMPLATE;
@@ -291,7 +292,7 @@ public class SignupController {
         final String emailAddress = invite.getForEmail();
         final String domain = utils.getDomainFromEmailAddress(emailAddress);
         Optional<AgencyToken> agencyTokenOptional =
-                civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(
+                civilServantRegistryClient.getAgencyToken(
                         domain, form.getToken(), form.getOrganisation());
 
         if(agencyTokenOptional.isEmpty()) {
