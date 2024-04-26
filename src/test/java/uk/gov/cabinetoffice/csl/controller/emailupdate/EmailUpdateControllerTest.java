@@ -152,7 +152,7 @@ public class EmailUpdateControllerTest {
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
-        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isDomainAllowListed(DOMAIN)).thenReturn(false);
         when(identityService.isDomainInAnAgencyToken(DOMAIN)).thenReturn(false);
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
@@ -204,7 +204,7 @@ public class EmailUpdateControllerTest {
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
-        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isDomainAllowListed(DOMAIN)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(DOMAIN)).thenReturn(false);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
@@ -226,7 +226,7 @@ public class EmailUpdateControllerTest {
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
-        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isDomainAllowListed(DOMAIN)).thenReturn(false);
         when(identityService.isDomainInAnAgencyToken(DOMAIN)).thenReturn(true);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
@@ -249,7 +249,7 @@ public class EmailUpdateControllerTest {
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(false);
-        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isDomainAllowListed(DOMAIN)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(DOMAIN)).thenReturn(false);
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
@@ -269,7 +269,7 @@ public class EmailUpdateControllerTest {
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.isIdentityExistsForEmail(emailUpdate.getPreviousEmail())).thenReturn(true);
-        when(identityService.isAllowListedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isDomainAllowListed(DOMAIN)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(DOMAIN)).thenReturn(false);
 
         doThrow(new RuntimeException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));

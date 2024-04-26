@@ -51,7 +51,7 @@ public class UserServiceTest {
                 emptySet(), LocalDateTime.now(), false, agencyTokenUid, null);
 
         when(identityService.getIdentityForEmail(email)).thenReturn(identity);
-        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.isDomainAllowListed(domain)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(true);
         when(identityService.isEmailInvited(email)).thenReturn(true);
 

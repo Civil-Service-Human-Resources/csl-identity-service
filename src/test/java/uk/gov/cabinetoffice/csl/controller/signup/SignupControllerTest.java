@@ -95,7 +95,7 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.isDomainAllowListed(domain)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
 
         mockMvc.perform(
@@ -125,7 +125,7 @@ public class SignupControllerTest {
 
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
         when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
-        when(identityService.isAllowListedDomain(domain)).thenReturn(true);
+        when(identityService.isDomainAllowListed(domain)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
 
         mockMvc.perform(
@@ -218,7 +218,7 @@ public class SignupControllerTest {
         String domain = "domain.com";
 
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.isAllowListedDomain(domain)).thenReturn(false);
+        when(identityService.isDomainAllowListed(domain)).thenReturn(false);
         when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
 
         mockMvc.perform(

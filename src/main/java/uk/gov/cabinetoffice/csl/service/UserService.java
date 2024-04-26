@@ -59,7 +59,7 @@ public class UserService implements UserDetailsService {
     }
 
     private boolean isAllowListedDomain(String domain) {
-        return identityService.isAllowListedDomain(domain);
+        return identityService.isDomainAllowListed(domain);
     }
 
     private boolean isAgencyDomain(String domain, Identity identity) {

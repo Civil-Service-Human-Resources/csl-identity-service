@@ -210,19 +210,19 @@ public class IdentityServiceTest {
 
     @Test
     public void testIsAllowListedDomainMixedCase(){
-        boolean validDomain = identityService.isAllowListedDomain("ExAmPlE.cOm");
+        boolean validDomain = identityService.isDomainAllowListed("ExAmPlE.cOm");
         assertTrue(validDomain);
     }
 
     @Test
     public void testIsAllowListedDomainLowerCase(){
-        boolean validDomain = identityService.isAllowListedDomain("example.com");
+        boolean validDomain = identityService.isDomainAllowListed("example.com");
         assertTrue(validDomain);
     }
 
     @Test
     public void testIsAllowListedDomainUpperCase(){
-        boolean validDomain = identityService.isAllowListedDomain("EXAMPLE.COM");
+        boolean validDomain = identityService.isDomainAllowListed("EXAMPLE.COM");
         assertTrue(validDomain);
     }
 

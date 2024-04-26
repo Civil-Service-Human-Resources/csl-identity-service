@@ -104,7 +104,7 @@ public class IdentityService {
                         agencyToken.getToken(), agencyToken.getOrg());
                 throw new ResourceNotFoundException("Agency token not found");
             }
-        } else if (!isAllowListedDomain(domain) && !inviteService.isEmailInvited(email)) {
+        } else if (!isDomainAllowListed(domain) && !inviteService.isEmailInvited(email)) {
             log.info("Invited request neither agency, nor allowListed, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException("Invited request neither agency, nor allowListed, nor invited via IDM for email: "
                     + email);
@@ -181,7 +181,7 @@ public class IdentityService {
         return civilServantRegistryClient.isDomainValid(domain);
     }
 
-    public boolean isAllowListedDomain(String domain) {
+    public boolean isDomainAllowListed(String domain) {
         return civilServantRegistryClient.isDomainAllowListed(domain);
     }
 

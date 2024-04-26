@@ -147,7 +147,7 @@ public class SignupController {
             return INVITE_SENT_TEMPLATE;
         }
 
-        if (identityService.isAllowListedDomain(domain)) {
+        if (identityService.isDomainAllowListed(domain)) {
             log.info("Sending invite to allowListed user with email {}", email);
             inviteService.sendSelfSignupInvite(email, true);
             model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
