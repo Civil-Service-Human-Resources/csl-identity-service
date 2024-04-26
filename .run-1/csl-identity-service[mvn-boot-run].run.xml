@@ -18,7 +18,7 @@
               <entry key="CLIENT_SECRET" value="test" />
               <entry key="CLOCK_ZONE_ID" value="Europe/London" />
               <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
-              <entry key="DATABASE_NAME" value="csl_identity" />
+              <entry key="DATABASE_NAME" value="identity" />
               <entry key="DATABASE_USESSL" value="false" />
               <entry key="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
               <entry key="DATASOURCE_PASSWORD" value="password" />
