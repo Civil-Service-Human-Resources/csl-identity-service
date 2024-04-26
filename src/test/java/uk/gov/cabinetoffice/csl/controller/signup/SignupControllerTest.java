@@ -24,6 +24,8 @@ import uk.gov.cabinetoffice.csl.service.InviteService;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
@@ -442,7 +444,8 @@ public class SignupControllerTest {
         String code = "abc123";
         String email = "test@example.com";
 
-        OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
+        List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
+        organisationalUnits.add(new OrganisationalUnit());
 
         Invite invite = new Invite();
         invite.setForEmail(email);
@@ -450,7 +453,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
+        when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisationalUnits);
 
         mockMvc.perform(
                 get("/signup/enterToken/" + code)
@@ -469,11 +472,12 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        OrganisationalUnit[] organisationalUnits = new OrganisationalUnit[]{new OrganisationalUnit()};
+        List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
+        organisationalUnits.add(new OrganisationalUnit());
 
         when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
+        when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisationalUnits);
 
         mockMvc.perform(
                 get("/signup/enterToken/" + code)
@@ -521,7 +525,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
+        when(civilServantRegistryClient.getAgencyToken(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -555,7 +559,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
+        when(civilServantRegistryClient.getAgencyToken(domain, token, organisation))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
 
@@ -586,7 +590,7 @@ public class SignupControllerTest {
 
         when(inviteService.isInviteCodeValid(code)).thenReturn(true);
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation))
+        when(civilServantRegistryClient.getAgencyToken(domain, token, organisation))
                 .thenReturn(emptyOptional);
 
         mockMvc.perform(

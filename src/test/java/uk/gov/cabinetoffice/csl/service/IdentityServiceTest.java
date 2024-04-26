@@ -71,7 +71,6 @@ public class IdentityServiceTest {
                 utils,
                 clock
         );
-        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(asList("allowListed.gov.uk", "example.com"));
     }
 
     @Test
@@ -166,7 +165,7 @@ public class IdentityServiceTest {
         agencyToken.setToken(tokenToken);
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenDomain, tokenToken, tokenCode))
+        when(civilServantRegistryClient.getAgencyToken(tokenDomain, tokenToken, tokenCode))
                 .thenReturn(Optional.of(agencyToken));
         when(passwordEncoder.encode("password")).thenReturn("password");
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
