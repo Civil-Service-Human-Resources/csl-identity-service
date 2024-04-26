@@ -10,9 +10,10 @@
               <entry key="ACCESS_TOKEN_SCOPE" value="openid, read, write" />
               <entry key="ACCESS_TOKEN_TTL_SECONDS" value="43200" />
               <entry key="ACCOUNT_LOCKOUT_MAX_LOGIN_ATTEMPTS" value="5" />
-              <entry key="ALLOWLIST_DOMAINS_TTL_SECONDS" value="43200" />
+              <entry key="ALLOWLIST_DOMAINS_CACHE_TTL_SECONDS" value="43200" />
               <entry key="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
               <entry key="AUTHENTICATION_SUCCESS_TARGET_URL" value="http://localhost:3001" />
+              <entry key="CIVIL_SERVANT_REGISTRY_ORGANISATION_MAX_PAGE_SIZE" value="200" />
               <entry key="CIVIL_SERVANT_REGISTRY_SERVICE_URL" value="http://localhost:9002" />
               <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
               <entry key="CLIENT_SECRET" value="test" />
@@ -45,6 +46,7 @@
               <entry key="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
               <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
               <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
+              <entry key="ORGANISATIONS_CACHE_TTL_SECONDS" value="100000" />
               <entry key="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
               <entry key="REACTIVATION_VALIDITY_SECONDS" value="86400" />
               <entry key="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
