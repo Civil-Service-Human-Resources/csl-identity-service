@@ -54,7 +54,7 @@ public class SignupController {
     private static final String REDIRECT_SIGNUP = "redirect:/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "redirect:/signup/request";
     private static final String REDIRECT_CHOOSE_ORGANISATION = "redirect:/signup/chooseOrganisation";
-    private static final String REDIRECT_ENTER_TOKEN = "redirect:/signup/enterToken";
+    private static final String REDIRECT_ENTER_TOKEN = "redirect:/signup/enterToken/";
     private static final String REDIRECT_INVALID_SIGNUP_CODE = "redirect:/login?error=invalidSignupCode";
 
     private static final String LPG_UI_URL = "lpgUiUrl";
