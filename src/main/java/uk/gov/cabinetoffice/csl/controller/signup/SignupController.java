@@ -18,7 +18,6 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
-import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -366,7 +365,7 @@ public class SignupController {
                     if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
                         log.info("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup", agencyToken.getUid(), agencyToken.getCapacity(),
                                 invite.getForEmail());
-                        redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ApplicationConstants.NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+                        redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
                         return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
                     }
 
@@ -379,7 +378,7 @@ public class SignupController {
                     return REDIRECT_SIGNUP + code;
                 }).orElseGet(() -> {
                     log.info("Enter token form has failed domain, token, organisation validation");
-                    redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE);
+                    redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
                     return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
                 });
     }
