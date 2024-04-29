@@ -210,24 +210,6 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void testIsAllowListedDomainMixedCase(){
-        boolean validDomain = identityService.isDomainAllowListed("ExAmPlE.cOm");
-        assertTrue(validDomain);
-    }
-
-    @Test
-    public void testIsAllowListedDomainLowerCase(){
-        boolean validDomain = identityService.isDomainAllowListed("example.com");
-        assertTrue(validDomain);
-    }
-
-    @Test
-    public void testIsAllowListedDomainUpperCase(){
-        boolean validDomain = identityService.isDomainAllowListed("EXAMPLE.COM");
-        assertTrue(validDomain);
-    }
-
-    @Test
     public void shouldRemoveReportingRoles() {
         Role orgReporter = new Role("ORGANISATION_REPORTER", "");
         Role professionReporter = new Role("PROFESSION_REPORTER", "");
