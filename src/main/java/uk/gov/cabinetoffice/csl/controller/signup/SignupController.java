@@ -340,9 +340,11 @@ public class SignupController {
         if (invite == null) {
             return REDIRECT_INVALID_SIGNUP_CODE;
         }
+
         if (invite.isAuthorisedInvite()) {
             return REDIRECT_SIGNUP + code;
         }
+
         if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(organisationCode, utils.getDomainFromEmailAddress(invite.getForEmail()))) {
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }

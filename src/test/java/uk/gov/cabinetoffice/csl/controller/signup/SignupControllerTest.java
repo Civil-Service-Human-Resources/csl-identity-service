@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -78,7 +77,8 @@ public class SignupControllerTest {
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
-    private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"), ZoneId.of("Europe/London"));
+    private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"),
+            ZoneId.of("Europe/London"));
 
     private final String GENERIC_EMAIL = "email@domain.com";
     private final String GENERIC_DOMAIN = "domain.com";
@@ -105,6 +105,11 @@ public class SignupControllerTest {
         return agencyToken;
     }
 
+
+    /*
+    /signup/request
+     */
+
     @Test
     public void shouldReturnCreateAccountForm() throws Exception {
         mockMvc.perform(
@@ -122,7 +127,7 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
-        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(Optional.ofNullable(null));
+        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(Optional.empty());
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
         when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
         when(identityService.isDomainAllowListed(domain)).thenReturn(true);
@@ -221,7 +226,7 @@ public class SignupControllerTest {
 
     @Test
     public void shouldConfirmInviteSentIfAgencyTokenEmail() throws Exception {
-        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.ofNullable(null));
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.empty());
         when(identityService.isIdentityExistsForEmail(GENERIC_EMAIL)).thenReturn(false);
         when(identityService.isDomainInAnAgencyToken(GENERIC_DOMAIN)).thenReturn(true);
 
@@ -261,6 +266,10 @@ public class SignupControllerTest {
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE,
                         "Your organisation is unable to use this service. Please contact your line manager."));
     }
+
+    /*
+    /signup/
+     */
 
     @Test
     public void shouldRedirectToSignupIfInviteCodeDoesNotExists() throws Exception {
@@ -309,7 +318,7 @@ public class SignupControllerTest {
         mockMvc.perform(
                         post("/signup/" + GENERIC_CODE)
                                 .with(csrf())
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                                 .param("password", password)
                                 .param("confirmPassword", differentPassword))
                 .andExpect(status().isOk())
@@ -399,7 +408,7 @@ public class SignupControllerTest {
     }
 
     /*
-    Enter organisation
+    /signup/chooseOrganisation/
      */
 
     @Test
@@ -440,10 +449,6 @@ public class SignupControllerTest {
                 .andExpect(view().name(CHOOSE_ORGANISATION_TEMPLATE));
     }
 
-    /*
-    Choose organisation
-     */
-
     @Test
     public void chooseOrganisationShouldRedirectToEnterTokenIfAgency() throws Exception {
         OrganisationalUnit org = generateBasicOrganisation();
@@ -455,7 +460,7 @@ public class SignupControllerTest {
         mockMvc.perform(
                         post("/signup/chooseOrganisation/" + GENERIC_CODE)
                                 .with(csrf())
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                                 .param("organisation", GENERIC_ORG_CODE))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(String.format("/signup/enterToken/%s/%s", GENERIC_CODE, GENERIC_ORG_CODE)));
@@ -472,196 +477,139 @@ public class SignupControllerTest {
         mockMvc.perform(
                         post("/signup/chooseOrganisation/" + GENERIC_CODE)
                                 .with(csrf())
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                                 .param("organisation", GENERIC_ORG_CODE))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(String.format("/signup/%s", GENERIC_CODE)));
     }
 
     /*
-    Enter token
+    /signup/enterToken/
      */
 
     private String enterTokenUrl() {
-        return "/signup/enterToken/" + GENERIC_CODE + "/" + GENERIC_ORG_CODE;
+        return REDIRECT_ENTER_TOKEN + GENERIC_CODE + "/" + GENERIC_ORG_CODE;
     }
 
     @Test
     public void shouldRedirectToLoginIfInviteNotValidFromToken() throws Exception {
-        String code = "abc123";
-
-        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(null);
 
         mockMvc.perform(
-                get("/signup/enterToken/" + code)
-                        .with(csrf())
-                )
+                        get(enterTokenUrl())
+                                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
-    public void shouldReturnEnterToken() throws Exception {
-        String code = "abc123";
-        String email = "test@example.com";
-
-        List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
-        organisationalUnits.add(new OrganisationalUnit());
-
-        Invite invite = new Invite();
-        invite.setForEmail(email);
-        invite.setAuthorisedInvite(false);
-
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisationalUnits);
+    public void shouldRedirectOnEnterTokenIfTokenAuthorised() throws Exception {
+        Invite invite = generateBasicInvite(true);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
 
         mockMvc.perform(
-                get("/signup/enterToken/" + code)
-                        .with(csrf())
-                )
+                        get(enterTokenUrl())
+                                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + GENERIC_CODE));
+    }
+
+    @Test
+    public void shouldReturnEnterToken() throws Exception {
+        Invite invite = generateBasicInvite(false);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(GENERIC_ORG_CODE, GENERIC_DOMAIN))
+                .thenReturn(true);
+
+        mockMvc.perform(
+                        get(enterTokenUrl())
+                                .with(csrf()))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name(ENTER_TOKEN_TEMPLATE));
     }
 
     @Test
-    public void shouldRedirectOnEnterTokenIfTokenAuth() throws Exception {
-        String code = "abc123";
-        String email = "test@example.com";
-
-        Invite invite = new Invite();
-        invite.setForEmail(email);
-        invite.setAuthorisedInvite(true);
-
-        List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
-        organisationalUnits.add(new OrganisationalUnit());
-
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisationalUnits);
-
-        mockMvc.perform(
-                get("/signup/enterToken/" + code)
-                        .with(csrf())
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
-    }
-
-    @Test
     public void shouldRedirectToLoginIfTokenInviteInvalid() throws Exception {
-        String code = "abc123";
-        String organisation = "org";
         String token = "token123";
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(null);
 
         mockMvc.perform(
-                post("/signup/enterToken/" + code)
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("organisation", organisation)
-                        .param("token", token)
-                )
+                        post(enterTokenUrl())
+                                .with(csrf())
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("token", token))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
     }
 
     @Test
     public void shouldRedirectToSignupIfInviteValidAndAgencyTokenHasSpaceAvailable() throws Exception {
-        String code = "abc123";
-        String organisation = "org";
         String token = "token123";
-        String email = "test@example.com";
-        String domain = "example.com";
 
-        Invite invite = new Invite();
-        invite.setForEmail(email);
-        invite.setAuthorisedInvite(true);
+        Invite invite = generateBasicInvite(true);
 
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(domain, token, organisation))
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         mockMvc.perform(
-                post("/signup/enterToken/" + code)
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("organisation", organisation)
-                        .param("token", token)
-                )
+                        post(enterTokenUrl())
+                                .with(csrf())
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + GENERIC_CODE));
     }
 
     @Test
     public void shouldRedirectToTokenWithErrorIfInviteValidAndAgencyTokenDoesNotHaveSpaceAvailable()
             throws Exception {
-        String code = "abc123";
-        String organisation = "org";
         String token = "token123";
-        String email = "test@example.com";
-        String domain = "example.com";
 
-        Invite invite = new Invite();
-        invite.setForEmail(email);
-        invite.setAuthorisedInvite(true);
-
+        Invite invite = generateBasicInvite(true);
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setCapacity(10L);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(domain, token, organisation))
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
 
         mockMvc.perform(
-                post("/signup/enterToken/" + code)
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("organisation", organisation)
-                        .param("token", token)
-                )
+                        post(enterTokenUrl())
+                                .with(csrf())
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("organisation", GENERIC_ORG_CODE)
+                                .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
+                .andExpect(redirectedUrl(enterTokenUrl()));
     }
 
     @Test
     public void shouldRedirectToEnterTokenWithErrorMessageIfNoTokensFound() throws Exception {
-        String code = "abc123";
-        String organisation = "org";
         String token = "token123";
-        String email = "test@example.com";
-        String domain = "example.com";
 
-        Invite invite = new Invite();
-        invite.setForEmail(email);
-        invite.setAuthorisedInvite(true);
-
+        Invite invite = generateBasicInvite(true);
         Optional<AgencyToken> emptyOptional = Optional.empty();
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(domain, token, organisation))
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
                 .thenReturn(emptyOptional);
 
         mockMvc.perform(
-                post("/signup/enterToken/" + code)
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("organisation", organisation)
-                        .param("token", token)
-                )
+                        post(enterTokenUrl())
+                                .with(csrf())
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code))
+                .andExpect(redirectedUrl(enterTokenUrl()))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE));
     }
 }
