@@ -109,6 +109,7 @@ public class IdentityServiceTest {
     public void createIdentityFromInviteCodeWithoutAgencyButIsAllowListed() {
         final String code = "123abc";
         final String email = "test@example.com";
+        final String domain = "example.com";
         Role role = new Role();
         role.setName("USER");
 
@@ -124,6 +125,7 @@ public class IdentityServiceTest {
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
+        when(civilServantRegistryClient.isDomainAllowListed(domain)).thenReturn(true);
 
         identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 
