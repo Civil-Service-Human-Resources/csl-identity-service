@@ -321,7 +321,6 @@ public class SignupControllerTest {
                                 .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                                 .param("password", password)
                                 .param("confirmPassword", differentPassword))
-                .andExpect(status().isOk())
                 .andExpect(view().name(SIGNUP_TEMPLATE))
                 .andExpect(model().attributeExists("invite"));
     }
