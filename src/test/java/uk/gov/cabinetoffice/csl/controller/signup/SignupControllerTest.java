@@ -52,6 +52,7 @@ public class SignupControllerTest {
     private static final String STATUS_ATTRIBUTE = "status";
 
     private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
+    private static final String CHOOSE_ORGANISATION_TEMPLATE = "signup/chooseOrganisation";
     private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
     private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
     private static final String SIGNUP_TEMPLATE = "signup/signup";
@@ -397,6 +398,94 @@ public class SignupControllerTest {
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP + GENERIC_CODE));
     }
 
+    /*
+    Enter organisation
+     */
+
+    @Test
+    public void enterOrganisationRedirectToLoginWhenInviteIsInvalid() throws Exception {
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(null);
+        mockMvc.perform(
+                        get("/signup/chooseOrganisation/" + GENERIC_CODE)
+                                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
+    }
+
+    @Test
+    public void enterOrganisationRedirectToSignUpWhenInviteIsAuthorised() throws Exception {
+        Invite invite = generateBasicInvite(true);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        mockMvc.perform(
+                        get("/signup/chooseOrganisation/" + GENERIC_CODE)
+                                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/signup/" + GENERIC_CODE));
+    }
+
+    @Test
+    public void enterOrganisationShouldRenderTemplateWhenInviteIsValid() throws Exception {
+        OrganisationalUnit org = generateBasicOrganisation();
+        org.setAgencyToken(generateBasicAgencyToken());
+        List<OrganisationalUnit> orgs = Collections.singletonList(org);
+
+        Invite invite = generateBasicInvite(false);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
+
+        mockMvc.perform(
+                        get("/signup/chooseOrganisation/" + GENERIC_CODE)
+                                .with(csrf()))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name(CHOOSE_ORGANISATION_TEMPLATE));
+    }
+
+    /*
+    Choose organisation
+     */
+
+    @Test
+    public void chooseOrganisationShouldRedirectToEnterTokenIfAgency() throws Exception {
+        OrganisationalUnit org = generateBasicOrganisation();
+        org.setAgencyToken(generateBasicAgencyToken());
+        List<OrganisationalUnit> orgs = Collections.singletonList(org);
+        Invite invite = generateBasicInvite(false);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
+        mockMvc.perform(
+                        post("/signup/chooseOrganisation/" + GENERIC_CODE)
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("organisation", GENERIC_ORG_CODE))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(String.format("/signup/enterToken/%s/%s", GENERIC_CODE, GENERIC_ORG_CODE)));
+    }
+
+    @Test
+    public void chooseOrganisationShouldAuthoriseInviteAndRedirectToSignupIfAllowlist() throws Exception {
+        OrganisationalUnit org = generateBasicOrganisation();
+        org.setDomains(Collections.singletonList(new Domain(1L, GENERIC_DOMAIN)));
+        List<OrganisationalUnit> orgs = Collections.singletonList(org);
+        Invite invite = generateBasicInvite(false);
+        when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        when(civilServantRegistryClient.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
+        mockMvc.perform(
+                        post("/signup/chooseOrganisation/" + GENERIC_CODE)
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("organisation", GENERIC_ORG_CODE))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(String.format("/signup/%s", GENERIC_CODE)));
+    }
+
+    /*
+    Enter token
+     */
+
+    private String enterTokenUrl() {
+        return "/signup/enterToken/" + GENERIC_CODE + "/" + GENERIC_ORG_CODE;
+    }
+
     @Test
     public void shouldRedirectToLoginIfInviteNotValidFromToken() throws Exception {
         String code = "abc123";
@@ -458,7 +547,6 @@ public class SignupControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
     }
-
 
     @Test
     public void shouldRedirectToLoginIfTokenInviteInvalid() throws Exception {
