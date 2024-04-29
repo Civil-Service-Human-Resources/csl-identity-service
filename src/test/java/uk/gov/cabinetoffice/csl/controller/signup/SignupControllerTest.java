@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
+import uk.gov.cabinetoffice.csl.dto.Domain;
 import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
@@ -24,9 +26,7 @@ import uk.gov.cabinetoffice.csl.service.InviteService;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.Matchers.containsString;
@@ -79,6 +79,31 @@ public class SignupControllerTest {
 
     private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"), ZoneId.of("Europe/London"));
 
+    private final String GENERIC_EMAIL = "email@domain.com";
+    private final String GENERIC_DOMAIN = "domain.com";
+    private final String GENERIC_CODE = "ABC123";
+    private final String GENERIC_ORG_CODE = "org123";
+
+    private Invite generateBasicInvite(boolean authorised) {
+        Invite i = new Invite();
+        i.setCode(GENERIC_CODE);
+        i.setForEmail(GENERIC_EMAIL);
+        i.setAuthorisedInvite(authorised);
+        return i;
+    }
+
+    private OrganisationalUnit generateBasicOrganisation() {
+        OrganisationalUnit organisationalUnit = new OrganisationalUnit();
+        organisationalUnit.setCode(GENERIC_ORG_CODE);
+        return organisationalUnit;
+    }
+
+    private AgencyToken generateBasicAgencyToken() {
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setAgencyDomains(Collections.singletonList(new Domain(1L, GENERIC_DOMAIN)));
+        return agencyToken;
+    }
+
     @Test
     public void shouldReturnCreateAccountForm() throws Exception {
         mockMvc.perform(
@@ -96,9 +121,10 @@ public class SignupControllerTest {
         String email = "user@domain.com";
         String domain = "domain.com";
 
+        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(Optional.ofNullable(null));
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.isDomainAllowListed(domain)).thenReturn(true);
         when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
+        when(identityService.isDomainAllowListed(domain)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -119,28 +145,25 @@ public class SignupControllerTest {
 
     @Test
     public void shouldExpireInviteIfUserReRegAfterRegAllowedTimeButBeforeActivationLinkExpire() throws Exception {
-        String email = "user@domain.com";
-        String domain = "domain.com";
-        Optional<Invite> invite = Optional.of(new Invite());
-        invite.get().setInvitedAt(now(clock));
-        invite.get().setCode("code");
+        Invite invite = generateBasicInvite(true);
+        invite.setInvitedAt(now(clock).minusDays(3));
 
-        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(invite);
-        when(inviteService.isInviteExpired(invite.get())).thenReturn(false);
-        when(identityService.isDomainAllowListed(domain)).thenReturn(true);
-        when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
+        when(inviteService.isInviteExpired(invite)).thenReturn(false);
+        when(identityService.isDomainAllowListed(GENERIC_DOMAIN)).thenReturn(true);
+        when(identityService.isDomainInAnAgencyToken(GENERIC_DOMAIN)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", email)
-                        .param("confirmEmail", email)
+                        .param("email", GENERIC_EMAIL)
+                        .param("confirmEmail", GENERIC_EMAIL)
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE));
 
-        verify(inviteService, times(1)).updateInviteStatus(invite.get().getCode(), EXPIRED);
+        verify(inviteService, times(1)).updateInviteStatus(invite.getCode(), EXPIRED);
     }
 
     @Test
@@ -159,14 +182,17 @@ public class SignupControllerTest {
 
     @Test
     public void shouldRedirectToSignupIfUserHasAlreadyBeenInvited() throws Exception {
-        String email = "user@domain.com";
+
+        Invite invite = generateBasicInvite(true);
+        invite.setInvitedAt(now(clock));
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
 
         mockMvc.perform(
                 post("/signup/request")
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", email)
-                        .param("confirmEmail", email)
+                        .param("email", GENERIC_EMAIL)
+                        .param("confirmEmail", GENERIC_EMAIL)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
@@ -174,8 +200,11 @@ public class SignupControllerTest {
 
     @Test
     public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
-        String email = "user@domain.com";
 
+        String email = "user@domain.com";
+        Invite invite = generateBasicInvite(true);
+        invite.setInvitedAt(now(clock));
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(true);
 
         mockMvc.perform(
@@ -191,18 +220,16 @@ public class SignupControllerTest {
 
     @Test
     public void shouldConfirmInviteSentIfAgencyTokenEmail() throws Exception {
-        String email = "user@domain.com";
-        String domain = "domain.com";
-
-        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(true);
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.ofNullable(null));
+        when(identityService.isIdentityExistsForEmail(GENERIC_EMAIL)).thenReturn(false);
+        when(identityService.isDomainInAnAgencyToken(GENERIC_DOMAIN)).thenReturn(true);
 
         mockMvc.perform(
                 post("/signup/request")
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", email)
-                        .param("confirmEmail", email)
+                        .param("email", GENERIC_EMAIL)
+                        .param("confirmEmail", GENERIC_EMAIL)
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
@@ -211,24 +238,22 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")));
 
-        verify(inviteService).sendSelfSignupInvite(email, false);
+        verify(inviteService).sendSelfSignupInvite(GENERIC_EMAIL, false);
     }
 
     @Test 
     public void shouldNotSendInviteIfNotAllowListedAndNotAgencyTokenEmail() throws Exception {
-        String email = "user@domain.com";
-        String domain = "domain.com";
-
-        when(identityService.isIdentityExistsForEmail(email)).thenReturn(false);
-        when(identityService.isDomainAllowListed(domain)).thenReturn(false);
-        when(identityService.isDomainInAnAgencyToken(domain)).thenReturn(false);
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.empty());
+        when(identityService.isIdentityExistsForEmail(GENERIC_EMAIL)).thenReturn(false);
+        when(identityService.isDomainAllowListed(GENERIC_DOMAIN)).thenReturn(false);
+        when(identityService.isDomainInAnAgencyToken(GENERIC_DOMAIN)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("email", email)
-                        .param("confirmEmail", email)
+                        .param("email", GENERIC_EMAIL)
+                        .param("confirmEmail", GENERIC_EMAIL)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST))
@@ -237,14 +262,25 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldRedirectToSignupIfSignupCodeNotValid() throws Exception {
-        String code = "abc123";
-
-        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
+    public void shouldRedirectToSignupIfInviteCodeDoesNotExists() throws Exception {
+        when(inviteService.isInviteCodeExists(GENERIC_CODE)).thenReturn(false);
 
         mockMvc.perform(
-                get("/signup/" + code)
-                        .with(csrf())
+                        get("/signup/" + GENERIC_CODE)
+                                .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
+    }
+
+    @Test
+    public void shouldRedirectToSignupIfSignupCodeAlreadyUsed() throws Exception {
+        when(inviteService.isInviteCodeExists(GENERIC_CODE)).thenReturn(true);
+        when(inviteService.isInviteCodeUsed(GENERIC_CODE)).thenReturn(true);
+
+        mockMvc.perform(
+                        get("/signup/" + GENERIC_CODE)
+                                .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
@@ -252,144 +288,82 @@ public class SignupControllerTest {
 
     @Test
     public void shouldRedirectToSignupIfInviteCodeExpired() throws Exception {
-        String code = "abc123";
-
-        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
-        when(inviteService.isInviteCodeExpired(code)).thenReturn(true);
-        doNothing().when(inviteService).updateInviteStatus(code, EXPIRED);
+        when(inviteService.isInviteCodeExists(GENERIC_CODE)).thenReturn(true);
+        when(inviteService.isInviteCodeExpired(GENERIC_CODE)).thenReturn(true);
 
         mockMvc.perform(
-                get("/signup/" + code)
-                        .with(csrf())
+                        get("/signup/" + GENERIC_CODE)
+                                .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
     }
 
     @Test
-    public void shouldRedirectToSignupIfInviteCodeDoesNotExists() throws Exception {
-        String code = "abc123";
-
-        when(inviteService.isInviteCodeExists(code)).thenReturn(false);
-
+    public void shouldNotPostIfPasswordsDifferent() throws Exception {
+        Invite invite = generateBasicInvite(true);
+        String password = "Password1";
+        String differentPassword = "differentPassword1";
+        when(inviteService.getInviteForCode(GENERIC_CODE)).thenReturn(invite);
         mockMvc.perform(
-                get("/signup/" + code)
-                        .with(csrf())
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
-    }
-
-    @Test
-    public void shouldRedirectToEnterTokenPageIfInviteNotAuthorised() throws Exception {
-        String code = "abc123";
-        Invite invite = new Invite();
-        invite.setAuthorisedInvite(false);
-
-        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
-        when(inviteService.isInviteCodeExpired(code)).thenReturn(false);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-
-        mockMvc.perform(
-                get("/signup/" + code)
-                        .with(csrf())
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
-    }
-
-    @Test
-    public void shouldReturnSignupIfInviteAuthorised() throws Exception {
-        String code = "abc123";
-        Invite invite = new Invite();
-        invite.setAuthorisedInvite(true);
-
-        when(inviteService.isInviteCodeExists(code)).thenReturn(true);
-        when(inviteService.isInviteCodeExpired(code)).thenReturn(false);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-
-        mockMvc.perform(
-                get("/signup/" + code)
-                        .with(csrf())
-                )
-                .andExpect(status().isOk())
-                .andExpect(view().name(SIGNUP_TEMPLATE));
-    }
-
-    @Test 
-    public void shouldRedirectToSignUpIfFormHasError() throws Exception {
-        String code = "abc123";
-        String password = "password";
-
-        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
-        when(inviteService.getInviteForCode(anyString())).thenReturn(new Invite());
-
-        mockMvc.perform(
-                post("/signup/" + code)
-                        .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("password", password)
-                        .param("confirmPassword", "doesn't match")
-                )
+                        post("/signup/" + GENERIC_CODE)
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("password", password)
+                                .param("confirmPassword", differentPassword))
                 .andExpect(status().isOk())
                 .andExpect(view().name(SIGNUP_TEMPLATE))
                 .andExpect(model().attributeExists("invite"));
     }
 
     @Test
-    public void shouldRedirectToLoginIfInviteNotValid() throws Exception {
-        String code = "abc123";
-        String password = "Password1";
+    public void shouldRedirectToEnterTokenPageIfInviteNotAuthorised() throws Exception {
+        Invite invite = generateBasicInvite(false);
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(false);
+        when(inviteService.isInviteCodeExists(GENERIC_CODE)).thenReturn(true);
+        when(inviteService.isInviteCodeUsed(GENERIC_CODE)).thenReturn(false);
+        when(inviteService.isInviteCodeExpired(GENERIC_CODE)).thenReturn(false);
+        when(inviteService.getInviteForCode(GENERIC_CODE)).thenReturn(invite);
 
         mockMvc.perform(
-                post("/signup/" + code)
+                get("/signup/" + GENERIC_CODE)
                         .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("password", password)
-                        .param("confirmPassword", password)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_INVALID_SIGNUP_CODE));
+                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + GENERIC_CODE));
     }
 
     @Test
-    public void shouldRedirectToEnterTokenIfInviteNotAuthorised() throws Exception {
-        String code = "abc123";
-        String password = "Password1";
-        Invite invite = new Invite();
-        invite.setAuthorisedInvite(false);
+    public void shouldReturnSignupIfInviteAuthorised() throws Exception {
+        Invite invite = generateBasicInvite(true);
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        when(inviteService.isInviteCodeExists(GENERIC_CODE)).thenReturn(true);
+        when(inviteService.isInviteCodeUsed(GENERIC_CODE)).thenReturn(false);
+        when(inviteService.isInviteCodeExpired(GENERIC_CODE)).thenReturn(false);
+        when(inviteService.getInviteForCode(GENERIC_CODE)).thenReturn(invite);
 
         mockMvc.perform(
-                post("/signup/" + code)
+                get("/signup/" + GENERIC_CODE)
                         .with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                        .param("password", password)
-                        .param("confirmPassword", password)
                 )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + code));
+                .andExpect(status().isOk())
+                .andExpect(view().name(SIGNUP_TEMPLATE));
     }
 
     @Test
     public void shouldReturnSignupSuccessIfInviteAuthorised() throws Exception {
-        String code = "abc123";
         String password = "Password1";
-        Invite invite = new Invite();
-        invite.setAuthorisedInvite(true);
+        Invite invite = generateBasicInvite(true);
+
         AgencyToken agencyToken = new AgencyToken();
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        doNothing().when(identityService).createIdentityFromInviteCode(code, password, agencyToken);
-        doNothing().when(inviteService).updateInviteStatus(code, InviteStatus.ACCEPTED);
+        when(inviteService.isInviteCodeValid(GENERIC_CODE)).thenReturn(true);
+        when(inviteService.getInviteForCode(GENERIC_CODE)).thenReturn(invite);
+        doNothing().when(identityService).createIdentityFromInviteCode(GENERIC_CODE, password, agencyToken);
+        doNothing().when(inviteService).updateInviteStatus(GENERIC_CODE, InviteStatus.ACCEPTED);
 
         mockMvc.perform(
-                post("/signup/" + code)
+                post("/signup/" + GENERIC_CODE)
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
@@ -402,19 +376,17 @@ public class SignupControllerTest {
 
     @Test
     public void shouldRedirectToPasswordSignupIfExceptionThrown() throws Exception {
-        String code = "abc123";
         String password = "Password1";
-        Invite invite = new Invite();
-        invite.setAuthorisedInvite(true);
+        Invite invite = generateBasicInvite(true);
         AgencyToken agencyToken = new AgencyToken();
 
-        when(inviteService.isInviteCodeValid(code)).thenReturn(true);
-        when(inviteService.getInviteForCode(code)).thenReturn(invite);
+        when(inviteService.isInviteCodeValid(GENERIC_CODE)).thenReturn(true);
+        when(inviteService.getInviteForCode(GENERIC_CODE)).thenReturn(invite);
         doThrow(new UnableToAllocateAgencyTokenException("Error")).when(identityService)
-                .createIdentityFromInviteCode(code, password, agencyToken);
+                .createIdentityFromInviteCode(GENERIC_CODE, password, agencyToken);
 
         mockMvc.perform(
-                post("/signup/" + code)
+                post("/signup/" + GENERIC_CODE)
                         .with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                         .param("password", password)
@@ -422,7 +394,7 @@ public class SignupControllerTest {
                         .flashAttr("exampleEntity", agencyToken)
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_SIGNUP + code));
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP + GENERIC_CODE));
     }
 
     @Test

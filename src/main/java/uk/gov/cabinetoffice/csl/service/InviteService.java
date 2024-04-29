@@ -91,11 +91,10 @@ public class InviteService {
     }
 
     public Invite getValidInviteForCode(String code) {
-        Invite invite = inviteRepository.findByCode(code);
-        if (invite != null && isInviteExpired(invite)) {
-            return null;
+        if (isInviteCodeValid(code)) {
+            return inviteRepository.findByCode(code);
         }
-        return invite;
+        return null;
     }
 
     @ReadOnlyProperty
