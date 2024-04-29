@@ -261,17 +261,19 @@ public class SignupController {
 
     @GetMapping(path = "chooseOrganisation/{code}")
     public String enterOrganisation(Model model, @PathVariable(value = "code") String code) {
-        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        Invite invite = inviteService.getValidInviteForCode(code);
+
         if (invite == null) {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
+
         if (invite.isAuthorisedInvite()) {
             return REDIRECT_SIGNUP + code;
         }
 
         log.info("Invite email = {} accessing enter organisation screen for validation", invite.getForEmail());
 
-        String domain = invite.getDomain();
+        final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
 
         model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
@@ -289,9 +291,10 @@ public class SignupController {
             model.addAttribute(STATUS_ATTRIBUTE, CHOOSE_ORGANISATION_ERROR_MESSAGE);
             return CHOOSE_ORGANISATION_TEMPLATE;
         }
-        Invite invite = inviteService.fetchValidInviteWithCode(code);
+
+        Invite invite = inviteService.getValidInviteForCode(code);
         if (invite == null) {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
         if (invite.isAuthorisedInvite()) {
             return REDIRECT_SIGNUP + code;
@@ -300,14 +303,14 @@ public class SignupController {
 
         log.info("Invite email = {} selected organisation {}", invite.getForEmail(), orgCode);
 
-        String domain = invite.getDomain();
+        final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
         return organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst()
                 .map(selectedOrg -> {
                     if (selectedOrg.isDomainAgencyAssigned(domain)) {
                         return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
                     } else if (selectedOrg.isDomainLinked(domain)) {
-                        inviteService.authoriseAndSave(invite);
+                        inviteService.authoriseAndSaveInvite(invite);
                         return REDIRECT_SIGNUP + code;
                     }
                     return null;
@@ -323,14 +326,14 @@ public class SignupController {
     @GetMapping(path = "enterToken/{code}/{organisationCode}")
     public String enterToken(Model model, @PathVariable(value = "code") String code,
                              @PathVariable(value = "organisationCode") String organisationCode) {
-        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        Invite invite = inviteService.getValidInviteForCode(code);
         if (invite == null) {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
         if (invite.isAuthorisedInvite()) {
             return REDIRECT_SIGNUP + code;
         }
-        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(organisationCode, invite.getDomain())) {
+        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(organisationCode, utils.getDomainFromEmailAddress(invite.getForEmail()))) {
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
@@ -351,12 +354,12 @@ public class SignupController {
             model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
             return CHOOSE_ORGANISATION_TEMPLATE;
         }
-        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        Invite invite = inviteService.getValidInviteForCode(code);
         if (invite == null) {
-            return REDIRECT_LOGIN;
+            return REDIRECT_INVALID_SIGNUP_CODE;
         }
 
-        final String domain = invite.getDomain();
+        final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
 
         return civilServantRegistryClient.getAgencyToken(domain, form.getToken(), orgCode)
                 .map(agencyToken -> {
@@ -367,7 +370,7 @@ public class SignupController {
                         return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
                     }
 
-                    inviteService.authoriseAndSave(invite);
+                    inviteService.authoriseAndSaveInvite(invite);
                     model.addAttribute(INVITE_MODEL, invite);
                     redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyTokenInfo(domain, form.getToken(), orgCode));
 
