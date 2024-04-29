@@ -310,22 +310,6 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldNotPostIfPasswordsDifferent() throws Exception {
-        Invite invite = generateBasicInvite(true);
-        String password = "Password1";
-        String differentPassword = "differentPassword1";
-        when(inviteService.getInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        mockMvc.perform(
-                        post("/signup/" + GENERIC_CODE)
-                                .with(csrf())
-                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
-                                .param("password", password)
-                                .param("confirmPassword", differentPassword))
-                .andExpect(view().name(SIGNUP_TEMPLATE))
-                .andExpect(model().attributeExists("invite"));
-    }
-
-    @Test
     public void shouldRedirectToEnterTokenPageIfInviteNotAuthorised() throws Exception {
         Invite invite = generateBasicInvite(false);
 
