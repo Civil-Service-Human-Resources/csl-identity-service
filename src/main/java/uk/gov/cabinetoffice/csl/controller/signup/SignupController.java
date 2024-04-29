@@ -373,7 +373,6 @@ public class SignupController {
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
 
-
         Optional<AgencyToken> agencyTokenOptional = civilServantRegistryClient.getAgencyToken(domain, form.getToken(), orgCode);
 
         if(agencyTokenOptional.isEmpty()) {
