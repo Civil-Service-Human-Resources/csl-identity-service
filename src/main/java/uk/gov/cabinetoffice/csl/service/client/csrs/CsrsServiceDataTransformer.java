@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -16,9 +18,11 @@ public class CsrsServiceDataTransformer {
     public List<OrganisationalUnit> transformOrganisations(List<OrganisationalUnit> organisationalUnitDtos) {
         List<OrganisationalUnit> tree = this.transformOrgsIntoTree(organisationalUnitDtos);
         tree.forEach(OrganisationalUnit::applyAgencyTokenToDescendants);
-        List<OrganisationalUnit> flattened = tree.stream().flatMap(o -> o.getHierarchyAsFlatList().stream()).collect(Collectors.toList());
-        flattened.sort(Comparator.comparing(OrganisationalUnit::getFormattedName));
-        return flattened;
+        return tree
+                .stream()
+                .flatMap(o -> o.getHierarchyAsFlatList().stream())
+                .sorted(comparing(OrganisationalUnit::getFormattedName))
+                .collect(toList());
     }
 
     public List<OrganisationalUnit> transformOrgsIntoTree(List<OrganisationalUnit> organisationalUnitDtos) {

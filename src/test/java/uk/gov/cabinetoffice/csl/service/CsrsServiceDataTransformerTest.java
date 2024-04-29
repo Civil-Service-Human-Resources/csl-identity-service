@@ -35,15 +35,10 @@ public class CsrsServiceDataTransformerTest {
         agencyChild.setId(3);
         agencyChild.setParentId(1);
         agencyChild.setFormattedName("PARENT | AGENCY_CHILD");
-
-        AgencyToken agencyToken1 = new AgencyToken();
-        agencyToken1.setUid("uid1");
-        agencyToken1.setToken("token1");
-        agencyToken1.setCapacity(1L);
-
-        List<Domain> domains1 = asList(new Domain(1L, "domain1.com"), new Domain(1L, "domain2.com"));
-        agencyToken1.setAgencyDomains(domains1);
-        agencyChild.setAgencyToken(agencyToken1);
+        AgencyToken agencyToken = new AgencyToken("uid1", "token1", 1L,
+                asList(new Domain(1L, "domain1.com"),
+                        new Domain(1L, "domain2.com")));
+        agencyChild.setAgencyToken(agencyToken);
 
         OrganisationalUnit agencyGrandchild = new OrganisationalUnit();
         agencyGrandchild.setId(6);
@@ -64,28 +59,17 @@ public class CsrsServiceDataTransformerTest {
         OrganisationalUnit otherAgency = new OrganisationalUnit();
         otherAgency.setId(14);
         otherAgency.setFormattedName("OTHER_AGENCY");
-
-        AgencyToken agencyToken2 = new AgencyToken();
-        agencyToken2.setUid("uid2");
-        agencyToken2.setToken("token2");
-        agencyToken2.setCapacity(1L);
-        List<Domain> domains2 = List.of(new Domain(1L, "domain2.com"));
-        agencyToken2.setAgencyDomains(domains2);
-        agencyChild.setAgencyToken(agencyToken2);
+        AgencyToken agencyToken1 = new AgencyToken("uid2", "token2", 1L,
+                singletonList(new Domain(1L, "domain2.com")));
+        otherAgency.setAgencyToken(agencyToken1);
 
         OrganisationalUnit otherAgencyChild = new OrganisationalUnit();
         otherAgencyChild.setId(20);
         otherAgencyChild.setParentId(14);
         otherAgencyChild.setFormattedName("OTHER_AGENCY | CHILD");
-
-        AgencyToken agencyToken3 = new AgencyToken();
-        agencyToken3.setUid("uid3");
-        agencyToken3.setToken("token3");
-        agencyToken3.setCapacity(1L);
-        List<Domain> domains3 = singletonList(new Domain(1L, "domain2.com"));
-        agencyToken2.setAgencyDomains(domains3);
-
-        otherAgencyChild.setAgencyToken(agencyToken3);
+        AgencyToken agencyToken2 = new AgencyToken("uid3", "token3", 1L,
+                singletonList(new Domain(1L, "domain2.com")));
+        otherAgencyChild.setAgencyToken(agencyToken2);
 
         return asList(child2, otherAgencyChild, agencyGrandchild, parent2, agencyChild, parent, otherAgency);
     }
