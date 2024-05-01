@@ -17,6 +17,9 @@ public class LegalController {
     private static final String CONTACT_US_TEMPLATE = "legal/contact-us";
     private static final String ACCESSIBILITY_STATEMENT_TEMPLATE = "legal/accessibility-statement";
 
+    private static final String CONTACT_EMAIL_ATTRIBUTE = "contactEmail";
+    private static final String CONTACT_NUMBER_ATTRIBUTE = "contactNumber";
+
     @Value("${lpg.contactEmail}")
     private String contactEmail;
 
@@ -35,15 +38,15 @@ public class LegalController {
 
     @GetMapping("/contact-us")
     public String contactUs(Model model) {
-        model.addAttribute("contactEmail", contactEmail);
-        model.addAttribute("contactNumber", contactNumber);
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
+        model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
         return CONTACT_US_TEMPLATE;
     }
 
     @GetMapping("/accessibility-statement")
     public String accessibilityStatement(Model model) {
-        model.addAttribute("contactEmail", contactEmail);
-        model.addAttribute("contactNumber", contactNumber);
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
+        model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
         return ACCESSIBILITY_STATEMENT_TEMPLATE;
     }
 }
