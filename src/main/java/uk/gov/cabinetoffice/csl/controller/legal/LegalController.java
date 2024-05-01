@@ -32,7 +32,8 @@ public class LegalController {
     }
 
     @GetMapping("/privacy")
-    public String privacyPage() {
+    public String privacyPage(Model model) {
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         return PRIVACY_TEMPLATE;
     }
 

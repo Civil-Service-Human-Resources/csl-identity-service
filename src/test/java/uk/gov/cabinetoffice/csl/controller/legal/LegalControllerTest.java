@@ -54,6 +54,7 @@ public class LegalControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(view().name(PRIVACY_TEMPLATE))
                 .andDo(print());
     }
