@@ -18,6 +18,8 @@
               <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
               <entry key="CLIENT_SECRET" value="test" />
               <entry key="CLOCK_ZONE_ID" value="Europe/London" />
+              <entry key="CONTACT_EMAIL" value="support@governmentcampus.co.uk" />
+              <entry key="CONTACT_NUMBER" value="020 3640 7985" />
               <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
               <entry key="DATABASE_NAME" value="identity" />
               <entry key="DATABASE_USESSL" value="false" />
