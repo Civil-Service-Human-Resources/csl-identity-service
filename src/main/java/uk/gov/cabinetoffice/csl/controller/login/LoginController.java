@@ -9,9 +9,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Controller
 public class LoginController {
+
+  private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "skipMaintenancePageForUser";
 
   @Value("${authenticationSuccess.targetUrl}")
   private String authenticationSuccessTargetUrl;
@@ -31,15 +34,24 @@ public class LoginController {
   @Value("${maintenancePage.contentLine4}")
   private String maintenancePageContentLine4;
 
+  @Value("${maintenancePage.skipForUsers}")
+  private String skipMaintenancePageForUsers;
+
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 
     if(maintenancePageEnabled) {
-      model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-      model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-      model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-      model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
-      return "maintenance/maintenance";
+      String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+      boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
+              .anyMatch(u -> u.equalsIgnoreCase(skipMaintenancePageForUser));
+
+      if (!skipMaintenancePage) {
+        model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
+        model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
+        model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
+        model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+        return "maintenance/maintenance";
+      }
     }
 
     DefaultSavedRequest dsr =

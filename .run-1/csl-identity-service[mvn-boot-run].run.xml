@@ -45,6 +45,12 @@
               <entry key="LPG_SIGNOUT_TIMER_SECONDS" value="5" />
               <entry key="LPG_UI_SIGNOUT_URI" value="/sign-out" />
               <entry key="LPG_UI_URL" value="http:http://localhost:3001" />
+              <entry key="MAINTENANCE_PAGE_ENABLED" value="false" />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_1" value="The learning website is undergoing scheduled maintenance." />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_2" value="It will be unavailable between the hours of 6pm to 8pm on Wednesday 1st May 2024." />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_3" value="Apologies for the inconvenience." />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_4" value="If the maintenance period is extended, further information will be provided here." />
+              <entry key="MAINTENANCE_PAGE_SKIP_FOR_USERS" value="tester1@domain.com,tester2@domain.com" />
               <entry key="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
               <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
               <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
