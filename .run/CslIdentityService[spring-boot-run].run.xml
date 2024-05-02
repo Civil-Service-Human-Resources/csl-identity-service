@@ -40,7 +40,7 @@
       <env name="LPG_SIGNOUT_TIMER_SECONDS" value="5" />
       <env name="LPG_UI_SIGNOUT_URI" value="/sign-out" />
       <env name="LPG_UI_URL" value="http:http://localhost:3001" />
-      <env name="MAINTENANCE_PAGE_ENABLED" value="true" />
+      <env name="MAINTENANCE_PAGE_ENABLED" value="false" />
       <env name="MAINTENANCE_PAGE_CONTENT_LINE_1" value="The learning website is undergoing scheduled maintenance." />
       <env name="MAINTENANCE_PAGE_CONTENT_LINE_2" value="It will be unavailable between the hours of 6pm to 8pm on Wednesday 1st May 2024." />
       <env name="MAINTENANCE_PAGE_CONTENT_LINE_3" value="Apologies for the inconvenience." />
