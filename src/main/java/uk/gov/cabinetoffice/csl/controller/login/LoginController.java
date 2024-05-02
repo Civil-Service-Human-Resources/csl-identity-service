@@ -50,7 +50,6 @@ public class LoginController {
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
               .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
-      log.info("LoginController.login.skipMaintenancePage: {}", skipMaintenancePage);
 
       if (!skipMaintenancePage) {
         model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
