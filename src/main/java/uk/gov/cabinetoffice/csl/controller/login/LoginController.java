@@ -4,13 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -45,28 +42,10 @@ public class LoginController {
   private String skipMaintenancePageForUsers;
 
   @RequestMapping("/login")
-  public String login(HttpServletRequest request, HttpServletResponse response,
-                      Model model, Authentication authentication) throws IOException {
-
-    log.info("LoginController.login.authentication: {}", authentication);
-    if (authentication != null) {
-      Object principal = authentication.getPrincipal();
-      log.info("LoginController.login.principal: {}", principal);
-      if(principal instanceof IdentityDetails identityDetails) {
-        log.info("LoginController.login.identityDetails: {}", identityDetails);
-      }
-      if(principal instanceof Jwt jwt) {
-        log.info("LoginController.login.jwt: {}", jwt);
-        String email = jwt.getClaim("email");
-        log.info("LoginController.login.email: {}", email);
-      }
-    }
+  public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 
     if(maintenancePageEnabled) {
-      log.info("LoginController.login.maintenancePageEnabled: {}", maintenancePageEnabled);
-
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-      log.info("LoginController.login.skipMaintenancePageForUser.username: {}", skipMaintenancePageForUser);
 
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
@@ -80,6 +59,7 @@ public class LoginController {
         model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
         return "maintenance/maintenance";
       }
+      log.info("Maintenance page is skipped for the user: {}", skipMaintenancePageForUser);
     }
 
     DefaultSavedRequest dsr =
