@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Controller
 public class LoginController {
 
@@ -42,8 +44,10 @@ public class LoginController {
 
     if(maintenancePageEnabled) {
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-      boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
-              .anyMatch(u -> u.equalsIgnoreCase(skipMaintenancePageForUser));
+
+      boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
+              Arrays.stream(skipMaintenancePageForUsers.split(","))
+              .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
 
       if (!skipMaintenancePage) {
         model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
