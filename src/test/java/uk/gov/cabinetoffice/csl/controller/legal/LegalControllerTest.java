@@ -22,10 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockCustomUser
 public class LegalControllerTest {
 
-    private static final String COOKIES_PATH = "/legal/cookies";
-    private static final String PRIVACY_PATH = "/legal/privacy";
-    private static final String CONTACT_US_PATH = "/legal/contact-us";
-    private static final String ACCESSIBILITY_STATEMENT_PATH = "/legal/accessibility-statement";
+    private static final String COOKIES_PATH = "/cookies";
+    private static final String PRIVACY_PATH = "/privacy";
+    private static final String ACCESSIBILITY_STATEMENT_PATH = "/accessibility-statement";
+    private static final String CONTACT_US_PATH = "/contact-us";
 
     private static final String COOKIES_TEMPLATE = "legal/cookies";
     private static final String PRIVACY_TEMPLATE = "legal/privacy";
