@@ -48,20 +48,22 @@ public class LoginController {
   public String login(HttpServletRequest request, HttpServletResponse response,
                       Model model, Authentication authentication) throws IOException {
 
-    if(maintenancePageEnabled) {
-      log.info("LoginController.login.authentication: {}", authentication);
-      if (authentication != null) {
-        Object principal = authentication.getPrincipal();
-        log.info("LoginController.login.principal: {}", principal);
-        if(principal instanceof IdentityDetails identityDetails) {
-          log.info("LoginController.login.identityDetails: {}", identityDetails);
-        }
-        if(principal instanceof Jwt jwt) {
-          log.info("LoginController.login.jwt: {}", jwt);
-          String email = jwt.getClaim("email");
-          log.info("LoginController.login.email: {}", email);
-        }
+    log.info("LoginController.login.authentication: {}", authentication);
+    if (authentication != null) {
+      Object principal = authentication.getPrincipal();
+      log.info("LoginController.login.principal: {}", principal);
+      if(principal instanceof IdentityDetails identityDetails) {
+        log.info("LoginController.login.identityDetails: {}", identityDetails);
       }
+      if(principal instanceof Jwt jwt) {
+        log.info("LoginController.login.jwt: {}", jwt);
+        String email = jwt.getClaim("email");
+        log.info("LoginController.login.email: {}", email);
+      }
+    }
+
+    if(maintenancePageEnabled) {
+      log.info("LoginController.login.maintenancePageEnabled: {}", maintenancePageEnabled);
 
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
       log.info("LoginController.login.skipMaintenancePageForUser.username: {}", skipMaintenancePageForUser);
