@@ -24,8 +24,8 @@ public class LegalControllerTest {
 
     private static final String COOKIES_PATH = "/legal/cookies";
     private static final String PRIVACY_PATH = "/legal/privacy";
-    private static final String CONTACT_US_PATH = "/legal/contact-us";
     private static final String ACCESSIBILITY_STATEMENT_PATH = "/legal/accessibility-statement";
+    private static final String CONTACT_US_PATH = "/legal/contact-us";
 
     private static final String COOKIES_TEMPLATE = "legal/cookies";
     private static final String PRIVACY_TEMPLATE = "legal/privacy";
