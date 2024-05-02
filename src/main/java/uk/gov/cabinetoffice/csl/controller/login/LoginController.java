@@ -2,6 +2,7 @@ package uk.gov.cabinetoffice.csl.controller.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
@@ -13,10 +14,11 @@ import java.util.Arrays;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Slf4j
 @Controller
 public class LoginController {
 
-  private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "skipMaintenancePageForUser";
+  private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
 
   @Value("${authenticationSuccess.targetUrl}")
   private String authenticationSuccessTargetUrl;
@@ -44,6 +46,7 @@ public class LoginController {
 
     if(maintenancePageEnabled) {
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+      log.info("LoginController.login.skipMaintenancePageForUser.username: {}", skipMaintenancePageForUser);
 
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
