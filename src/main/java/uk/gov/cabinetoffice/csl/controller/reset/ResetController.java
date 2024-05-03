@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.controller.reset;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +57,14 @@ public class ResetController {
     }
 
     @GetMapping
-    public String reset() {
+    public String reset(HttpServletRequest request, Model model) {
+
+        model = utils.displayMaintenancePage(request, model);
+        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
+        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+            return "maintenance/maintenance";
+        }
+
         return REQUEST_RESET_TEMPLATE;
     }
 
@@ -94,7 +102,14 @@ public class ResetController {
     }
 
     @GetMapping("/{code}")
-    public String loadResetForm(@PathVariable(value = "code") String code, Model model) {
+    public String loadResetForm(@PathVariable(value = "code") String code, HttpServletRequest request, Model model) {
+
+        model = utils.displayMaintenancePage(request, model);
+        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
+        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+            return "maintenance/maintenance";
+        }
+
         log.debug("User on reset screen with code {}", code);
 
         Reset reset = resetService.getResetForCode(code);

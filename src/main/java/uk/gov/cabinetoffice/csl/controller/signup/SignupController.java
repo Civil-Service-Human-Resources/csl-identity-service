@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.controller.signup;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,7 +96,14 @@ public class SignupController {
     }
 
     @GetMapping(path = "/request")
-    public String requestInvite(Model model) {
+    public String requestInvite(HttpServletRequest request, Model model) {
+
+        model = utils.displayMaintenancePage(request, model);
+        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
+        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+            return "maintenance/maintenance";
+        }
+
         model.addAttribute(REQUEST_INVITE_FORM, new RequestInviteForm());
         return REQUEST_INVITE_TEMPLATE;
     }
@@ -165,8 +173,14 @@ public class SignupController {
     }
 
     @GetMapping("/{code}")
-    public String signup(Model model, @PathVariable(value = "code") String code,
+    public String signup(@PathVariable(value = "code") String code, HttpServletRequest request, Model model,
                          RedirectAttributes redirectAttributes) {
+
+        model = utils.displayMaintenancePage(request, model);
+        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
+        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+            return "maintenance/maintenance";
+        }
 
         if (!inviteService.isInviteCodeExists(code)) {
             log.info("Signup code for invite is not valid. Redirecting to signup page.");

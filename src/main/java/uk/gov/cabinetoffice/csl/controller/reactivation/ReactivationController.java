@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.controller.reactivation;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -120,7 +121,15 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code, HttpServletRequest request, Model model,
+                                    RedirectAttributes redirectAttributes) {
+
+        model = utils.displayMaintenancePage(request, model);
+        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
+        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+            return "maintenance/maintenance";
+        }
+
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = reactivation.getEmail();
