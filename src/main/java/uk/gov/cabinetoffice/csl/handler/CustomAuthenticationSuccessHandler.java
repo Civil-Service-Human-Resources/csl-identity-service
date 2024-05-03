@@ -19,6 +19,9 @@ import java.util.Arrays;
 @Configuration
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
+    @Value("${authenticationSuccess.targetUrl}")
+    private String authenticationSuccessTargetUrl;
+
     @Value("${maintenancePage.enabled}")
     private boolean maintenancePageEnabled;
 
@@ -27,9 +30,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     @Value("${lpg.uiSignOutUrl}")
     private String lpgUiSignOutUrl;
-
-    @Value("${authenticationSuccess.targetUrl}")
-    private String authenticationSuccessTargetUrl;
 
     private final LoginService loginService;
 
