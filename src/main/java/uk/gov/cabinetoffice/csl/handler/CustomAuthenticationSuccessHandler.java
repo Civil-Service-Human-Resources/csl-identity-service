@@ -25,8 +25,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Value("${maintenancePage.skipForUsers}")
     private String skipMaintenancePageForUsers;
 
-    @Value("${lpg.uiSignOutUrl}")
-    private String lpgUiSignOutUrl;
+    @Value("${oauth2.serviceUrl}")
+    private String identityBaseUrl;
 
     @Value("${authenticationSuccess.targetUrl}")
     private String authenticationSuccessTargetUrl;
@@ -52,7 +52,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     log.info("Maintenance page is skipped for the user: {}", username);
                     loginService.loginSucceeded(identity);
                 } else {
-                    this.setDefaultTargetUrl(lpgUiSignOutUrl);
+                    this.setDefaultTargetUrl("/logout");
                 }
             } else {
                 loginService.loginSucceeded(identity);
