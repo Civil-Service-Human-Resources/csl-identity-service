@@ -18,7 +18,6 @@ public class AuthenticationEvents {
 
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent success) {
-        log.debug("AuthenticationEvents:onSuccess");
     }
 
     @EventListener
