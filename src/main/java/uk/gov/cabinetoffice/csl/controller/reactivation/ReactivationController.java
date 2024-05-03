@@ -82,7 +82,13 @@ public class ReactivationController {
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
+    public String sendReactivationEmail(@RequestParam String code, HttpServletRequest request, Model model,
+                                        RedirectAttributes redirectAttributes) {
+
+        if(utils.displayMaintenancePage(request, model)) {
+            return "maintenance/maintenance";
+        }
+
         try {
             String email = getDecryptedText(code, encryptionKey);
 
