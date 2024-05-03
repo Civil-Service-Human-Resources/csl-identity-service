@@ -25,9 +25,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Value("${maintenancePage.skipForUsers}")
     private String skipMaintenancePageForUsers;
 
-    @Value("${oauth2.serviceUrl}")
-    private String identityBaseUrl;
-
     @Value("${authenticationSuccess.targetUrl}")
     private String authenticationSuccessTargetUrl;
 
