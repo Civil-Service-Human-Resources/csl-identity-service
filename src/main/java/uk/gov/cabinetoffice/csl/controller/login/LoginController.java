@@ -43,10 +43,10 @@ public class LoginController {
 
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
-
+    log.info("Before Checking if maintenance page need to be skipped for the user: {}", request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME));
     if(maintenancePageEnabled) {
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-
+      log.info("Checking if maintenance page need to be skipped for the user: {}", skipMaintenancePageForUser);
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
               .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
