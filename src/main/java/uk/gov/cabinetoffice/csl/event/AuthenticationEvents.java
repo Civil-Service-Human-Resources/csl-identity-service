@@ -7,7 +7,6 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.LoginService;
 
 @Slf4j
@@ -19,12 +18,7 @@ public class AuthenticationEvents {
 
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent success) {
-        Authentication authentication = success.getAuthentication();
-        log.debug("AuthenticationEvents:onSuccess:authentication: {}", authentication);
-        if (authentication.getPrincipal() != null
-                && authentication.getPrincipal() instanceof IdentityDetails identityDetails) {
-            loginService.loginSucceeded(identityDetails.getIdentity());
-        }
+        log.debug("AuthenticationEvents:onSuccess");
     }
 
     @EventListener
