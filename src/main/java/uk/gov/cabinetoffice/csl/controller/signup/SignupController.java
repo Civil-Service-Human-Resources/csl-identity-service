@@ -98,9 +98,7 @@ public class SignupController {
     @GetMapping(path = "/request")
     public String requestInvite(HttpServletRequest request, Model model) {
 
-        model = utils.displayMaintenancePage(request, model);
-        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
-        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+        if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 
@@ -176,9 +174,7 @@ public class SignupController {
     public String signup(@PathVariable(value = "code") String code, HttpServletRequest request, Model model,
                          RedirectAttributes redirectAttributes) {
 
-        model = utils.displayMaintenancePage(request, model);
-        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
-        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+        if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 
