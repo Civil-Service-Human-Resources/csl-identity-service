@@ -53,7 +53,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     loginService.loginSucceeded(identity);
                 } else {
                     log.info("Logout to Display Maintenance page for the user: {}", username);
-                    response.sendRedirect(lpgUiSignOutUrl);
+                    this.setDefaultTargetUrl(lpgUiSignOutUrl);
                 }
             } else {
                 loginService.loginSucceeded(identity);
