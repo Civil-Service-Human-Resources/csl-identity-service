@@ -22,14 +22,14 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Value("${authenticationSuccess.targetUrl}")
     private String authenticationSuccessTargetUrl;
 
+    @Value("${lpg.uiSignOutUrl}")
+    private String lpgUiSignOutUrl;
+
     @Value("${maintenancePage.enabled}")
     private boolean maintenancePageEnabled;
 
     @Value("${maintenancePage.skipForUsers}")
     private String skipMaintenancePageForUsers;
-
-    @Value("${lpg.uiSignOutUrl}")
-    private String lpgUiSignOutUrl;
 
     private final LoginService loginService;
 
