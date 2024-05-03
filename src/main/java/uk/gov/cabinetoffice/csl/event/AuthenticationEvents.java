@@ -20,7 +20,7 @@ public class AuthenticationEvents {
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent success) {
         Authentication authentication = success.getAuthentication();
-        log.info("AuthenticationEvents:onSuccess:authentication: {}", authentication);
+        log.info("Maintenance page: AuthenticationEvents:onSuccess:authentication: {}", authentication);
         if (authentication.getPrincipal() != null
                 && authentication.getPrincipal() instanceof IdentityDetails identityDetails){
             loginService.loginSucceeded(identityDetails.getIdentity());

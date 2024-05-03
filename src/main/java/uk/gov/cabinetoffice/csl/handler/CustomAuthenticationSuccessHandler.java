@@ -21,7 +21,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        log.info("CustomAuthenticationSuccessHandler:onAuthenticationSuccess:authentication: {}", authentication);
+        log.info("Maintenance page:CustomAuthenticationSuccessHandler:onAuthenticationSuccess:authentication: {}", authentication);
         this.setDefaultTargetUrl(authenticationSuccessTargetUrl);
         super.onAuthenticationSuccess(request, response, authentication);
     }
