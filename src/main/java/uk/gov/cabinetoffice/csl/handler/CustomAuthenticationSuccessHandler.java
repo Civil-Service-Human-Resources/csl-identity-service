@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
+import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.service.LoginService;
 
 import java.io.IOException;
@@ -21,9 +22,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     @Value("${authenticationSuccess.targetUrl}")
     private String authenticationSuccessTargetUrl;
-
-    @Value("${lpg.uiSignOutUrl}")
-    private String lpgUiSignOutUrl;
 
     @Value("${maintenancePage.enabled}")
     private boolean maintenancePageEnabled;
@@ -52,8 +50,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     log.info("Maintenance page is skipped for the user: {}", username);
                     loginService.loginSucceeded(identity);
                 } else {
-                    log.info("Trying to logout the user by redirecting to lpg-ui/sign-out to Display Maintenance page for the user: {}", username);
-                    response.sendRedirect(lpgUiSignOutUrl);
+                    log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", username);
+                    throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
                 }
             } else {
                 loginService.loginSucceeded(identity);
