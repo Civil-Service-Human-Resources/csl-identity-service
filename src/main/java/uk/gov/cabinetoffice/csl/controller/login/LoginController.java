@@ -28,9 +28,7 @@ public class LoginController {
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 
-    model = utils.displayMaintenancePage(request, model);
-    String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
-    if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+    if(utils.displayMaintenancePage(request, model)) {
       return "maintenance/maintenance";
     }
 

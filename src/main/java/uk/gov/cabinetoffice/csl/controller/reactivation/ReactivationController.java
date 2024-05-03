@@ -124,9 +124,7 @@ public class ReactivationController {
     public String reactivateAccount(@PathVariable(value = "code") String code, HttpServletRequest request, Model model,
                                     RedirectAttributes redirectAttributes) {
 
-        model = utils.displayMaintenancePage(request, model);
-        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
-        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+        if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 

@@ -59,9 +59,7 @@ public class ResetController {
     @GetMapping
     public String reset(HttpServletRequest request, Model model) {
 
-        model = utils.displayMaintenancePage(request, model);
-        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
-        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+        if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 
@@ -104,9 +102,7 @@ public class ResetController {
     @GetMapping("/{code}")
     public String loadResetForm(@PathVariable(value = "code") String code, HttpServletRequest request, Model model) {
 
-        model = utils.displayMaintenancePage(request, model);
-        String displayMaintenancePage = (String)model.getAttribute("displayMaintenancePage");
-        if("yes".equalsIgnoreCase(displayMaintenancePage)) {
+        if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 

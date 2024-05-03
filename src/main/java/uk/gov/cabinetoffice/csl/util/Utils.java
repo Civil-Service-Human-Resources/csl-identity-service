@@ -40,11 +40,11 @@ public class Utils {
     @Value("${maintenancePage.skipForUsers}")
     private String skipMaintenancePageForUsers;
 
-    public Model displayMaintenancePage(HttpServletRequest request, Model model) {
-        model.addAttribute("displayMaintenancePage", "no");
+    public boolean displayMaintenancePage(HttpServletRequest request, Model model) {
+        boolean displayMaintenancePage = false;
 
         if(maintenancePageEnabled) {
-            model.addAttribute("displayMaintenancePage", "yes");
+            displayMaintenancePage = true;
 
             model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
             model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
@@ -56,11 +56,11 @@ public class Utils {
                     Arrays.stream(skipMaintenancePageForUsers.split(","))
                             .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
             if (skipMaintenancePage) {
-                model.addAttribute("displayMaintenancePage", "no");
+                displayMaintenancePage = false;
                 log.info("Maintenance page is skipped for the user: {}", username);
             }
         }
-        return model;
+        return displayMaintenancePage;
     }
 
     public String convertSecondsIntoDaysHoursMinutesSeconds(long totalSeconds) {
