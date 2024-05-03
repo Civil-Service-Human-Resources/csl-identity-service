@@ -51,14 +51,15 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 if(skipMaintenancePage) {
                     log.info("Maintenance page is skipped for the user: {}", username);
                     loginService.loginSucceeded(identity);
+                    super.onAuthenticationSuccess(request, response, authentication);
                 } else {
                     log.info("Logout to Display Maintenance page for the user: {}", username);
-                    this.setDefaultTargetUrl(lpgUiSignOutUrl);
+                    response.sendRedirect(lpgUiSignOutUrl);
                 }
             } else {
                 loginService.loginSucceeded(identity);
+                super.onAuthenticationSuccess(request, response, authentication);
             }
         }
-        super.onAuthenticationSuccess(request, response, authentication);
     }
 }
