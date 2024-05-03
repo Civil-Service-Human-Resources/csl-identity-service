@@ -15,8 +15,6 @@ import uk.gov.cabinetoffice.csl.service.LoginService;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 @Slf4j
 @Configuration
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
@@ -48,10 +46,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             Identity identity = identityDetails.getIdentity();
             if(maintenancePageEnabled) {
                 String username = identity.getEmail();
-                boolean skipMaintenancePage = isNotBlank(username) &&
-                        Arrays.stream(skipMaintenancePageForUsers.split(","))
+                boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
                                 .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
                 if(skipMaintenancePage) {
+                    log.info("Maintenance page is skipped for the user: {}", username);
                     loginService.loginSucceeded(identity);
                 } else {
                     this.setDefaultTargetUrl(lpgUiSignOutUrl);
