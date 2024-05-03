@@ -49,6 +49,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     log.info("Maintenance page is skipped for the user: {}", username);
                     loginService.loginSucceeded(identity);
                 } else {
+                    log.info("Logout to display Maintenance page for the user: {}", username);
                     this.setDefaultTargetUrl("/logout");
                 }
             } else {
