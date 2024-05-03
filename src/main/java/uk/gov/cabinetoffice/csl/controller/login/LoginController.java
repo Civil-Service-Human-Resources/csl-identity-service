@@ -43,10 +43,9 @@ public class LoginController {
 
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
-    log.info("Before Checking if Maintenance page need to be skipped for the user: {}", request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME));
+
     if(maintenancePageEnabled) {
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-      log.info("Checking if Maintenance page need to be skipped for the user: {}", skipMaintenancePageForUser);
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
               .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
@@ -58,7 +57,7 @@ public class LoginController {
         model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
         return "maintenance/maintenance";
       }
-      log.info("Maintenance page is skipped for the user: {}", skipMaintenancePageForUser);
+      log.info("Maintenance page is skipped to show the login page for the user: {}", skipMaintenancePageForUser);
     }
 
     DefaultSavedRequest dsr =
