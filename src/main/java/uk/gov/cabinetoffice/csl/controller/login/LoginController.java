@@ -8,7 +8,7 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import uk.gov.cabinetoffice.csl.util.Utils;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 
 import java.io.IOException;
 
@@ -19,16 +19,16 @@ public class LoginController {
   @Value("${authenticationSuccess.targetUrl}")
   private String authenticationSuccessTargetUrl;
 
-  private final Utils utils;
+  private final MaintenancePageUtil maintenancePageUtil;
 
-  public LoginController(Utils utils) {
-    this.utils = utils;
+  public LoginController(MaintenancePageUtil maintenancePageUtil) {
+    this.maintenancePageUtil = maintenancePageUtil;
   }
 
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 
-    if(utils.displayMaintenancePage(request, model)) {
+    if(maintenancePageUtil.displayMaintenancePage(request, model)) {
       return "maintenance/maintenance";
     }
 

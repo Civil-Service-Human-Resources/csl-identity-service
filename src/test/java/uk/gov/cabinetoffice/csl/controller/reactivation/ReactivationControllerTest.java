@@ -16,6 +16,7 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.LocalDateTime;
@@ -55,7 +56,21 @@ public class ReactivationControllerTest {
     @MockBean
     private NotifyService notifyService;
 
+    @MockBean
+    private MaintenancePageUtil maintenancePageUtil;
+
     private final Utils utils = new Utils();
+
+    @Test
+    public void shouldReturnMaintenancePage() throws Exception {
+        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
+        mockMvc.perform(
+                        get("/account/reactivate/" + CODE))
+                .andExpect(status().isOk())
+                .andExpect(view().name("maintenance/maintenance"))
+                .andExpect(content().string(containsString("Maintenance")))
+                .andDo(print());
+    }
 
     @Test
     public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
@@ -177,7 +192,9 @@ public class ReactivationControllerTest {
         String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
 
         mockMvc.perform(
-                        get("/account/reactivate").param("code", encryptedUsername))
+                    get("/account/reactivate")
+                        .param("code", encryptedUsername)
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/reactivate"))
                 .andExpect(content().string(containsString("We've sent you an email")))

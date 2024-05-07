@@ -14,6 +14,7 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 
 import static java.time.Month.FEBRUARY;
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -53,7 +55,23 @@ public class ResetControllerTest {
     @MockBean
     private IdentityService identityService;
 
+    @MockBean
+    private MaintenancePageUtil maintenancePageUtil;
+
     private final Utils utils = new Utils();
+
+    @Test
+    public void shouldReturnMaintenancePage() throws Exception {
+        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
+        mockMvc.perform(
+                        get("/reset")
+                                .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("maintenance/maintenance"))
+                .andExpect(content().string(containsString("Maintenance")))
+                .andDo(print());
+    }
 
     @Test
     public void shouldLoadRequestResetForm() throws Exception {

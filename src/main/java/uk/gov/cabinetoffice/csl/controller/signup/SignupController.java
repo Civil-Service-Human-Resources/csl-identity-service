@@ -19,6 +19,7 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -79,25 +80,29 @@ public class SignupController {
 
     private final Utils utils;
 
+    private final MaintenancePageUtil maintenancePageUtil;
+
     private final Clock clock;
 
     public SignupController(InviteService inviteService,
                             IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
                             AgencyTokenCapacityService agencyTokenCapacityService,
-                            Utils utils, Clock clock) {
+                            Utils utils, MaintenancePageUtil maintenancePageUtil,
+                            Clock clock) {
         this.inviteService = inviteService;
         this.identityService = identityService;
         this.civilServantRegistryClient = civilServantRegistryClient;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.utils = utils;
+        this.maintenancePageUtil = maintenancePageUtil;
         this.clock = clock;
     }
 
     @GetMapping(path = "/request")
     public String requestInvite(HttpServletRequest request, Model model) {
 
-        if(utils.displayMaintenancePage(request, model)) {
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 
@@ -172,7 +177,7 @@ public class SignupController {
                          RedirectAttributes redirectAttributes,
                          HttpServletRequest request, Model model) {
 
-        if(utils.displayMaintenancePage(request, model)) {
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 

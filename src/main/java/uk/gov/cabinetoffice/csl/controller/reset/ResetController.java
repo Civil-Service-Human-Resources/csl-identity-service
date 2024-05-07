@@ -15,6 +15,7 @@ import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -46,20 +47,23 @@ public class ResetController {
 
     private final Utils utils;
 
+    private final MaintenancePageUtil maintenancePageUtil;
+
     public ResetController(ResetService resetService, PasswordService passwordService,
                            IdentityService identityService, ResetFormValidator resetFormValidator,
-                           Utils utils) {
+                           Utils utils, MaintenancePageUtil maintenancePageUtil) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
         this.resetFormValidator = resetFormValidator;
         this.utils = utils;
+        this.maintenancePageUtil = maintenancePageUtil;
     }
 
     @GetMapping
     public String reset(HttpServletRequest request, Model model) {
 
-        if(utils.displayMaintenancePage(request, model)) {
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 
@@ -103,7 +107,7 @@ public class ResetController {
     public String loadResetForm(@PathVariable(value = "code") String code,
                                 HttpServletRequest request, Model model) {
 
-        if(utils.displayMaintenancePage(request, model)) {
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
 
