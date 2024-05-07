@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 
 import java.util.Arrays;
 
@@ -55,5 +56,18 @@ public class MaintenancePageUtil {
             }
         }
         return displayMaintenancePage;
+    }
+
+    public void skipMaintenancePageCheck(String email) {
+        if (maintenancePageEnabled) {
+            boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                    .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
+            if(skipMaintenancePage) {
+                log.info("Maintenance page is skipped for the user: {}", email);
+            } else {
+                log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
+                throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
+            }
+        }
     }
 }

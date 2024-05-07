@@ -10,11 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.service.LoginService;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Slf4j
 @Configuration
@@ -23,16 +22,14 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Value("${authenticationSuccess.targetUrl}")
     private String authenticationSuccessTargetUrl;
 
-    @Value("${maintenancePage.enabled}")
-    private boolean maintenancePageEnabled;
-
-    @Value("${maintenancePage.skipForUsers}")
-    private String skipMaintenancePageForUsers;
-
     private final LoginService loginService;
 
-    public CustomAuthenticationSuccessHandler(LoginService loginService) {
+    private final MaintenancePageUtil maintenancePageUtil;
+
+    public CustomAuthenticationSuccessHandler(LoginService loginService,
+                                              MaintenancePageUtil maintenancePageUtil) {
         this.loginService = loginService;
+        this.maintenancePageUtil = maintenancePageUtil;
     }
 
     @Override
@@ -42,20 +39,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         Object principal = authentication.getPrincipal();
         if (principal instanceof IdentityDetails identityDetails) {
             Identity identity = identityDetails.getIdentity();
-            if(maintenancePageEnabled) {
-                String username = identity.getEmail();
-                boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                                .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
-                if(skipMaintenancePage) {
-                    log.info("Maintenance page is skipped for the user: {}", username);
-                    loginService.loginSucceeded(identity);
-                } else {
-                    log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", username);
-                    throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
-                }
-            } else {
-                loginService.loginSucceeded(identity);
-            }
+            maintenancePageUtil.skipMaintenancePageCheck(identity.getEmail());
+            loginService.loginSucceeded(identity);
         }
         super.onAuthenticationSuccess(request, response, authentication);
     }
