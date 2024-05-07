@@ -82,8 +82,9 @@ public class ReactivationController {
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code, HttpServletRequest request, Model model,
-                                        RedirectAttributes redirectAttributes) {
+    public String sendReactivationEmail(@RequestParam String code,
+                                        RedirectAttributes redirectAttributes,
+                                        HttpServletRequest request, Model model) {
 
         if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
@@ -127,8 +128,9 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code, HttpServletRequest request, Model model,
-                                    RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code,
+                                    RedirectAttributes redirectAttributes,
+                                    HttpServletRequest request, Model model) {
 
         if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
