@@ -85,8 +85,7 @@ public class SignupController {
                             IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
                             AgencyTokenCapacityService agencyTokenCapacityService,
-                            Utils utils,
-                            Clock clock) {
+                            Utils utils, Clock clock) {
         this.inviteService = inviteService;
         this.identityService = identityService;
         this.civilServantRegistryClient = civilServantRegistryClient;
@@ -107,10 +106,8 @@ public class SignupController {
     }
 
     @PostMapping(path = "/request")
-    public String sendInvite(Model model,
-                             @ModelAttribute @Valid RequestInviteForm form,
-                             BindingResult bindingResult,
-                             RedirectAttributes redirectAttributes) throws NotificationClientException {
+    public String sendInvite(Model model, @ModelAttribute @Valid RequestInviteForm form,
+                             BindingResult bindingResult, RedirectAttributes redirectAttributes) throws NotificationClientException {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute(REQUEST_INVITE_FORM, form);
@@ -171,8 +168,9 @@ public class SignupController {
     }
 
     @GetMapping("/{code}")
-    public String signup(@PathVariable(value = "code") String code, HttpServletRequest request, Model model,
-                         RedirectAttributes redirectAttributes) {
+    public String signup(@PathVariable(value = "code") String code,
+                         RedirectAttributes redirectAttributes,
+                         HttpServletRequest request, Model model) {
 
         if(utils.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
@@ -230,8 +228,7 @@ public class SignupController {
                          @ModelAttribute @Valid SignupForm signupForm,
                          BindingResult signUpFormBindingResult,
                          @ModelAttribute AgencyToken agencyToken,
-                         Model model,
-                         RedirectAttributes redirectAttributes) {
+                         RedirectAttributes redirectAttributes, Model model) {
 
         if (signUpFormBindingResult.hasErrors()) {
             model.addAttribute(INVITE_MODEL, inviteService.getInviteForCode(code));
