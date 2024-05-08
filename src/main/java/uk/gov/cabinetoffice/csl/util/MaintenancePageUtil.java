@@ -36,6 +36,11 @@ public class MaintenancePageUtil {
     private String skipMaintenancePageForUsers;
 
     public boolean displayMaintenancePage(HttpServletRequest request, Model model) {
+        String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+        return displayMaintenancePage(username, model);
+    }
+
+    public boolean displayMaintenancePage(String username, Model model) {
         boolean displayMaintenancePage = false;
 
         if(maintenancePageEnabled) {
@@ -46,7 +51,6 @@ public class MaintenancePageUtil {
             model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
             model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
 
-            String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
             boolean skipMaintenancePage = isNotBlank(username) &&
                     Arrays.stream(skipMaintenancePageForUsers.split(","))
                             .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
