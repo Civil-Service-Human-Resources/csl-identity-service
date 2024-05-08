@@ -340,7 +340,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_ENTER_TOKEN + GENERIC_CODE));
+                .andExpect(redirectedUrl(CHOOSE_ORGANISATION_TEMPLATE + GENERIC_CODE));
     }
 
     @Test
