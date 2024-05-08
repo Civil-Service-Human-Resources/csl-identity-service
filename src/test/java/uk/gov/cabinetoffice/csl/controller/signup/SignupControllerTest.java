@@ -53,7 +53,7 @@ public class SignupControllerTest {
     private static final String STATUS_ATTRIBUTE = "status";
 
     private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
-    private static final String CHOOSE_ORGANISATION_TEMPLATE = "signup/chooseOrganisation/";
+    private static final String CHOOSE_ORGANISATION_TEMPLATE = "signup/chooseOrganisation";
     private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
     private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
     private static final String SIGNUP_TEMPLATE = "signup/signup";
@@ -61,6 +61,7 @@ public class SignupControllerTest {
 
     private static final String REDIRECT_SIGNUP = "/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "/signup/request";
+    private static final String REDIRECT_CHOOSE_ORGANISATION = "/signup/chooseOrganisation/";
     private static final String REDIRECT_ENTER_TOKEN = "/signup/enterToken/";
     private static final String REDIRECT_INVALID_SIGNUP_CODE = "/login?error=invalidSignupCode";
 
@@ -340,7 +341,7 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(CHOOSE_ORGANISATION_TEMPLATE + GENERIC_CODE));
+                .andExpect(redirectedUrl(REDIRECT_CHOOSE_ORGANISATION + GENERIC_CODE));
     }
 
     @Test
