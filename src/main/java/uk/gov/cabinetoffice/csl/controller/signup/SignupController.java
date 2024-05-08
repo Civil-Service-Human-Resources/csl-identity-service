@@ -111,8 +111,10 @@ public class SignupController {
     }
 
     @PostMapping(path = "/request")
-    public String sendInvite(Model model, @ModelAttribute @Valid RequestInviteForm form,
-                             BindingResult bindingResult, RedirectAttributes redirectAttributes) throws NotificationClientException {
+    public String sendInvite(Model model,
+                             @ModelAttribute @Valid RequestInviteForm form,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes) throws NotificationClientException {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute(REQUEST_INVITE_FORM, form);
