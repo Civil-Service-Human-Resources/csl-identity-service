@@ -53,7 +53,7 @@ public class SignupControllerTest {
     private static final String STATUS_ATTRIBUTE = "status";
 
     private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
-    private static final String CHOOSE_ORGANISATION_TEMPLATE = "signup/chooseOrganisation";
+    private static final String CHOOSE_ORGANISATION_TEMPLATE = "signup/chooseOrganisation/";
     private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
     private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
     private static final String SIGNUP_TEMPLATE = "signup/signup";
