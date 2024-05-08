@@ -208,7 +208,7 @@ public class SignupController {
 
         Invite invite = inviteService.getInviteForCode(code);
         if (!invite.isAuthorisedInvite()) {
-            log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
+            log.info("Invited email {} is not authorised yet. Redirecting to choose organisation page.",
                     invite.getForEmail());
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
