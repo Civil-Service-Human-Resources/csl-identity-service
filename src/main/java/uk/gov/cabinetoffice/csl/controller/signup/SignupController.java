@@ -53,7 +53,7 @@ public class SignupController {
 
     private static final String REDIRECT_SIGNUP = "redirect:/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "redirect:/signup/request";
-    private static final String REDIRECT_CHOOSE_ORGANISATION = "redirect:/signup/chooseOrganisation";
+    private static final String REDIRECT_CHOOSE_ORGANISATION = "redirect:/signup/chooseOrganisation/";
     private static final String REDIRECT_ENTER_TOKEN = "redirect:/signup/enterToken/";
     private static final String REDIRECT_INVALID_SIGNUP_CODE = "redirect:/login?error=invalidSignupCode";
 
@@ -195,9 +195,9 @@ public class SignupController {
 
         Invite invite = inviteService.getInviteForCode(code);
         if (!invite.isAuthorisedInvite()) {
-            log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
+            log.info("Invited email {} is not authorised yet. Redirecting to choose organisation page.",
                     invite.getForEmail());
-            return REDIRECT_ENTER_TOKEN + code;
+            return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
         model.addAttribute(INVITE_MODEL, invite);
@@ -234,7 +234,9 @@ public class SignupController {
 
         Invite invite = inviteService.getInviteForCode(code);
         if (!invite.isAuthorisedInvite()) {
-            return REDIRECT_ENTER_TOKEN + code;
+            log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
+                    invite.getForEmail());
+            return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
         try {
@@ -270,7 +272,7 @@ public class SignupController {
             return REDIRECT_SIGNUP + code;
         }
 
-        log.info("Invite email = {} accessing enter organisation screen for validation", invite.getForEmail());
+        log.info("Invite email {} accessing enter organisation screen for validation", invite.getForEmail());
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
@@ -302,7 +304,7 @@ public class SignupController {
 
         String orgCode = form.getOrganisation();
 
-        log.info("Invite email = {} selected organisation {}", invite.getForEmail(), orgCode);
+        log.info("Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
