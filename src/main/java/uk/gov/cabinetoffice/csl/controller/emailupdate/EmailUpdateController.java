@@ -66,7 +66,8 @@ public class EmailUpdateController {
 
     public EmailUpdateController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
-                                 Utils utils, MaintenancePageUtil maintenancePageUtil,
+                                 Utils utils,
+                                 MaintenancePageUtil maintenancePageUtil,
                                  @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
@@ -76,7 +77,8 @@ public class EmailUpdateController {
     }
 
     @GetMapping
-    public String updateEmailForm(HttpServletRequest request, Model model, @ModelAttribute UpdateEmailForm form) {
+    public String updateEmailForm(Model model, @ModelAttribute UpdateEmailForm form,
+                                  HttpServletRequest request) {
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }
@@ -118,8 +120,9 @@ public class EmailUpdateController {
 
     @GetMapping("/verify/{code}")
     public String verifyEmail(@PathVariable String code,
-                              HttpServletRequest request, Model model,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes,
+                              HttpServletRequest request, Model model) {
+
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }

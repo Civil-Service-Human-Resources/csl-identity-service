@@ -26,8 +26,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     private final MaintenancePageUtil maintenancePageUtil;
 
-    public CustomAuthenticationSuccessHandler(LoginService loginService,
-                                              MaintenancePageUtil maintenancePageUtil) {
+    public CustomAuthenticationSuccessHandler(LoginService loginService, MaintenancePageUtil maintenancePageUtil) {
         this.loginService = loginService;
         this.maintenancePageUtil = maintenancePageUtil;
     }

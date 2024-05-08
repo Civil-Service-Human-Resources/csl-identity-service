@@ -77,7 +77,8 @@ public class ReactivationController {
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
                                   NotifyService notifyService,
-                                  Utils utils, MaintenancePageUtil maintenancePageUtil) {
+                                  Utils utils,
+                                  MaintenancePageUtil maintenancePageUtil) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.notifyService = notifyService;
@@ -86,9 +87,7 @@ public class ReactivationController {
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code,
-                                        RedirectAttributes redirectAttributes,
-                                        Model model) {
+    public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
 
         try {
             String email = getDecryptedText(code, encryptionKey);
@@ -132,8 +131,7 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code,
-                                    RedirectAttributes redirectAttributes,
+    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes,
                                     HttpServletRequest request, Model model) {
 
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {

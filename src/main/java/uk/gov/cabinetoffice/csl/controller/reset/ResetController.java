@@ -51,7 +51,8 @@ public class ResetController {
 
     public ResetController(ResetService resetService, PasswordService passwordService,
                            IdentityService identityService, ResetFormValidator resetFormValidator,
-                           Utils utils, MaintenancePageUtil maintenancePageUtil) {
+                           Utils utils,
+                           MaintenancePageUtil maintenancePageUtil) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
@@ -104,8 +105,8 @@ public class ResetController {
     }
 
     @GetMapping("/{code}")
-    public String loadResetForm(@PathVariable(value = "code") String code,
-                                HttpServletRequest request, Model model) {
+    public String loadResetForm(@PathVariable(value = "code") String code, Model model,
+                                HttpServletRequest request) {
 
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";

@@ -41,8 +41,8 @@ public class UpdatePasswordController {
     }
 
     @GetMapping
-    public String updatePasswordForm(HttpServletRequest request, Model model,
-                                     @ModelAttribute UpdatePasswordForm form) {
+    public String updatePasswordForm(Model model, @ModelAttribute UpdatePasswordForm form,
+                                     HttpServletRequest request) {
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
         }

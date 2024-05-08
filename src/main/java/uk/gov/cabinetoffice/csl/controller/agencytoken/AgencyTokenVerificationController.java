@@ -58,7 +58,8 @@ public class AgencyTokenVerificationController {
     private final MaintenancePageUtil maintenancePageUtil;
 
     @GetMapping(path = "/{code}")
-    public String enterToken(@PathVariable String code, HttpServletRequest request, Model model) {
+    public String enterToken(Model model, @PathVariable String code,
+                             HttpServletRequest request) {
 
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
