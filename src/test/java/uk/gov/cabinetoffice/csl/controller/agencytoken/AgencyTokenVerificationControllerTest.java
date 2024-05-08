@@ -21,6 +21,7 @@ import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.service.VerificationCodeDeterminationService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -28,10 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 import static uk.gov.cabinetoffice.csl.dto.VerificationCodeType.*;
@@ -79,6 +82,9 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private Utils utils;
 
+    @MockBean
+    private MaintenancePageUtil maintenancePageUtil;
+
     private List<OrganisationalUnit> organisations;
 
     @BeforeEach
@@ -86,6 +92,21 @@ public class AgencyTokenVerificationControllerTest {
         organisations = new ArrayList<>();
         organisations.add(new OrganisationalUnit());
         when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisations);
+    }
+
+    @Test
+    public void shouldReturnMaintenancePage() throws Exception {
+        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
+        mockMvc.perform(
+                get(VERIFY_TOKEN_URL + CODE)
+                        .with(csrf())
+                        .flashAttr("uid", IDENTITY_UID)
+                        .flashAttr("email", EMAIL)
+                        .flashAttr("domain", DOMAIN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("maintenance/maintenance"))
+                .andExpect(content().string(containsString("Maintenance")))
+                .andDo(print());
     }
 
     @Test
