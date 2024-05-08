@@ -246,7 +246,9 @@ public class SignupController {
 
         Invite invite = inviteService.getInviteForCode(code);
         if (!invite.isAuthorisedInvite()) {
-            return REDIRECT_ENTER_TOKEN + code;
+            log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
+                    invite.getForEmail());
+            return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
         try {
@@ -282,7 +284,7 @@ public class SignupController {
             return REDIRECT_SIGNUP + code;
         }
 
-        log.info("Invite email = {} accessing enter organisation screen for validation", invite.getForEmail());
+        log.info("Invite email {} accessing enter organisation screen for validation", invite.getForEmail());
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
@@ -314,7 +316,7 @@ public class SignupController {
 
         String orgCode = form.getOrganisation();
 
-        log.info("Invite email = {} selected organisation {}", invite.getForEmail(), orgCode);
+        log.info("Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
