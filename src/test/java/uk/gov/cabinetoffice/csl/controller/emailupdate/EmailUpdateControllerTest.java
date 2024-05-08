@@ -12,11 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.service.*;
 import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
+import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
 import java.time.ZoneId;
 
 import static java.time.LocalDateTime.now;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -54,6 +56,21 @@ public class EmailUpdateControllerTest {
 
     @MockBean
     private EmailUpdateService emailUpdateService;
+
+    @MockBean
+    private MaintenancePageUtil maintenancePageUtil;
+
+    @Test
+    public void shouldDisplayMaintenancePage() throws Exception {
+        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
+        mockMvc.perform(get(EMAIL_PATH)
+                    .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("maintenance/maintenance"))
+                .andExpect(content().string(containsString("Maintenance")))
+                .andDo(print());
+    }
 
     @Test
     public void givenARequestToChangeYourEmail_whenUpdateEmailForm_shouldDisplayForm() throws Exception {

@@ -111,7 +111,7 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldReturnMaintenancePage() throws Exception {
+    public void shouldDisplayMaintenancePage() throws Exception {
         when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
         mockMvc.perform(
                         get("/signup/request")
