@@ -37,10 +37,10 @@ public class MaintenancePageUtil {
 
     public boolean displayMaintenancePage(HttpServletRequest request, Model model) {
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        return displayMaintenancePage(username, model);
+        return displayMaintenancePageForUser(username, model);
     }
 
-    public boolean displayMaintenancePage(String username, Model model) {
+    public boolean displayMaintenancePageForUser(String username, Model model) {
         boolean displayMaintenancePage = false;
 
         if(maintenancePageEnabled) {

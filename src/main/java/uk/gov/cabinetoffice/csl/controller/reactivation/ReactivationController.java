@@ -88,14 +88,14 @@ public class ReactivationController {
     @GetMapping
     public String sendReactivationEmail(@RequestParam String code,
                                         RedirectAttributes redirectAttributes,
-                                        HttpServletRequest request, Model model) {
-
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance/maintenance";
-        }
+                                        Model model) {
 
         try {
             String email = getDecryptedText(code, encryptionKey);
+
+            if(maintenancePageUtil.displayMaintenancePageForUser(email, model)) {
+                return "maintenance/maintenance";
+            }
 
             String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
             if(isNotBlank(resultIdentityActive)) {
