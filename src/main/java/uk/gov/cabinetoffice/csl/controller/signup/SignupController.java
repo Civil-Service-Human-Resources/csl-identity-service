@@ -88,7 +88,8 @@ public class SignupController {
                             IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
                             AgencyTokenCapacityService agencyTokenCapacityService,
-                            Utils utils, MaintenancePageUtil maintenancePageUtil,
+                            Utils utils,
+                            MaintenancePageUtil maintenancePageUtil,
                             Clock clock) {
         this.inviteService = inviteService;
         this.identityService = identityService;
@@ -100,7 +101,7 @@ public class SignupController {
     }
 
     @GetMapping(path = "/request")
-    public String requestInvite(HttpServletRequest request, Model model) {
+    public String requestInvite(Model model, HttpServletRequest request) {
 
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
@@ -175,9 +176,9 @@ public class SignupController {
     }
 
     @GetMapping("/{code}")
-    public String signup(@PathVariable(value = "code") String code,
+    public String signup(Model model, @PathVariable(value = "code") String code,
                          RedirectAttributes redirectAttributes,
-                         HttpServletRequest request, Model model) {
+                         HttpServletRequest request) {
 
         if(maintenancePageUtil.displayMaintenancePage(request, model)) {
             return "maintenance/maintenance";
@@ -235,7 +236,8 @@ public class SignupController {
                          @ModelAttribute @Valid SignupForm signupForm,
                          BindingResult signUpFormBindingResult,
                          @ModelAttribute AgencyToken agencyToken,
-                         RedirectAttributes redirectAttributes, Model model) {
+                         Model model,
+                         RedirectAttributes redirectAttributes) {
 
         if (signUpFormBindingResult.hasErrors()) {
             model.addAttribute(INVITE_MODEL, inviteService.getInviteForCode(code));
