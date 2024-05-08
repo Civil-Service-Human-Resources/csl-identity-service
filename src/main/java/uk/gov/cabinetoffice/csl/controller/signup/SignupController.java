@@ -210,7 +210,7 @@ public class SignupController {
         if (!invite.isAuthorisedInvite()) {
             log.info("Invited email {} is not authorised yet. Redirecting to enter token page.",
                     invite.getForEmail());
-            return REDIRECT_ENTER_TOKEN + code;
+            return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
         model.addAttribute(INVITE_MODEL, invite);
