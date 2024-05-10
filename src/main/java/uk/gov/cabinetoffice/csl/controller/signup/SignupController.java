@@ -303,26 +303,35 @@ public class SignupController {
         }
 
         String orgCode = form.getOrganisation();
-
-        log.info("Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
+        log.info("csl-identity-service.SignupController: Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
+        log.info("csl-identity-service.SignupController: domain {}", domain);
+
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
+        log.info("csl-identity-service.SignupController: organisations {}", organisations);
 
         return organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst()
                 .map(selectedOrg -> {
+                    log.info("csl-identity-service.SignupController: selectedOrg {}", selectedOrg);
                     if (selectedOrg.isDomainAgencyAssigned(domain)) {
-                        return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                        String domainAgencyRedirect = REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                        log.info("csl-identity-service.SignupController: domainAgencyRedirect {}", domainAgencyRedirect);
+                        return domainAgencyRedirect;
                     } else if (selectedOrg.isDomainLinked(domain)) {
                         inviteService.authoriseAndSaveInvite(invite);
-                        return REDIRECT_SIGNUP + code;
+                        String domainLinkedRedirect = REDIRECT_SIGNUP + code;
+                        log.info("csl-identity-service.SignupController: domainLinkedRedirect {}", domainLinkedRedirect);
+                        return domainLinkedRedirect;
                     }
+                    log.info("csl-identity-service.SignupController: null return");
                     return null;
                 })
                 .orElseGet(() -> {
                     model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
                     model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
                     model.addAttribute(STATUS_ATTRIBUTE, CHOOSE_ORGANISATION_ERROR_MESSAGE);
+                    log.info("csl-identity-service.SignupController: return CHOOSE_ORGANISATION_TEMPLATE: {}", CHOOSE_ORGANISATION_TEMPLATE);
                     return CHOOSE_ORGANISATION_TEMPLATE;
                 });
     }
