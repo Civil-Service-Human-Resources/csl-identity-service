@@ -519,7 +519,7 @@ public class SignupControllerTest {
     public void shouldReturnEnterToken() throws Exception {
         Invite invite = generateBasicInvite(false);
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(GENERIC_ORG_CODE, GENERIC_DOMAIN))
+        when(civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(GENERIC_DOMAIN, GENERIC_ORG_CODE))
                 .thenReturn(true);
 
         mockMvc.perform(

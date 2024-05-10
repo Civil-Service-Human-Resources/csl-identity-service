@@ -134,11 +134,11 @@ public class SignupController {
                         " or until it expires.", email);
                 long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                        "You have been sent an email with a link to register your account.\n" +
-                                "Please check your spam or junk mail folders.\n" +
-                                "If you have not received the email, please wait %s"
-                                .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(durationInSecondsBeforeReInvite)) +
-                                " before creating an account.");
+                "You have been sent an email with a link to register your account.\n" +
+                        "Please check your spam or junk mail folders.\n" +
+                        "If you have not received the email, please wait %s"
+                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(durationInSecondsBeforeReInvite)) +
+                        " before creating an account.");
                 return REDIRECT_SIGNUP_REQUEST;
             } else {
                 log.info("User with email {} trying to re-register after re-registration allowed time therefore " +
@@ -158,14 +158,16 @@ public class SignupController {
         if (identityService.isDomainInAnAgencyToken(domain)) {
             log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
-            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+            model.addAttribute("resetValidity",
+                    utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
 
         if (identityService.isDomainAllowListed(domain)) {
             log.info("Sending invite to allowListed user with email {}", email);
             inviteService.sendSelfSignupInvite(email, true);
-            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+            model.addAttribute("resetValidity",
+                    utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
 
@@ -363,11 +365,13 @@ public class SignupController {
             return REDIRECT_SIGNUP + code;
         }
 
-        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(organisationCode, utils.getDomainFromEmailAddress(invite.getForEmail()))) {
+        final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
+        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(domain, organisationCode)) {
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
-        log.info("Invite email = {} accessing enter token screen for validation with organisation {}", invite.getForEmail(), organisationCode);
+        log.info("Invite email {} accessing enter token screen for validation with organisation {}",
+                invite.getForEmail(), organisationCode);
 
         model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
         model.addAttribute(INVITE_CODE_ATTRIBUTE, code);
@@ -384,6 +388,7 @@ public class SignupController {
             model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
             return CHOOSE_ORGANISATION_TEMPLATE;
         }
+
         Invite invite = inviteService.getValidInviteForCode(code);
         if (invite == null) {
             return REDIRECT_INVALID_SIGNUP_CODE;
@@ -391,7 +396,8 @@ public class SignupController {
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
 
-        Optional<AgencyToken> agencyTokenOptional = civilServantRegistryClient.getAgencyToken(domain, form.getToken(), orgCode);
+        Optional<AgencyToken> agencyTokenOptional = civilServantRegistryClient.getAgencyToken(
+                domain, form.getToken(), orgCode);
 
         if(agencyTokenOptional.isEmpty()) {
             log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
@@ -411,7 +417,8 @@ public class SignupController {
 
         inviteService.authoriseAndSaveInvite(invite);
         model.addAttribute(INVITE_MODEL, invite);
-        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyTokenInfo(domain, form.getToken(), orgCode));
+        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyTokenInfo(
+                domain, form.getToken(), orgCode));
         log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
                 domain, form.getToken(), orgCode);
         return REDIRECT_SIGNUP + code;
