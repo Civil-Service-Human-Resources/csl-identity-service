@@ -106,7 +106,6 @@ public class MaintenancePageUtilTest {
         MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(true,
                 skipMaintenancePageForUsers, maintenancePageContentLine1, maintenancePageContentLine2,
                 maintenancePageContentLine3,maintenancePageContentLine4);
-
         try {
             maintenancePageUtil.skipMaintenancePageCheck("tester1@domain.com");
         } catch (GenericServerException e) {
