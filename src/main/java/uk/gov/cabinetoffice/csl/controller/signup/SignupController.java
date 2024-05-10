@@ -303,35 +303,35 @@ public class SignupController {
         }
 
         String orgCode = form.getOrganisation();
-        log.info("csl-identity-service.SignupController: Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
+        log.info("csl-identity-service.SignupController.chooseOrganisation: Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
-        log.info("csl-identity-service.SignupController: domain {}", domain);
+        log.info("csl-identity-service.SignupController.chooseOrganisation: domain {}", domain);
 
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
-        log.info("csl-identity-service.SignupController: organisations {}", organisations);
+        log.info("csl-identity-service.SignupController.chooseOrganisation: organisations {}", organisations);
 
         return organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst()
                 .map(selectedOrg -> {
-                    log.info("csl-identity-service.SignupController: selectedOrg {}", selectedOrg);
+                    log.info("csl-identity-service.SignupController.chooseOrganisation: selectedOrg {}", selectedOrg);
                     if (selectedOrg.isDomainAgencyAssigned(domain)) {
                         String domainAgencyRedirect = REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-                        log.info("csl-identity-service.SignupController: domainAgencyRedirect {}", domainAgencyRedirect);
+                        log.info("csl-identity-service.SignupController.chooseOrganisation: domainAgencyRedirect {}", domainAgencyRedirect);
                         return domainAgencyRedirect;
                     } else if (selectedOrg.isDomainLinked(domain)) {
                         inviteService.authoriseAndSaveInvite(invite);
                         String domainLinkedRedirect = REDIRECT_SIGNUP + code;
-                        log.info("csl-identity-service.SignupController: domainLinkedRedirect {}", domainLinkedRedirect);
+                        log.info("csl-identity-service.SignupController.chooseOrganisation: domainLinkedRedirect {}", domainLinkedRedirect);
                         return domainLinkedRedirect;
                     }
-                    log.info("csl-identity-service.SignupController: null return");
+                    log.info("csl-identity-service.SignupController.chooseOrganisation: null return");
                     return null;
                 })
                 .orElseGet(() -> {
                     model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
                     model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
                     model.addAttribute(STATUS_ATTRIBUTE, CHOOSE_ORGANISATION_ERROR_MESSAGE);
-                    log.info("csl-identity-service.SignupController: return CHOOSE_ORGANISATION_TEMPLATE: {}", CHOOSE_ORGANISATION_TEMPLATE);
+                    log.info("csl-identity-service.SignupController.chooseOrganisation: return CHOOSE_ORGANISATION_TEMPLATE: {}", CHOOSE_ORGANISATION_TEMPLATE);
                     return CHOOSE_ORGANISATION_TEMPLATE;
                 });
     }
@@ -348,11 +348,16 @@ public class SignupController {
             return REDIRECT_SIGNUP + code;
         }
 
-        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(organisationCode, utils.getDomainFromEmailAddress(invite.getForEmail()))) {
+        log.info("csl-identity-service.SignupController.enterToken: organisationCode {}", organisationCode);
+
+        String domainFromEmailAddress = utils.getDomainFromEmailAddress(invite.getForEmail());
+        log.info("csl-identity-service.SignupController.enterToken: domainFromEmailAddress {}", domainFromEmailAddress);
+        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(domainFromEmailAddress, organisationCode)) {
+            log.info("csl-identity-service.SignupController.enterToken: REDIRECT_CHOOSE_ORGANISATION {}", REDIRECT_CHOOSE_ORGANISATION + code);
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
-        log.info("Invite email = {} accessing enter token screen for validation with organisation {}", invite.getForEmail(), organisationCode);
+        log.info("csl-identity-service.SignupController.enterToken: Invite email = {} accessing enter token screen for validation with organisation {}", invite.getForEmail(), organisationCode);
 
         model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
         model.addAttribute(INVITE_CODE_ATTRIBUTE, code);
