@@ -96,6 +96,7 @@ public class SignupController {
 
     @GetMapping(path = "/request")
     public String requestInvite(Model model) {
+
         model.addAttribute(REQUEST_INVITE_FORM, new RequestInviteForm());
         return REQUEST_INVITE_TEMPLATE;
     }
@@ -309,30 +310,22 @@ public class SignupController {
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
         List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
 
-        Optional<OrganisationalUnit> selectedOrgUnitOptional =
-                organisations
-                        .stream()
-                        .filter(o -> o.getCode().equals(orgCode))
-                        .findFirst();
-
-        if (selectedOrgUnitOptional.isEmpty()) {
-            model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
-            model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
-            model.addAttribute(STATUS_ATTRIBUTE, CHOOSE_ORGANISATION_ERROR_MESSAGE);
-            return CHOOSE_ORGANISATION_TEMPLATE;
-        }
-
-        OrganisationalUnit selectedOrgUnit = selectedOrgUnitOptional.get();
-        if (selectedOrgUnit.isDomainAgencyAssigned(domain)) {
-            return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-        }
-
-        if (selectedOrgUnit.isDomainLinked(domain)) {
-            inviteService.authoriseAndSaveInvite(invite);
-            return REDIRECT_SIGNUP + code;
-        }
-
-        return REDIRECT_INVALID_SIGNUP_CODE;
+        return organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst()
+                .map(selectedOrg -> {
+                    if (selectedOrg.isDomainAgencyAssigned(domain)) {
+                        return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                    } else if (selectedOrg.isDomainLinked(domain)) {
+                        inviteService.authoriseAndSaveInvite(invite);
+                        return REDIRECT_SIGNUP + code;
+                    }
+                    return null;
+                })
+                .orElseGet(() -> {
+                    model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
+                    model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
+                    model.addAttribute(STATUS_ATTRIBUTE, CHOOSE_ORGANISATION_ERROR_MESSAGE);
+                    return CHOOSE_ORGANISATION_TEMPLATE;
+                });
     }
 
     @GetMapping(path = "enterToken/{code}/{organisationCode}")
@@ -377,28 +370,27 @@ public class SignupController {
 
         Optional<AgencyToken> agencyTokenOptional = civilServantRegistryClient.getAgencyToken(domain, form.getToken(), orgCode);
 
-        if(agencyTokenOptional.isEmpty()) {
-            log.info("Token form has failed the validation for domain {}, token {} and organisation {}.",
-                    domain, form.getToken(), orgCode);
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
-            return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-        }
+        return agencyTokenOptional
+                .map(agencyToken -> {
+                    if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
+                        log.info("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup", agencyToken.getUid(), agencyToken.getCapacity(),
+                                invite.getForEmail());
+                        redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+                        return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                    }
 
-        AgencyToken agencyToken = agencyTokenOptional.get();
-        if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-            log.info("Agency token uid {} with capacity {} has no spaces available. " +
-                            "User with email {} is unable to signup.",
-                    agencyToken.getUid(), agencyToken.getCapacity(), invite.getForEmail());
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-            return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-        }
+                    inviteService.authoriseAndSaveInvite(invite);
+                    model.addAttribute(INVITE_MODEL, invite);
+                    redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyTokenInfo(domain, form.getToken(), orgCode));
 
-        inviteService.authoriseAndSaveInvite(invite);
-        model.addAttribute(INVITE_MODEL, invite);
-        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, agencyTokenInfo(domain, form.getToken(), orgCode));
-        log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
-                domain, form.getToken(), orgCode);
-        return REDIRECT_SIGNUP + code;
+                    log.info("Enter token form has passed domain, token, organisation validation");
+
+                    return REDIRECT_SIGNUP + code;
+                }).orElseGet(() -> {
+                    log.info("Enter token form has failed domain, token, organisation validation");
+                    redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+                    return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                });
     }
 
     private AgencyToken agencyTokenInfo(String domain, String token, String org) {
