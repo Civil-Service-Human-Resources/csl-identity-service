@@ -148,7 +148,7 @@ public class SignupController {
         }
 
         if (identityService.isIdentityExistsForEmail(email)) {
-            log.info("User is trying to sign-uo with an email {} which is already in use.", email);
+            log.info("User is trying to sign-up with an email {} which is already in use.", email);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
                     "User already exists for email address " + email);
             return REDIRECT_SIGNUP_REQUEST;
