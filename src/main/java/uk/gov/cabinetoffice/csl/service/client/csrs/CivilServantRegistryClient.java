@@ -139,7 +139,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
                     .thenApply(i -> futures.stream().flatMap(listCompletableFuture -> listCompletableFuture.join().stream()).collect(toList())).join();
 
         }
-        log.info(String.format("%s", organisationalUnits.size()));
+        log.info("organisationalUnits size {}", organisationalUnits.size());
         return organisationalUnits;
     }
 
@@ -165,7 +165,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     @Override
     public void removeOrganisationalUnitFromCivilServant(String uid) {
         try {
-            log.info(format("Removing organisation from user %s", uid));
+            log.info("Removing organisation from user {}", uid);
             String url = format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
             RequestEntity<Void> request = RequestEntity.post(url).build();
             httpClient.executeRequest(request, Void.class);
