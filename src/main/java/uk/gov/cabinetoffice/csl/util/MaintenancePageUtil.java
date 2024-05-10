@@ -17,23 +17,31 @@ public class MaintenancePageUtil {
 
     private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
 
-    @Value("${maintenancePage.enabled}")
-    private boolean maintenancePageEnabled;
+    private final boolean maintenancePageEnabled;
 
-    @Value("${maintenancePage.contentLine1}")
-    private String maintenancePageContentLine1;
+    private final String skipMaintenancePageForUsers;
 
-    @Value("${maintenancePage.contentLine2}")
-    private String maintenancePageContentLine2;
+    private final String maintenancePageContentLine1;
 
-    @Value("${maintenancePage.contentLine3}")
-    private String maintenancePageContentLine3;
+    private final String maintenancePageContentLine2;
 
-    @Value("${maintenancePage.contentLine4}")
-    private String maintenancePageContentLine4;
+    private final String maintenancePageContentLine3;
 
-    @Value("${maintenancePage.skipForUsers}")
-    private String skipMaintenancePageForUsers;
+    private final String maintenancePageContentLine4;
+
+    public MaintenancePageUtil(@Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
+                               @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
+                               @Value("${maintenancePage.contentLine1}") String maintenancePageContentLine1,
+                               @Value("${maintenancePage.contentLine2}") String maintenancePageContentLine2,
+                               @Value("${maintenancePage.contentLine3}") String maintenancePageContentLine3,
+                               @Value("${maintenancePage.contentLine4}") String maintenancePageContentLine4) {
+        this.maintenancePageEnabled = maintenancePageEnabled;
+        this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
+        this.maintenancePageContentLine1 = maintenancePageContentLine1;
+        this.maintenancePageContentLine2 = maintenancePageContentLine2;
+        this.maintenancePageContentLine3 = maintenancePageContentLine3;
+        this.maintenancePageContentLine4 = maintenancePageContentLine4;
+    }
 
     public boolean displayMaintenancePage(HttpServletRequest request, Model model) {
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
@@ -41,25 +49,21 @@ public class MaintenancePageUtil {
     }
 
     public boolean displayMaintenancePageForUser(String username, Model model) {
-        boolean displayMaintenancePage = false;
-
         if(maintenancePageEnabled) {
-            displayMaintenancePage = true;
-
-            model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-            model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-            model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-            model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
-
             boolean skipMaintenancePage = isNotBlank(username) &&
                     Arrays.stream(skipMaintenancePageForUsers.split(","))
                             .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
             if (skipMaintenancePage) {
-                displayMaintenancePage = false;
                 log.info("Maintenance page is skipped for the user: {}", username);
+                return false;
             }
+            model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
+            model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
+            model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
+            model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+            return true;
         }
-        return displayMaintenancePage;
+        return false;
     }
 
     public void skipMaintenancePageCheck(String email) {
