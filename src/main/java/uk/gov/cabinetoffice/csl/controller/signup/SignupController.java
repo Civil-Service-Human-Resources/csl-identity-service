@@ -96,7 +96,6 @@ public class SignupController {
 
     @GetMapping(path = "/request")
     public String requestInvite(Model model) {
-
         model.addAttribute(REQUEST_INVITE_FORM, new RequestInviteForm());
         return REQUEST_INVITE_TEMPLATE;
     }
