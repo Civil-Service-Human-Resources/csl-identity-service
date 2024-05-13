@@ -36,15 +36,22 @@ public class MaintenancePageUtil {
         String method = request.getMethod();
         log.info("MaintenancePageFilter.doFilterInternal: method: {}", method);
 
-        if(maintenancePageEnabled) {
-            boolean skipMaintenancePage = isNotBlank(username) &&
-                    Arrays.stream(skipMaintenancePageForUsers.split(","))
-                            .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
-            if(skipMaintenancePage) {
-                log.info("MaintenancePageFilter.doFilterInternal: Maintenance page is skipped for the user: {}", username);
-                return true;
-            }
+        if(!maintenancePageEnabled) {
+            return true;
         }
+
+        if(!"GET".equalsIgnoreCase(method)) {
+            return true;
+        }
+
+        boolean skipMaintenancePage = isNotBlank(username) &&
+                Arrays.stream(skipMaintenancePageForUsers.split(","))
+                        .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
+        if(skipMaintenancePage) {
+            log.info("MaintenancePageFilter.doFilterInternal: Maintenance page is skipped for the user: {}", username);
+            return true;
+        }
+
         return false;
     }
 
