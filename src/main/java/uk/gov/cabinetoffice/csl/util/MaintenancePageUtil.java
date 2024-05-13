@@ -22,9 +22,10 @@ public class MaintenancePageUtil {
 
     private final String skipMaintenancePageForUris;
 
-    public MaintenancePageUtil(@Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
-                               @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
-                               @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
+    public MaintenancePageUtil(
+            @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
+            @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
+            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.skipMaintenancePageForUris = skipMaintenancePageForUris;
@@ -32,9 +33,7 @@ public class MaintenancePageUtil {
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        log.info("MaintenancePageFilter.doFilterInternal: username request param: {}", username);
         String method = request.getMethod();
-        log.info("MaintenancePageFilter.doFilterInternal: method: {}", method);
 
         if(!maintenancePageEnabled) {
             return true;
@@ -44,24 +43,16 @@ public class MaintenancePageUtil {
             return true;
         }
 
-        boolean skipMaintenancePage = isNotBlank(username) &&
+        return isNotBlank(username) &&
                 Arrays.stream(skipMaintenancePageForUsers.split(","))
                         .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
-        if(skipMaintenancePage) {
-            log.info("MaintenancePageFilter.doFilterInternal: Maintenance page is skipped for the user: {}", username);
-            return true;
-        }
-
-        return false;
     }
 
     public void skipMaintenancePageCheck(String email) {
         if (maintenancePageEnabled) {
             boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
                     .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
-            if(skipMaintenancePage) {
-                log.info("MaintenancePageUtil.skipMaintenancePageCheck:Maintenance page is skipped for the user: {}", email);
-            } else {
+            if(!skipMaintenancePage) {
                 log.warn("MaintenancePageUtil.skipMaintenancePageCheck:User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
                 throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
             }
@@ -69,9 +60,7 @@ public class MaintenancePageUtil {
     }
 
     public boolean shouldNotApplyFilterForURI(HttpServletRequest request) {
-        log.info("MaintenancePageFilter.shouldNotFilter: servletPath: {}", request.getServletPath());
         String requestURI = request.getRequestURI();
-        log.info("MaintenancePageFilter.shouldNotFilter: requestURI: {}", requestURI);
         return Arrays.stream(skipMaintenancePageForUris.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
     }
