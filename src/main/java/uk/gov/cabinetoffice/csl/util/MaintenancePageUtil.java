@@ -54,7 +54,7 @@ public class MaintenancePageUtil {
                     Arrays.stream(skipMaintenancePageForUsers.split(","))
                             .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
             if (skipMaintenancePage) {
-                log.info("Maintenance page is skipped for the user: {}", username);
+                log.info("MaintenancePageUtil.displayMaintenancePageForUser:Maintenance page is skipped for the user: {}", username);
                 return false;
             }
             model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
@@ -71,9 +71,9 @@ public class MaintenancePageUtil {
             boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
                     .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
             if(skipMaintenancePage) {
-                log.info("Maintenance page is skipped for the user: {}", email);
+                log.info("MaintenancePageUtil.skipMaintenancePageCheck:Maintenance page is skipped for the user: {}", email);
             } else {
-                log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
+                log.warn("MaintenancePageUtil.skipMaintenancePageCheck:User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
                 throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
             }
         }
