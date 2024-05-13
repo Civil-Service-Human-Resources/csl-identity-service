@@ -93,7 +93,7 @@ public class AgencyTokenVerificationController {
                     utils.getDomainFromEmailAddress(verificationCodeDetermination.getEmail());
 
             AgencyToken agencyToken = civilServantRegistryClient
-                    .getAgencyTokenForDomainTokenOrganisation(domainFromEmailAddress, token, organisation)
+                    .getAgencyToken(domainFromEmailAddress, token, organisation)
                     .orElseThrow(() -> new ResourceNotFoundException("Agency Token for DomainTokenOrganisation Not Found"));
 
             if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
@@ -144,6 +144,6 @@ public class AgencyTokenVerificationController {
     }
 
     private void addOrganisationsToModel(Model model) {
-        model.addAttribute("organisations", civilServantRegistryClient.getOrganisationalUnitsFormatted());
+        model.addAttribute("organisations", civilServantRegistryClient.getAllOrganisationsFromCache());
     }
 }

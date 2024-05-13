@@ -1,6 +1,7 @@
 package uk.gov.cabinetoffice.csl.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +13,7 @@ import uk.gov.cabinetoffice.csl.exception.AccountDeactivatedException;
 import uk.gov.cabinetoffice.csl.exception.PendingReactivationExistsException;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class UserService implements UserDetailsService {
@@ -27,11 +29,7 @@ public class UserService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else {
-            String email = identity.getEmail();
-            String domain = utils.getDomainFromEmailAddress(email);
-            if (!isAllowListedDomain(domain)
-                    && !isAgencyDomain(domain, identity)
-                    && !isEmailInvited(email)) {
+            if (!isUserValid(identity)) {
                 throw new AccountBlockedException("User account is blocked");
             }
             if (!identity.isActive()) {
@@ -44,12 +42,28 @@ public class UserService implements UserDetailsService {
         return new IdentityDetails(identity);
     }
 
+    private boolean isUserValid(Identity identity) {
+        String email = identity.getEmail();
+        String domain = utils.getDomainFromEmailAddress(email);
+        String agencyTokenUid = identity.getAgencyTokenUid();
+        if (isEmailInvited(email)) {
+            log.debug(String.format("User %s has a valid invite from another user", identity.getId()));
+            return true;
+        }
+        if (agencyTokenUid != null) {
+            log.debug(String.format("Checking domain %s against agency token %s for user %s", domain, agencyTokenUid, identity.getId()));
+            return identityService.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
+        }
+        log.debug(String.format("Checking domain %s against allowlist for user %s", domain, identity.getId()));
+        return isAllowListedDomain(domain);
+    }
+
     private boolean isAllowListedDomain(String domain) {
-        return identityService.isAllowListedDomain(domain);
+        return identityService.isDomainAllowListed(domain);
     }
 
     private boolean isAgencyDomain(String domain, Identity identity) {
-        return identityService.isDomainInAgency(domain) && identity.getAgencyTokenUid() != null;
+        return identityService.isDomainInAnAgencyToken(domain) && identity.getAgencyTokenUid() != null;
     }
 
     private boolean isEmailInvited(String email) {

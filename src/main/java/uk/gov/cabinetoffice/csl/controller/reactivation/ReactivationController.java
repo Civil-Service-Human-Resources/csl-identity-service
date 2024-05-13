@@ -138,7 +138,7 @@ public class ReactivationController {
 
             String domain = utils.getDomainFromEmailAddress(reactivation.getEmail());
             log.debug("Reactivating account using Reactivation: {}", reactivation);
-            if (identityService.isDomainInAgency(domain)) {
+            if (identityService.isDomainInAnAgencyToken(domain)) {
                 log.info("Account reactivation is for a agency domain, requires token validation for Reactivation: {}",
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;

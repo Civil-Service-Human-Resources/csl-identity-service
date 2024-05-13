@@ -4,7 +4,7 @@
 <div class="container">
     <div class="grid-row">
         <div class="column-two-thirds">
-            <a href="/login" class="link-back">Back</a>
+            <a th:href="@{|/signup/chooseOrganisation/${inviteCode}|}" class="link-back">Back</a>
             <div th:if="${status}" class="error-summary" role="alert"  aria-labelledby="error-summary-heading-example-1" tabindex="-1">
                 <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">There was a problem</h2>
                 <ul class="error-summary-list">
@@ -17,15 +17,6 @@
             <p class="lede">Your organisation requires you to supply a token to create an account.</p>
             <form method="post" class="push-bottom" th:object="${enterTokenForm}">
                 <input type="hidden" id="removeUser" name="removeUser" value="false">
-                <div class="form-group" th:classappend="${#fields.hasErrors('organisation')} ? form-group-error : ''">
-                    <label th:for="organisation" class="govuk-label">Organisation</label>
-                    <span id="organisation-hint" class="form-hint">Start typing to find your organisation name</span>
-                    <select id="organisation" name="organisation" aria-labelledby="organisation">
-                        <option value=""></option>
-                        <option th:label="${organisation.formattedName}" th:each="organisation : ${organisations}"
-                                th:value="${organisation.code}" th:text="${organisation.formattedName}"></option>
-                    </select>
-                </div>
                 <div class="form-group" th:classappend="${#fields.hasErrors('token')} ? form-group-error : ''">
                     <label th:for="token" class="govuk-label">Token</label>
                     <span id="token-hint" class="form-hint">Enter your 10-character organisation token.</span>

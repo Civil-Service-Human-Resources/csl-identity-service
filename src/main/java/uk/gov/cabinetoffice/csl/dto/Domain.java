@@ -1,9 +1,15 @@
 package uk.gov.cabinetoffice.csl.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 @Data
-public class Domain {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Domain implements Serializable {
     private Long id;
     private String domain;
 }

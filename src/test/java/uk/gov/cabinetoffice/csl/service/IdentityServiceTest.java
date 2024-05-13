@@ -71,7 +71,6 @@ public class IdentityServiceTest {
                 utils,
                 clock
         );
-        when(civilServantRegistryClient.getAllowListDomains()).thenReturn(asList("allowListed.gov.uk", "example.com"));
     }
 
     @Test
@@ -110,6 +109,7 @@ public class IdentityServiceTest {
     public void createIdentityFromInviteCodeWithoutAgencyButIsAllowListed() {
         final String code = "123abc";
         final String email = "test@example.com";
+        final String domain = "example.com";
         Role role = new Role();
         role.setName("USER");
 
@@ -125,6 +125,7 @@ public class IdentityServiceTest {
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
+        when(civilServantRegistryClient.isDomainAllowListed(domain)).thenReturn(true);
 
         identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 
@@ -166,7 +167,7 @@ public class IdentityServiceTest {
         agencyToken.setToken(tokenToken);
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyTokenForDomainTokenOrganisation(tokenDomain, tokenToken, tokenCode))
+        when(civilServantRegistryClient.getAgencyToken(tokenDomain, tokenToken, tokenCode))
                 .thenReturn(Optional.of(agencyToken));
         when(passwordEncoder.encode("password")).thenReturn("password");
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
@@ -206,24 +207,6 @@ public class IdentityServiceTest {
                 IdentityNotFoundException.class, () -> identityService.getInactiveIdentityForEmail(EMAIL));
 
         assertEquals("Identity not found", thrown.getMessage());
-    }
-
-    @Test
-    public void testIsAllowListedDomainMixedCase(){
-        boolean validDomain = identityService.isAllowListedDomain("ExAmPlE.cOm");
-        assertTrue(validDomain);
-    }
-
-    @Test
-    public void testIsAllowListedDomainLowerCase(){
-        boolean validDomain = identityService.isAllowListedDomain("example.com");
-        assertTrue(validDomain);
-    }
-
-    @Test
-    public void testIsAllowListedDomainUpperCase(){
-        boolean validDomain = identityService.isAllowListedDomain("EXAMPLE.COM");
-        assertTrue(validDomain);
     }
 
     @Test

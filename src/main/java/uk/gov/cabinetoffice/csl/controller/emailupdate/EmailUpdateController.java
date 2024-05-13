@@ -136,12 +136,12 @@ public class EmailUpdateController {
         String newDomain = utils.getDomainFromEmailAddress(newEmail);
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
-        if (isAgencyDomain(newDomain)) {
+        if (identityService.isDomainInAnAgencyToken(newDomain)) {
             log.debug("New email is agency: oldEmail = {}, newEmail = {}", oldEmail,
                     newEmail);
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
-        } else if (isAllowListed(newDomain)) {
+        } else if (identityService.isDomainAllowListed(newDomain)) {
             log.debug("New email is allow listed: oldEmail = {}, newEmail = {}", oldEmail,
                     newEmail);
             try {
@@ -178,13 +178,5 @@ public class EmailUpdateController {
     public String emailUpdateError(Model model) {
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         return UPDATE_EMAIL_ERROR_TEMPLATE;
-    }
-
-    private boolean isAllowListed(String newDomain) {
-        return identityService.isAllowListedDomain(newDomain);
-    }
-
-    private boolean isAgencyDomain(String newDomain) {
-        return identityService.isDomainInAgency(newDomain);
     }
 }

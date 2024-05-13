@@ -71,6 +71,11 @@ public class InviteService {
         return inviteRepository.save(invite);
     }
 
+    public void authoriseAndSaveInvite(Invite invite) {
+        invite.setAuthorisedInvite(true);
+        inviteRepository.save(invite);
+    }
+
     public void updateInviteStatus(String code, InviteStatus newStatus) {
         Invite invite = inviteRepository.findByCode(code);
         invite.setStatus(newStatus);
@@ -83,6 +88,13 @@ public class InviteService {
     @ReadOnlyProperty
     public Invite getInviteForCode(String code) {
         return inviteRepository.findByCode(code);
+    }
+
+    public Invite getValidInviteForCode(String code) {
+        if (isInviteCodeValid(code)) {
+            return inviteRepository.findByCode(code);
+        }
+        return null;
     }
 
     @ReadOnlyProperty
