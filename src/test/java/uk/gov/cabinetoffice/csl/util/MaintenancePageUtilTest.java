@@ -12,11 +12,13 @@ public class MaintenancePageUtilTest {
 
     private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
     private final String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
+    private final String skipMaintenancePageForUris = "/health,/info,/maintenance,/error,/cookies,/privacy," +
+            "/accessibility-statement,/contact-us,/webjars,/assets,/css,/img,/favicon.ico";
 
     @Test
     public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsDisabled() {
         MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(false,
-                skipMaintenancePageForUsers);
+                skipMaintenancePageForUsers, skipMaintenancePageForUris);
         try {
             maintenancePageUtil.skipMaintenancePageCheck("tester1@domain.com");
         } catch (Exception e) {
@@ -27,7 +29,7 @@ public class MaintenancePageUtilTest {
     @Test
     public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsAllowedToSkipMaintenancePage() {
         MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(true,
-                skipMaintenancePageForUsers);
+                skipMaintenancePageForUsers, skipMaintenancePageForUris);
         try {
             maintenancePageUtil.skipMaintenancePageCheck("tester1@domain.com");
         } catch (GenericServerException e) {
@@ -38,7 +40,7 @@ public class MaintenancePageUtilTest {
     @Test
     public void shouldNotSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsNotAllowedToSkipMaintenancePage() {
         MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(true,
-                skipMaintenancePageForUsers);
+                skipMaintenancePageForUsers, skipMaintenancePageForUris);
 
         GenericServerException thrown = assertThrows(GenericServerException.class, () ->
                 maintenancePageUtil.skipMaintenancePageCheck("tester3@domain.com"),

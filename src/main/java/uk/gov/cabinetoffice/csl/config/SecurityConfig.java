@@ -117,9 +117,6 @@ public class SecurityConfig {
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler());
-				//TODO: Below commented code will be removed if not used for future tickets.
-				//.ignoring()
-				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}
 
 	@Bean
