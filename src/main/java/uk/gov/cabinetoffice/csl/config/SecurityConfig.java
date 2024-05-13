@@ -85,7 +85,7 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/cookies","/privacy","/accessibility-statement","/contact-us",
-					"/error",
+					"/error","/maintenance",
 					"/signup/**", "/login", "/reset/**",
 					"/account/reactivate/**","/account/verify/agency/**",
 					"/account/email/verify/**","/account/email/updated/**","/account/email/update/error/**",

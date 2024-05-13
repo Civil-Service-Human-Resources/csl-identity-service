@@ -49,7 +49,7 @@ public class MaintenancePageFilter implements Filter {
 		log.info("MaintenancePageFilter.displayMaintenancePage: username request param: {}", username);
 		String method = request.getMethod();
 		log.info("MaintenancePageFilter.displayMaintenancePage: method: {}", method);
-		if(maintenancePageEnabled) {
+		if(maintenancePageEnabled && "GET".equalsIgnoreCase(method)) {
 			boolean skipMaintenancePage = isNotBlank(username) &&
 					Arrays.stream(skipMaintenancePageForUsers.split(","))
 							.anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
