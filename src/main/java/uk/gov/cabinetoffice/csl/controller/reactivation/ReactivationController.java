@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.reactivation;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -16,7 +15,6 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.LocalDateTime;
@@ -57,8 +55,6 @@ public class ReactivationController {
 
     private final Utils utils;
 
-    private final MaintenancePageUtil maintenancePageUtil;
-
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
@@ -77,13 +73,11 @@ public class ReactivationController {
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
                                   NotifyService notifyService,
-                                  Utils utils,
-                                  MaintenancePageUtil maintenancePageUtil) {
+                                  Utils utils) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.notifyService = notifyService;
         this.utils = utils;
-        this.maintenancePageUtil = maintenancePageUtil;
     }
 
     @GetMapping
@@ -91,10 +85,6 @@ public class ReactivationController {
 
         try {
             String email = getDecryptedText(code, encryptionKey);
-
-            if(maintenancePageUtil.displayMaintenancePageForUser(email, model)) {
-                return "maintenance/maintenance";
-            }
 
             String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
             if(isNotBlank(resultIdentityActive)) {
@@ -131,12 +121,7 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes,
-                                    HttpServletRequest request, Model model) {
-
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance/maintenance";
-        }
+    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
 
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);

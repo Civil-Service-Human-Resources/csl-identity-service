@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.agencytoken;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,6 @@ import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.service.VerificationCodeDeterminationService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import static java.lang.String.format;
@@ -55,15 +53,8 @@ public class AgencyTokenVerificationController {
 
     private final VerificationCodeDeterminationService verificationCodeDeterminationService;
 
-    private final MaintenancePageUtil maintenancePageUtil;
-
     @GetMapping(path = "/{code}")
-    public String enterToken(Model model, @PathVariable String code,
-                             HttpServletRequest request) {
-
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance/maintenance";
-        }
+    public String enterToken(Model model, @PathVariable String code) {
 
         log.info("User accessing token-based verification screen");
 

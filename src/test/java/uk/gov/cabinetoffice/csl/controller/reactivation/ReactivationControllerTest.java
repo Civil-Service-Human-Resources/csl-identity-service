@@ -16,7 +16,6 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.LocalDateTime;
@@ -57,21 +56,7 @@ public class ReactivationControllerTest {
     @MockBean
     private NotifyService notifyService;
 
-    @MockBean
-    private MaintenancePageUtil maintenancePageUtil;
-
     private final Utils utils = new Utils();
-
-    @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
-        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
-        mockMvc.perform(
-                        get("/account/reactivate/" + CODE).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("maintenance/maintenance"))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andDo(print());
-    }
 
     @Test
     public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {

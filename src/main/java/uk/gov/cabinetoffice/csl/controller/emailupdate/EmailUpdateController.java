@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,6 @@ import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
@@ -61,27 +59,20 @@ public class EmailUpdateController {
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
-    private final MaintenancePageUtil maintenancePageUtil;
     private final int validityInSeconds;
 
     public EmailUpdateController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
                                  Utils utils,
-                                 MaintenancePageUtil maintenancePageUtil,
                                  @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
         this.utils = utils;
-        this.maintenancePageUtil = maintenancePageUtil;
         this.validityInSeconds = validityInSeconds;
     }
 
     @GetMapping
-    public String updateEmailForm(Model model, @ModelAttribute UpdateEmailForm form,
-                                  HttpServletRequest request) {
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance/maintenance";
-        }
+    public String updateEmailForm(Model model, @ModelAttribute UpdateEmailForm form) {
         log.debug("Getting update email form");
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         model.addAttribute(UPDATE_EMAIL_FORM, form);
@@ -120,12 +111,8 @@ public class EmailUpdateController {
 
     @GetMapping("/verify/{code}")
     public String verifyEmail(@PathVariable String code,
-                              RedirectAttributes redirectAttributes,
-                              HttpServletRequest request, Model model) {
+                              RedirectAttributes redirectAttributes) {
 
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance/maintenance";
-        }
         log.debug("Attempting update email verification with code: {}", code);
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {

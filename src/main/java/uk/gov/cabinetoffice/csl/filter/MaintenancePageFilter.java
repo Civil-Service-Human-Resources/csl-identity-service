@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -18,7 +19,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @WebFilter
 @Component
 @Order(3)
-public class MaintenancePageFilter implements Filter {
+public class MaintenancePageFilter extends OncePerRequestFilter {
 
 	private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
 
@@ -33,31 +34,34 @@ public class MaintenancePageFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		log.debug("MaintenancePageFilter.doFilter.start");
-		displayMaintenancePage(httpRequest, httpResponse);
-		log.debug("MaintenancePageFilter.doFilter.end");
-		chain.doFilter(request, response);
-	}
-
-	private void displayMaintenancePage(HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+									FilterChain filterChain) throws ServletException, IOException {
 		String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-		log.info("MaintenancePageFilter.displayMaintenancePage: username request param: {}", username);
+		log.info("MaintenancePageFilter.doFilterInternal: username request param: {}", username);
 		String method = request.getMethod();
-		log.info("MaintenancePageFilter.displayMaintenancePage: method: {}", method);
-		if(maintenancePageEnabled && "GET".equalsIgnoreCase(method)) {
+		log.info("MaintenancePageFilter.doFilterInternal: method: {}", method);
+
+		if(maintenancePageEnabled) {
 			boolean skipMaintenancePage = isNotBlank(username) &&
 					Arrays.stream(skipMaintenancePageForUsers.split(","))
 							.anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
-			if (skipMaintenancePage) {
-				log.info("MaintenancePageFilter.displayMaintenancePage: Maintenance page is skipped for the user: {}", username);
+			if(skipMaintenancePage) {
+				log.info("MaintenancePageFilter.doFilterInternal: Maintenance page is skipped for the user: {}", username);
+			} else {
+				response.sendRedirect("/maintenance");
 				return;
 			}
-			response.sendRedirect("/maintenance");
 		}
+		filterChain.doFilter(request, response);
+	}
+
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		log.info("MaintenancePageFilter.shouldNotFilter: servletPath: {}", request.getServletPath());
+		String requestURI = request.getRequestURI();
+		log.info("MaintenancePageFilter.shouldNotFilter: requestURI: {}", requestURI);
+		return "/health".equalsIgnoreCase(requestURI)
+				|| "/info".equalsIgnoreCase(requestURI)
+				|| "/maintenance".equalsIgnoreCase(requestURI);
 	}
 }

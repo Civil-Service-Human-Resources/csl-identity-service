@@ -21,7 +21,6 @@ import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -36,7 +35,6 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.InviteStatus.EXPIRED;
@@ -80,9 +78,6 @@ public class SignupControllerTest {
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
-    @MockBean
-    private MaintenancePageUtil maintenancePageUtil;
-
     private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"),
             ZoneId.of("Europe/London"));
 
@@ -109,19 +104,6 @@ public class SignupControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setAgencyDomains(Collections.singletonList(new Domain(1L, GENERIC_DOMAIN)));
         return agencyToken;
-    }
-
-    @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
-        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
-        mockMvc.perform(
-                        get("/signup/request")
-                                .with(csrf())
-                )
-                .andExpect(status().isOk())
-                .andExpect(view().name("maintenance/maintenance"))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andDo(print());
     }
 
     /*

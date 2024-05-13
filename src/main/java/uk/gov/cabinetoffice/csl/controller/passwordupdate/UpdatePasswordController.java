@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.passwordupdate;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 
 @Controller
 @RequestMapping("/account/password")
@@ -32,20 +30,13 @@ public class UpdatePasswordController {
     private int signOutTimerInSeconds;
 
     private final PasswordService passwordService;
-    private final MaintenancePageUtil maintenancePageUtil;
 
-    public UpdatePasswordController(PasswordService passwordService,
-                                    MaintenancePageUtil maintenancePageUtil) {
+    public UpdatePasswordController(PasswordService passwordService) {
         this.passwordService = passwordService;
-        this.maintenancePageUtil = maintenancePageUtil;
     }
 
     @GetMapping
-    public String updatePasswordForm(Model model, @ModelAttribute UpdatePasswordForm form,
-                                     HttpServletRequest request) {
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance/maintenance";
-        }
+    public String updatePasswordForm(Model model, @ModelAttribute UpdatePasswordForm form) {
         model.addAttribute("updatePasswordForm", form);
         return UPDATE_PASSWORD_TEMPLATE;
     }

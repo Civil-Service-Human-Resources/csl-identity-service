@@ -11,12 +11,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
-import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -46,22 +44,6 @@ public class UpdatePasswordControllerTest {
 
     @MockBean
     private PasswordService passwordService;
-
-    @MockBean
-    private MaintenancePageUtil maintenancePageUtil;
-
-    @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
-        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
-        mockMvc.perform(
-                        get("/account/password")
-                                .with(csrf())
-                )
-                .andExpect(status().isOk())
-                .andExpect(view().name("maintenance/maintenance"))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andDo(print());
-    }
 
     @Test
     public void shouldLoadPasswordResetForm() throws Exception {
