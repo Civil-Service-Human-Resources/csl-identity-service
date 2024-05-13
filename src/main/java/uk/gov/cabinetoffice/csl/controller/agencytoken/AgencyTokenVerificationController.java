@@ -55,7 +55,6 @@ public class AgencyTokenVerificationController {
 
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
-
         log.info("User accessing token-based verification screen");
 
         if (model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {

@@ -82,7 +82,6 @@ public class ReactivationController {
 
     @GetMapping
     public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
-
         try {
             String email = getDecryptedText(code, encryptionKey);
 
@@ -122,7 +121,6 @@ public class ReactivationController {
 
     @GetMapping("/{code}")
     public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
-
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = reactivation.getEmail();

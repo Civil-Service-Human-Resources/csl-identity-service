@@ -92,7 +92,8 @@ public class ReactivationControllerTest {
         when(identityService.isDomainInAnAgencyToken(utils.getDomainFromEmailAddress(EMAIL))).thenReturn(true);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE).with(csrf()))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/account/verify/agency/" + CODE));
     }
@@ -105,7 +106,8 @@ public class ReactivationControllerTest {
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE).with(csrf()))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/account/reactivate/updated"));
     }
@@ -119,7 +121,8 @@ public class ReactivationControllerTest {
         String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
 
         mockMvc.perform(
-                        get("/account/reactivate/" + CODE).with(csrf()))
+                        get("/account/reactivate/" + CODE)
+                                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error=reactivation-expired&username=" + encryptedUsername))
                 .andDo(print());
@@ -132,7 +135,8 @@ public class ReactivationControllerTest {
                 .when(reactivationService).getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE).with(csrf()))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE))
@@ -146,7 +150,8 @@ public class ReactivationControllerTest {
                 getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE).with(csrf()))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE))
@@ -155,7 +160,8 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldGetAccountReactivatedTemplate() throws Exception {
-        mockMvc.perform(get("/account/reactivate/updated").with(csrf()))
+        mockMvc.perform(get("/account/reactivate/updated")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/accountReactivated"));
     }

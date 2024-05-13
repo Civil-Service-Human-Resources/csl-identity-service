@@ -112,7 +112,6 @@ public class EmailUpdateController {
     @GetMapping("/verify/{code}")
     public String verifyEmail(@PathVariable String code,
                               RedirectAttributes redirectAttributes) {
-
         log.debug("Attempting update email verification with code: {}", code);
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {

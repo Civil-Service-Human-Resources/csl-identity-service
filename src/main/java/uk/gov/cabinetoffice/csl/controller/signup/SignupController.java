@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.controller.signup;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
