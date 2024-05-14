@@ -1,14 +1,22 @@
 package uk.gov.cabinetoffice.csl.util;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("no-redis")
 public class MaintenancePageUtilTest {
+
+    private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
+
+    @Mock
+    private HttpServletRequest request;
 
     private MaintenancePageUtil createMaintenancePageUtil(boolean maintenancePageEnabled) {
         String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
@@ -16,6 +24,27 @@ public class MaintenancePageUtilTest {
                 "/accessibility-statement,/contact-us,/webjars,/assets,/css,/img,/favicon.ico";
         return new MaintenancePageUtil(maintenancePageEnabled,
                 skipMaintenancePageForUsers, skipMaintenancePageForUris);
+    }
+
+    @Test
+    public void shouldSkipMaintenancePageIfMaintenancePageIsDisabled() {
+        assertTrue(createMaintenancePageUtil(false)
+                .skipMaintenancePageForUser(request));
+    }
+
+    @Test
+    public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsOtherThanGET() {
+        when(request.getMethod()).thenReturn("POST");
+        assertTrue(createMaintenancePageUtil(true)
+                .skipMaintenancePageForUser(request));
+    }
+
+    @Test
+    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsNotPassedInRequestParam() {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn(null);
+        assertFalse(createMaintenancePageUtil(true)
+                .skipMaintenancePageForUser(request));
     }
 
     @Test

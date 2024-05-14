@@ -32,17 +32,16 @@ public class MaintenancePageUtil {
     }
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
-        String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        String method = request.getMethod();
-
         if(!maintenancePageEnabled) {
             return true;
         }
 
+        String method = request.getMethod();
         if(!"GET".equalsIgnoreCase(method)) {
             return true;
         }
 
+        String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
         boolean skipMaintenancePageForUser = isNotBlank(username) &&
                 Arrays.stream(skipMaintenancePageForUsers.split(","))
                         .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
