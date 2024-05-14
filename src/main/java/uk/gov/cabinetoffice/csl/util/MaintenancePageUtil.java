@@ -111,8 +111,7 @@ public class MaintenancePageUtil {
         boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
                 && Arrays.stream(skipMaintenancePageForUris.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
-        log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI." +
-                        "shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
+        log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;
     }
