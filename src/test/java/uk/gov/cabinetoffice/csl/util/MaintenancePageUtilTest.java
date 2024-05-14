@@ -26,62 +26,61 @@ public class MaintenancePageUtilTest {
                 skipMaintenancePageForUsers, skipMaintenancePageForUris);
     }
 
+    private boolean executeSkipMaintenancePageForUser(boolean maintenancePageEnabled,
+                                                      String httpMethod, String username) {
+        when(request.getMethod()).thenReturn(httpMethod);
+        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn(username);
+        return createMaintenancePageUtil(maintenancePageEnabled).skipMaintenancePageForUser(request);
+    }
+
+    private boolean executeShouldNotApplyMaintenancePageFilterForURI(boolean maintenancePageEnabled, String requestUri) {
+        when(request.getRequestURI()).thenReturn(requestUri);
+        return createMaintenancePageUtil(maintenancePageEnabled).shouldNotApplyMaintenancePageFilterForURI(request);
+    }
+
+    private void executeSkipMaintenancePageCheck(boolean maintenancePageEnabled, String username) {
+        createMaintenancePageUtil(maintenancePageEnabled).skipMaintenancePageCheck(username);
+    }
+
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsDisabled() {
-        assertTrue(createMaintenancePageUtil(false)
-                .skipMaintenancePageForUser(request));
+        assertTrue(executeSkipMaintenancePageForUser(false, "GET", null));
     }
 
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsOtherThanGET() {
-        when(request.getMethod()).thenReturn("POST");
-        assertTrue(createMaintenancePageUtil(true)
-                .skipMaintenancePageForUser(request));
+        assertTrue(executeSkipMaintenancePageForUser(true, "POST", null));
     }
 
     @Test
     public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsNotPassedInRequestParam() {
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn(null);
-        assertFalse(createMaintenancePageUtil(true)
-                .skipMaintenancePageForUser(request));
+        assertFalse(executeSkipMaintenancePageForUser(true, "GET", null));
     }
 
     @Test
     public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsNotAllowedToSkipMaintenancePage() {
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn("tester3@domain.com");
-        assertFalse(createMaintenancePageUtil(true)
-                .skipMaintenancePageForUser(request));
+        assertFalse(executeSkipMaintenancePageForUser(true, "GET", "tester3@domain.com"));
     }
 
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsAllowedToSkipMaintenancePage() {
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn("tester1@domain.com");
-        assertTrue(createMaintenancePageUtil(true)
-                .skipMaintenancePageForUser(request));
+        assertTrue(executeSkipMaintenancePageForUser(true, "GET", "tester1@domain.com"));
     }
 
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsAllowedToSkipMaintenancePage() {
-        when(request.getRequestURI()).thenReturn("/health");
-        assertTrue(createMaintenancePageUtil(true)
-                .shouldNotApplyMaintenancePageFilterForURI(request));
+        assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(true, "/health"));
     }
 
     @Test
     public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsNotAllowedToSkipMaintenancePage() {
-        when(request.getRequestURI()).thenReturn("/create");
-        assertFalse(createMaintenancePageUtil(true)
-                .shouldNotApplyMaintenancePageFilterForURI(request));
+        assertFalse(executeShouldNotApplyMaintenancePageFilterForURI(true, "/create"));
     }
 
     @Test
     public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsDisabled() {
         try {
-            createMaintenancePageUtil(false)
-                    .skipMaintenancePageCheck("tester1@domain.com");
+            executeSkipMaintenancePageCheck(false, "tester1@domain.com");
         } catch (Exception e) {
             fail("No exception is thrown");
         }
@@ -90,8 +89,7 @@ public class MaintenancePageUtilTest {
     @Test
     public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsAllowedToSkipMaintenancePage() {
         try {
-            createMaintenancePageUtil(true)
-                    .skipMaintenancePageCheck("tester1@domain.com");
+            executeSkipMaintenancePageCheck(true, "tester1@domain.com");
         } catch (GenericServerException e) {
             fail("GenericServerException should not be thrown here.");
         }
@@ -100,8 +98,7 @@ public class MaintenancePageUtilTest {
     @Test
     public void shouldNotSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsNotAllowedToSkipMaintenancePage() {
         GenericServerException thrown = assertThrows(GenericServerException.class, () ->
-                createMaintenancePageUtil(true)
-                        .skipMaintenancePageCheck("tester3@domain.com"),
+                executeSkipMaintenancePageCheck(true, "tester3@domain.com"),
                 "Expected skipMaintenancePageCheck() to throw GenericServerException, but it didn't");
         assertTrue(thrown.getMessage().contains("User is not allowed to access the website due to maintenance page is enabled."));
     }
