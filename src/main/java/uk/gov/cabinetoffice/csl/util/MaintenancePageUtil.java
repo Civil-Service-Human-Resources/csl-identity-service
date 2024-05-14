@@ -56,8 +56,9 @@ public class MaintenancePageUtil {
         log.info("skipMaintenancePageForUser.username from request parameter: {}", username);
 
         if(isBlank(username)) {
-            Principal userPrincipal = request.getUserPrincipal();
-            if (userPrincipal instanceof Jwt jwt) {
+            Principal principal = request.getUserPrincipal();
+            log.info("skipMaintenancePageForUser.principal: {}", principal);
+            if (principal instanceof Jwt jwt) {
                 username = jwt.getClaim("email");
                 log.info("skipMaintenancePageForUser.username from request user principal: {}", username);
             }
