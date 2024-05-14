@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,9 +28,14 @@ public class MaintenancePageFilterTest {
     @MockBean
     private MaintenancePageUtil maintenancePageUtil;
 
-    private final HttpServletRequest request = mock(HttpServletRequest.class);
-    private final HttpServletResponse response = mock(HttpServletResponse.class);
-    private final FilterChain mockFilterChain = mock(FilterChain.class);
+    @Mock
+    private HttpServletRequest request;
+
+    @Mock
+    private HttpServletResponse response;
+
+    @Mock
+    private FilterChain mockFilterChain;
 
     @Test
     public void shouldNotRedirectToMaintenancePageWhenSkipMaintenancePageForUserIsTrue() throws ServletException, IOException {
