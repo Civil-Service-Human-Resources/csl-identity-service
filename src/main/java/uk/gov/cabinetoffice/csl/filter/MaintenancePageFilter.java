@@ -1,7 +1,6 @@
 package uk.gov.cabinetoffice.csl.filter;
 
 import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,6 @@ import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 import java.io.IOException;
 
 @AllArgsConstructor
-@WebFilter
 @Component
 @Order(3)
 public class MaintenancePageFilter extends OncePerRequestFilter {
