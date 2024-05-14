@@ -43,9 +43,15 @@ public class MaintenancePageUtil {
             return true;
         }
 
-        return isNotBlank(username) &&
+        boolean skipMaintenancePageForUser = isNotBlank(username) &&
                 Arrays.stream(skipMaintenancePageForUsers.split(","))
                         .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
+
+        if(skipMaintenancePageForUser) {
+            log.info("Maintenance page is skipped for the user: {}", username);
+        }
+
+        return skipMaintenancePageForUser;
     }
 
     public void skipMaintenancePageCheck(String email) {
@@ -53,7 +59,8 @@ public class MaintenancePageUtil {
             boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
                     .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
             if(!skipMaintenancePage) {
-                log.warn("MaintenancePageUtil.skipMaintenancePageCheck:User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
+                log.warn("User is not allowed to access the website due to maintenance page is enabled. " +
+                        "Showing error page to the user: {}", email);
                 throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
             }
         }
