@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,6 +46,7 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(COOKIES_TEMPLATE))
+                .andExpect(content().string(containsString("Cookies")))
                 .andDo(print());
     }
 
@@ -56,6 +58,7 @@ public class LegalControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(view().name(PRIVACY_TEMPLATE))
+                .andExpect(content().string(containsString("Privacy notice for Civil Service Learning")))
                 .andDo(print());
     }
 
@@ -68,6 +71,7 @@ public class LegalControllerTest {
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(view().name(CONTACT_US_TEMPLATE))
+                .andExpect(content().string(containsString("Contact us")))
                 .andDo(print());
     }
 
@@ -80,6 +84,7 @@ public class LegalControllerTest {
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(view().name(ACCESSIBILITY_STATEMENT_TEMPLATE))
+                .andExpect(content().string(containsString("Accessibility statement")))
                 .andDo(print());
     }
 }
