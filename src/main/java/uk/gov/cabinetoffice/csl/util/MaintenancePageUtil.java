@@ -53,16 +53,23 @@ public class MaintenancePageUtil {
         }
 
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+        log.info("skipMaintenancePageForUser.username from request parameter: {}", username);
 
         if(isBlank(username)) {
             Principal userPrincipal = request.getUserPrincipal();
             if (userPrincipal instanceof Jwt jwt) {
                 username = jwt.getClaim("email");
+                log.info("skipMaintenancePageForUser.username from request user principal: {}", username);
             }
         }
 
         if(isBlank(username)) {
-            username = userAuthService.getUsername();
+            try {
+                username = userAuthService.getUsername();
+                log.info("skipMaintenancePageForUser.username from userAuthService: {}", username);
+            } catch (Exception e) {
+                log.info("username is not available. No action to be taken.");
+            }
         }
 
         boolean skipMaintenancePageForUser = false;
