@@ -65,9 +65,9 @@ public class MaintenancePageUtil {
         }
     }
 
-    public boolean shouldNotApplyFilterForURI(HttpServletRequest request) {
+    public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        return Arrays.stream(skipMaintenancePageForUris.split(","))
+        return isNotBlank(requestURI) && Arrays.stream(skipMaintenancePageForUris.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
     }
 }

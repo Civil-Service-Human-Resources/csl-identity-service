@@ -55,14 +55,14 @@ public class MaintenancePageFilterTest {
 
     @Test
     public void shouldNotFilterWhenShouldNotApplyFilterForURIIsTrue() throws ServletException, IOException {
-        when(maintenancePageUtil.shouldNotApplyFilterForURI(request)).thenReturn(true);
+        when(maintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI(request)).thenReturn(true);
         assertTrue(maintenancePageFilter.shouldNotFilter(request));
         maintenancePageFilter.destroy();
     }
 
     @Test
     public void shouldFilterWhenShouldNotApplyFilterForURIIsFalse() throws ServletException, IOException {
-        when(maintenancePageUtil.shouldNotApplyFilterForURI(request)).thenReturn(false);
+        when(maintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI(request)).thenReturn(false);
         assertFalse(maintenancePageFilter.shouldNotFilter(request));
         maintenancePageFilter.destroy();
     }

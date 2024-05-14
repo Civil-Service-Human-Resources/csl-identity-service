@@ -48,6 +48,36 @@ public class MaintenancePageUtilTest {
     }
 
     @Test
+    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsNotAllowedToSkipMaintenancePage() {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn("tester3@domain.com");
+        assertFalse(createMaintenancePageUtil(true)
+                .skipMaintenancePageForUser(request));
+    }
+
+    @Test
+    public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsAllowedToSkipMaintenancePage() {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME)).thenReturn("tester1@domain.com");
+        assertTrue(createMaintenancePageUtil(true)
+                .skipMaintenancePageForUser(request));
+    }
+
+    @Test
+    public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsAllowedToSkipMaintenancePage() {
+        when(request.getRequestURI()).thenReturn("/health");
+        assertTrue(createMaintenancePageUtil(true)
+                .shouldNotApplyMaintenancePageFilterForURI(request));
+    }
+
+    @Test
+    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsNotAllowedToSkipMaintenancePage() {
+        when(request.getRequestURI()).thenReturn("/create");
+        assertFalse(createMaintenancePageUtil(true)
+                .shouldNotApplyMaintenancePageFilterForURI(request));
+    }
+
+    @Test
     public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsDisabled() {
         try {
             createMaintenancePageUtil(false)

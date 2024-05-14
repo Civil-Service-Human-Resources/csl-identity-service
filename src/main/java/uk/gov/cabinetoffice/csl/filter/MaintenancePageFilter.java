@@ -30,6 +30,6 @@ public class MaintenancePageFilter extends OncePerRequestFilter {
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-		return maintenancePageUtil.shouldNotApplyFilterForURI(request);
+		return maintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI(request);
 	}
 }
