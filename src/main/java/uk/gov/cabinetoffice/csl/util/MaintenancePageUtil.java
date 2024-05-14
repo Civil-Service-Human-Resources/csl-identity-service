@@ -3,13 +3,16 @@ package uk.gov.cabinetoffice.csl.util;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
+import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 
 import java.security.Principal;
 import java.util.Arrays;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.logging.log4j.util.Strings.isBlank;
 
 @Slf4j
 @Component
@@ -23,21 +26,25 @@ public class MaintenancePageUtil {
 
     private final String skipMaintenancePageForUris;
 
+    private final IUserAuthService userAuthService;
+
     public MaintenancePageUtil(
             @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
             @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
-            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
+            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris,
+            IUserAuthService userAuthService) {
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.skipMaintenancePageForUris = skipMaintenancePageForUris;
+        this.userAuthService = userAuthService;
     }
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
+        debug(request);
+
         if(!maintenancePageEnabled) {
             return true;
         }
-
-        debug(request);
 
         String method = request.getMethod();
         if(!"GET".equalsIgnoreCase(method)) {
@@ -46,13 +53,32 @@ public class MaintenancePageUtil {
         }
 
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        boolean skipMaintenancePageForUser = isNotBlank(username) &&
-                Arrays.stream(skipMaintenancePageForUsers.split(","))
-                        .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
-        log.info("skipMaintenancePageForUser.returning skipMaintenancePageForUser: {}", skipMaintenancePageForUser);
 
-        if(skipMaintenancePageForUser) {
-            log.info("skipMaintenancePageForUser.Maintenance page is skipped for the user: {}", username);
+        if(isBlank(username)) {
+            Principal userPrincipal = request.getUserPrincipal();
+            if (userPrincipal instanceof Jwt jwt) {
+                username = jwt.getClaim("email");
+            }
+        }
+
+        if(isBlank(username)) {
+            username = userAuthService.getUsername();
+        }
+
+        boolean skipMaintenancePageForUser = false;
+
+        if(isNotBlank(username)) {
+            final String trimmedUsername = username.trim();
+            log.info("skipMaintenancePageForUser.trimmedUsername: {}", trimmedUsername);
+
+            skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                            .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
+
+            log.info("skipMaintenancePageForUser.returning skipMaintenancePageForUser: {}", skipMaintenancePageForUser);
+
+            if(skipMaintenancePageForUser) {
+                log.info("skipMaintenancePageForUser.Maintenance page is skipped for the user: {}", username);
+            }
         }
 
         return skipMaintenancePageForUser;

@@ -5,6 +5,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.cabinetoffice.csl.exception.GenericServerException;
+import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -18,12 +19,15 @@ public class MaintenancePageUtilTest {
     @Mock
     private HttpServletRequest request;
 
+    @Mock
+    private IUserAuthService userAuthService;
+
     private MaintenancePageUtil createMaintenancePageUtil(boolean maintenancePageEnabled) {
         String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
         String skipMaintenancePageForUris = "/health,/info,/maintenance,/error,/cookies,/privacy," +
                 "/accessibility-statement,/contact-us,/webjars,/assets,/css,/img,/favicon.ico";
-        return new MaintenancePageUtil(maintenancePageEnabled,
-                skipMaintenancePageForUsers, skipMaintenancePageForUris);
+        return new MaintenancePageUtil(maintenancePageEnabled, skipMaintenancePageForUsers,
+                skipMaintenancePageForUris, userAuthService);
     }
 
     private boolean executeSkipMaintenancePageForUser(boolean maintenancePageEnabled,
