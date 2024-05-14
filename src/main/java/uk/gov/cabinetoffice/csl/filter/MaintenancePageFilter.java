@@ -5,7 +5,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,7 +12,6 @@ import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 
 import java.io.IOException;
 
-@Slf4j
 @AllArgsConstructor
 @WebFilter
 @Component
