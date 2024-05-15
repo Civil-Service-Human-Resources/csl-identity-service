@@ -56,36 +56,29 @@ public class MaintenancePageUtil {
             Principal principal = request.getUserPrincipal();
             if (principal instanceof Jwt jwt) {
                 username = jwt.getClaim("email");
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from request user principal: {}",
-                        username);
             }
         }
 
         if(isBlank(username)) {
             try {
                 username = userAuthService.getUsername();
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from userAuthService: {}", username);
             } catch (Exception e) {
                 log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is not available. No action to be taken.");
             }
         }
 
-        boolean skipMaintenancePageForUser = false;
+        if(isBlank(username)) {
+            return false;
+        }
 
-        if(isNotBlank(username)) {
-            final String trimmedUsername = username.trim();
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.trimmedUsername: {}", trimmedUsername);
+        final String trimmedUsername = username.trim();
 
-            skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                            .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
+        boolean skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                        .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.returning skipMaintenancePageForUser: {}",
-                    skipMaintenancePageForUser);
-
-            if(skipMaintenancePageForUser) {
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user: {}",
-                        username);
-            }
+        if(skipMaintenancePageForUser) {
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user: {}",
+                    username);
         }
 
         return skipMaintenancePageForUser;
@@ -98,8 +91,11 @@ public class MaintenancePageUtil {
 
         boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
-        log.info("MaintenancePageUtil.skipMaintenancePageCheck.skipMaintenancePage: {}", skipMaintenancePage);
-        if(!skipMaintenancePage) {
+
+        if(skipMaintenancePage) {
+            log.info("MaintenancePageUtil.skipMaintenancePageCheck.Maintenance page is skipped for the user: {}",
+                    email);
+        } else {
             log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
                     "User is not allowed to access the website due to maintenance page is enabled. " +
                     "Showing error page to the user: {}", email);
