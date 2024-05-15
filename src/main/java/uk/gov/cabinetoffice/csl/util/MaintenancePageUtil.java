@@ -40,7 +40,6 @@ public class MaintenancePageUtil {
     }
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
-
         if(!maintenancePageEnabled) {
             return true;
         }
@@ -93,29 +92,32 @@ public class MaintenancePageUtil {
     }
 
     public void skipMaintenancePageCheck(String email) {
-        if (maintenancePageEnabled) {
-            boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                    .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
-            log.info("MaintenancePageUtil.skipMaintenancePageCheck.skipMaintenancePage: {}", skipMaintenancePage);
-            if(!skipMaintenancePage) {
-                log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
-                        "User is not allowed to access the website due to maintenance page is enabled. " +
-                        "Showing error page to the user: {}", email);
-                throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
-            }
+        if(!maintenancePageEnabled) {
+            return;
+        }
+
+        boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
+        log.info("MaintenancePageUtil.skipMaintenancePageCheck.skipMaintenancePage: {}", skipMaintenancePage);
+        if(!skipMaintenancePage) {
+            log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
+                    "User is not allowed to access the website due to maintenance page is enabled. " +
+                    "Showing error page to the user: {}", email);
+            throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
         }
     }
 
     public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
-        if (maintenancePageEnabled) {
-            String requestURI = request.getRequestURI();
-            boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
-                    && Arrays.stream(skipMaintenancePageForUris.split(","))
-                    .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
-            log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
-                    shouldNotApplyMaintenancePageFilterForURI, requestURI);
-            return shouldNotApplyMaintenancePageFilterForURI;
+        if(!maintenancePageEnabled) {
+            return true;
         }
-        return true;
+
+        String requestURI = request.getRequestURI();
+        boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
+                && Arrays.stream(skipMaintenancePageForUris.split(","))
+                .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
+        log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
+                shouldNotApplyMaintenancePageFilterForURI, requestURI);
+        return shouldNotApplyMaintenancePageFilterForURI;
     }
 }
