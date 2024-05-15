@@ -95,12 +95,13 @@ public class MaintenancePageUtil {
         if(skipMaintenancePage) {
             log.info("MaintenancePageUtil.skipMaintenancePageCheck.Maintenance page is skipped for the user: {}",
                     email);
-        } else {
-            log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
-                    "User is not allowed to access the website due to maintenance page is enabled. " +
-                    "Showing error page to the user: {}", email);
-            throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
+            return;
         }
+
+        log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
+                "User is not allowed to access the website due to maintenance page is enabled. " +
+                "Showing error page to the user: {}", email);
+        throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
     }
 
     public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
