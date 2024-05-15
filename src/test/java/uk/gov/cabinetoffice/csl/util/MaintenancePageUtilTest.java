@@ -72,6 +72,11 @@ public class MaintenancePageUtilTest {
     }
 
     @Test
+    public void shouldNotApplyMaintenancePageFilterForURIfMaintenancePageIsDisabled() {
+        assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(false, "/health"));
+    }
+
+    @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsAllowedToSkipMaintenancePage() {
         assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(true, "/health"));
     }

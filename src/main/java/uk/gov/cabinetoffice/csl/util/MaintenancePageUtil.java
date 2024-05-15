@@ -107,12 +107,15 @@ public class MaintenancePageUtil {
     }
 
     public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
-                && Arrays.stream(skipMaintenancePageForUris.split(","))
-                .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
-        log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
-                shouldNotApplyMaintenancePageFilterForURI, requestURI);
-        return shouldNotApplyMaintenancePageFilterForURI;
+        if (maintenancePageEnabled) {
+            String requestURI = request.getRequestURI();
+            boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
+                    && Arrays.stream(skipMaintenancePageForUris.split(","))
+                    .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
+            log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
+                    shouldNotApplyMaintenancePageFilterForURI, requestURI);
+            return shouldNotApplyMaintenancePageFilterForURI;
+        }
+        return true;
     }
 }
