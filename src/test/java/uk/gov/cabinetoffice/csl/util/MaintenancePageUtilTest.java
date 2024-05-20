@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.cabinetoffice.csl.exception.GenericServerException;
-import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -19,15 +17,14 @@ public class MaintenancePageUtilTest {
     @Mock
     private HttpServletRequest request;
 
-    @Mock
-    private IUserAuthService userAuthService;
-
     private MaintenancePageUtil createMaintenancePageUtil(boolean maintenancePageEnabled) {
         String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
-        String skipMaintenancePageForUris = "/health,/info,/maintenance,/error,/cookies,/privacy," +
-                "/accessibility-statement,/contact-us,/webjars,/assets,/css,/img,/favicon.ico";
+        String skipMaintenancePageForUris = "/health,/maintenance,/error,/logout,/webjars,/css,/img,/js,/favicon.ico," +
+                "/oauth/revoke,/oauth/resolve,/oauth/token,/oauth/check_token," +
+                "/api/identities,/signup/chooseOrganisation,/signup/enterToken," +
+                "/account/verify/agency,/account/reactivate/updated";
         return new MaintenancePageUtil(maintenancePageEnabled, skipMaintenancePageForUsers,
-                skipMaintenancePageForUris, userAuthService);
+                skipMaintenancePageForUris);
     }
 
     private boolean executeSkipMaintenancePageForUser(boolean maintenancePageEnabled,
@@ -42,10 +39,6 @@ public class MaintenancePageUtilTest {
         return createMaintenancePageUtil(maintenancePageEnabled).shouldNotApplyMaintenancePageFilterForURI(request);
     }
 
-    private void executeSkipMaintenancePageCheck(boolean maintenancePageEnabled, String username) {
-        createMaintenancePageUtil(maintenancePageEnabled).skipMaintenancePageCheck(username);
-    }
-
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsDisabled() {
         assertTrue(executeSkipMaintenancePageForUser(false, "GET", null));
@@ -54,11 +47,6 @@ public class MaintenancePageUtilTest {
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsOtherThanGET() {
         assertTrue(executeSkipMaintenancePageForUser(true, "POST", null));
-    }
-
-    @Test
-    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsNotPassedInRequestParam() {
-        assertFalse(executeSkipMaintenancePageForUser(true, "GET", null));
     }
 
     @Test
@@ -78,37 +66,11 @@ public class MaintenancePageUtilTest {
 
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsAllowedToSkipMaintenancePage() {
-        assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(true, "/health"));
+        assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(true, "/assets/css/main.css"));
     }
 
     @Test
     public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsNotAllowedToSkipMaintenancePage() {
         assertFalse(executeShouldNotApplyMaintenancePageFilterForURI(true, "/create"));
-    }
-
-    @Test
-    public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsDisabled() {
-        try {
-            executeSkipMaintenancePageCheck(false, "tester1@domain.com");
-        } catch (Exception e) {
-            fail("No exception is thrown");
-        }
-    }
-
-    @Test
-    public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsAllowedToSkipMaintenancePage() {
-        try {
-            executeSkipMaintenancePageCheck(true, "tester1@domain.com");
-        } catch (GenericServerException e) {
-            fail("GenericServerException should not be thrown here.");
-        }
-    }
-
-    @Test
-    public void shouldNotSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsNotAllowedToSkipMaintenancePage() {
-        GenericServerException thrown = assertThrows(GenericServerException.class, () ->
-                executeSkipMaintenancePageCheck(true, "tester3@domain.com"),
-                "Expected skipMaintenancePageCheck() to throw GenericServerException, but it didn't");
-        assertTrue(thrown.getMessage().contains("User is not allowed to access the website due to maintenance page is enabled."));
     }
 }

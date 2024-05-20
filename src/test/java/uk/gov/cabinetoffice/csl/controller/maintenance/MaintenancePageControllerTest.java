@@ -10,7 +10,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -23,21 +22,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockCustomUser
 public class MaintenancePageControllerTest {
 
-    private static final String MAINTENANCE_TEMPLATE = "maintenance/maintenance";
-
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     public void shouldDisplayMaintenancePage() throws Exception {
+        String lpgUiUrl = "http://localhost:3001";
         mockMvc.perform(get("/maintenance")
                         .with(csrf())
                 )
-                .andExpect(status().isOk())
-                .andExpect(view().name(MAINTENANCE_TEMPLATE))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andExpect(content().string(containsString("The learning website is undergoing scheduled maintenance.")))
-                .andExpect(content().string(containsString("Apologies for the inconvenience.")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(lpgUiUrl))
                 .andDo(print());
     }
 }

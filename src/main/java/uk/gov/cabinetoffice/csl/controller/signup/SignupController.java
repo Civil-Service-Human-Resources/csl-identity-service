@@ -35,6 +35,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @RequestMapping("/signup")
 public class SignupController {
 
+    private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
     private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
     private static final String CHOOSE_ORGANISATION_TEMPLATE = "signup/chooseOrganisation";
     private static final String REQUEST_INVITE_TEMPLATE = "signup/requestInvite";
@@ -405,7 +406,7 @@ public class SignupController {
                 domain, form.getToken(), orgCode));
         log.info("Token form has passed the validation for domain {}, token {} and organisation {}.",
                 domain, form.getToken(), orgCode);
-        return REDIRECT_SIGNUP + code;
+        return REDIRECT_SIGNUP + code  + "?" + SKIP_MAINTENANCE_PAGE_PARAM_NAME + "=" + invite.getForEmail();
     }
 
     private AgencyToken agencyTokenInfo(String domain, String token, String org) {

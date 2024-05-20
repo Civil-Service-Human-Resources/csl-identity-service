@@ -3,14 +3,14 @@ package uk.gov.cabinetoffice.csl.util;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import uk.gov.cabinetoffice.csl.exception.GenericServerException;
-import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
+import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 
-import java.security.Principal;
 import java.util.Arrays;
 
+import static java.util.Locale.ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
@@ -26,17 +26,13 @@ public class MaintenancePageUtil {
 
     private final String skipMaintenancePageForUris;
 
-    private final IUserAuthService userAuthService;
-
     public MaintenancePageUtil(
             @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
             @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
-            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris,
-            IUserAuthService userAuthService) {
+            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.skipMaintenancePageForUris = skipMaintenancePageForUris;
-        this.userAuthService = userAuthService;
     }
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
@@ -44,64 +40,44 @@ public class MaintenancePageUtil {
             return true;
         }
 
-        String method = request.getMethod();
-        if(!"GET".equalsIgnoreCase(method)) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.method is not GET returning true.");
-            return true;
-        }
-
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+        log.info("MaintenancePageUtil: username from request param: {}", username);
 
         if(isBlank(username)) {
-            Principal principal = request.getUserPrincipal();
-            if (principal instanceof Jwt jwt) {
-                username = jwt.getClaim("email");
-            }
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Object principal = authentication != null ? authentication.getPrincipal() : null;
+            log.debug("MaintenancePageUtil: Authentication principal from SecurityContextHolder: {}", principal);
+            username = getUsernameFromPrincipal(principal);
         }
 
-        if(isBlank(username)) {
-            try {
-                username = userAuthService.getUsername();
-            } catch (Exception e) {
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is not available. No action to be taken.");
-            }
-        }
+        String requestURI = request.getRequestURI();
 
         if(isBlank(username)) {
-            return false;
+            if("GET".equalsIgnoreCase(request.getMethod())) {
+                log.info("MaintenancePageUtil: username is missing and HTTP Method is GET. " +
+                        "Returning false for skipMaintenancePageForUser for requestURI {}", requestURI);
+                return false;
+            } else {
+                log.info("MaintenancePageUtil: username is missing and HTTP Method is not GET. " +
+                        "Returning true for skipMaintenancePageForUser for requestURI {}", requestURI);
+                return true;
+            }
         }
 
         final String trimmedUsername = username.trim();
 
         boolean skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                        .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
+                .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
         if(skipMaintenancePageForUser) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user: {}",
-                    username);
+            log.info("MaintenancePageUtil: Maintenance page is skipped for the username {} for requestURI {}",
+                    username, requestURI);
+        } else {
+            log.info("MaintenancePageUtil: username {} is not allowed to skip the Maintenance page for requestURI {}",
+                    username, requestURI);
         }
 
         return skipMaintenancePageForUser;
-    }
-
-    public void skipMaintenancePageCheck(String email) {
-        if(!maintenancePageEnabled) {
-            return;
-        }
-
-        boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
-
-        if(skipMaintenancePage) {
-            log.info("MaintenancePageUtil.skipMaintenancePageCheck.Maintenance page is skipped for the user: {}",
-                    email);
-            return;
-        }
-
-        log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
-                "User is not allowed to access the website due to maintenance page is enabled. " +
-                "Showing error page to the user: {}", email);
-        throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
     }
 
     public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
@@ -112,9 +88,19 @@ public class MaintenancePageUtil {
         String requestURI = request.getRequestURI();
         boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
                 && Arrays.stream(skipMaintenancePageForUris.split(","))
-                .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
-        log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
+                .anyMatch(u -> requestURI.trim().toLowerCase(ROOT)
+                        .contains(u.toLowerCase(ROOT)));
+        log.debug("MaintenancePageUtil: shouldNotApplyMaintenancePageFilterForURI is {} for requestURI {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;
+    }
+
+    private String getUsernameFromPrincipal(Object principal) {
+        if (principal instanceof IdentityDetails identityDetails) {
+            String username = identityDetails.getIdentity().getEmail();
+            log.info("MaintenancePageUtil: username from Authentication principal is {}", username);
+            return username;
+        }
+        return null;
     }
 }

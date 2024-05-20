@@ -33,10 +33,14 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         this.setDefaultTargetUrl(authenticationSuccessTargetUrl);
+        if(!maintenancePageUtil.skipMaintenancePageForUser(request)) {
+            response.sendRedirect("/maintenance");
+            return;
+        }
+
         Object principal = authentication.getPrincipal();
         if (principal instanceof IdentityDetails identityDetails) {
             Identity identity = identityDetails.getIdentity();
-            maintenancePageUtil.skipMaintenancePageCheck(identity.getEmail());
             loginService.loginSucceeded(identity);
         }
         super.onAuthenticationSuccess(request, response, authentication);
