@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.LoginService;
+import uk.gov.cabinetoffice.csl.util.LogoutUtil;
 import uk.gov.cabinetoffice.csl.util.MaintenancePageUtil;
 
 import java.io.IOException;
@@ -24,9 +25,14 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     private final MaintenancePageUtil maintenancePageUtil;
 
-    public CustomAuthenticationSuccessHandler(LoginService loginService, MaintenancePageUtil maintenancePageUtil) {
+    private final LogoutUtil logoutUtil;
+
+    public CustomAuthenticationSuccessHandler(LoginService loginService,
+                                              MaintenancePageUtil maintenancePageUtil,
+                                              LogoutUtil logoutUtil) {
         this.loginService = loginService;
         this.maintenancePageUtil = maintenancePageUtil;
+        this.logoutUtil = logoutUtil;
     }
 
     @Override
@@ -34,6 +40,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                                         Authentication authentication) throws IOException, ServletException {
         this.setDefaultTargetUrl(authenticationSuccessTargetUrl);
         if(!maintenancePageUtil.skipMaintenancePageForUser(request)) {
+            logoutUtil.logout(request, response, authentication);
             response.sendRedirect("/maintenance");
             return;
         }
