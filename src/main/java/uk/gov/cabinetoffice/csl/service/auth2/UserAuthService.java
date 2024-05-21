@@ -45,7 +45,6 @@ public class UserAuthService implements IUserAuthService {
         } else if (principal instanceof Jwt jwt) {
             username = jwt.getClaim("user_name");
         }
-
         if (isBlank(username)) {
             log.error("Learner Id is missing from authentication token");
             throw new ClientAuthenticationErrorException("System error");

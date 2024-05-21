@@ -97,7 +97,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             DomainsResponse domainsResponse = getAllowListDomains();
             if (domainsResponse == null) {
-                log.error("Allowlist Domains returned null.");
+                log.error("Allowlist Domains returned null");
                 throw new GenericServerException("System error");
             }
             return domainsResponse.getDomains()
