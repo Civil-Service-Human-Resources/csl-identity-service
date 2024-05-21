@@ -9,7 +9,9 @@ public interface IUserAuthService {
 
     Authentication getAuthentication();
 
-    String getUsername();
+    String getUid();
+
+    String getEmail();
 
     Jwt getBearerTokenFromUserAuth();
 

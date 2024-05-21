@@ -42,38 +42,38 @@ public class MaintenancePageUtil {
             return true;
         }
 
-        String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        log.info("MaintenancePageUtil: username from request param: {}", username);
+        String email = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+        log.info("MaintenancePageUtil: email from request param: {}", email);
 
-        if(isBlank(username)) {
-            username = userAuthService.getUsername();
+        if(isBlank(email)) {
+            email = userAuthService.getEmail();
         }
 
         String requestURI = request.getRequestURI();
 
-        if(isBlank(username)) {
+        if(isBlank(email)) {
             if("GET".equalsIgnoreCase(request.getMethod())) {
-                log.info("MaintenancePageUtil: username is missing and HTTP Method is GET. " +
+                log.info("MaintenancePageUtil: email is missing and HTTP Method is GET. " +
                         "Returning false for skipMaintenancePageForUser for requestURI {}", requestURI);
                 return false;
             } else {
-                log.info("MaintenancePageUtil: username is missing and HTTP Method is not GET. " +
+                log.info("MaintenancePageUtil: email is missing and HTTP Method is not GET. " +
                         "Returning true for skipMaintenancePageForUser for requestURI {}", requestURI);
                 return true;
             }
         }
 
-        final String trimmedUsername = username.trim();
+        final String trimmedUsername = email.trim();
 
         boolean skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
         if(skipMaintenancePageForUser) {
-            log.info("MaintenancePageUtil: Maintenance page is skipped for the username {} for requestURI {}",
-                    username, requestURI);
+            log.info("MaintenancePageUtil: Maintenance page is skipped for the email {} for requestURI {}",
+                    email, requestURI);
         } else {
-            log.info("MaintenancePageUtil: username {} is not allowed to skip the Maintenance page for requestURI {}",
-                    username, requestURI);
+            log.info("MaintenancePageUtil: email {} is not allowed to skip the Maintenance page for requestURI {}",
+                    email, requestURI);
         }
 
         return skipMaintenancePageForUser;

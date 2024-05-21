@@ -30,11 +30,11 @@ public class LogoutUtil {
                 response.addCookie(cookieToDelete);
             }
         }
-        String username = userAuthService.getUsername();
-        log.debug("LogoutUtil.username: {}", username);
-        if (isNotBlank(username)) {
-            Long n = oauth2AuthorizationRepository.deleteByPrincipalName(username);
-            log.debug("LogoutUtil: {} Oauth2Authorization entries deleted from DB for user {}", n, username);
+        String uid = userAuthService.getUid();
+        log.debug("LogoutUtil.uid: {}", uid);
+        if (isNotBlank(uid)) {
+            Long n = oauth2AuthorizationRepository.deleteByPrincipalName(uid);
+            log.debug("LogoutUtil: {} Oauth2Authorization entries deleted from DB for principal_name {}", n, uid);
         }
     }
 }
