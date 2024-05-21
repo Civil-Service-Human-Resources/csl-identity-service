@@ -150,7 +150,7 @@ public class EmailUpdateController {
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
-                log.error("Unable to update old email {} to newEmail {}. Exception: {}", oldEmail, newEmail
+                log.error("Unable to update old email: {} to newEmail: {}. Exception: {}", oldEmail, newEmail
                         , e.toString());
                 return REDIRECT_LOGIN;
             }

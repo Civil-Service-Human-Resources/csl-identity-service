@@ -38,7 +38,7 @@ public class IdentityClient implements IIdentityClient {
         RequestEntity<Void> request = RequestEntity.post(url).build();
         OAuthToken oAuthToken = client.executeRequest(request, OAuthToken.class);
         if (oAuthToken == null) {
-            log.error("Service token response was null.");
+            log.error("Service token response was null");
             throw new InternalAuthErrorException("System error");
         }
         oAuthToken.setExpiryDateTime(now(clock).plusSeconds(oAuthToken.getExpiresIn()));

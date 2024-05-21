@@ -25,7 +25,7 @@ public class AgencyTokenController {
         try {
             return ResponseEntity.ok(agencyTokenCapacityService.getSpacesUsedByAgencyToken(uid));
         } catch (Exception e) {
-            log.error("Unexpected error while calling getSpacesUsedForAgencyToken with uid: {}, {}", uid, e.toString());
+            log.error("Unexpected error calling getSpacesUsedForAgencyToken with uid: {}, {}", uid, e.toString());
             return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
         }
     }
@@ -37,7 +37,7 @@ public class AgencyTokenController {
             agencyTokenCapacityService.deleteAgencyToken(uid);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Unexpected error while calling deleteAgencyToken with uid: {}, {}", uid, e.toString());
+            log.error("Unexpected error calling deleteAgencyToken with uid: {}, {}", uid, e.toString());
             return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
         }
     }

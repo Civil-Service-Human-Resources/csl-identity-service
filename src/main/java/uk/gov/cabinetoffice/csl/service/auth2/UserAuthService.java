@@ -47,7 +47,7 @@ public class UserAuthService implements IUserAuthService {
         }
 
         if (isBlank(username)) {
-            log.error("Learner Id is missing from authentication token.");
+            log.error("Learner Id is missing from authentication token");
             throw new ClientAuthenticationErrorException("System error");
         }
         return username;

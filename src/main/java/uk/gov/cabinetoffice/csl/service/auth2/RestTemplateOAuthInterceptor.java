@@ -25,7 +25,7 @@ public class RestTemplateOAuthInterceptor implements ClientHttpRequestIntercepto
             request.getHeaders().setBearerAuth(token);
             return execution.execute(request, body);
         } catch (Exception e) {
-            log.error("RestTemplateOAuthInterceptor: Error has occurred: {}", e.toString());
+            log.error("RestTemplateOAuthInterceptor.intercept: Error has occurred {}", e.toString());
             throw new GenericServerException("System error");
         }
     }

@@ -154,7 +154,7 @@ public class ReactivationController {
             return REDIRECT_LOGIN;
         } catch (Exception e) {
             log.error("There was an error processing account reactivation for code: {} with cause: {}",
-                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause was null.");
+                    code, e.getCause() != null ? e.getCause().toString() : "Exception cause was null");
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         }
