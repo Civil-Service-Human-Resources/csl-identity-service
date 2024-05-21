@@ -137,12 +137,12 @@ public class EmailUpdateController {
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
         if (identityService.isDomainInAnAgencyToken(newDomain)) {
-            log.debug("New email domain is in agency. oldEmail: {}, newEmail: {}", oldEmail,
+            log.debug("New email domain is in agency. oldEmail = {}, newEmail = {}", oldEmail,
                     newEmail);
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
         } else if (identityService.isDomainAllowListed(newDomain)) {
-            log.debug("New email domain is allow listed. oldEmail: {}, newEmail: {}", oldEmail,
+            log.debug("New email domain is allow listed. oldEmail = {}, newEmail = {}", oldEmail,
                     newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
@@ -150,7 +150,7 @@ public class EmailUpdateController {
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
-                log.error("Unable to update old email: {} to newEmail: {}. Exception: {}", oldEmail, newEmail
+                log.error("Unable to update old email = {} to newEmail = {}. Exception: {}", oldEmail, newEmail
                         , e.toString());
                 return REDIRECT_LOGIN;
             }
