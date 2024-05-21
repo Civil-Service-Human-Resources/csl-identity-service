@@ -32,19 +32,24 @@ public class LogoutUtil {
             }
         }
         if (authentication != null) {
-            String principalName = null;
-            if (authentication.getPrincipal() instanceof IdentityDetails principal) {
-                principal = (IdentityDetails) authentication.getPrincipal();
-                principalName = principal.getUsername();
-            } else if (authentication.getPrincipal() instanceof Jwt principal) {
-                principal = (Jwt) authentication.getPrincipal();
-                principalName = principal.getClaim("user_name");
-            }
-            log.debug("LogoutUtil.principalName: {}", principalName);
-            if (isNotBlank(principalName)) {
-                Long n = oauth2AuthorizationRepository.deleteByPrincipalName(principalName);
-                log.debug("LogoutUtil: {} Oauth2Authorization entries deleted from DB for user {}", n, principalName);
+            String username = getUsernameFromPrincipal(authentication);
+            log.debug("LogoutUtil.username: {}", username);
+            if (isNotBlank(username)) {
+                Long n = oauth2AuthorizationRepository.deleteByPrincipalName(username);
+                log.debug("LogoutUtil: {} Oauth2Authorization entries deleted from DB for user {}", n, username);
             }
         }
+    }
+
+    private String getUsernameFromPrincipal(Authentication authentication) {
+        String username = null;
+        if (authentication.getPrincipal() instanceof IdentityDetails principal) {
+            principal = (IdentityDetails) authentication.getPrincipal();
+            username = principal.getUsername();
+        } else if (authentication.getPrincipal() instanceof Jwt principal) {
+            principal = (Jwt) authentication.getPrincipal();
+            username = principal.getClaim("user_name");
+        }
+        return username;
     }
 }

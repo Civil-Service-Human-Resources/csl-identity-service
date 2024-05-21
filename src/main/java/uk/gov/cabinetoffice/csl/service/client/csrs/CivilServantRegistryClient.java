@@ -97,7 +97,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         try {
             DomainsResponse domainsResponse = getAllowListDomains();
             if (domainsResponse == null) {
-                log.error("Allowlist Domains returned null");
+                log.error("Allowlist Domains returned null.");
                 throw new GenericServerException("System error");
             }
             return domainsResponse.getDomains()
@@ -105,7 +105,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
                     .map(d -> d.getDomain().toLowerCase())
                     .collect(toList());
         } catch (Exception e) {
-            log.error("An error has occurred while getting allow listed domains from Civil Servant Registry", e);
+            log.error("An error has occurred while getting allow listed domains from Civil Servant Registry: ", e);
             throw new GenericServerException("System error");
         }
     }
@@ -170,7 +170,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
             RequestEntity<Void> request = RequestEntity.post(url).build();
             httpClient.executeRequest(request, Void.class);
         } catch (Exception e) {
-            log.error("An error has occurred while removing organisation from user using Civil Servant registry", e);
+            log.error("An error has occurred while removing organisation from user using Civil Servant registry: ", e);
             throw new GenericServerException("System error");
         }
     }

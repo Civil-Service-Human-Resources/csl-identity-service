@@ -37,13 +37,17 @@ public class UserAuthService implements IUserAuthService {
 
     @Override
     public String getUsername() {
-        String username = "";
-        Jwt jwtPrincipal = getBearerTokenFromUserAuth();
-        if (jwtPrincipal != null) {
-            username = (String) jwtPrincipal.getClaims().get("user_name");
+        Authentication authentication = getAuthentication();
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+        String username = null;
+        if (principal instanceof IdentityDetails) {
+            username = getIdentityDetails().getIdentity().getEmail();
+        } else if (principal instanceof Jwt jwt) {
+            username = jwt.getClaim("user_name");
         }
+
         if (isBlank(username)) {
-            log.error("Learner Id is missing from authentication token");
+            log.error("Learner Id is missing from authentication token.");
             throw new ClientAuthenticationErrorException("System error");
         }
         return username;
