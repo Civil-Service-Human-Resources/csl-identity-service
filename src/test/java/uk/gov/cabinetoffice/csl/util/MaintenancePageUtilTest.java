@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -13,6 +14,9 @@ import static org.mockito.Mockito.when;
 public class MaintenancePageUtilTest {
 
     private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
+
+    @Mock
+    private IUserAuthService userAuthService;
 
     @Mock
     private HttpServletRequest request;
@@ -25,8 +29,8 @@ public class MaintenancePageUtilTest {
                 "/reset-cache,/api/identities," +
                 "/signup/chooseOrganisation,/signup/enterToken," +
                 "/account/verify/agency,/account/reactivate/updated";
-        return new MaintenancePageUtil(maintenancePageEnabled, skipMaintenancePageForUsers,
-                skipMaintenancePageForUris);
+        return new MaintenancePageUtil(userAuthService, maintenancePageEnabled,
+                skipMaintenancePageForUsers, skipMaintenancePageForUris);
     }
 
     private boolean executeSkipMaintenancePageForUser(boolean maintenancePageEnabled,

@@ -3,10 +3,8 @@ package uk.gov.cabinetoffice.csl.util;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
+import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 
 import java.util.Arrays;
 
@@ -20,6 +18,8 @@ public class MaintenancePageUtil {
 
     private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
 
+    private final IUserAuthService userAuthService;
+
     private final boolean maintenancePageEnabled;
 
     private final String skipMaintenancePageForUsers;
@@ -27,9 +27,11 @@ public class MaintenancePageUtil {
     private final String skipMaintenancePageForUris;
 
     public MaintenancePageUtil(
+            IUserAuthService userAuthService,
             @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
             @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
             @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
+        this.userAuthService = userAuthService;
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.skipMaintenancePageForUris = skipMaintenancePageForUris;
@@ -44,10 +46,7 @@ public class MaintenancePageUtil {
         log.info("MaintenancePageUtil: username from request param: {}", username);
 
         if(isBlank(username)) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Object principal = authentication != null ? authentication.getPrincipal() : null;
-            log.debug("MaintenancePageUtil: Authentication principal from SecurityContextHolder: {}", principal);
-            username = getUsernameFromPrincipal(principal);
+            username = userAuthService.getUsername();
         }
 
         String requestURI = request.getRequestURI();
@@ -93,14 +92,5 @@ public class MaintenancePageUtil {
         log.debug("MaintenancePageUtil: shouldNotApplyMaintenancePageFilterForURI is {} for requestURI {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;
-    }
-
-    private String getUsernameFromPrincipal(Object principal) {
-        if (principal instanceof IdentityDetails identityDetails) {
-            String username = identityDetails.getIdentity().getEmail();
-            log.info("MaintenancePageUtil: username from Authentication principal is {}", username);
-            return username;
-        }
-        return null;
     }
 }

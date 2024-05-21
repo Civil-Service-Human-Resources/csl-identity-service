@@ -3,7 +3,6 @@ package uk.gov.cabinetoffice.csl.controller.maintenance;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,12 +48,11 @@ public class MaintenancePageController {
     }
 
     @GetMapping("/maintenance")
-    public String maintenancePage(Model model, HttpServletRequest request, HttpServletResponse response,
-                                  Authentication authentication) throws IOException {
+    public String maintenancePage(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if(!maintenancePageEnabled) {
             response.sendRedirect(lpgUiUrl);
         }
-        logoutUtil.logout(request, response, authentication);
+        logoutUtil.logout(request, response);
         model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
         model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
         model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);

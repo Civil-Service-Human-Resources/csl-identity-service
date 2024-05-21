@@ -16,6 +16,6 @@ public class CustomCookieAndAuth2TokenClearingLogoutHandler implements LogoutHan
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        logoutUtil.logout(request, response, authentication);
+        logoutUtil.logout(request, response);
     }
 }
