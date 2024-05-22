@@ -15,8 +15,8 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class CsrsServiceDataTransformer {
 
-    public List<OrganisationalUnit> transformOrganisations(List<OrganisationalUnit> organisationalUnitDtos) {
-        List<OrganisationalUnit> tree = this.transformOrgsIntoTree(organisationalUnitDtos);
+    public List<OrganisationalUnit> transformOrganisations(List<OrganisationalUnit> organisationalUnits) {
+        List<OrganisationalUnit> tree = this.transformOrgsIntoTree(organisationalUnits);
         tree.forEach(OrganisationalUnit::applyAgencyTokenToDescendants);
         return tree
                 .stream()
@@ -25,17 +25,17 @@ public class CsrsServiceDataTransformer {
                 .collect(toList());
     }
 
-    public List<OrganisationalUnit> transformOrgsIntoTree(List<OrganisationalUnit> organisationalUnitDtos) {
+    public List<OrganisationalUnit> transformOrgsIntoTree(List<OrganisationalUnit> organisationalUnits) {
         Map<Integer, Integer> orgIdMap = new HashMap<>();
         List<OrganisationalUnit> roots = new ArrayList<>();
-        for (int i = 0; i < organisationalUnitDtos.size(); i++) {
-            OrganisationalUnit organisationalUnitDto = organisationalUnitDtos.get(i);
-            orgIdMap.put(organisationalUnitDto.getId(), i);
+        for (int i = 0; i < organisationalUnits.size(); i++) {
+            OrganisationalUnit organisationalUnit = organisationalUnits.get(i);
+            orgIdMap.put(organisationalUnit.getId(), i);
         }
-        organisationalUnitDtos.forEach(o -> {
+        organisationalUnits.forEach(o -> {
             if (o.getParentId() != null) {
                 int index = orgIdMap.get(o.getParentId());
-                organisationalUnitDtos.get(index).addDescendant(o);
+                organisationalUnits.get(index).addDescendant(o);
             } else {
                 roots.add(o);
             }

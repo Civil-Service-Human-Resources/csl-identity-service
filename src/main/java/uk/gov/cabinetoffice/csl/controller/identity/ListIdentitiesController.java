@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.dto.IdentityAgencyToken;
-import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
+import uk.gov.cabinetoffice.csl.dto.IdentityDto;
 import uk.gov.cabinetoffice.csl.dto.UidList;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
@@ -38,46 +38,46 @@ public class ListIdentitiesController {
     }
 
     @GetMapping("/api/identities")
-    public ResponseEntity<List<IdentityDTO>> listIdentities() {
+    public ResponseEntity<List<IdentityDto>> listIdentities() {
         return ok(
                 identityService.getAllIdentities()
                 .stream()
-                .map(IdentityDTO::new)
+                .map(IdentityDto::new)
                 .collect(toList())
         );
     }
 
     @GetMapping("/api/identities/map")
-    public ResponseEntity<Map<String, IdentityDTO>> listIdentitiesAsMap() {
+    public ResponseEntity<Map<String, IdentityDto>> listIdentitiesAsMap() {
         return ok(
                 identityService.getAllNormalisedIdentities()
                 .stream()
-                .collect(toMap(IdentityDTO::getUid, o -> o))
+                .collect(toMap(IdentityDto::getUid, o -> o))
         );
     }
 
     @GetMapping(value ="/api/identities/map-for-uids", params = "uids")
-    public ResponseEntity<Map<String, IdentityDTO>> listIdentitiesAsMapForUids(@RequestParam List<String> uids) {
+    public ResponseEntity<Map<String, IdentityDto>> listIdentitiesAsMapForUids(@RequestParam List<String> uids) {
         return ok(
                 identityService.getIdentitiesByUidsNormalised(uids)
                 .stream()
-                .collect(toMap(IdentityDTO::getUid, o -> o)));
+                .collect(toMap(IdentityDto::getUid, o -> o)));
     }
 
     @GetMapping(value = "/api/identities", params = "emailAddress")
-    public ResponseEntity<IdentityDTO> findByEmailAddress(@RequestParam String emailAddress) {
+    public ResponseEntity<IdentityDto> findByEmailAddress(@RequestParam String emailAddress) {
         Identity identity = identityService.getActiveIdentityForEmail(emailAddress);
         if (identity != null) {
-            return ok(new IdentityDTO(identity));
+            return ok(new IdentityDto(identity));
         }
         return notFound().build();
     }
 
     @GetMapping(value = "/api/identities", params = "uid")
-    public ResponseEntity<IdentityDTO> findByUid(@RequestParam String uid) {
+    public ResponseEntity<IdentityDto> findByUid(@RequestParam String uid) {
         try {
             Identity identity = identityService.getIdentityForUid(uid);
-            return ok(new IdentityDTO(identity));
+            return ok(new IdentityDto(identity));
         } catch(IdentityNotFoundException e) {
             return notFound().build();
         } catch (Exception e) {

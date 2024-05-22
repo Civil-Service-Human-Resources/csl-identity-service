@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
+import uk.gov.cabinetoffice.csl.dto.IdentityDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,18 +22,18 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
 
         boolean existsByEmailIgnoreCase(String email);
 
-        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i.email, i.uid)" +
+        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDto(i.email, i.uid)" +
                 " from Identity i")
-        List<IdentityDTO> findAllNormalised();
+        List<IdentityDto> findAllNormalised();
 
         Optional<Identity> findFirstByUid(String uid);
 
         @Query("select i from Identity i where i.uid in (?1)")
         List<Identity> findIdentitiesByUids(List<String> uids);
 
-        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDTO(i)" +
+        @Query("select new uk.gov.cabinetoffice.csl.dto.IdentityDto(i)" +
                 " from Identity i where i.uid in (?1)")
-        List<IdentityDTO> findIdentitiesByUidsNormalised(List<String> uids);
+        List<IdentityDto> findIdentitiesByUidsNormalised(List<String> uids);
 
         Long countByAgencyTokenUid(String uid);
 

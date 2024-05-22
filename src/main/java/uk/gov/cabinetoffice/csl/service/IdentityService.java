@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
-import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
+import uk.gov.cabinetoffice.csl.dto.IdentityDto;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
@@ -71,11 +71,11 @@ public class IdentityService {
         return identityRepository.findAll();
     }
 
-    public List<IdentityDTO> getAllNormalisedIdentities() {
+    public List<IdentityDto> getAllNormalisedIdentities() {
         return identityRepository.findAllNormalised();
     }
 
-    public List<IdentityDTO> getIdentitiesByUidsNormalised(List<String> uids) {
+    public List<IdentityDto> getIdentitiesByUidsNormalised(List<String> uids) {
         return identityRepository.findIdentitiesByUidsNormalised(uids);
     }
 
