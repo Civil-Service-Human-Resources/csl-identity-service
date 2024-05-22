@@ -24,6 +24,7 @@ public class MaintenancePageUtilTest {
     private MaintenancePageUtil createMaintenancePageUtil(boolean maintenancePageEnabled) {
         String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
         String skipMaintenancePageForUris = "/health,/info,/maintenance,/error,/logout," +
+                "/cookies,/privacy,/accessibility-statement,/contact-us," +
                 "/webjars,/css,/img,/js,/favicon.ico," +
                 "/oauth2/token,/oauth2/introspect,/oauth2/revoke,/identity/resolve," +
                 "/reset-cache,/api/identities," +
