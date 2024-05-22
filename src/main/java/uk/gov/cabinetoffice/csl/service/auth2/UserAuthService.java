@@ -7,7 +7,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.exception.ClientAuthenticationErrorException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -46,8 +45,7 @@ public class UserAuthService implements IUserAuthService {
             uid = jwt.getClaim("user_name");
         }
         if (isBlank(uid)) {
-            log.error("Learner Id is missing from authentication token");
-            throw new ClientAuthenticationErrorException("System error");
+            log.warn("Learner uid is missing from authentication token. User is not logged-in.");
         }
         return uid;
     }
@@ -63,8 +61,7 @@ public class UserAuthService implements IUserAuthService {
             email = jwt.getClaim("email");
         }
         if (isBlank(email)) {
-            log.error("Learner Id is missing from authentication token");
-            throw new ClientAuthenticationErrorException("System error");
+            log.warn("Learner email id is missing from authentication token. User is not logged-in.");
         }
         return email;
     }
