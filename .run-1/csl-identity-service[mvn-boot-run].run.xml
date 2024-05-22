@@ -50,7 +50,7 @@
               <entry key="MAINTENANCE_PAGE_CONTENT_LINE_2" value="It will be unavailable between the hours of 6pm to 8pm on Wednesday 1st May 2024." />
               <entry key="MAINTENANCE_PAGE_CONTENT_LINE_3" value="Apologies for the inconvenience." />
               <entry key="MAINTENANCE_PAGE_CONTENT_LINE_4" value="If the maintenance period is extended, further information will be provided here." />
-              <entry key="MAINTENANCE_PAGE_SKIP_FOR_URIS" value="/health,/info,/maintenance,/error,/logout,/cookies,/privacy,/accessibility-statement,/contact-us,/webjars,/css,/img,/js,/favicon.ico,/oauth2/token,/oauth2/introspect,/oauth2/revoke,/identity/resolve,/reset-cache,/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency,/account/reactivate/updated" />
+              <entry key="MAINTENANCE_PAGE_SKIP_FOR_URIS" value="/health,/info,/maintenance,/error,/logout,/cookies,/privacy,/accessibility-statement,/contact-us,/webjars,/css,/img,/js,/favicon.ico,/oauth2/token,/oauth2/introspect,/oauth2/revoke,/identity/resolve,/reset-cache,/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency,/account/reactivate/updated,/account/email/updated" />
               <entry key="MAINTENANCE_PAGE_SKIP_FOR_USERS" value="learner@domain.com,tester@domain.com" />
               <entry key="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
               <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
