@@ -73,18 +73,22 @@ public class MaintenancePageUtil {
         boolean skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
+        if(!skipMaintenancePageForUser) {
+            //Below try catch block is for the deactivated account scenario
+            try {
+                final String decryptedUsername = getDecryptedText(email, encryptionKey);
+                skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                        .anyMatch(u -> u.trim().equalsIgnoreCase(decryptedUsername));
+                email = decryptedUsername; //For logging in the subsequent code below
+            } catch (Exception e) {
+                log.debug("MaintenancePageUtil: trimmedUsername is not encrypted.");
+            }
+        }
+
         if(skipMaintenancePageForUser) {
             log.info("MaintenancePageUtil: Maintenance page is skipped for the email {} for requestURI {}",
                     email, requestURI);
         } else {
-            //Below try catch block is for the deactivated account scenario
-            try {
-                String decryptedUsername = getDecryptedText(trimmedUsername, encryptionKey);
-                skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                        .anyMatch(u -> u.trim().equalsIgnoreCase(decryptedUsername));
-            } catch (Exception e) {
-                log.debug("MaintenancePageUtil: trimmedUsername is not encrypted.");
-            }
             log.info("MaintenancePageUtil: email {} is not allowed to skip the Maintenance page for requestURI {}",
                     email, requestURI);
         }
