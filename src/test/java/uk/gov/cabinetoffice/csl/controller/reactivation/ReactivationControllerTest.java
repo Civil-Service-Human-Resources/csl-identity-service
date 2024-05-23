@@ -25,6 +25,7 @@ import java.util.Map;
 import static java.time.Month.FEBRUARY;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -91,7 +92,8 @@ public class ReactivationControllerTest {
         when(identityService.isDomainInAnAgencyToken(utils.getDomainFromEmailAddress(EMAIL))).thenReturn(true);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/account/verify/agency/" + CODE));
     }
@@ -104,7 +106,8 @@ public class ReactivationControllerTest {
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/account/reactivate/updated"));
     }
@@ -118,7 +121,8 @@ public class ReactivationControllerTest {
         String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
 
         mockMvc.perform(
-                        get("/account/reactivate/" + CODE))
+                        get("/account/reactivate/" + CODE)
+                                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error=reactivation-expired&username=" + encryptedUsername))
                 .andDo(print());
@@ -131,7 +135,8 @@ public class ReactivationControllerTest {
                 .when(reactivationService).getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE))
@@ -145,7 +150,8 @@ public class ReactivationControllerTest {
                 getReactivationForCodeAndStatus(CODE, PENDING);
 
         mockMvc.perform(
-                get("/account/reactivate/" + CODE))
+                get("/account/reactivate/" + CODE)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute(STATUS_ATTRIBUTE, ACCOUNT_REACTIVATION_ERROR_MESSAGE))
@@ -154,7 +160,8 @@ public class ReactivationControllerTest {
 
     @Test
     public void shouldGetAccountReactivatedTemplate() throws Exception {
-        mockMvc.perform(get("/account/reactivate/updated"))
+        mockMvc.perform(get("/account/reactivate/updated")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/accountReactivated"));
     }
@@ -177,7 +184,10 @@ public class ReactivationControllerTest {
         String encryptedUsername = getEncryptedText(EMAIL, encryptionKey);
 
         mockMvc.perform(
-                        get("/account/reactivate").param("code", encryptedUsername))
+                    get("/account/reactivate")
+                        .param("code", encryptedUsername)
+                        .with(csrf())
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/reactivate"))
                 .andExpect(content().string(containsString("We've sent you an email")))

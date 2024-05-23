@@ -1,17 +1,12 @@
 package uk.gov.cabinetoffice.csl.service.auth2;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
-import uk.gov.cabinetoffice.csl.exception.ClientAuthenticationErrorException;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-@Slf4j
 @Component
 @AllArgsConstructor
 public class UserAuthService implements IUserAuthService {
@@ -36,17 +31,29 @@ public class UserAuthService implements IUserAuthService {
     }
 
     @Override
-    public String getUsername() {
-        String username = "";
-        Jwt jwtPrincipal = getBearerTokenFromUserAuth();
-        if (jwtPrincipal != null) {
-            username = (String) jwtPrincipal.getClaims().get("user_name");
+    public String getUid() {
+        Authentication authentication = getAuthentication();
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+        String uid = null;
+        if (principal instanceof IdentityDetails) {
+            uid = getIdentityDetails().getUsername();
+        } else if (principal instanceof Jwt jwt) {
+            uid = jwt.getClaim("user_name");
         }
-        if (isBlank(username)) {
-            log.error("Learner Id is missing from authentication token");
-            throw new ClientAuthenticationErrorException("System error");
+        return uid;
+    }
+
+    @Override
+    public String getEmail() {
+        Authentication authentication = getAuthentication();
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+        String email = null;
+        if (principal instanceof IdentityDetails) {
+            email = getIdentityDetails().getIdentity().getEmail();
+        } else if (principal instanceof Jwt jwt) {
+            email = jwt.getClaim("email");
         }
-        return username;
+        return email;
     }
 
     @Override

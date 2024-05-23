@@ -61,7 +61,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                     String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
                     String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
-                    log.debug("Pending reactivation for the email {} requested at {} and expires on {}",
+                    log.info("Pending reactivation for the email {} requested at {} and expires on {}",
                             pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {
                     log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
@@ -69,7 +69,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 redirect = "/login?error=pending-reactivation";
             }
         }
-        log.debug("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);
+        log.info("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);
         response.sendRedirect(redirect);
     }
 }

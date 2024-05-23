@@ -47,23 +47,19 @@ public class UserService implements UserDetailsService {
         String domain = utils.getDomainFromEmailAddress(email);
         String agencyTokenUid = identity.getAgencyTokenUid();
         if (isEmailInvited(email)) {
-            log.debug(String.format("User %s has a valid invite from another user", identity.getId()));
+            log.debug(String.format("User %s has a valid invite from another user", email));
             return true;
         }
         if (agencyTokenUid != null) {
-            log.debug(String.format("Checking domain %s against agency token %s for user %s", domain, agencyTokenUid, identity.getId()));
+            log.debug(String.format("Checking domain %s against agency token %s for user %s", domain, agencyTokenUid, email));
             return identityService.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
         }
-        log.debug(String.format("Checking domain %s against allowlist for user %s", domain, identity.getId()));
+        log.debug(String.format("Checking domain %s against allowlist for user %s", domain, email));
         return isAllowListedDomain(domain);
     }
 
     private boolean isAllowListedDomain(String domain) {
         return identityService.isDomainAllowListed(domain);
-    }
-
-    private boolean isAgencyDomain(String domain, Identity identity) {
-        return identityService.isDomainInAnAgencyToken(domain) && identity.getAgencyTokenUid() != null;
     }
 
     private boolean isEmailInvited(String email) {

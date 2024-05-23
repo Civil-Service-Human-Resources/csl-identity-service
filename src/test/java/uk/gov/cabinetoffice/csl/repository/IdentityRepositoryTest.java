@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.dto.IdentityDTO;
+import uk.gov.cabinetoffice.csl.dto.IdentityDto;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 
 import java.util.ArrayList;
@@ -135,7 +135,7 @@ public class IdentityRepositoryTest {
         UIDs1.add(uid1);
         UIDs1.add(uid2);
         UIDs1.add(uid3);
-        List<IdentityDTO> result1 = identityRepository.findIdentitiesByUidsNormalised(UIDs1);
+        List<IdentityDto> result1 = identityRepository.findIdentitiesByUidsNormalised(UIDs1);
         assertEquals(3, result1.size());
         assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid1)).count());
         assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid2)).count());
@@ -144,7 +144,7 @@ public class IdentityRepositoryTest {
         List<String> UIDs2 = new ArrayList<>();
         UIDs2.add(uid1);
         UIDs2.add(uid2);
-        List<IdentityDTO> result2 = identityRepository.findIdentitiesByUidsNormalised(UIDs2);
+        List<IdentityDto> result2 = identityRepository.findIdentitiesByUidsNormalised(UIDs2);
         assertEquals(2, result2.size());
         assertEquals(1, result2.stream().filter(r -> r.getUid().equals(uid1)).count());
         assertEquals(1, result2.stream().filter(r -> r.getUid().equals(uid2)).count());
@@ -152,19 +152,19 @@ public class IdentityRepositoryTest {
         List<String> UIDs3 = new ArrayList<>();
         UIDs3.add(uid1);
         UIDs3.add(uid4);
-        List<IdentityDTO> result3 = identityRepository.findIdentitiesByUidsNormalised(UIDs3);
+        List<IdentityDto> result3 = identityRepository.findIdentitiesByUidsNormalised(UIDs3);
         assertEquals(1, result3.size());
         assertEquals(1, result3.stream().filter(r -> r.getUid().equals(uid1)).count());
         assertEquals(0, result3.stream().filter(r -> r.getUid().equals(uid4)).count());
 
         List<String> UIDs4 = new ArrayList<>();
         UIDs4.add(uid4);
-        List<IdentityDTO> result4 = identityRepository.findIdentitiesByUidsNormalised(UIDs4);
+        List<IdentityDto> result4 = identityRepository.findIdentitiesByUidsNormalised(UIDs4);
         assertEquals(0, result4.size());
         assertEquals(0, result4.stream().filter(r -> r.getUid().equals(uid4)).count());
 
         List<String> UIDs5 = new ArrayList<>();
-        List<IdentityDTO> result5 = identityRepository.findIdentitiesByUidsNormalised(UIDs5);
+        List<IdentityDto> result5 = identityRepository.findIdentitiesByUidsNormalised(UIDs5);
         assertEquals(0, result5.size());
     }
 

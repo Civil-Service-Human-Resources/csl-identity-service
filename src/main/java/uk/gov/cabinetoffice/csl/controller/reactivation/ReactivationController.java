@@ -183,7 +183,7 @@ public class ReactivationController {
                 log.info("Pending reactivations are marked as expired because user is active for email: {}",
                         email);
             } catch(Exception e) {
-                log.debug("Pending reactivation not found for email: {}", email);
+                log.warn("Pending reactivation not found for email: {}", email);
             }
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_ACCOUNT_IS_ALREADY_ACTIVE);
             return REDIRECT_LOGIN;

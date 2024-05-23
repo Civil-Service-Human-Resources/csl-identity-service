@@ -48,6 +48,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.ENTER_TOKEN_ERR
 @WithMockUser(username = "user")
 public class SignupControllerTest {
 
+    private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
     private static final String STATUS_ATTRIBUTE = "status";
 
     private static final String ENTER_TOKEN_TEMPLATE = "agencytoken/enterToken";
@@ -548,7 +549,8 @@ public class SignupControllerTest {
                                 .contentType(APPLICATION_FORM_URLENCODED_VALUE)
                                 .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_SIGNUP + GENERIC_CODE));
+                .andExpect(redirectedUrl("/signup/" + GENERIC_CODE
+                        + "?" + SKIP_MAINTENANCE_PAGE_PARAM_NAME + "=" + GENERIC_EMAIL));
     }
 
     @Test

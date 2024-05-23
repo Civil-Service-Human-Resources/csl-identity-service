@@ -85,7 +85,7 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
 					"/cookies","/privacy","/accessibility-statement","/contact-us",
-					"/error",
+					"/health","/maintenance","/error",
 					"/signup/**", "/login", "/reset/**",
 					"/account/reactivate/**","/account/verify/agency/**",
 					"/account/email/verify/**","/account/email/updated/**","/account/email/update/error/**",
@@ -117,9 +117,6 @@ public class SecurityConfig {
 	WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web
 				.expressionHandler(new WebSecurityExpressionHandler());
-				//TODO: Below commented code will be removed if not used for future tickets.
-				//.ignoring()
-				//.requestMatchers("/webjars/**","/assets/**","/css/**","/img/**","/favicon.ico");
 	}
 
 	@Bean
