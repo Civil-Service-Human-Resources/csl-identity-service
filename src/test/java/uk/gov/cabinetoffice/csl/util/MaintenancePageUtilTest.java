@@ -29,7 +29,8 @@ public class MaintenancePageUtilTest {
                 "/oauth2/token,/oauth2/introspect,/oauth2/revoke,/identity/resolve," +
                 "/reset-cache,/api/identities," +
                 "/signup/chooseOrganisation,/signup/enterToken," +
-                "/account/verify/agency,/account/reactivate/updated,/account/email/updated";
+                "/account/verify/agency,/account/reactivate/updated," +
+                "/account/email/updated,/account/email/update/error";
         String encryptionKey = "0123456789abcdef0123456789abcdef";
         return new MaintenancePageUtil(userAuthService, maintenancePageEnabled,
                 skipMaintenancePageForUsers, skipMaintenancePageForUris, encryptionKey);
