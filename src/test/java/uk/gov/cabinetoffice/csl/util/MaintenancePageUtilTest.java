@@ -30,8 +30,9 @@ public class MaintenancePageUtilTest {
                 "/reset-cache,/api/identities," +
                 "/signup/chooseOrganisation,/signup/enterToken," +
                 "/account/verify/agency,/account/reactivate/updated,/account/email/updated";
+        String encryptionKey = "0123456789abcdef0123456789abcdef";
         return new MaintenancePageUtil(userAuthService, maintenancePageEnabled,
-                skipMaintenancePageForUsers, skipMaintenancePageForUris);
+                skipMaintenancePageForUsers, skipMaintenancePageForUris, encryptionKey);
     }
 
     private boolean executeSkipMaintenancePageForUser(boolean maintenancePageEnabled,

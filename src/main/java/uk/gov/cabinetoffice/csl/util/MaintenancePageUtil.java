@@ -11,6 +11,7 @@ import java.util.Arrays;
 import static java.util.Locale.ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.logging.log4j.util.Strings.isBlank;
+import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getDecryptedText;
 
 @Slf4j
 @Component
@@ -26,15 +27,19 @@ public class MaintenancePageUtil {
 
     private final String skipMaintenancePageForUris;
 
+    private final String encryptionKey;
+
     public MaintenancePageUtil(
             IUserAuthService userAuthService,
             @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
             @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
-            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
+            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris,
+            @Value("${textEncryption.encryptionKey}") String encryptionKey) {
         this.userAuthService = userAuthService;
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.skipMaintenancePageForUris = skipMaintenancePageForUris;
+        this.encryptionKey = encryptionKey;
     }
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
@@ -72,6 +77,14 @@ public class MaintenancePageUtil {
             log.info("MaintenancePageUtil: Maintenance page is skipped for the email {} for requestURI {}",
                     email, requestURI);
         } else {
+            //Below try catch block is for the deactivated account scenario
+            try {
+                String decryptedUsername = getDecryptedText(trimmedUsername, encryptionKey);
+                skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                        .anyMatch(u -> u.trim().equalsIgnoreCase(decryptedUsername));
+            } catch (Exception e) {
+                log.debug("MaintenancePageUtil: trimmedUsername is not encrypted.");
+            }
             log.info("MaintenancePageUtil: email {} is not allowed to skip the Maintenance page for requestURI {}",
                     email, requestURI);
         }
