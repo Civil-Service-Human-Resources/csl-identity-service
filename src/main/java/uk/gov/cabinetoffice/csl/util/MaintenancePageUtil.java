@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import static java.util.Locale.ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.logging.log4j.util.Strings.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getDecryptedText;
 
 @Slf4j
