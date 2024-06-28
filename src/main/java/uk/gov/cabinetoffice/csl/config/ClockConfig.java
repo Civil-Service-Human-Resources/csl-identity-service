@@ -11,14 +11,14 @@ import java.time.ZoneId;
 @Configuration
 public class ClockConfig {
 
-    @Value("${clock.zoneId}")
-    private String clockZoneId;
+    @Value("${time.zoneId}")
+    private String timeZoneId;
 
     @Bean
     public Clock getClock() {
-        if(StringUtils.isBlank(clockZoneId)) {
+        if(StringUtils.isBlank(timeZoneId)) {
             return Clock.systemDefaultZone();
         }
-        return Clock.system(ZoneId.of(clockZoneId.trim()));
+        return Clock.system(ZoneId.of(timeZoneId.trim()));
     }
 }
