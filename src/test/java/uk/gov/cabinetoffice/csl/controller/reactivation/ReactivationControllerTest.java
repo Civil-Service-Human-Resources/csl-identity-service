@@ -190,8 +190,9 @@ public class ReactivationControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/reactivate"))
-                .andExpect(content().string(containsString("We've sent you an email")))
-                .andExpect(content().string(containsString("What happens next?")))
+                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("Check your email for the link to reactivate your account.")))
                 .andExpect(content().string(containsString(reactivationEmailMessage)))
                 .andExpect(content().string(containsString(reactivationValidityMessage)))
                 .andDo(print());
