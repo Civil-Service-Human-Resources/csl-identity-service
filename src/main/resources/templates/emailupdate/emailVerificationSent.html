@@ -1,5 +1,5 @@
 <page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
-<title>We've sent you an email</title>
+<title>We've sent you an email - Civil Service Learning</title>
 <content>
 <div class="container">
     <div class="grid-row">
@@ -13,7 +13,7 @@
                 <p>We have sent you an email with a link to your new email address.</p>
                 <p>Please click on the link in the email to verify changes to your account.</p>
                 <p>The link will expire in <span th:text="${resetValidity}"></span></p>
-                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">Sign out</a> and check your email.</p>
+                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">sign out</a> and check your email.</p>
             </div>
             <div hidden id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
             <div hidden id="signOutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
