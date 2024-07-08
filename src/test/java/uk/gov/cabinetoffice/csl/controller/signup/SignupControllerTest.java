@@ -143,8 +143,9 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
-                .andExpect(content().string(containsString("We've sent you an email")))
-                .andExpect(content().string(containsString("What happens next")))
+                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")));
 
@@ -241,8 +242,9 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
-                .andExpect(content().string(containsString("We've sent you an email")))
-                .andExpect(content().string(containsString("What happens next")))
+                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")));
 
