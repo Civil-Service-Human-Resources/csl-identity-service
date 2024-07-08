@@ -55,6 +55,7 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(view().name(PRIVACY_TEMPLATE))
                 .andExpect(content().string(containsString("Privacy notice for Civil Service Learning")))
                 .andDo(print());
@@ -67,7 +68,9 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andExpect(view().name(CONTACT_US_TEMPLATE))
                 .andExpect(content().string(containsString("Contact us")))
                 .andDo(print());
@@ -80,7 +83,9 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andExpect(view().name(ACCESSIBILITY_STATEMENT_TEMPLATE))
                 .andExpect(content().string(containsString("Accessibility statement")))
                 .andDo(print());

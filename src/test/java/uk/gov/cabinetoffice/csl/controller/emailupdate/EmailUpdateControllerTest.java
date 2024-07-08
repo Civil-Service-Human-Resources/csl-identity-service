@@ -17,6 +17,7 @@ import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 import java.time.ZoneId;
 
 import static java.time.LocalDateTime.now;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -140,7 +141,9 @@ public class EmailUpdateControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andExpect(view().name(EMAIL_VERIFICATION_SENT_TEMPLATE));
 
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));

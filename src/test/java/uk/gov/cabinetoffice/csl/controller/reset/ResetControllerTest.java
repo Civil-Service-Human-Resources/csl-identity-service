@@ -81,8 +81,6 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/checkEmail"))
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
@@ -90,6 +88,10 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andDo(print());
     }
 
@@ -114,8 +116,6 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/checkEmail"))
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
@@ -124,6 +124,10 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andDo(print());
     }
 

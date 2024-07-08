@@ -143,13 +143,15 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
-                        "We have sent you an email with a link to <strong>continue creating your account</strong>.")));
+                        "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")));
 
         verify(inviteService).sendSelfSignupInvite(email, true);
     }
@@ -174,7 +176,9 @@ public class SignupControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE));
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")));
 
         verify(inviteService, times(1)).updateInviteStatus(invite.getCode(), EXPIRED);
     }
@@ -246,13 +250,15 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
-                        "We have sent you an email with a link to <strong>continue creating your account</strong>.")));
+                        "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")));
 
         verify(inviteService).sendSelfSignupInvite(GENERIC_EMAIL, false);
     }
