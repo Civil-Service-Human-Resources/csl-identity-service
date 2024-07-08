@@ -19,6 +19,9 @@ import uk.gov.service.notify.NotificationClientException;
 
 import java.time.LocalDateTime;
 
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_EMAIL_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_NUMBER_ATTRIBUTE;
+
 @Slf4j
 @Controller
 @RequestMapping("/reset")
@@ -34,6 +37,12 @@ public class ResetController {
 
     @Value("${reset.validityInSeconds}")
     private long validityInSeconds;
+
+    @Value("${lpg.contactEmail}")
+    private String contactEmail;
+
+    @Value("${lpg.contactNumber}")
+    private String contactNumber;
 
     private final ResetService resetService;
 
@@ -64,6 +73,10 @@ public class ResetController {
     public String requestReset(@RequestParam(value = "email") String email, Model model)
             throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
+
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
+        model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
+
         if (identityService.isIdentityExistsForEmail(email)) {
             Reset pendingReset = resetService.getPendingResetForEmail(email);
             String resetValidityMessage1;

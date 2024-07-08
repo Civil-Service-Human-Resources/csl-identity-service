@@ -69,6 +69,12 @@ public class SignupController {
     @Value("${invite.durationAfterReRegAllowedInSeconds}")
     private long durationAfterReRegAllowedInSeconds;
 
+    @Value("${lpg.contactEmail}")
+    private String contactEmail;
+
+    @Value("${lpg.contactNumber}")
+    private String contactNumber;
+
     private final InviteService inviteService;
 
     private final IdentityService identityService;
@@ -106,6 +112,9 @@ public class SignupController {
                              @ModelAttribute @Valid RequestInviteForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) throws NotificationClientException {
+
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
+        model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute(REQUEST_INVITE_FORM, form);

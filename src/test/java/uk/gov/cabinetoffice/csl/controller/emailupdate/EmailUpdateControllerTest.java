@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.PENDING;
-import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -139,6 +139,8 @@ public class EmailUpdateControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(view().name(EMAIL_VERIFICATION_SENT_TEMPLATE));
 
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));

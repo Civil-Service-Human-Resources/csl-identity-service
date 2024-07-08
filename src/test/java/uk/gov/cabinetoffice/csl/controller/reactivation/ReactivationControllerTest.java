@@ -190,6 +190,8 @@ public class ReactivationControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/reactivate"))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reactivate your account.")))

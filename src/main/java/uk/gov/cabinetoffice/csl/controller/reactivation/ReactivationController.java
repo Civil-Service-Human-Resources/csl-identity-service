@@ -70,6 +70,12 @@ public class ReactivationController {
     @Value("${reactivation.validityInSeconds}")
     private int reactivationValidityInSeconds;
 
+    @Value("${lpg.contactEmail}")
+    private String contactEmail;
+
+    @Value("${lpg.contactNumber}")
+    private String contactNumber;
+
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
                                   NotifyService notifyService,
@@ -82,6 +88,10 @@ public class ReactivationController {
 
     @GetMapping
     public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
+
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
+        model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
+
         try {
             String email = getDecryptedText(code, encryptionKey);
 

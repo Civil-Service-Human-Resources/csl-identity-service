@@ -7,6 +7,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_EMAIL_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_NUMBER_ATTRIBUTE;
+
 @Slf4j
 @Controller
 @RequestMapping
@@ -16,9 +19,6 @@ public class LegalController {
     private static final String PRIVACY_TEMPLATE = "legal/privacy";
     private static final String ACCESSIBILITY_STATEMENT_TEMPLATE = "legal/accessibility-statement";
     private static final String CONTACT_US_TEMPLATE = "legal/contact-us";
-
-    private static final String CONTACT_EMAIL_ATTRIBUTE = "contactEmail";
-    private static final String CONTACT_NUMBER_ATTRIBUTE = "contactNumber";
 
     @Value("${lpg.contactEmail}")
     private String contactEmail;

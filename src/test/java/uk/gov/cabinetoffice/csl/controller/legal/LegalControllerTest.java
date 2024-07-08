@@ -15,6 +15,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,9 +33,6 @@ public class LegalControllerTest {
     private static final String PRIVACY_TEMPLATE = "legal/privacy";
     private static final String CONTACT_US_TEMPLATE = "legal/contact-us";
     private static final String ACCESSIBILITY_STATEMENT_TEMPLATE = "legal/accessibility-statement";
-
-    private static final String CONTACT_EMAIL_ATTRIBUTE = "contactEmail";
-    private static final String CONTACT_NUMBER_ATTRIBUTE = "contactNumber";
 
     @Autowired
     private MockMvc mockMvc;

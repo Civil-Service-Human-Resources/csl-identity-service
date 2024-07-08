@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.InviteStatus.EXPIRED;
 import static uk.gov.cabinetoffice.csl.domain.InviteStatus.PENDING;
-import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -143,6 +143,8 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
@@ -170,7 +172,9 @@ public class SignupControllerTest {
                         .param("confirmEmail", GENERIC_EMAIL)
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name(INVITE_SENT_TEMPLATE));
+                .andExpect(view().name(INVITE_SENT_TEMPLATE))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE));
 
         verify(inviteService, times(1)).updateInviteStatus(invite.getCode(), EXPIRED);
     }
@@ -242,6 +246,8 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))

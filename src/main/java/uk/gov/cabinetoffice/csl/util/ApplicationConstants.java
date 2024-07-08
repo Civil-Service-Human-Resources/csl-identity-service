@@ -1,7 +1,11 @@
 package uk.gov.cabinetoffice.csl.util;
 
 public class ApplicationConstants {
-    
+
+    public static final String CONTACT_EMAIL_ATTRIBUTE = "contactEmail";
+
+    public static final String CONTACT_NUMBER_ATTRIBUTE = "contactNumber";
+
     public static final String STATUS_ATTRIBUTE = "status";
 
     public static final String ENTER_TOKEN_ERROR_MESSAGE = "Incorrect token";

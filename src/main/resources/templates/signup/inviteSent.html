@@ -23,8 +23,8 @@
                     <div class="text">
                         <p>Check your spam folder.</p>
                         <p>If you don't see the email after 30 minutes, you can contact the Learning Platform
-                            for Government helpdesk on <a href="tel:+442036407985">020 3640 7985</a> or by email on
-                            <a href="mailto:support@governmentcampus.co.uk">support@governmentcampus.co.uk</a>.
+                            for Government helpdesk on <a th:href="'tel:'+${contactNumber}" th:text="${contactNumber}"></a> or by email on
+                            <a th:href="'mailto:'+${contactEmail}" th:text="${contactEmail}"></a>.
                         </p>
                     </div>
                 </div>

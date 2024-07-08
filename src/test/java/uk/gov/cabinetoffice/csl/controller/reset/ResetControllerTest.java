@@ -29,6 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.RESET;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_EMAIL_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_NUMBER_ATTRIBUTE;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -79,6 +81,8 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/checkEmail"))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
@@ -110,6 +114,8 @@ public class ResetControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(view().name("reset/checkEmail"))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
