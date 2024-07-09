@@ -49,7 +49,7 @@ public class OrganisationalUnit implements Serializable {
         if (agencyToken != null) {
             return agencyToken.getAgencyDomains()
                     .stream()
-                    .anyMatch(d -> d.getDomain().equals(domain));
+                    .anyMatch(d -> d.getDomain().equalsIgnoreCase(domain));
         }
         return false;
     }
