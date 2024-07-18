@@ -48,7 +48,9 @@
       <env name="MAINTENANCE_PAGE_SKIP_FOR_USERS" value="learner@domain.com,tester@domain.com" />
       <env name="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
       <env name="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
-      <env name="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
+      <env name="ORG_SPRINGFRAMEWORK_LOGGING_LEVEL" value="INFO" />
+      <env name="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="INFO" />
+      <env name="ORG_SPRINGFRAMEWORK_SESSION_LOGGING_LEVEL" value="INFO" />
       <env name="ORGANISATIONS_CACHE_TTL_SECONDS" value="100000" />
       <env name="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
       <env name="REACTIVATION_VALIDITY_SECONDS" value="86400" />
