@@ -29,6 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.RESET;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_EMAIL_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_NUMBER_ATTRIBUTE;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -86,6 +88,10 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andDo(print());
     }
 
@@ -118,6 +124,10 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andDo(print());
     }
 

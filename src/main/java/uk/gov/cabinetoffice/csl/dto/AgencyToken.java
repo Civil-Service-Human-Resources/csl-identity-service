@@ -62,6 +62,6 @@ public class AgencyToken implements Serializable {
     public boolean isDomainAssignedToAgencyToken(String domain) {
         return this.getAgencyDomains()
                 .stream()
-                .anyMatch(d -> d.getDomain().equals(domain));
+                .anyMatch(d -> d.getDomain().equalsIgnoreCase(domain));
     }
 }

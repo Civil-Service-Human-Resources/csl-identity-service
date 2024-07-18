@@ -17,13 +17,13 @@ import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
 
-import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE;
-import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.STATUS_ATTRIBUTE;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @Slf4j
 @Controller
 @RequestMapping("/account/email")
 public class EmailUpdateController {
+
     private static final String LPG_UI_SIGNOUT_URL_ATTRIBUTE = "lpgUiSignOutUrl";
     private static final String LPG_UI_SIGNOUT_TIMER_ATTRIBUTE = "signOutTimerInSeconds";
     private static final String LPG_UI_URL_ATTRIBUTE = "lpgUiUrl";
@@ -56,6 +56,12 @@ public class EmailUpdateController {
     @Value("${lpg.signOutTimerInSeconds}")
     private int signOutTimerInSeconds;
 
+    @Value("${lpg.contactEmail}")
+    private String contactEmail;
+
+    @Value("${lpg.contactNumber}")
+    private String contactNumber;
+
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
@@ -82,6 +88,10 @@ public class EmailUpdateController {
     @PostMapping
     public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form,
                                         BindingResult bindingResult, Authentication authentication) {
+
+        model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
+        model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
+
         if (bindingResult.hasErrors()) {
             model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             model.addAttribute(UPDATE_EMAIL_FORM, form);

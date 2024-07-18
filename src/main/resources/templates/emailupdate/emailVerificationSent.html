@@ -1,5 +1,5 @@
 <page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
-<title>We've sent you an email</title>
+<title>We've sent you an email - Civil Service Learning</title>
 <content>
 <div class="container">
     <div class="grid-row">
@@ -13,7 +13,7 @@
                 <p>We have sent you an email with a link to your new email address.</p>
                 <p>Please click on the link in the email to verify changes to your account.</p>
                 <p>The link will expire in <span th:text="${resetValidity}"></span></p>
-                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">Sign out</a> and check your email.</p>
+                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">sign out</a> and check your email.</p>
             </div>
             <div hidden id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
             <div hidden id="signOutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
@@ -25,8 +25,8 @@
                     <div class="text">
                         <p>Check your spam folder.</p>
                         <p>If you don't see the email after 30 minutes, you can contact the Learning Platform
-                            for Government helpdesk on <a href="tel:+442036407985">020 3640 7985</a> or by email on
-                            <a href="mailto:support@governmentcampus.co.uk">support@governmentcampus.co.uk</a>.
+                            for Government helpdesk on <a th:href="'tel:'+${contactNumber}" th:text="${contactNumber}"></a> or by email on
+                            <a th:href="'mailto:'+${contactEmail}" th:text="${contactEmail}"></a>.
                         </p>
                     </div>
                 </div>

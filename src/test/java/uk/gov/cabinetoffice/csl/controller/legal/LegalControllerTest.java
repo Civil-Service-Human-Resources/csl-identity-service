@@ -15,6 +15,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,9 +33,6 @@ public class LegalControllerTest {
     private static final String PRIVACY_TEMPLATE = "legal/privacy";
     private static final String CONTACT_US_TEMPLATE = "legal/contact-us";
     private static final String ACCESSIBILITY_STATEMENT_TEMPLATE = "legal/accessibility-statement";
-
-    private static final String CONTACT_EMAIL_ATTRIBUTE = "contactEmail";
-    private static final String CONTACT_NUMBER_ATTRIBUTE = "contactNumber";
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,6 +55,7 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(view().name(PRIVACY_TEMPLATE))
                 .andExpect(content().string(containsString("Privacy notice for Civil Service Learning")))
                 .andDo(print());
@@ -69,7 +68,9 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andExpect(view().name(CONTACT_US_TEMPLATE))
                 .andExpect(content().string(containsString("Contact us")))
                 .andDo(print());
@@ -82,7 +83,9 @@ public class LegalControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andExpect(view().name(ACCESSIBILITY_STATEMENT_TEMPLATE))
                 .andExpect(content().string(containsString("Accessibility statement")))
                 .andDo(print());
