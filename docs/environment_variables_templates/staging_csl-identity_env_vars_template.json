@@ -1,0 +1,477 @@
+[
+  {
+    "name": "ACCESS_TOKEN_SCOPE",
+    "value": "openid, read, write",
+    "slotSetting": false
+  },
+  {
+    "name": "ACCESS_TOKEN_TTL_SECONDS",
+    "value": "43200",
+    "slotSetting": false
+  },
+  {
+    "name": "ACCOUNT_LOCKOUT_MAX_LOGIN_ATTEMPTS",
+    "value": "5",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS",
+    "value": "never",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_ENDPOINTS_ENABLED",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_ENDPOINTS_WEB_BASE_PATH",
+    "value": "/manage",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDED",
+    "value": "health,info",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_INFO_ENV_ENABLED",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_INFO_JAVA_ENABLED",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "ACTUATOR_MANAGEMENT_REDIS_HEALTH_ENABLED",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "ALLOWLIST_DOMAINS_CACHE_TTL_SECONDS",
+    "value": "43200",
+    "slotSetting": false
+  },
+  {
+    "name": "APP_DESCRIPTION",
+    "value": "csl-identity-service description here",
+    "slotSetting": false
+  },
+  {
+    "name": "APP_NAME",
+    "value": "csl-identity-service",
+    "slotSetting": false
+  },
+  {
+    "name": "APP_VERSION",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_ROLE_NAME",
+    "value": "lpg-lpgstaging-identity",
+    "slotSetting": false
+  },
+  {
+    "name": "ASSET_CDN",
+    "value": "https://staging-identity-assets.azureedge.net",
+    "slotSetting": false
+  },
+  {
+    "name": "AUTHENTICATION_SUCCESS_TARGET_URL",
+    "value": "https://staging.learn.civilservice.gov.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "CACHE_TYPE",
+    "value": "redis",
+    "slotSetting": false
+  },
+  {
+    "name": "CIVIL_SERVANT_REGISTRY_ORGANISATION_MAX_PAGE_SIZE",
+    "value": "200",
+    "slotSetting": false
+  },
+  {
+    "name": "CIVIL_SERVANT_REGISTRY_SERVICE_URL",
+    "value": "https://civil-servant-registry.staging.learn.civilservice.gov.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "CLIENT_ID",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "CLIENT_SECRET",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "CONTACT_EMAIL",
+    "value": "support@governmentcampus.co.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "CONTACT_NUMBER",
+    "value": "020 3640 7985",
+    "slotSetting": false
+  },
+  {
+    "name": "DATABASE_HOST",
+    "value": "jdbc:mysql://lpg-lpgstaging-gp.mysql.database.azure.com:3306",
+    "slotSetting": false
+  },
+  {
+    "name": "DATABASE_NAME",
+    "value": "identity",
+    "slotSetting": false
+  },
+  {
+    "name": "DATABASE_USESSL",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "DATASOURCE_DRIVER_CLASS_NAME",
+    "value": "com.mysql.cj.jdbc.Driver",
+    "slotSetting": false
+  },
+  {
+    "name": "DATASOURCE_PASSWORD",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "DATASOURCE_URL",
+    "value": "${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false",
+    "slotSetting": false
+  },
+  {
+    "name": "DATASOURCE_USERNAME",
+    "value": "mysqladminuser@lpg-lpgstaging-gp",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_ENABLE_CI",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_REGISTRY_SERVER_URL",
+    "value": "https://lpgregistry.azurecr.io",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+    "value": "lpgregistry",
+    "slotSetting": false
+  },
+  {
+    "name": "DURATION_AFTER_REREG_ALLOWED_SECONDS",
+    "value": "86400",
+    "slotSetting": false
+  },
+  {
+    "name": "EMAIL_UPDATE_VALIDITY_SECONDS",
+    "value": "86400",
+    "slotSetting": false
+  },
+  {
+    "name": "ENCRYPTION_KEY",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "ENV_PROFILE",
+    "value": "staging",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_API_KEY",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID",
+    "value": "f4c2ece1-5159-4736-92cb-4fe0df719308",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_INVITE_TEMPLATE_ID",
+    "value": "7ef048a3-5c82-40fd-be4c-a238ce328fea",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID",
+    "value": "13c2b9ac-4ad0-449f-b43b-57c04fc88b1d",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_REACTIVATION_TEMPLATE_ID",
+    "value": "abfb2e5f-3905-4817-b041-c53afd1eb3e5",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID",
+    "value": "994fb6d4-a57a-49f2-baee-b0c6f6060b63",
+    "slotSetting": false
+  },
+  {
+    "name": "GOV_NOTIFY_RESET_TEMPLATE_ID",
+    "value": "d29b056c-349b-42fc-a453-920cfb58a906",
+    "slotSetting": false
+  },
+  {
+    "name": "INVITE_SIGNUP_URL",
+    "value": "https://identity.staging.learn.civilservice.gov.uk/signup/%s",
+    "slotSetting": false
+  },
+  {
+    "name": "INVITE_VALIDITY_SECONDS",
+    "value": "259200",
+    "slotSetting": false
+  },
+  {
+    "name": "JPA_DDL_AUTO",
+    "value": "none",
+    "slotSetting": false
+  },
+  {
+    "name": "JPA_HIBERNATE_ENABLE_LAZY_LOAD_NO_TRANS",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "JPA_OPEN_IN_VIEW",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "JPA_SHOW_SQL",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "JWT_KEY",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "LPG_SIGNOUT_TIMER_SECONDS",
+    "value": "5",
+    "slotSetting": false
+  },
+  {
+    "name": "LPG_UI_SIGNOUT_URI",
+    "value": "/sign-out",
+    "slotSetting": false
+  },
+  {
+    "name": "LPG_UI_URL",
+    "value": "https://staging.learn.civilservice.gov.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_CONTENT_LINE_1",
+    "value": "The learning website is undergoing scheduled maintenance.",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_CONTENT_LINE_2",
+    "value": "It will be unavailable between the hours of 6pm to 8pm on Monday 12th February 2024.",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_CONTENT_LINE_3",
+    "value": "Apologies for the inconvenience.",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_CONTENT_LINE_4",
+    "value": "If the maintenance period is extended, further information will be provided here.",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_ENABLED",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_SKIP_FOR_URIS",
+    "value": "/health,/info,/maintenance,/error,/logout,/cookies,/privacy,/accessibility-statement,/contact-us,/webjars,/css,/img,/js,/favicon.ico,/oauth2/token,/oauth2/introspect,/oauth2/revoke,/identity/resolve,/reset-cache,/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency,/account/reactivate/updated,/account/email/updated",
+    "slotSetting": false
+  },
+  {
+    "name": "MAINTENANCE_PAGE_SKIP_FOR_USERS",
+    "value": "alexander.irvine@cabinetoffice.gov.uk,ben.newton@cabinetoffice.gov.uk,david.acquet@cabinetoffice.gov.uk,jamey.howard@cabinetoffice.gov.uk,jamie.lovell@cabinetoffice.gov.uk,neeraj.jain@cabinetoffice.gov.uk,neeraj.jain1@cabinetoffice.gov.uk,neeraj.jain2@cabinetoffice.gov.uk,owen.edwards@cabinetoffice.gov.uk,savvas.stephanides@cabinetoffice.gov.uk,simon.ward@cabinetoffice.gov.uk,cslnewusertest1@cabinetoffice.gov.uk,cslnewusertest2@cabinetoffice.gov.uk,maintenancetest@cabinetoffice.gov.uk,simon.ward@acas.org,test@rel262.com,tokentest1@environment-agency.gov.uk,change@r27.gov.uk,change@cabinetoffice.gov.uk,offlinenew@cabinetoffice.gov.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "MVN_WRAPPER_VERSION",
+    "value": "Apache Maven 3.8.6",
+    "slotSetting": false
+  },
+  {
+    "name": "OAUTH2_SERVICE_URL",
+    "value": "https://staging.learn.civilservice.gov.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "OAUTH2_TOKEN_ENDPOINT",
+    "value": "/oauth2/token",
+    "slotSetting": false
+  },
+  {
+    "name": "ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL",
+    "value": "INFO",
+    "slotSetting": false
+  },
+  {
+    "name": "ORGANISATIONS_CACHE_TTL_SECONDS",
+    "value": "100000",
+    "slotSetting": false
+  },
+  {
+    "name": "PASSWORD_PATTERN",
+    "value": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$",
+    "slotSetting": false
+  },
+  {
+    "name": "REACTIVATION_VALIDITY_SECONDS",
+    "value": "86400",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_CACHE_ENABLE_STATISTICS",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_CACHE_NULL_VALUES",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_CACHE_TTL_MS",
+    "value": "86400000",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_HOST",
+    "value": "lpg-lpgstaging-redis-session.redis.cache.windows.net",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_KEY_PREFIX",
+    "value": "csl-identity_",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_PASSWORD",
+    "value": "<populate this value>",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_PORT",
+    "value": "6379",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_USE_KEY_PREFIX",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE",
+    "value": "0",
+    "slotSetting": false
+  },
+  {
+    "name": "REFRESH_TOKEN_TTL_SECONDS",
+    "value": "86400",
+    "slotSetting": false
+  },
+  {
+    "name": "REGISTRY_SERVICE_URL",
+    "value": "https://civil-servant-registry.staging.learn.civilservice.gov.uk",
+    "slotSetting": false
+  },
+  {
+    "name": "RESET_URL",
+    "value": "https://identity.staging.learn.civilservice.gov.uk/reset/%s",
+    "slotSetting": false
+  },
+  {
+    "name": "RESET_VALIDITY_SECONDS",
+    "value": "86400",
+    "slotSetting": false
+  },
+  {
+    "name": "ROOT_LOGGING_LEVEL",
+    "value": "INFO",
+    "slotSetting": false
+  },
+  {
+    "name": "SESSION_TIMEOUT_SECONDS",
+    "value": "3600",
+    "slotSetting": false
+  },
+  {
+    "name": "SPRING_BOOT_VERSION",
+    "value": "Spring Boot 3.1.0",
+    "slotSetting": false
+  },
+  {
+    "name": "THYMELEAF_CACHE",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "THYMELEAF_CHECK_TEMPLATE",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "TIME_ZONE_ID",
+    "value": "UTC",
+    "slotSetting": false
+  },
+  {
+    "name": "UK_GOV_CABINETOFFICE_LOGGING_LEVEL",
+    "value": "DEBUG",
+    "slotSetting": false
+  },
+  {
+    "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+    "value": "0",
+    "slotSetting": false
+  },
+  {
+    "name": "WEBSITES_CONTAINER_START_TIME_LIMIT",
+    "value": "600",
+    "slotSetting": false
+  },
+  {
+    "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+    "value": "false",
+    "slotSetting": false
+  },
+  {
+    "name": "WEBSITES_PORT",
+    "value": "8080",
+    "slotSetting": false
+  }
+]
