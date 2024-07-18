@@ -25,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import uk.gov.cabinetoffice.csl.config.FrontendAssets.AssetCdnService;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.handler.*;
 
@@ -43,6 +44,9 @@ public class SecurityConfig {
 
 	@Value("${oauth2.scope}")
 	private String accessTokenScope;
+
+	@Value("${templates.assetCdn}")
+	private String assetCdn;
 
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
@@ -89,7 +93,7 @@ public class SecurityConfig {
 					"/signup/**", "/login", "/reset/**",
 					"/account/reactivate/**","/account/verify/agency/**",
 					"/account/email/verify/**","/account/email/updated/**","/account/email/update/error/**",
-					actuatorBasePath + "/**").permitAll()
+					actuatorBasePath + "/**", assetCdn).permitAll()
 				.anyRequest().authenticated()
 			)
 			.formLogin(formLogin -> formLogin
@@ -170,5 +174,10 @@ public class SecurityConfig {
 				context.getClaims().audience(new ArrayList<>());
 			}
 		};
+	}
+
+	@Bean(name = "assetCdnService")
+	public AssetCdnService assetCdnService() {
+		return () -> assetCdn;
 	}
 }
