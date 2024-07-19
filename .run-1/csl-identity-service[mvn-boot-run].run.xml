@@ -53,7 +53,9 @@
               <entry key="MAINTENANCE_PAGE_SKIP_FOR_USERS" value="learner@domain.com,tester@domain.com" />
               <entry key="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
               <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
-              <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="DEBUG" />
+              <entry key="ORG_SPRINGFRAMEWORK_LOGGING_LEVEL" value="INFO" />
+              <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="INFO" />
+              <entry key="ORG_SPRINGFRAMEWORK_SESSION_LOGGING_LEVEL" value="INFO" />
               <entry key="ORGANISATIONS_CACHE_TTL_SECONDS" value="100000" />
               <entry key="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
               <entry key="REACTIVATION_VALIDITY_SECONDS" value="86400" />

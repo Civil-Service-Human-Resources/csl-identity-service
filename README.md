@@ -44,6 +44,6 @@ A postman collection is available in [docs/csl-identity-service.postman_collecti
 * SQL file to make the entries in local dev env is available in [docs/db/mysql/dev/V10.1__insert-oauth2-registered-client.sql](docs/db/mysql/dev/V10.1__insert-oauth2-registered-client.sql)
 * SQL templates to make the entries in other envs are available in [docs/db/mysql/oauth2_client_entry_templates](docs/db/mysql/oauth2_client_entry_templates)
 
-### oauth2_registered_client Entries:
+### Deployment:
 
 * Deployment instructions are available [here](https://cshrdigitalandanalysis.atlassian.net/wiki/spaces/LPG/pages/3770777602/Deployment+Process)
