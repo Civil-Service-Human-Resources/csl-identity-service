@@ -61,12 +61,14 @@ public class ReactivationControllerTest {
     @Test
     public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
-
+        String title = "Check your email";
+        String viewName = "reactivate/reactivate";
         String reactivationEmailMessage = "We&#39;ve sent you an email with a link to reactivate your account.";
         String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
                 .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
 
-        executeSendReactivationEmail(reactivation, false, reactivationEmailMessage, reactivationValidityMessage);
+        executeSendReactivationEmail(reactivation, false, reactivationEmailMessage,
+                reactivationValidityMessage, title, viewName);
     }
 
     @Test
@@ -74,14 +76,17 @@ public class ReactivationControllerTest {
         Reactivation reactivation = createPendingActivationAndMockServicesInvocation();
         LocalDateTime requestedAt = LocalDateTime.now();
         reactivation.setRequestedAt(requestedAt);
-
+        String title = "Account reactivation pending";
+        String viewName = "reactivate/pendingReactivate";
         String reactivationEmailMessage = ("We&#39;ve sent you an email on %s with a link to reactivate your " +
                 "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
         LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
-        String reactivationValidityMessage = "The link in the email will expire on %s."
+        String reactivationValidityMessage = ("The link in the email will expire on %s after which you will be " +
+                "able to request a new link by repeating the reactivation process on the login page.")
                 .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
 
-        executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage);
+        executeSendReactivationEmail(reactivation, true, reactivationEmailMessage,
+                reactivationValidityMessage, title, viewName);
     }
 
     @Test
@@ -171,7 +176,9 @@ public class ReactivationControllerTest {
     private void executeSendReactivationEmail(Reactivation reactivation,
                                               boolean isPendingReactivation,
                                               String reactivationEmailMessage,
-                                              String reactivationValidityMessage)  throws Exception {
+                                              String reactivationValidityMessage,
+                                              String title,
+                                              String viewName)  throws Exception {
         when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(isPendingReactivation);
         when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
         when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
@@ -191,8 +198,8 @@ public class ReactivationControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("reactivate/reactivate"))
-                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(view().name(viewName))
+                .andExpect(content().string(containsString(title)))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reactivate your account.")))
                 .andExpect(content().string(containsString(reactivationEmailMessage)))
