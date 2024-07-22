@@ -29,6 +29,7 @@ public class ResetController {
 
     private static final String REQUEST_RESET_TEMPLATE = "reset/requestReset";
     private static final String CHECK_EMAIL_TEMPLATE = "reset/checkEmail";
+    private static final String PENDING_RESET_TEMPLATE = "reset/pendingReset";
     private static final String PASSWORD_FORM_TEMPLATE = "reset/passwordForm";
     private static final String PASSWORD_RESET_TEMPLATE = "reset/passwordReset";
 
@@ -86,18 +87,20 @@ public class ResetController {
                 log.info("Reset request email sent to {}", email);
                 resetValidityMessage1 = "The link will expire in %s."
                         .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+                model.addAttribute("resetValidityMessage1", resetValidityMessage1);
+                return CHECK_EMAIL_TEMPLATE;
             } else {
                 log.info("Pending Reset exists for email {}", email);
                 LocalDateTime requestedAt = pendingReset.getRequestedAt();
                 LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
                 resetValidityMessage1 = "The email was sent on %s."
                         .formatted(utils.convertDateTimeFormat(requestedAt));
-                resetValidityMessage2 = "The link in the email will expire on %s."
+                resetValidityMessage2 = "The link in the email will expire on %s after which you will be able to request a new link by repeating the password reset process on the login page."
                         .formatted(utils.convertDateTimeFormat(resetLinkExpiryDateTime));
+                model.addAttribute("resetValidityMessage1", resetValidityMessage1);
+                model.addAttribute("resetValidityMessage2", resetValidityMessage2);
+                return PENDING_RESET_TEMPLATE;
             }
-            model.addAttribute("resetValidityMessage1", resetValidityMessage1);
-            model.addAttribute("resetValidityMessage2", resetValidityMessage2);
-            return CHECK_EMAIL_TEMPLATE;
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
             model.addAttribute("userMessage", "Invalid email id.\n" +
