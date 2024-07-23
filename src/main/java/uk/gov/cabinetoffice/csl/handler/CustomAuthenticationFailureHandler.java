@@ -64,7 +64,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                     String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
                     String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
-                    redirectStr = redirectStr + "&requestedAt="+requestedAtStr+"&expiryAt="+reactivationExpiryStr;
+                    redirectStr = redirectStr + "&requestedAt=" + requestedAtStr + "&expiryAt=" + reactivationExpiryStr;
                     log.info("Pending reactivation for the email {} requested at {} and expires on {}",
                             pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {

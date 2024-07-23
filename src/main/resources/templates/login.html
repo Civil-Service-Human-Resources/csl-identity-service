@@ -32,7 +32,7 @@
                     </span>
                     <span th:if="${param.error[0] == 'pending-reactivation'}">
                         We've sent you an email on <span th:text="${param.requestedAt[0]}"></span> with a link to reactivate your account. Please check your emails (including the junk/spam folder).<br>
-                        The link in the email will expire on <span th:text="${param.expiryAt[0]}"></span> after which you will be able to request a new link by repeating the reactivation process on the login page.<br>
+                        The link in the email will expire on <span th:text="${param.expiryAt[0]}"></span> after which you will be able to request a new link by repeating the reactivation process on the login page.
                     </span>
                     <span th:if="${param.error[0] == 'invalidSignupCode'}">
                         Sign-up link is invalid. Please re-check your sign-up email or <a href="/signup/request">create an account</a>.
