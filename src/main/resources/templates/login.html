@@ -31,7 +31,6 @@
                         You will need to <a th:href="@{/account/reactivate(code=${param.username[0]})}">reactivate your account by clicking here</a> to keep using Civil Service Learning.<br>
                     </span>
                     <span th:if="${param.error[0] == 'pending-reactivation'}">
-                        We've sent you an email with a link to reactivate your account. Please check your emails (including the junk/spam folder).
                         <p th:text="${reactivationEmailMessage}"></p>
                         <p th:text="${reactivationValidityMessage}"></p>
                     </span>
