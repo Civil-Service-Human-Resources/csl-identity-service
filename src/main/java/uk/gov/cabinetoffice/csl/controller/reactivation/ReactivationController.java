@@ -111,7 +111,6 @@ public class ReactivationController {
                 String reactivationValidityMessage = ("The link in the email will expire on %s after which you will be " +
                         "able to request a new link by repeating the reactivation process on the login page.")
                         .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime));
-
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
                 return PENDING_REACTIVATE_TEMPLATE;
             } else {

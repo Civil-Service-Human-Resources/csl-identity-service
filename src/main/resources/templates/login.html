@@ -32,6 +32,8 @@
                     </span>
                     <span th:if="${param.error[0] == 'pending-reactivation'}">
                         We've sent you an email with a link to reactivate your account. Please check your emails (including the junk/spam folder).
+                        <p th:text="${reactivationEmailMessage}"></p>
+                        <p th:text="${reactivationValidityMessage}"></p>
                     </span>
                     <span th:if="${param.error[0] == 'invalidSignupCode'}">
                         Sign-up link is invalid. Please re-check your sign-up email or <a href="/signup/request">create an account</a>.

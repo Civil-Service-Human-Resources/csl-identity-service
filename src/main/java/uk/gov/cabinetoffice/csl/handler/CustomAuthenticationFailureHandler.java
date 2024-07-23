@@ -61,6 +61,16 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                     String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
                     String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
+
+                    String reactivationEmailMessage = ("We've sent you an email on %s with a link to reactivate your " +
+                            "account. Please check your emails (including the junk/spam folder)").formatted(requestedAtStr);
+                    request.setAttribute("reactivationEmailMessage", reactivationEmailMessage);
+
+                    String reactivationValidityMessage = ("The link in the email will expire on %s after which you will be " +
+                            "able to request a new link by repeating the reactivation process on the login page.")
+                            .formatted(reactivationExpiryStr);
+                    request.setAttribute("reactivationValidityMessage", reactivationValidityMessage);
+
                     log.info("Pending reactivation for the email {} requested at {} and expires on {}",
                             pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {
