@@ -67,8 +67,8 @@ public class ReactivationControllerTest {
         String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
                 .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
 
-        executeSendReactivationEmail(reactivation, false, reactivationEmailMessage,
-                reactivationValidityMessage, title, viewName);
+        executeSendReactivationEmail(reactivation, false, reactivationEmailMessage, reactivationValidityMessage,
+                                     title, viewName);
     }
 
     @Test
@@ -85,8 +85,8 @@ public class ReactivationControllerTest {
                 "able to request a new link by repeating the reactivation process on the login page.")
                 .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
 
-        executeSendReactivationEmail(reactivation, true, reactivationEmailMessage,
-                reactivationValidityMessage, title, viewName);
+        executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage,
+                                     title, viewName);
     }
 
     @Test
@@ -177,8 +177,7 @@ public class ReactivationControllerTest {
                                               boolean isPendingReactivation,
                                               String reactivationEmailMessage,
                                               String reactivationValidityMessage,
-                                              String title,
-                                              String viewName)  throws Exception {
+                                              String title, String viewName)  throws Exception {
         when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(isPendingReactivation);
         when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
         when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
