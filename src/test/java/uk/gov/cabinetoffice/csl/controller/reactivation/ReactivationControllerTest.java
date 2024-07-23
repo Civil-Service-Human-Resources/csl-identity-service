@@ -66,7 +66,6 @@ public class ReactivationControllerTest {
         String reactivationEmailMessage = "We&#39;ve sent you an email with a link to reactivate your account.";
         String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
                 .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
-
         executeSendReactivationEmail(reactivation, false, reactivationEmailMessage, reactivationValidityMessage,
                                      title, viewName);
     }
@@ -84,7 +83,6 @@ public class ReactivationControllerTest {
         String reactivationValidityMessage = ("The link in the email will expire on %s after which you will be " +
                 "able to request a new link by repeating the reactivation process on the login page.")
                 .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
-
         executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage,
                                      title, viewName);
     }
