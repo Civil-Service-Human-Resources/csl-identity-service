@@ -177,7 +177,7 @@ public class ReactivationControllerTest {
                                               boolean isPendingReactivation,
                                               String reactivationEmailMessage,
                                               String reactivationValidityMessage,
-                                              String title, String viewName)  throws Exception {
+                                              String title, String viewName) throws Exception {
         when(reactivationService.isPendingReactivationExistsForEmail(EMAIL)).thenReturn(isPendingReactivation);
         when(reactivationService.createPendingReactivation(EMAIL)).thenReturn(reactivation);
         when(reactivationService.getPendingReactivationForEmail(EMAIL)).thenReturn(reactivation);
