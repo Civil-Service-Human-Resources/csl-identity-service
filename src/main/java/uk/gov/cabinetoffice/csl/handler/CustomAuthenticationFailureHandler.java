@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
@@ -55,25 +57,20 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
             case ("Reactivation request has expired") -> redirect = "/login?error=reactivation-expired&username=" + encodedUsername;
             case ("Pending reactivation exists for user") -> {
+                String redirectStr = "/login?error=pending-reactivation";
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                     LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
                     String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
                     String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
-                    String reactivationEmailMessage = ("We've sent you an email on %s with a link to reactivate your " +
-                            "account. Please check your emails (including the junk/spam folder)").formatted(requestedAtStr);
-                    request.setAttribute("reactivationEmailMessage", reactivationEmailMessage);
-                    String reactivationValidityMessage = ("The link in the email will expire on %s after which you will be " +
-                            "able to request a new link by repeating the reactivation process on the login page.")
-                            .formatted(reactivationExpiryStr);
-                    request.setAttribute("reactivationValidityMessage", reactivationValidityMessage);
+                    redirectStr = redirectStr + "&requestedAt="+requestedAtStr+"&expiryAt="+reactivationExpiryStr;
                     log.info("Pending reactivation for the email {} requested at {} and expires on {}",
                             pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {
                     log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
                 }
-                redirect = "/login?error=pending-reactivation";
+                redirect = redirectStr;
             }
         }
         log.info("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);
