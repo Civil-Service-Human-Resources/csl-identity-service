@@ -70,8 +70,7 @@ public class CustomAuthenticationFailureHandlerTest {
     public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
             throws Exception {
         HttpServletResponse response = executeHandler("Pending reactivation exists for user");
-        verify(response).sendRedirect("/login?error=pending-reactivation" +
-                "&requestedAt=01 Feb 2024 15:30:20&expiryAt=02 Feb 2024 15:30:20");
+        verify(response).sendRedirect("/login?error=pending-reactivation");
     }
 
     private HttpServletResponse executeHandler(String message) {

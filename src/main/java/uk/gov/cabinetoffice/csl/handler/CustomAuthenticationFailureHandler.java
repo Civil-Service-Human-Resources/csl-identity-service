@@ -57,20 +57,18 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
             case ("Reactivation request has expired") -> redirect = "/login?error=reactivation-expired&username=" + encodedUsername;
             case ("Pending reactivation exists for user") -> {
-                String redirectStr = "/login?error=pending-reactivation";
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                     LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
                     String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                     LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
                     String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
-                    redirectStr = redirectStr + "&requestedAt=" + requestedAtStr + "&expiryAt=" + reactivationExpiryStr;
                     log.info("Pending reactivation for the email {} requested at {} and expires on {}",
                             pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
                 } catch (Exception e) {
                     log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
                 }
-                redirect = redirectStr;
+                redirect = "/login?error=pending-reactivation";
             }
         }
         log.info("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);

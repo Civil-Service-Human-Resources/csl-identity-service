@@ -77,12 +77,9 @@ public class ReactivationControllerTest {
         reactivation.setRequestedAt(requestedAt);
         String title = "Account reactivation pending";
         String viewName = "reactivate/pendingReactivate";
-        String reactivationEmailMessage = ("We&#39;ve sent you an email on %s with a link to reactivate your " +
-                "account.").formatted(utils.convertDateTimeFormat(requestedAt.toString()));
+        String reactivationEmailMessage = ("We recently sent you an email to reactivate your account.");
         LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
-        String reactivationValidityMessage = ("The link in the email will expire on %s after which you will be " +
-                "able to request a new link by repeating the reactivation process on the login page.")
-                .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime.toString()));
+        String reactivationValidityMessage = ("Please check your emails (including the junk/spam folder)");
         executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage,
                                      title, viewName);
     }
