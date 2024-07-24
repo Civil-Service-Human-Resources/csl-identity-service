@@ -1,19 +1,20 @@
 <page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
-<title>Check your email - Civil Service Learning</title>
+<title>Account reactivation - Civil Service Learning</title>
 <content>
 <div class="container">
     <div class="grid-row">
         <div class="column-full">
             <div class="govuk-box-highlight">
-                <h1 class="heading-large">Check your email</h1>
+                <h1 class="heading-large">Account reactivation pending</h1>
             </div>
         </div>
     </div>
     <div class="grid-row">
         <div class="column-two-thirds">
             <h2 class="heading-medium">What next?</h2>
-            <p>Check your email for the link to reset your password.</p>
-            <p th:text="${resetValidityMessage1}"></p>
+            <p>Check your email for the link to reactivate your account.</p>
+            <p th:text="${reactivationEmailMessage}"></p>
+            <p th:text="${reactivationValidityMessage}"></p>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">
                     <span class="summary">Haven't received the email?</span>

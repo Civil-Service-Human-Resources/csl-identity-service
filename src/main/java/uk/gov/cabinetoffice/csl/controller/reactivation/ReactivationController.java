@@ -38,6 +38,7 @@ public class ReactivationController {
     private static final String ACCOUNT_REACTIVATED_TEMPLATE = "reactivate/accountReactivated";
 
     private static final String ACCOUNT_REACTIVATE_TEMPLATE = "reactivate/reactivate";
+    private static final String PENDING_REACTIVATE_TEMPLATE = "reactivate/pendingReactivate";
 
     private static final String REDIRECT_ACCOUNT_REACTIVATED = "redirect:/account/reactivate/updated";
 
@@ -103,14 +104,12 @@ public class ReactivationController {
             if(reactivationService.isPendingReactivationExistsForEmail(email)) {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                String reactivationEmailMessage = ("We've sent you an email on %s with a link to reactivate your " +
-                        "account.").formatted(utils.convertDateTimeFormat(requestedAt));
+                String reactivationEmailMessage = "We recently sent you an email to reactivate your account.";
                 model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
                 LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
-                String reactivationValidityMessage = "The link in the email will expire on %s."
-                        .formatted(utils.convertDateTimeFormat(reactivationLinkExpiryDateTime));
-
+                String reactivationValidityMessage = "Please check your emails (including the junk/spam folder).";
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
+                return PENDING_REACTIVATE_TEMPLATE;
             } else {
                 Reactivation reactivation = reactivationService.createPendingReactivation(email);
                 notifyUserByEmail(reactivation);
@@ -119,8 +118,8 @@ public class ReactivationController {
                 String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
                         .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
                 model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
+                return ACCOUNT_REACTIVATE_TEMPLATE;
             }
-            return ACCOUNT_REACTIVATE_TEMPLATE;
         } catch (Exception e) {
             log.error("There was an error while creating the reactivation link for the code: {} with cause: {}",
                     code, e.toString());

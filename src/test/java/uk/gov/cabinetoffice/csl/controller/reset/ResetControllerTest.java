@@ -45,7 +45,6 @@ public class ResetControllerTest {
     private static final String PASSWORD = "Password123";
     private static final String CODE = "abc123";
 
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -96,7 +95,7 @@ public class ResetControllerTest {
     }
 
     @Test
-    public void shouldLoadCheckEmailPageWithPendingResetDateIfUserTryToResetAgainWhilePendingResetExistsForTheGivenEmailId() throws Exception {
+    public void shouldLoadPendingResetPageIfUserTryToResetAgainWhilePendingResetExistsForTheGivenEmailId() throws Exception {
         final long validityInSeconds = 86400;
         when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
         Reset reset = createReset();
@@ -106,8 +105,8 @@ public class ResetControllerTest {
         LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
         String setRequestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
         String resetLinkExpiryDateTimeStr = utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString());
-        String resetValidityMessage1 = "The email was sent on %s.".formatted(setRequestedAtStr);
-        String resetValidityMessage2 = "The link in the email will expire on %s.".formatted(resetLinkExpiryDateTimeStr);
+        String resetValidityMessage1 = "We recently sent you an email to reset your password.";
+        String resetValidityMessage2 = "Please check your emails (including the junk/spam folder).";
         when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
 
         mockMvc.perform(post("/reset")
@@ -115,8 +114,8 @@ public class ResetControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("reset/checkEmail"))
-                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(view().name("reset/pendingReset"))
+                .andExpect(content().string(containsString("Password reset pending")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
                 .andExpect(content().string(containsString(resetValidityMessage1)))
