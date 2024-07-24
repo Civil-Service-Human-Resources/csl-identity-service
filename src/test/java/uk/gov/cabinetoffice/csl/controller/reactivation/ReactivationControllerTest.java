@@ -167,7 +167,7 @@ public class ReactivationControllerTest {
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("reactivate/accountReactivated"))
-                .andExpect(content().string(containsString("Account reactivation final step")))
+                .andExpect(content().string(containsString("Account reactivation")))
                 .andExpect(content().string(containsString("Your account will be successfully reactivated once you log in")));
     }
 
