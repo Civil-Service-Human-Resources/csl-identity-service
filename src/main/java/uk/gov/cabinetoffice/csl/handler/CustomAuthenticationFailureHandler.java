@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.ui.Model;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
