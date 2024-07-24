@@ -79,7 +79,7 @@ public class ReactivationControllerTest {
         String viewName = "reactivate/pendingReactivate";
         String reactivationEmailMessage = ("We recently sent you an email to reactivate your account.");
         LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
-        String reactivationValidityMessage = ("Please check your emails (including the junk/spam folder)");
+        String reactivationValidityMessage = ("Please check your emails (including the junk/spam folder).");
         executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage,
                                      title, viewName);
     }

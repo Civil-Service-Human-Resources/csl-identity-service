@@ -45,7 +45,6 @@ public class ResetControllerTest {
     private static final String PASSWORD = "Password123";
     private static final String CODE = "abc123";
 
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -106,9 +105,8 @@ public class ResetControllerTest {
         LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
         String setRequestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
         String resetLinkExpiryDateTimeStr = utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString());
-        String resetValidityMessage1 = "The email was sent on %s.".formatted(setRequestedAtStr);
-        String resetValidityMessage2 = ("The link in the email will expire on %s after which you will be able to request " +
-                "a new link by repeating the password reset process on the login page.").formatted(resetLinkExpiryDateTimeStr);
+        String resetValidityMessage1 = "We recently sent you an email to reset your password.";
+        String resetValidityMessage2 = "Please check your emails (including the junk/spam folder).";
         when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
 
         mockMvc.perform(post("/reset")

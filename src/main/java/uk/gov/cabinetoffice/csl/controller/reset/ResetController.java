@@ -93,10 +93,8 @@ public class ResetController {
                 log.info("Pending Reset exists for email {}", email);
                 LocalDateTime requestedAt = pendingReset.getRequestedAt();
                 LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
-                resetValidityMessage1 = "The email was sent on %s."
-                        .formatted(utils.convertDateTimeFormat(requestedAt));
-                resetValidityMessage2 = "The link in the email will expire on %s after which you will be able to request a new link by repeating the password reset process on the login page."
-                        .formatted(utils.convertDateTimeFormat(resetLinkExpiryDateTime));
+                resetValidityMessage1 = "We recently sent you an email to reset your password.";
+                resetValidityMessage2 = "Please check your emails (including the junk/spam folder).";
                 model.addAttribute("resetValidityMessage1", resetValidityMessage1);
                 model.addAttribute("resetValidityMessage2", resetValidityMessage2);
                 return PENDING_RESET_TEMPLATE;
