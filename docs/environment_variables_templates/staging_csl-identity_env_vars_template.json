@@ -306,7 +306,7 @@
   },
   {
     "name": "MAINTENANCE_PAGE_ENABLED",
-    "value": "false",
+    "value": "true",
     "slotSetting": false
   },
   {
