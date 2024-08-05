@@ -30,6 +30,7 @@ public class Reactivation {
     @Column(nullable = false)
     private LocalDateTime requestedAt;
 
+    @Column
     private LocalDateTime reactivatedAt;
 
     @Column(length = 150, nullable = false)
