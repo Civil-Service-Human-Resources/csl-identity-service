@@ -1,0 +1,54 @@
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+<title>Create an account - Civil Service Learning</title>
+<content>
+<div class="container">
+    <div class="grid-row">
+        <div class="column-two-thirds">
+            <a href="/login" class="link-back">Back</a>
+            <div th:if="${status}" class="error-summary" role="alert"  aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">
+                    There was a problem inviting this email address
+                </h2>
+                <ul class="error-summary-list">
+                    <li><a href="#email" th:text="${status}" class="error-inline">status ...</a></li>
+                </ul>
+            </div>
+            <div th:if="${#fields.hasErrors('${requestInviteForm.*}')}" class="error-summary" role="alert"
+                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">
+                    There was a problem with your email address
+                </h2>
+                <ul class="error-summary-list">
+                    <form th:object="${requestInviteForm}">
+                        <li th:object="${requestInviteForm}" th:if="${#fields.hasErrors('global')}">
+                            <a href="#email" th:errors="*{global}">Input is incorrect</a>
+                        </li>
+                    </form>
+                    <li th:if="${#fields.hasErrors('${requestInviteForm.email}')}">
+                        <a href="#email" th:errors="*{requestInviteForm.email}">Email is invalid</a>
+                    </li>
+                    <li th:if="${#fields.hasErrors('${requestInviteForm.confirmEmail}')}">
+                        <a href="#confirmEmail" th:errors="*{requestInviteForm.confirmEmail}">Fields do not match</a>
+                    </li>
+                </ul>
+            </div>
+            <h2 class="heading-large">Create an account</h2>
+            <h3 class="heading-medium">Enter your email address</h3>
+            <p class="lede">You need to create an account before using this website. This will take 5 - 10 minutes.</p>
+            <form method="post" class="push-bottom" th:object="${requestInviteForm}">
+                <div class="form-group" th:classappend="${#fields.hasErrors('email')} ? form-group-error : ''">
+                    <label th:for="email" class="form-label">Email address</label>
+                    <input class="form-control form-control-2-3" id="email" type="text" th:field="*{email}">
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('confirmEmail')} ? form-group-error :  ''">
+                    <label th:for="confirmEmail" class="form-label">Confirm your email address</label>
+                    <input class="form-control form-control-2-3" id="confirmEmail" th:field="*{confirmEmail}" type="text"/>
+                </div>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="submit" class="button" value="Continue">
+            </form>
+        </div>
+    </div>
+</div>
+</content>
+</page>

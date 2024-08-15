@@ -1,0 +1,22 @@
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+<title>Contact us - Civil Service Learning</title>
+<content>
+    <div class="container container--main">
+        <div class="grid-row">
+            <div class="column-full">
+                <h1 class="heading-xlarge heading heading--page-heading ">
+                    Contact us
+                </h1>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="column-full">
+                <p class="govuk-body">You can contact the helpdesk on <a th:href="'tel:'+${contactNumber}" th:text="${contactNumber}"></a> or by email on <a th:href="'mailto:'+${contactEmail}" th:text="${contactEmail}"></a>.</p>
+                <p class="govuk-body">The helpdesk phone service is available Monday to Friday 8:30am to 5:30pm except all UK bank holidays.</p>
+            </div>
+        </div>
+
+    </div>
+</content>
+</page>

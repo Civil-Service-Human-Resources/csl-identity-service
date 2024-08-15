@@ -1,0 +1,111 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="csl-identity-service[mvn-boot-run]" type="MavenRunConfiguration" factoryName="Maven">
+    <MavenSettings>
+      <option name="myGeneralSettings" />
+      <option name="myRunnerSettings">
+        <MavenRunnerSettings>
+          <option name="delegateBuildToMaven" value="false" />
+          <option name="environmentProperties">
+            <map>
+              <entry key="ACCESS_TOKEN_SCOPE" value="openid, read, write" />
+              <entry key="ACCESS_TOKEN_TTL_SECONDS" value="43200" />
+              <entry key="ACCOUNT_LOCKOUT_MAX_LOGIN_ATTEMPTS" value="5" />
+              <entry key="ALLOWLIST_DOMAINS_CACHE_TTL_SECONDS" value="43200" />
+              <entry key="ASSET_CDN" value="https://int-identity-assets.azureedge.net" />
+              <entry key="AUTHENTICATION_SUCCESS_TARGET_URL" value="http://localhost:3001" />
+              <entry key="CIVIL_SERVANT_REGISTRY_ORGANISATION_MAX_PAGE_SIZE" value="200" />
+              <entry key="CIVIL_SERVANT_REGISTRY_SERVICE_URL" value="http://localhost:9002" />
+              <entry key="CLIENT_ID" value="9fbd4ae2-2db3-44c7-9544-88e80255b56e" />
+              <entry key="CLIENT_SECRET" value="test" />
+              <entry key="CONTACT_EMAIL" value="support@governmentcampus.co.uk" />
+              <entry key="CONTACT_NUMBER" value="020 3640 7985" />
+              <entry key="DATABASE_HOST" value="jdbc:mysql://localhost:3306" />
+              <entry key="DATABASE_NAME" value="identity" />
+              <entry key="DATABASE_USESSL" value="false" />
+              <entry key="DATASOURCE_DRIVER_CLASS_NAME" value="com.mysql.cj.jdbc.Driver" />
+              <entry key="DATASOURCE_PASSWORD" value="password" />
+              <entry key="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
+              <entry key="DATASOURCE_USERNAME" value="root" />
+              <entry key="DURATION_AFTER_REREG_ALLOWED_SECONDS" value="86400" />
+              <entry key="EMAIL_UPDATE_VALIDITY_SECONDS" value="86400" />
+              <entry key="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
+              <entry key="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
+              <entry key="GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID" value="f4c2ece1-5159-4736-92cb-4fe0df719308" />
+              <entry key="GOV_NOTIFY_INVITE_TEMPLATE_ID" value="7ef048a3-5c82-40fd-be4c-a238ce328fea" />
+              <entry key="GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID" value="13c2b9ac-4ad0-449f-b43b-57c04fc88b1d" />
+              <entry key="GOV_NOTIFY_REACTIVATION_TEMPLATE_ID" value="abfb2e5f-3905-4817-b041-c53afd1eb3e5" />
+              <entry key="GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID" value="994fb6d4-a57a-49f2-baee-b0c6f6060b63" />
+              <entry key="GOV_NOTIFY_RESET_TEMPLATE_ID" value="d29b056c-349b-42fc-a453-920cfb58a906" />
+              <entry key="INVITE_VALIDITY_SECONDS" value="259200" />
+              <entry key="JPA_HIBERNATE_ENABLE_LAZY_LOAD_NO_TRANS" value="true" />
+              <entry key="JPA_OPEN_IN_VIEW" value="false" />
+              <entry key="JPA_SHOW_SQL" value="true" />
+              <entry key="JWT_KEY" value="bJwXRAslLzOtPywnCqBbQujKBKki44LB" />
+              <entry key="LPG_SIGNOUT_TIMER_SECONDS" value="5" />
+              <entry key="LPG_UI_SIGNOUT_URI" value="/sign-out" />
+              <entry key="LPG_UI_URL" value="http:http://localhost:3001" />
+              <entry key="MAINTENANCE_PAGE_ENABLED" value="false" />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_1" value="The learning website is undergoing scheduled maintenance." />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_2" value="It will be unavailable between the hours of 6pm to 8pm on Wednesday 1st May 2024." />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_3" value="Apologies for the inconvenience." />
+              <entry key="MAINTENANCE_PAGE_CONTENT_LINE_4" value="If the maintenance period is extended, further information will be provided here." />
+              <entry key="MAINTENANCE_PAGE_SKIP_FOR_URIS" value="/health,/info,/maintenance,/error,/logout,/cookies,/privacy,/accessibility-statement,/contact-us,/webjars,/css,/img,/js,/favicon.ico,/oauth2/token,/oauth2/introspect,/oauth2/revoke,/identity/resolve,/reset-cache,/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency,/account/reactivate/updated,/account/email/updated,/account/email/update/error" />
+              <entry key="MAINTENANCE_PAGE_SKIP_FOR_USERS" value="learner@domain.com,tester@domain.com" />
+              <entry key="OAUTH2_SERVICE_URL" value="http://localhost:9005" />
+              <entry key="OAUTH2_TOKEN_ENDPOINT" value="/oauth2/token" />
+              <entry key="ORG_SPRINGFRAMEWORK_LOGGING_LEVEL" value="INFO" />
+              <entry key="ORG_SPRINGFRAMEWORK_SECURITY_LOGGING_LEVEL" value="INFO" />
+              <entry key="ORG_SPRINGFRAMEWORK_SESSION_LOGGING_LEVEL" value="INFO" />
+              <entry key="ORGANISATIONS_CACHE_TTL_SECONDS" value="100000" />
+              <entry key="PASSWORD_PATTERN" value="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$" />
+              <entry key="REACTIVATION_VALIDITY_SECONDS" value="86400" />
+              <entry key="REDIS_CACHE_ENABLE_STATISTICS" value="true" />
+              <entry key="REDIS_CACHE_NULL_VALUES" value="false" />
+              <entry key="REDIS_CACHE_TTL_MS" value="86400000" />
+              <entry key="REDIS_HOST" value="localhost" />
+              <entry key="REDIS_PASSWORD" value="password" />
+              <entry key="REDIS_PORT" value="6379" />
+              <entry key="REDIS_USE_KEY_PREFIX" value="true" />
+              <entry key="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
+              <entry key="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
+              <entry key="RESET_VALIDITY_SECONDS" value="86400" />
+              <entry key="ROOT_LOGGING_LEVEL" value="INFO" />
+              <entry key="SESSION_TIMEOUT_SECONDS" value="3600" />
+              <entry key="THYMELEAF_CACHE" value="true" />
+              <entry key="THYMELEAF_CHECK_TEMPLATE" value="true" />
+              <entry key="TIME_ZONE_ID" value="UTC" />
+              <entry key="UK_GOV_CABINETOFFICE_LOGGING_LEVEL" value="DEBUG" />
+            </map>
+          </option>
+          <option name="jreName" value="#USE_PROJECT_JDK" />
+          <option name="mavenProperties">
+            <map />
+          </option>
+          <option name="passParentEnv" value="true" />
+          <option name="runMavenInBackground" value="true" />
+          <option name="skipTests" value="false" />
+          <option name="vmOptions" value="" />
+        </MavenRunnerSettings>
+      </option>
+      <option name="myRunnerParameters">
+        <MavenRunnerParameters>
+          <option name="profiles">
+            <set />
+          </option>
+          <option name="goals">
+            <list>
+              <option value="spring-boot:run" />
+            </list>
+          </option>
+          <option name="pomFileName" />
+          <option name="profilesMap">
+            <map />
+          </option>
+          <option name="resolveToWorkspace" value="false" />
+          <option name="workingDirPath" value="$PROJECT_DIR$" />
+        </MavenRunnerParameters>
+      </option>
+    </MavenSettings>
+    <method v="2" />
+  </configuration>
+</component>

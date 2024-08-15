@@ -1,0 +1,1 @@
+create index token_status_idx on `token` (status);

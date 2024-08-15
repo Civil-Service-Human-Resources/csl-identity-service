@@ -1,0 +1,46 @@
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+<title>Verify token - Civil Service Learning</title>
+<content>
+<div class="container">
+    <div class="grid-row">
+        <div class="column-two-thirds">
+            <a href="/logout" class="link-back">Back</a>
+            <div th:if="${status}" class="error-summary" role="alert"  aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">There was a problem</h2>
+                <ul class="error-summary-list">
+                    <li><a href="#" th:text="${status}">status ...</a></li>
+                </ul>
+            </div>
+            <h1 class="heading-large">Verify token</h1>
+            <h2 class="heading-medium">Enter the token for your new organisation</h2>
+            <p class="lede">Your organisation requires you to supply a token for your account.</p>
+            <p class="lede">A token is a 10-character code that you can obtain from your line manager.</p>
+            <form method="post" class="push-bottom" th:object="${verifyTokenForm}">
+                <div class="form-group" th:classappend="${#fields.hasErrors('organisation')} ? form-group-error : ''">
+                    <label th:for="organisation" class="govuk-label">Organisation</label>
+                    <span id="organisation-hint" class="form-hint">Start typing to find your organisation name</span>
+                    <select id="organisation" name="organisation" aria-labelledby="organisation">
+                        <option value=""></option>
+                        <option th:label="${organisation.formattedName}" th:each="organisation : ${organisations}" th:value="${organisation.code}" th:text="${organisation.formattedName}"></option>
+                    </select>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('token')} ? form-group-error : ''">
+                    <label th:for="token" class="govuk-label">Token</label>
+                    <span id="token-hint" class="form-hint">Enter your 10-character organisation token</span>
+                    <input class="form-control form-control-2-3 width-10" id="token" type="text" th:field="*{token}">
+                    <input type="hidden" th:name="code" th:value="${code}"/>
+                </div>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="submit" class="button" value="Continue">
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/assets/js/accessible-autocomplete.min.js"></script>
+<script th:inline="javascript">
+    accessibleAutocomplete.enhanceSelectElement({
+        selectElement: document.querySelector('#organisation')
+    });
+</script>
+</content>
+</page>
