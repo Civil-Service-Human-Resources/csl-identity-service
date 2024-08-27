@@ -104,16 +104,13 @@ public class ReactivationController {
 
         try {
             String email = getDecryptedText(code, encryptionKey);
-
             String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
             if(isNotBlank(resultIdentityActive)) {
                 return resultIdentityActive;
             }
-
             if(reactivationService.isPendingReactivationExistsForEmail(email)) {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-
                 long durationInSecondsSinceReactivationRequested = SECONDS.between(requestedAt, now(clock));
                 if (durationInSecondsSinceReactivationRequested < durationAfterReactivationAllowedInSeconds) {
                     String reactivationEmailMessage = "We recently sent you an email to reactivate your account.";

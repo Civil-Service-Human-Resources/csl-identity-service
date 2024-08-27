@@ -13,10 +13,12 @@ import uk.gov.cabinetoffice.csl.service.ReactivationService;
 
 import java.io.IOException;
 import java.time.Clock;
+import java.time.LocalDateTime;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.*;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 
@@ -83,6 +85,19 @@ public class CustomAuthenticationFailureHandlerTest {
         when(reactivationService.getPendingReactivationForEmail(email)).thenReturn(createPendingReactivation());
         HttpServletResponse response = executeHandler("Pending reactivation exists for user");
         verify(response).sendRedirect("/login?error=pending-reactivation");
+    }
+
+    @Test
+    public void shouldSetErrorToDeactivatedOnPendingReactivationExistsAfterReactivationAllowedInSeconds()
+            throws Exception {
+        Reactivation pendingReactivation = createPendingReactivation();
+        LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
+        final long durationAfterReactivationAllowedInSeconds = 3600;
+        pendingReactivation.setRequestedAt(requestedAt.minus(durationAfterReactivationAllowedInSeconds, SECONDS));
+        when(reactivationService.getPendingReactivationForEmail(email)).thenReturn(pendingReactivation);
+        HttpServletResponse response = executeHandler("Pending reactivation exists for user");
+        verify(response).sendRedirect("/login?error=deactivated&username="
+                + encode(encryptedEmail, UTF_8));
     }
 
     private HttpServletResponse executeHandler(String message) {
