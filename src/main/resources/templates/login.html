@@ -17,7 +17,9 @@
                 <p>
                     <span th:if="${param.error[0] == 'failed'}">
                         Check your email and password are correct.<br>
-                        After <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts, your account will be locked.
+                        <span th:if="${param.maxLoginAttempts}">
+                            After <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts, your account will be locked.
+                        </span>
                     </span>
                     <span th:if="${param.error[0] == 'locked'}">
                         Your account is locked due to <span th:text="${param.maxLoginAttempts[0]}"></span> consecutive unsuccessful login attempts.<br>
