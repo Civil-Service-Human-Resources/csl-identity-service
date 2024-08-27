@@ -12,10 +12,13 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getEncryptedText;
 
 @Slf4j
@@ -31,13 +34,19 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     @Value("${reactivation.validityInSeconds}")
     private int reactivationValidityInSeconds;
 
+    @Value("${reactivation.durationAfterReactivationAllowedInSeconds}")
+    private long durationAfterReactivationAllowedInSeconds;
+
     private final ReactivationService reactivationService;
 
     private final Utils utils;
 
-    public CustomAuthenticationFailureHandler(ReactivationService reactivationService, Utils utils) {
+    private final Clock clock;
+
+    public CustomAuthenticationFailureHandler(ReactivationService reactivationService, Utils utils, Clock clock) {
         this.reactivationService = reactivationService;
         this.utils = utils;
+        this.clock = clock;
     }
 
     @SneakyThrows
@@ -58,15 +67,23 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
                     LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                    String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
-                    LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
-                    String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
-                    log.info("Pending reactivation for the email {} requested at {} and expires on {}",
-                            pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
+                    long durationInSecondsSinceReactivationRequested = SECONDS.between(requestedAt, now(clock));
+                    if (durationInSecondsSinceReactivationRequested < durationAfterReactivationAllowedInSeconds) {
+                        log.info("User with email {} is trying to reactivate before re-reactivate allowed time." +
+                                " No action is taken. Current pending reactivation will remain valid until re-reactivate allowed" +
+                                " or until it expires.", pendingReactivation.getEmail());
+                        String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
+                        LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
+                        String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
+                        log.info("Pending reactivation for the email {} requested at {} and expires on {}",
+                                pendingReactivation.getEmail(), requestedAtStr, reactivationExpiryStr);
+                        redirect = "/login?error=pending-reactivation";
+                    } else {
+                        redirect = "/login?error=deactivated&username=" + encodedUsername;
+                    }
                 } catch (Exception e) {
                     log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
                 }
-                redirect = "/login?error=pending-reactivation";
             }
         }
         log.info("CustomAuthenticationFailureHandler.onAuthenticationFailure.redirect: {}", redirect);

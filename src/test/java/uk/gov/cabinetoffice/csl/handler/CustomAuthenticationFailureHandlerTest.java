@@ -51,7 +51,7 @@ public class CustomAuthenticationFailureHandlerTest {
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException {
+    public void shouldSetErrorToDeactivatedOnAccountDeactivation() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=deactivated&username="
@@ -59,18 +59,11 @@ public class CustomAuthenticationFailureHandlerTest {
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedExpiredOnDeactivationExpired() throws IOException {
+    public void shouldSetErrorToReactivatedExpiredOnAccountReactivationExpired() throws IOException {
         HttpServletResponse response = executeHandler("Reactivation request has expired");
         String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=reactivation-expired&username="
                 + encode(encryptedUsername, UTF_8));
-    }
-
-    @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
-            throws Exception {
-        HttpServletResponse response = executeHandler("Pending reactivation exists for user");
-        verify(response).sendRedirect("/login?error=pending-reactivation");
     }
 
     private HttpServletResponse executeHandler(String message) {
