@@ -13,6 +13,7 @@
                     <span th:case="'reactivation-expired'">Your reactivation link has expired</span>
                     <span th:case="'pending-reactivation'">Your account is pending reactivation</span>
                     <span th:case="'invalidSignupCode'">Sign-up link is invalid</span>
+                    <span th:case="*">Please sign in</span>
                 </h2>
                 <p>
                     <span th:if="${param.error[0] == 'failed'}">
