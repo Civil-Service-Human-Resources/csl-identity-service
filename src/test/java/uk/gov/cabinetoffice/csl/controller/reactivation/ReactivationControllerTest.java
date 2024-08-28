@@ -18,11 +18,12 @@ import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.time.Month.FEBRUARY;
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -42,7 +43,6 @@ public class ReactivationControllerTest {
 
     private static final String CODE = "abc123";
     private static final String EMAIL = "test@example.com";
-    private final int reactivationValidityInSeconds = 86400;
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,7 +56,11 @@ public class ReactivationControllerTest {
     @MockBean
     private NotifyService notifyService;
 
-    private final Utils utils = new Utils();
+    @Autowired
+    private Utils utils;
+
+    @Autowired
+    private Clock clock;
 
     @Test
     public void shouldCreatePendingReactivationAndSendEmailIfNoPendingReactivation() throws Exception {
@@ -64,6 +68,7 @@ public class ReactivationControllerTest {
         String title = "Check your email";
         String viewName = "reactivate/reactivate";
         String reactivationEmailMessage = "We&#39;ve sent you an email with a link to reactivate your account.";
+        int reactivationValidityInSeconds = 86400;
         String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
                 .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
         executeSendReactivationEmail(reactivation, false, reactivationEmailMessage, reactivationValidityMessage,
@@ -78,7 +83,6 @@ public class ReactivationControllerTest {
         String title = "Account reactivation pending";
         String viewName = "reactivate/pendingReactivate";
         String reactivationEmailMessage = ("We recently sent you an email to reactivate your account.");
-        LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
         String reactivationValidityMessage = ("Please check your emails (including the junk/spam folder).");
         executeSendReactivationEmail(reactivation, true, reactivationEmailMessage, reactivationValidityMessage,
                                      title, viewName);
@@ -215,8 +219,7 @@ public class ReactivationControllerTest {
         reactivation.setEmail(EMAIL);
         reactivation.setCode(CODE);
         reactivation.setReactivationStatus(PENDING);
-        LocalDateTime dateOfReactivationRequest = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
-        reactivation.setRequestedAt(dateOfReactivationRequest);
+        reactivation.setRequestedAt(now(clock));
 
         when(reactivationService.getReactivationForCodeAndStatus(CODE, PENDING))
                 .thenReturn(reactivation);

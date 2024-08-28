@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.LocalDateTime.now;
-import static java.time.temporal.ChronoUnit.*;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 
@@ -93,7 +92,7 @@ public class CustomAuthenticationFailureHandlerTest {
         Reactivation pendingReactivation = createPendingReactivation();
         LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
         final long durationAfterReactivationAllowedInSeconds = 3600;
-        pendingReactivation.setRequestedAt(requestedAt.minus(durationAfterReactivationAllowedInSeconds, SECONDS));
+        pendingReactivation.setRequestedAt(requestedAt.minusSeconds(durationAfterReactivationAllowedInSeconds));
         when(reactivationService.getPendingReactivationForEmail(email)).thenReturn(pendingReactivation);
         HttpServletResponse response = executeHandler("Pending reactivation exists for user");
         verify(response).sendRedirect("/login?error=deactivated&username="
