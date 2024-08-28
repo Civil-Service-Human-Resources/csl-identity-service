@@ -133,7 +133,6 @@ public class ReactivationController {
                     .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
             model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
             return ACCOUNT_REACTIVATE_TEMPLATE;
-
         } catch (Exception e) {
             log.error("There was an error while creating the reactivation link for the code: {} with cause: {}",
                     code, e.toString());
