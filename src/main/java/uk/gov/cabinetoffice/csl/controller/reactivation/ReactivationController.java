@@ -97,7 +97,8 @@ public class ReactivationController {
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
+    public String sendReactivationEmail(@RequestParam String code, Model model,
+                                        RedirectAttributes redirectAttributes) {
 
         model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
@@ -142,7 +143,8 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code,
+                                    RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = reactivation.getEmail();
@@ -165,8 +167,8 @@ public class ReactivationController {
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
-                log.info("Account reactivation is not a agency domain and can reactivate without further validation for " +
-                                "Reactivation: {}", reactivation);
+                log.info("Account reactivation is not a agency domain and can reactivate without further validation"
+                        + " for Reactivation: {}", reactivation);
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }

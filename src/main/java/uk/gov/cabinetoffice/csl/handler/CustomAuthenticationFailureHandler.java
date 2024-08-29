@@ -62,7 +62,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("User account is locked") -> redirect = "/login?error=locked&maxLoginAttempts=" + maxLoginAttempts;
             case ("User account is blocked") -> redirect = "/login?error=blocked";
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
-            case ("Reactivation request has expired") -> redirect = "/login?error=reactivation-expired&username=" + encodedUsername;
+            case ("Reactivation request has expired") -> redirect = "/login?error=reactivation-expired&username="
+                    + encodedUsername;
             case ("Pending reactivation exists for user") -> {
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);
@@ -70,8 +71,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                     long durationInSecondsSinceReactivationRequested = SECONDS.between(requestedAt, now(clock));
                     if (durationInSecondsSinceReactivationRequested < durationAfterReactivationAllowedInSeconds) {
                         log.info("User with email {} is trying to reactivate before re-reactivate allowed time." +
-                                " No action is taken. Current pending reactivation will remain valid until re-reactivate allowed" +
-                                " or until it expires.", pendingReactivation.getEmail());
+                        "User is displayed the message for the pending reactivation.", pendingReactivation.getEmail());
                         String requestedAtStr = utils.convertDateTimeFormat(requestedAt);
                         LocalDateTime reactivationLinkExpiry = requestedAt.plusSeconds(reactivationValidityInSeconds);
                         String reactivationExpiryStr = utils.convertDateTimeFormat(reactivationLinkExpiry);
@@ -82,7 +82,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                         redirect = "/login?error=deactivated&username=" + encodedUsername;
                     }
                 } catch (Exception e) {
-                    log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username, e.toString());
+                    log.warn("Exception while retrieving pending reactivation for email: {}, Exception: {}", username,
+                            e.toString());
                 }
             }
         }
