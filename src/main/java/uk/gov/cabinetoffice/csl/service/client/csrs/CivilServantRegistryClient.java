@@ -84,14 +84,15 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         }
     }
 
-    private DomainsResponse getAllowListDomains() {
+    @Override
+    @Cacheable("allowListDomains")
+    public DomainsResponse getAllowListDomains() {
         log.info("getAllowListDomains: Fetching allowlist domains from Civil Servant Registry");
             RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
             return httpClient.executeRequest(request, DomainsResponse.class);
     }
 
     @Override
-    @Cacheable("allowListDomains")
     public List<String> getAllowListDomainsFromCache() {
         log.info("getAllowListDomainsFromCache: Fetching allowlist domains");
         try {
