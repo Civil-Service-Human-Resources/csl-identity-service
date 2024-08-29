@@ -85,7 +85,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    @Cacheable("allowListDomains")
+    @Cacheable("allowDomains")
     public DomainsResponse getAllowListDomains() {
         log.info("getAllowListDomains: Fetching allowlist domains from Civil Servant Registry");
             RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
@@ -112,7 +112,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    @CacheEvict(value = "allowListDomains", allEntries = true)
+    @CacheEvict(value = "allowDomains", allEntries = true)
     public void evictAllowListDomainCache() {
         log.info("Evicting Allowlist Domains cache");
     }

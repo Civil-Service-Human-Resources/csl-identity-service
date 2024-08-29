@@ -26,7 +26,7 @@ public class RedisCacheConfig {
 
         Map<String, RedisCacheConfiguration> configMap = new HashMap<>();
         RedisCacheConfiguration defaultCacheConfig = defaultCacheConfig().disableCachingNullValues();
-        configMap.put("allowListDomains", defaultCacheConfig.entryTtl(ofSeconds(allowListDomainsCacheTTlSeconds)));
+        configMap.put("allowDomains", defaultCacheConfig.entryTtl(ofSeconds(allowListDomainsCacheTTlSeconds)));
         configMap.put("organisations", defaultCacheConfig.entryTtl(ofSeconds(organisationsCacheTTlSeconds)));
 
         return (builder) -> builder
