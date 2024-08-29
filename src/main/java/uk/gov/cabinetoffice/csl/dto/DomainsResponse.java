@@ -3,12 +3,11 @@ package uk.gov.cabinetoffice.csl.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 @Data
-public class DomainsResponse implements Serializable {
+public class DomainsResponse {
 
     private List<Domain> domains;
 
