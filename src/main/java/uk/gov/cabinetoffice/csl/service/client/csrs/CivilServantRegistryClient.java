@@ -127,7 +127,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
     @Override
     public List<OrganisationalUnit> getAllOrganisations() {
-        log.info("Fetching all organisations from Civil Servant Registry API");
+        log.info("getAllOrganisations: Fetching all organisations from Civil Servant Registry API");
         List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
         GetOrganisationsResponse initialResponse = getOrganisations(1, 0);
         if (initialResponse.getTotalElements() >= 1) {
@@ -153,6 +153,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     @Override
     @Cacheable("organisations")
     public List<OrganisationalUnit> getAllOrganisationsFromCache() {
+        log.info("getAllOrganisationsFromCache: Fetching all organisations");
         List<OrganisationalUnit> organisationalUnits = getAllOrganisations();
         return csrsServiceDataTransformer.transformOrganisations(organisationalUnits);
     }
