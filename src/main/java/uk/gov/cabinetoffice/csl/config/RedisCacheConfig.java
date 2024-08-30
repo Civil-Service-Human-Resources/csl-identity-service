@@ -22,10 +22,12 @@ public class RedisCacheConfig {
         return (builder) -> builder
                 .withCacheConfiguration("allowDomains",
                         defaultCacheConfig()
+                                .disableCachingNullValues()
                                 .entryTtl(ofSeconds(allowListDomainsCacheTTlSeconds))
                                 .prefixCacheNameWith("csl-identity_"))
                 .withCacheConfiguration("organisations",
                         defaultCacheConfig()
+                                .disableCachingNullValues()
                                 .entryTtl(ofSeconds(organisationsCacheTTlSeconds))
                                 .prefixCacheNameWith("csl-identity_"));
     }
