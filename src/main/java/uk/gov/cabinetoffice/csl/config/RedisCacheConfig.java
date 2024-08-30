@@ -11,6 +11,9 @@ import static org.springframework.data.redis.cache.RedisCacheConfiguration.defau
 @Configuration
 public class RedisCacheConfig {
 
+    @Value("${spring.cache.redis.key-prefix}")
+    private String redisCacheKeyPrefix;
+
     @Value("${civilServantRegistry.allowListDomains.cache.ttlSeconds}")
     private int allowListDomainsCacheTTlSeconds;
 
@@ -24,11 +27,11 @@ public class RedisCacheConfig {
                         defaultCacheConfig()
                                 .disableCachingNullValues()
                                 .entryTtl(ofSeconds(allowListDomainsCacheTTlSeconds))
-                                .prefixCacheNameWith("csl-identity_"))
+                                .prefixCacheNameWith(redisCacheKeyPrefix))
                 .withCacheConfiguration("organisations",
                         defaultCacheConfig()
                                 .disableCachingNullValues()
                                 .entryTtl(ofSeconds(organisationsCacheTTlSeconds))
-                                .prefixCacheNameWith("csl-identity_"));
+                                .prefixCacheNameWith(redisCacheKeyPrefix));
     }
 }
