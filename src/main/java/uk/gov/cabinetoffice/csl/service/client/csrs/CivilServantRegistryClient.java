@@ -84,16 +84,17 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         }
     }
 
-    private DomainsResponse getAllowListDomains() {
-        log.info("Fetching allowlist domains from Civil Servant Registry");
-            RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
-            return httpClient.executeRequest(request, DomainsResponse.class);
+    @Override
+    public DomainsResponse getAllowListDomains() {
+        log.info("getAllowListDomains: Fetching allowlist domains from Civil Servant Registry");
+        RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
+        return httpClient.executeRequest(request, DomainsResponse.class);
     }
 
     @Override
-    @Cacheable("allowListDomains")
+    @Cacheable("allowDomains")
     public List<String> getAllowListDomainsFromCache() {
-        log.info("Fetching allowlist domains from Civil Servant Registry");
+        log.info("getAllowListDomainsFromCache: Fetching allowlist domains");
         try {
             DomainsResponse domainsResponse = getAllowListDomains();
             if (domainsResponse == null) {
@@ -111,7 +112,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    @CacheEvict(value = "allowListDomains", allEntries = true)
+    @CacheEvict(value = "allowDomains", allEntries = true)
     public void evictAllowListDomainCache() {
         log.info("Evicting Allowlist Domains cache");
     }
@@ -126,7 +127,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
     @Override
     public List<OrganisationalUnit> getAllOrganisations() {
-        log.info("Fetching all organisations from Civil Servant Registry API");
+        log.info("getAllOrganisations: Fetching all organisations from Civil Servant Registry API");
         List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
         GetOrganisationsResponse initialResponse = getOrganisations(1, 0);
         if (initialResponse.getTotalElements() >= 1) {
@@ -152,6 +153,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     @Override
     @Cacheable("organisations")
     public List<OrganisationalUnit> getAllOrganisationsFromCache() {
+        log.info("getAllOrganisationsFromCache: Fetching all organisations");
         List<OrganisationalUnit> organisationalUnits = getAllOrganisations();
         return csrsServiceDataTransformer.transformOrganisations(organisationalUnits);
     }

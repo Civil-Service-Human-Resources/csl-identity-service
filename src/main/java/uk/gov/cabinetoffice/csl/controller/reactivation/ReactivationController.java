@@ -17,12 +17,15 @@ import uk.gov.cabinetoffice.csl.service.NotifyService;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.EXPIRED;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
@@ -56,6 +59,8 @@ public class ReactivationController {
 
     private final Utils utils;
 
+    private final Clock clock;
+
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
@@ -71,6 +76,9 @@ public class ReactivationController {
     @Value("${reactivation.validityInSeconds}")
     private int reactivationValidityInSeconds;
 
+    @Value("${reactivation.durationAfterReactivationAllowedInSeconds}")
+    private long durationAfterReactivationAllowedInSeconds;
+
     @Value("${lpg.contactEmail}")
     private String contactEmail;
 
@@ -80,46 +88,52 @@ public class ReactivationController {
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
                                   NotifyService notifyService,
-                                  Utils utils) {
+                                  Utils utils, Clock clock) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.notifyService = notifyService;
         this.utils = utils;
+        this.clock = clock;
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
+    public String sendReactivationEmail(@RequestParam String code, Model model,
+                                        RedirectAttributes redirectAttributes) {
 
         model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
 
         try {
             String email = getDecryptedText(code, encryptionKey);
-
             String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
             if(isNotBlank(resultIdentityActive)) {
                 return resultIdentityActive;
             }
-
             if(reactivationService.isPendingReactivationExistsForEmail(email)) {
                 Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(email);
                 LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
-                String reactivationEmailMessage = "We recently sent you an email to reactivate your account.";
-                model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
-                LocalDateTime reactivationLinkExpiryDateTime = requestedAt.plusSeconds(reactivationValidityInSeconds);
-                String reactivationValidityMessage = "Please check your emails (including the junk/spam folder).";
-                model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
-                return PENDING_REACTIVATE_TEMPLATE;
+                long durationInSecondsSinceReactivationRequested = SECONDS.between(requestedAt, now(clock));
+                if (durationInSecondsSinceReactivationRequested < durationAfterReactivationAllowedInSeconds) {
+                    String reactivationEmailMessage = "We recently sent you an email to reactivate your account.";
+                    model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
+                    String reactivationValidityMessage = "Please check your emails (including the junk/spam folder).";
+                    model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
+                    return PENDING_REACTIVATE_TEMPLATE;
+                } else {
+                    pendingReactivation.setRequestedAt(now(clock));
+                    reactivationService.saveReactivation(pendingReactivation);
+                    notifyUserByEmail(pendingReactivation);
+                }
             } else {
                 Reactivation reactivation = reactivationService.createPendingReactivation(email);
                 notifyUserByEmail(reactivation);
-                String reactivationEmailMessage = "We've sent you an email with a link to reactivate your account.";
-                model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
-                String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
-                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
-                model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
-                return ACCOUNT_REACTIVATE_TEMPLATE;
             }
+            String reactivationEmailMessage = "We've sent you an email with a link to reactivate your account.";
+            model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
+            String reactivationValidityMessage = "You have %s to click the reactivation link within the email."
+                    .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(reactivationValidityInSeconds));
+            model.addAttribute("reactivationValidityMessage", reactivationValidityMessage);
+            return ACCOUNT_REACTIVATE_TEMPLATE;
         } catch (Exception e) {
             log.error("There was an error while creating the reactivation link for the code: {} with cause: {}",
                     code, e.toString());
@@ -129,7 +143,8 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code,
+                                    RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             String email = reactivation.getEmail();
@@ -152,8 +167,8 @@ public class ReactivationController {
                         reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
-                log.info("Account reactivation is not a agency domain and can reactivate without further validation for " +
-                                "Reactivation: {}", reactivation);
+                log.info("Account reactivation is not a agency domain and can reactivate without further validation"
+                        + " for Reactivation: {}", reactivation);
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }
@@ -192,7 +207,7 @@ public class ReactivationController {
                 log.info("Pending reactivations are marked as expired because user is active for email: {}",
                         email);
             } catch(Exception e) {
-                log.warn("Pending reactivation not found for email: {}", email);
+                log.info("Pending reactivation not found for email: {}", email);
             }
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, REACTIVATION_ACCOUNT_IS_ALREADY_ACTIVE);
             return REDIRECT_LOGIN;

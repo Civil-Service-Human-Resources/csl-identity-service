@@ -12,11 +12,12 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.service.ReactivationService;
 
 import java.io.IOException;
-import java.time.*;
+import java.time.Clock;
+import java.time.LocalDateTime;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.Month.FEBRUARY;
+import static java.time.LocalDateTime.now;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 
@@ -26,11 +27,24 @@ public class CustomAuthenticationFailureHandlerTest {
 
     private final int maxLoginAttempts = 5;
 
+    private final String email = "learner@domain.com";
+
+    private final String encryptedEmail = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
+
     @Autowired
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @MockBean
     private ReactivationService reactivationService;
+
+    @Autowired
+    private Clock clock;
+
+    @Test
+    public void shouldSetErrorToErrorOnSystemError() throws IOException {
+        HttpServletResponse response = executeHandler("System error");
+        verify(response).sendRedirect("/error");
+    }
 
     @Test
     public void shouldSetErrorToFailedOnFailedLogin() throws IOException {
@@ -51,26 +65,38 @@ public class CustomAuthenticationFailureHandlerTest {
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivated() throws IOException {
+    public void shouldSetErrorToDeactivatedOnAccountDeactivation() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
-        String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=deactivated&username="
-                + encode(encryptedUsername, UTF_8));
+                + encode(encryptedEmail, UTF_8));
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedExpiredOnDeactivationExpired() throws IOException {
+    public void shouldSetErrorToReactivatedExpiredOnAccountReactivationExpired() throws IOException {
         HttpServletResponse response = executeHandler("Reactivation request has expired");
-        String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         verify(response).sendRedirect("/login?error=reactivation-expired&username="
-                + encode(encryptedUsername, UTF_8));
+                + encode(encryptedEmail, UTF_8));
     }
 
     @Test
-    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists()
+    public void shouldSetErrorToPendingReactivationOnAccountDeactivatedAndPendingReactivationExists()
             throws Exception {
+        when(reactivationService.getPendingReactivationForEmail(email)).thenReturn(createPendingReactivation());
         HttpServletResponse response = executeHandler("Pending reactivation exists for user");
         verify(response).sendRedirect("/login?error=pending-reactivation");
+    }
+
+    @Test
+    public void shouldSetErrorToDeactivatedOnPendingReactivationExistsAfterReactivationAllowedInSeconds()
+            throws Exception {
+        Reactivation pendingReactivation = createPendingReactivation();
+        LocalDateTime requestedAt = pendingReactivation.getRequestedAt();
+        final long durationAfterReactivationAllowedInSeconds = 3600;
+        pendingReactivation.setRequestedAt(requestedAt.minusSeconds(durationAfterReactivationAllowedInSeconds));
+        when(reactivationService.getPendingReactivationForEmail(email)).thenReturn(pendingReactivation);
+        HttpServletResponse response = executeHandler("Pending reactivation exists for user");
+        verify(response).sendRedirect("/login?error=deactivated&username="
+                + encode(encryptedEmail, UTF_8));
     }
 
     private HttpServletResponse executeHandler(String message) {
@@ -78,21 +104,17 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
         when(exception.getMessage()).thenReturn(message);
-        String username = "learner@domain.com";
-        when(request.getParameter("username")).thenReturn(username);
-        Reactivation pendingReactivation = createPendingReactivation(username);
-        when(reactivationService.getPendingReactivationForEmail(username)).thenReturn(pendingReactivation);
+        when(request.getParameter("username")).thenReturn(email);
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
         return response;
     }
 
-    private Reactivation createPendingReactivation(String email) {
+    private Reactivation createPendingReactivation() {
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(email);
         reactivation.setCode("code");
         reactivation.setReactivationStatus(PENDING);
-        LocalDateTime dateTime = LocalDateTime.of(2024, FEBRUARY, 1, 15, 30, 20);
-        reactivation.setRequestedAt(dateTime);
+        reactivation.setRequestedAt(now(clock));
         return reactivation;
     }
 }
