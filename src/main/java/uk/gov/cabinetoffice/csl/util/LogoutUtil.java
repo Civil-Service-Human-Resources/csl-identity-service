@@ -39,7 +39,6 @@ public class LogoutUtil {
                 log.debug("LogoutUtil: {} Oauth2Authorization entries deleted from DB for principal_name {}", n, uid);
             }
             request.getSession().invalidate();
-            request.logout();
             log.debug("LogoutUtil: Session is invalidated.");
         } catch (Exception e) {
             log.info("LogoutUtil.logout: Exception is raised but no action required: " + e.getMessage());
