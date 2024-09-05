@@ -53,6 +53,9 @@ public class IdentityServiceTest {
     private ICivilServantRegistryClient civilServantRegistryClient;
 
     @Mock
+    private CsrsService csrsService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     private final Utils utils = new Utils();
@@ -67,6 +70,7 @@ public class IdentityServiceTest {
                 identityRepository,
                 new CompoundRolesRepository(),
                 civilServantRegistryClient,
+                csrsService,
                 passwordEncoder,
                 utils,
                 clock
@@ -125,7 +129,7 @@ public class IdentityServiceTest {
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
-        when(civilServantRegistryClient.isDomainAllowListed(domain)).thenReturn(true);
+        when(csrsService.domainIsAllowlisted(domain)).thenReturn(true);
 
         identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 

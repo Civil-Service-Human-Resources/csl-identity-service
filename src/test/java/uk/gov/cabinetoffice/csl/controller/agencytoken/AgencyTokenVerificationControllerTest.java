@@ -85,7 +85,7 @@ public class AgencyTokenVerificationControllerTest {
     public void setup() {
         organisations = new ArrayList<>();
         organisations.add(new OrganisationalUnit());
-        when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisations);
+        when(civilServantRegistryClient.getAllOrganisations()).thenReturn(organisations);
     }
 
     @Test

@@ -15,7 +15,6 @@ import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
@@ -53,16 +52,6 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    public boolean isDomainAllowListed(String domain) {
-        return this.getAllowListDomainsFromCache().contains(domain.toLowerCase(Locale.ROOT));
-    }
-
-    @Override
-    public boolean isDomainValid(String domain) {
-        return !this.getFilteredOrganisations(domain).isEmpty();
-    }
-
-    @Override
     public boolean isDomainInAnAgencyToken(String domain) {
         try {
             String url = agencyTokensUrl + String.format("?domain=%s", domain);
@@ -85,18 +74,14 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     }
 
     @Override
-    public DomainsResponse getAllowListDomains() {
-        log.info("getAllowListDomains: Fetching allowlist domains from Civil Servant Registry");
-        RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
-        return httpClient.executeRequest(request, DomainsResponse.class);
-    }
-
-    @Override
     @Cacheable("allowDomains")
-    public List<String> getAllowListDomainsFromCache() {
+    public List<String> getAllowListDomains() {
         log.info("getAllowListDomainsFromCache: Fetching allowlist domains");
         try {
-            DomainsResponse domainsResponse = getAllowListDomains();
+            log.info("getAllowListDomains: Fetching allowlist domains from Civil Servant Registry");
+            RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
+            DomainsResponse domainsResponse = httpClient.executeRequest(request, DomainsResponse.class);
+
             if (domainsResponse == null) {
                 log.error("Allowlist Domains returned null");
                 throw new GenericServerException("System error");
@@ -117,16 +102,16 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
         log.info("Evicting Allowlist Domains cache");
     }
 
-    @Override
-    public List<OrganisationalUnit> getFilteredOrganisations(String domain) {
-        return this.getAllOrganisationsFromCache()
-                .stream()
-                .filter(o -> o.doesDomainExist(domain))
-                .collect(toList());
+    private GetOrganisationsResponse getOrganisations(Integer size, Integer page) {
+        String url = organisationalUnitsUrl + String.format("?size=%s&page=%s&formatName=true", size, page);
+        RequestEntity<Void> request = RequestEntity.get(url).build();
+        return httpClient.executeRequest(request, GetOrganisationsResponse.class);
     }
 
     @Override
+    @Cacheable("organisations")
     public List<OrganisationalUnit> getAllOrganisations() {
+        log.info("getAllOrganisationsFromCache: Fetching all organisations");
         log.info("getAllOrganisations: Fetching all organisations from Civil Servant Registry API");
         List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
         GetOrganisationsResponse initialResponse = getOrganisations(1, 0);
@@ -141,20 +126,6 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
 
         }
         log.info("organisationalUnits size {}", organisationalUnits.size());
-        return organisationalUnits;
-    }
-
-    private GetOrganisationsResponse getOrganisations(Integer size, Integer page) {
-        String url = organisationalUnitsUrl + String.format("?size=%s&page=%s&formatName=true", size, page);
-        RequestEntity<Void> request = RequestEntity.get(url).build();
-        return httpClient.executeRequest(request, GetOrganisationsResponse.class);
-    }
-
-    @Override
-    @Cacheable("organisations")
-    public List<OrganisationalUnit> getAllOrganisationsFromCache() {
-        log.info("getAllOrganisationsFromCache: Fetching all organisations");
-        List<OrganisationalUnit> organisationalUnits = getAllOrganisations();
         return csrsServiceDataTransformer.transformOrganisations(organisationalUnits);
     }
 

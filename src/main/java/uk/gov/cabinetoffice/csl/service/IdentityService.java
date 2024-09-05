@@ -38,6 +38,7 @@ public class IdentityService {
     private final IdentityRepository identityRepository;
     private final CompoundRoles compoundRoles;
     private final ICivilServantRegistryClient civilServantRegistryClient;
+    private final CsrsService csrsService;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
     private final Clock clock;
@@ -178,11 +179,11 @@ public class IdentityService {
 
     public boolean isValidEmailDomain(String email) {
         final String domain = utils.getDomainFromEmailAddress(email);
-        return civilServantRegistryClient.isDomainValid(domain);
+        return csrsService.domainIsValid(domain);
     }
 
     public boolean isDomainAllowListed(String domain) {
-        return civilServantRegistryClient.isDomainAllowListed(domain);
+        return csrsService.domainIsAllowlisted(domain);
     }
 
     public boolean isDomainInAnAgencyToken(String domain) {

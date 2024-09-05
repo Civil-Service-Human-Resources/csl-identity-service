@@ -144,6 +144,6 @@ public class AgencyTokenVerificationController {
     }
 
     private void addOrganisationsToModel(Model model) {
-        model.addAttribute("organisations", civilServantRegistryClient.getAllOrganisationsFromCache());
+        model.addAttribute("organisations", civilServantRegistryClient.getAllOrganisations());
     }
 }

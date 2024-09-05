@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.gov.cabinetoffice.csl.service.CsrsService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
@@ -81,6 +82,8 @@ public class SignupController {
 
     private final ICivilServantRegistryClient civilServantRegistryClient;
 
+    private final CsrsService csrsService;
+
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
     private final Utils utils;
@@ -90,12 +93,14 @@ public class SignupController {
     public SignupController(InviteService inviteService,
                             IdentityService identityService,
                             ICivilServantRegistryClient civilServantRegistryClient,
+                            CsrsService csrsService,
                             AgencyTokenCapacityService agencyTokenCapacityService,
                             Utils utils,
                             Clock clock) {
         this.inviteService = inviteService;
         this.identityService = identityService;
         this.civilServantRegistryClient = civilServantRegistryClient;
+        this.csrsService = csrsService;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.utils = utils;
         this.clock = clock;
@@ -287,7 +292,7 @@ public class SignupController {
         log.info("Invite email {} accessing enter organisation screen for validation", invite.getForEmail());
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
-        List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
+        List<OrganisationalUnit> organisations = csrsService.getOrganisationalUnitsByDomain(domain);
 
         model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
         model.addAttribute(CHOOSE_ORGANISATION_FORM, new ChooseOrganisationForm());
@@ -319,7 +324,7 @@ public class SignupController {
         log.info("Invite email {} selected organisation {}", invite.getForEmail(), orgCode);
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
-        List<OrganisationalUnit> organisations = civilServantRegistryClient.getFilteredOrganisations(domain);
+        List<OrganisationalUnit> organisations = csrsService.getOrganisationalUnitsByDomain(domain);
 
         Optional<OrganisationalUnit> selectedOrgUnitOptional =
                 organisations
