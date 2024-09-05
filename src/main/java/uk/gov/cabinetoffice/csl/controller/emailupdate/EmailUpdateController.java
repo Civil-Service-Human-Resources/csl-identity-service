@@ -191,7 +191,8 @@ public class EmailUpdateController {
         String updatedEmail = String.valueOf(modelMap.get(EMAIL_ATTRIBUTE));
 
         model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, updatedEmail);
-        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
+        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
+        model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
 
         log.debug("Email updated success for: {}", updatedEmail);
         return EMAIL_UPDATED_TEMPLATE;
