@@ -1,5 +1,7 @@
 package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +12,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
+import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.util.LogoutUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
@@ -65,15 +69,17 @@ public class EmailUpdateController {
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
+    private final LogoutUtil logoutUtil;
     private final int validityInSeconds;
 
     public EmailUpdateController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
-                                 Utils utils,
+                                 Utils utils, LogoutUtil logoutUtil,
                                  @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
         this.utils = utils;
+        this.logoutUtil = logoutUtil;
         this.validityInSeconds = validityInSeconds;
     }
 
@@ -110,8 +116,8 @@ public class EmailUpdateController {
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
 
-        emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(),
-                newEmail);
+        Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
+        emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail);
 
         model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
         model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
@@ -120,9 +126,16 @@ public class EmailUpdateController {
     }
 
     @GetMapping("/verify/{code}")
-    public String verifyEmail(@PathVariable String code,
+    public String verifyEmail(@PathVariable String code, Authentication authentication,
+                              HttpServletRequest request, HttpServletResponse response,
                               RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+
+        if(principal != null ) {
+            logoutUtil.logout(request, response);
+            log.debug("verifyEmail: logoutUtil.logout is invoked.");
+        }
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
             log.warn("Email update code does not exist: {}", code);
