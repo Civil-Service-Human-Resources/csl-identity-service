@@ -3,7 +3,6 @@ package uk.gov.cabinetoffice.csl.controller.emailupdate;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +18,7 @@ import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,9 +44,6 @@ public class EmailUpdateRequestWhileLoginEmailUpdateControllerTest {
 
     @MockBean
     private IdentityService identityService;
-
-    @Mock
-    private EmailUpdateService emailUpdateService;
 
     @Test
     public void givenARequestToChangeYourEmail_whenUpdateEmailForm_shouldDisplayForm() throws Exception {
@@ -121,12 +118,24 @@ public class EmailUpdateRequestWhileLoginEmailUpdateControllerTest {
         verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
     }
 
-    @Test
     @Disabled
+    @Test
     public void givenAValidFormAndEmailDoesNotAlreadyExistAndIsAValidEmail_whenSendEmailVerification_shouldDisplayEmailVerificationSentScreen() throws Exception {
         when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(false);
         when(identityService.isValidEmailDomain(anyString())).thenReturn(true);
-        doNothing().when(emailUpdateService).saveEmailUpdateAndNotify(any(Identity.class), anyString());
+
+        Identity identity = new Identity();
+        identity.setId(123L);
+        identity.setUid("uid123");
+        identity.setEmail("test@example.com");
+        identity.setActive(true);
+        identity.setLocked(false);
+        identity.setDeletionNotificationSent(false);
+        identity.setAgencyTokenUid("agencyTokenUid");
+        identity.setFailedLoginAttempts(0);
+
+        EmailUpdateService emailUpdateService = mock(EmailUpdateService.class);
+        doNothing().when(emailUpdateService).saveEmailUpdateAndNotify(identity, NEW_EMAIL);
 
         mockMvc.perform(post(EMAIL_PATH)
                     .param("email", NEW_EMAIL)
