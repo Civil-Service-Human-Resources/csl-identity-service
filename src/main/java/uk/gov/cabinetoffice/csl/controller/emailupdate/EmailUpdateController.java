@@ -130,8 +130,8 @@ public class EmailUpdateController {
                               HttpServletRequest request, HttpServletResponse response,
                               RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
-        Object principal = authentication != null ? authentication.getPrincipal() : null;
 
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
         if(principal != null ) {
             logoutUtil.logout(request, response);
             log.debug("verifyEmail: logoutUtil.logout is invoked.");
