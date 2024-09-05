@@ -1,9 +1,0 @@
-services:
-  identity:
-    build:
-      dockerfile: Dockerfile
-      target: develop
-    ports:
-      - 8080:8080
-    env_file:
-      - int.env
