@@ -179,11 +179,11 @@ public class IdentityService {
 
     public boolean isValidEmailDomain(String email) {
         final String domain = utils.getDomainFromEmailAddress(email);
-        return csrsService.domainIsValid(domain);
+        return csrsService.isDomainValid(domain);
     }
 
     public boolean isDomainAllowListed(String domain) {
-        return csrsService.domainIsAllowlisted(domain);
+        return csrsService.isDomainAllowlisted(domain);
     }
 
     public boolean isDomainInAnAgencyToken(String domain) {

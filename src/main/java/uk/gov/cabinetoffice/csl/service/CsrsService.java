@@ -19,7 +19,7 @@ public class CsrsService {
         this.civilServantRegistryClient = civilServantRegistryClient;
     }
 
-    public boolean domainIsAllowlisted(String domain) {
+    public boolean isDomainAllowlisted(String domain) {
         return civilServantRegistryClient.getAllowListDomains().contains(domain.toLowerCase(Locale.ROOT));
     }
 
@@ -34,7 +34,7 @@ public class CsrsService {
                 .collect(toList());
     }
 
-    public boolean domainIsValid(String domain) {
+    public boolean isDomainValid(String domain) {
         return !this.getOrganisationalUnitsByDomain(domain).isEmpty();
     }
 }

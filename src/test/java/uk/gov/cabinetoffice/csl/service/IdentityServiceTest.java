@@ -129,7 +129,7 @@ public class IdentityServiceTest {
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
-        when(csrsService.domainIsAllowlisted(domain)).thenReturn(true);
+        when(csrsService.isDomainAllowlisted(domain)).thenReturn(true);
 
         identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 
