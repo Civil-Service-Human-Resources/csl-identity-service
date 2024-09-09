@@ -15,7 +15,6 @@ import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.repository.CompoundRoles;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Clock;
@@ -37,7 +36,6 @@ public class IdentityService {
     private final AgencyTokenCapacityService agencyTokenCapacityService;
     private final IdentityRepository identityRepository;
     private final CompoundRoles compoundRoles;
-    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final CsrsService csrsService;
     private final PasswordEncoder passwordEncoder;
     private final Utils utils;
@@ -89,7 +87,7 @@ public class IdentityService {
         String agencyTokenUid = null;
         if (agencyToken != null && agencyToken.hasData()) {
             Optional<AgencyToken> agencyTokenOptional =
-                    civilServantRegistryClient.getAgencyToken(agencyToken.getDomain(),
+                    csrsService.getAgencyToken(agencyToken.getDomain(),
                             agencyToken.getToken(), agencyToken.getOrg());
             if(agencyTokenOptional.isPresent()) {
                 AgencyToken agencyTokenFromCSRS = agencyTokenOptional.get();
@@ -187,10 +185,10 @@ public class IdentityService {
     }
 
     public boolean isDomainInAnAgencyToken(String domain) {
-        return civilServantRegistryClient.isDomainInAnAgencyToken(domain);
+        return csrsService.isDomainInAnAgencyToken(domain);
     }
 
     public boolean isAgencyTokenUidValidForDomain(String agencyTokenUid, String domain) {
-        return civilServantRegistryClient.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
+        return csrsService.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
     }
 }

@@ -11,7 +11,6 @@ import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.factory.EmailUpdateFactory;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -31,10 +30,10 @@ public class EmailUpdateService {
     private final EmailUpdateRepository emailUpdateRepository;
     private final EmailUpdateFactory emailUpdateFactory;
     private final NotifyService notifyService;
-    private final ICivilServantRegistryClient civilServantRegistryClient;
     private final IdentityService identityService;
     private final Clock clock;
     private final int validityInSeconds;
+    private final CsrsService csrsService;
 
     @Value("${govNotify.template.emailUpdate}")
     private String updateEmailTemplateId;
@@ -45,17 +44,16 @@ public class EmailUpdateService {
     public EmailUpdateService(EmailUpdateRepository emailUpdateRepository,
                               EmailUpdateFactory emailUpdateFactory,
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
-                              ICivilServantRegistryClient civilServantRegistryClient,
                               IdentityService identityService,
                               Clock clock,
-                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
+                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds, CsrsService csrsService) {
         this.emailUpdateRepository = emailUpdateRepository;
         this.emailUpdateFactory = emailUpdateFactory;
         this.notifyService = notifyService;
-        this.civilServantRegistryClient = civilServantRegistryClient;
         this.identityService = identityService;
         this.clock = clock;
         this.validityInSeconds = validityInSeconds;
+        this.csrsService = csrsService;
     }
 
     public boolean isEmailUpdateExpired(EmailUpdate emailUpdate) {
@@ -131,7 +129,7 @@ public class EmailUpdateService {
 
         log.debug("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
-        civilServantRegistryClient.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
+        csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
 
         emailUpdate.setUpdatedAt(now(clock));
         emailUpdate.setEmailUpdateStatus(UPDATED);

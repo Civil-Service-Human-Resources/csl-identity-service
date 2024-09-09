@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.service.CsrsService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.Invite;
 import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
@@ -80,8 +79,6 @@ public class SignupController {
 
     private final IdentityService identityService;
 
-    private final ICivilServantRegistryClient civilServantRegistryClient;
-
     private final CsrsService csrsService;
 
     private final AgencyTokenCapacityService agencyTokenCapacityService;
@@ -92,14 +89,12 @@ public class SignupController {
 
     public SignupController(InviteService inviteService,
                             IdentityService identityService,
-                            ICivilServantRegistryClient civilServantRegistryClient,
                             CsrsService csrsService,
                             AgencyTokenCapacityService agencyTokenCapacityService,
                             Utils utils,
                             Clock clock) {
         this.inviteService = inviteService;
         this.identityService = identityService;
-        this.civilServantRegistryClient = civilServantRegistryClient;
         this.csrsService = csrsService;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.utils = utils;
@@ -365,7 +360,7 @@ public class SignupController {
         }
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
-        if (!civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(domain, organisationCode)) {
+        if (!csrsService.isDomainInAnAgencyTokenWithOrg(domain, organisationCode)) {
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
@@ -395,7 +390,7 @@ public class SignupController {
 
         final String domain = utils.getDomainFromEmailAddress(invite.getForEmail());
 
-        Optional<AgencyToken> agencyTokenOptional = civilServantRegistryClient.getAgencyToken(
+        Optional<AgencyToken> agencyTokenOptional = csrsService.getAgencyToken(
                 domain, form.getToken(), orgCode);
 
         if(agencyTokenOptional.isEmpty()) {
