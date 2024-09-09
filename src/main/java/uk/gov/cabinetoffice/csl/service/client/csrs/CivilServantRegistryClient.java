@@ -76,7 +76,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     @Override
     @Cacheable("allowDomains")
     public List<String> getAllowListDomains() {
-        log.info("getAllowListDomainsFromCache: Fetching allowlist domains");
+        log.info("getAllowListDomains: Fetching allowlist domains");
         try {
             log.info("getAllowListDomains: Fetching allowlist domains from Civil Servant Registry");
             RequestEntity<Void> request = RequestEntity.get(domainsUrl).build();
@@ -111,7 +111,7 @@ public class CivilServantRegistryClient implements ICivilServantRegistryClient {
     @Override
     @Cacheable("organisations")
     public List<OrganisationalUnit> getAllOrganisations() {
-        log.info("getAllOrganisationsFromCache: Fetching all organisations");
+        log.info("getAllOrganisations: Fetching all organisations");
         log.info("getAllOrganisations: Fetching all organisations from Civil Servant Registry API");
         List<OrganisationalUnit> organisationalUnits = new ArrayList<>();
         GetOrganisationsResponse initialResponse = getOrganisations(1, 0);
