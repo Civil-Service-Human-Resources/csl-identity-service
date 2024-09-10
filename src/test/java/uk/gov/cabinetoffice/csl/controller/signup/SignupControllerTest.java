@@ -15,8 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.Domain;
 import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
+import uk.gov.cabinetoffice.csl.service.CsrsService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.domain.*;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
@@ -68,9 +68,6 @@ public class SignupControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ICivilServantRegistryClient civilServantRegistryClient;
-
-    @MockBean
     private InviteService inviteService;
 
     @MockBean
@@ -79,6 +76,9 @@ public class SignupControllerTest {
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    @MockBean
+    private CsrsService csrsService;
+
     private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"),
             ZoneId.of("Europe/London"));
 
@@ -86,6 +86,7 @@ public class SignupControllerTest {
     private final String GENERIC_DOMAIN = "domain.com";
     private final String GENERIC_CODE = "ABC123";
     private final String GENERIC_ORG_CODE = "org123";
+
 
     private Invite generateBasicInvite(boolean authorised) {
         Invite i = new Invite();
@@ -439,7 +440,7 @@ public class SignupControllerTest {
 
         Invite invite = generateBasicInvite(false);
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
+        when(csrsService.getOrganisationalUnitsByDomain(GENERIC_DOMAIN)).thenReturn(orgs);
 
         mockMvc.perform(
                         get("/signup/chooseOrganisation/" + GENERIC_CODE)
@@ -455,7 +456,7 @@ public class SignupControllerTest {
         List<OrganisationalUnit> orgs = Collections.singletonList(org);
         Invite invite = generateBasicInvite(false);
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
+        when(csrsService.getOrganisationalUnitsByDomain(GENERIC_DOMAIN)).thenReturn(orgs);
         mockMvc.perform(
                         post("/signup/chooseOrganisation/" + GENERIC_CODE)
                                 .with(csrf())
@@ -472,7 +473,8 @@ public class SignupControllerTest {
         List<OrganisationalUnit> orgs = Collections.singletonList(org);
         Invite invite = generateBasicInvite(false);
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
+        when(csrsService.getOrganisationalUnitsByDomain(GENERIC_DOMAIN)).thenReturn(orgs);
+
         mockMvc.perform(
                         post("/signup/chooseOrganisation/" + GENERIC_CODE)
                                 .with(csrf())
@@ -517,7 +519,7 @@ public class SignupControllerTest {
     public void shouldReturnEnterToken() throws Exception {
         Invite invite = generateBasicInvite(false);
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.isDomainInAnAgencyTokenWithOrg(GENERIC_DOMAIN, GENERIC_ORG_CODE))
+        when(csrsService.isDomainInAnAgencyTokenWithOrg(GENERIC_DOMAIN, GENERIC_ORG_CODE))
                 .thenReturn(true);
 
         mockMvc.perform(
@@ -553,7 +555,7 @@ public class SignupControllerTest {
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
+        when(csrsService.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -578,7 +580,7 @@ public class SignupControllerTest {
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
+        when(csrsService.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
                 .thenReturn(optionalAgencyToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
 
@@ -600,7 +602,7 @@ public class SignupControllerTest {
         Optional<AgencyToken> emptyOptional = Optional.empty();
 
         when(inviteService.getValidInviteForCode(GENERIC_CODE)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
+        when(csrsService.getAgencyToken(GENERIC_DOMAIN, token, GENERIC_ORG_CODE))
                 .thenReturn(emptyOptional);
 
         mockMvc.perform(

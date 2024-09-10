@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.service.CsrsService;
 import uk.gov.cabinetoffice.csl.service.client.identity.IIdentityClient;
 
 @AllArgsConstructor
@@ -15,7 +15,7 @@ import uk.gov.cabinetoffice.csl.service.client.identity.IIdentityClient;
 public class CacheResetController {
 
     private final IIdentityClient identityClient;
-    private final ICivilServantRegistryClient civilServantRegistryClient;
+    private final CsrsService csrsService;
 
     @GetMapping(path = "/service-token", produces = "application/json")
     public ResponseEntity<?> evictServiceTokenFromCache() {
@@ -25,13 +25,13 @@ public class CacheResetController {
 
     @GetMapping(path = "/allowlist-domains", produces = "application/json")
     public ResponseEntity<?> evictAllowListDomainCache() {
-        civilServantRegistryClient.evictAllowListDomainCache();
+        csrsService.evictAllowListDomainCache();
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping(path = "/organisations", produces = "application/json")
     public ResponseEntity<?> evictOrganisationsCache() {
-        civilServantRegistryClient.evictOrganisationsCache();
+        csrsService.evictOrganisationsCache();
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }
