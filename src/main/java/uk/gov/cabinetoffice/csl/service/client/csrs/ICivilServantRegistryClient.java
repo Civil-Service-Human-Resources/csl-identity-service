@@ -1,7 +1,6 @@
 package uk.gov.cabinetoffice.csl.service.client.csrs;
 
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
-import uk.gov.cabinetoffice.csl.dto.DomainsResponse;
 import uk.gov.cabinetoffice.csl.dto.OrganisationalUnit;
 
 import java.util.List;
@@ -9,25 +8,15 @@ import java.util.Optional;
 
 public interface ICivilServantRegistryClient {
 
-    boolean isDomainAllowListed(String domain);
-
-    boolean isDomainValid(String domain);
-
     boolean isDomainInAnAgencyToken(String domain);
 
     boolean isDomainInAnAgencyTokenWithOrg(String domain, String orgCode);
 
-    DomainsResponse getAllowListDomains();
-
-    List<String> getAllowListDomainsFromCache();
+    List<String> getAllowListDomains();
 
     void evictAllowListDomainCache();
 
-    List<OrganisationalUnit> getFilteredOrganisations(String domain);
-
     List<OrganisationalUnit> getAllOrganisations();
-
-    List<OrganisationalUnit> getAllOrganisationsFromCache();
 
     void evictOrganisationsCache();
 

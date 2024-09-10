@@ -13,7 +13,6 @@ import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -48,7 +47,7 @@ public class EmailUpdateServiceTest {
     private IdentityService identityService;
 
     @MockBean
-    private ICivilServantRegistryClient civilServantRegistryClient;
+    private CsrsService csrsService;
 
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
@@ -87,7 +86,7 @@ public class EmailUpdateServiceTest {
 
         emailUpdateService.updateEmailAddress(emailUpdate);
 
-        verify(civilServantRegistryClient, times(1)).removeOrganisationalUnitFromCivilServant(any());
+        verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
                 eq(emailUpdate.getNewEmail()), isNull());
 
@@ -113,7 +112,7 @@ public class EmailUpdateServiceTest {
 
         emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
 
-        verify(civilServantRegistryClient, times(1)).removeOrganisationalUnitFromCivilServant(any());
+        verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
                 eq(emailUpdate.getNewEmail()), eq(agencyToken));
 
