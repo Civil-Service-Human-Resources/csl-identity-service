@@ -48,7 +48,6 @@ public class EmailUpdateController {
     private static final String REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE = "redirect:/account/email/update/error?codeExpired=true";
     private static final String REDIRECT_ACCOUNT_EMAIL_CODE_ALREADY_USED = "redirect:/account/email/update/error?codeAlreadyUsed=true";
 
-
     private static final String REDIRECT_LOGIN = "redirect:/login";
 
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
