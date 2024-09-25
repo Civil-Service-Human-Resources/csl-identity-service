@@ -36,7 +36,5 @@ public class LogoutUtil {
             Long n = oauth2AuthorizationRepository.deleteByPrincipalName(uid);
             log.debug("LogoutUtil: {} Oauth2Authorization entries deleted from DB for principal_name {}", n, uid);
         }
-        request.getSession().invalidate();
-        log.debug("LogoutUtil: Session is invalidated.");
     }
 }
