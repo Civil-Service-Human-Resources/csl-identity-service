@@ -29,7 +29,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("no-redis")
-public class EmailUpdateCompletionWhileNotLoginEmailUpdateControllerTest {
+public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
     private static final String VERIFY_EMAIL_PATH = "/account/email/verify/";

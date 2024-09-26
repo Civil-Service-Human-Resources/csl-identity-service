@@ -26,7 +26,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @AutoConfigureMockMvc
 @ActiveProfiles("no-redis")
 @WithMockCustomUser
-public class EmailUpdateRequestWhileLoginEmailUpdateControllerTest {
+public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
 
     private static final String UPDATE_EMAIL_FORM_TEMPLATE = "updateEmailForm";
     private static final String UPDATE_EMAIL_VIEW_NAME_TEMPLATE = "emailupdate/updateEmail";
