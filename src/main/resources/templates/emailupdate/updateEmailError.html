@@ -20,7 +20,7 @@
                     There was a problem with your email address
                 </h2>
                 <ul class="error-summary-list">
-                    <li class="error-message">This email address is already taken.</li>
+                    <li class="error-message">This email address is already taken</li>
                 </ul>
             </div>
             <div th:if="${param.invalidCode}" class="error-summary" role="alert"
@@ -47,16 +47,7 @@
                     Your email update request is expired
                 </h2>
                 <ul class="error-summary-list">
-                    <li class="error-message">Please submit the request again.</li>
-                </ul>
-            </div>
-            <div th:if="${param.codeAlreadyUsed}" class="error-summary" role="alert"
-                 aria-labelledby="error-summary-heading-example-1" tabindex="-1">
-                <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-6">
-                    This email update link is already used
-                </h2>
-                <ul class="error-summary-list">
-                    <li class="error-message">Please check the email update link.</li>
+                    <li class="error-message">Please submit the request again</li>
                 </ul>
             </div>
         </div>

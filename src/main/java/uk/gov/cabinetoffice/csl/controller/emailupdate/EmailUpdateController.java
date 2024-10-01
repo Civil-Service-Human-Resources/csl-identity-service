@@ -46,7 +46,6 @@ public class EmailUpdateController {
     private static final String REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE = "redirect:/account/email/update/error?notValidEmailDomain=true";
     private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE = "redirect:/account/email/update/error?invalidCode=true";
     private static final String REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE = "redirect:/account/email/update/error?codeExpired=true";
-    private static final String REDIRECT_ACCOUNT_EMAIL_CODE_ALREADY_USED = "redirect:/account/email/update/error?codeAlreadyUsed=true";
 
     private static final String REDIRECT_LOGIN = "redirect:/login";
 
@@ -147,11 +146,6 @@ public class EmailUpdateController {
         EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
         String oldEmail = emailUpdate.getPreviousEmail();
         String newEmail = emailUpdate.getNewEmail();
-
-        if(UPDATED.equals(emailUpdate.getEmailUpdateStatus())) {
-            log.info("Email update link is already used: {} oldEmail {}, newEmail: {}", code, oldEmail, newEmail);
-            return REDIRECT_ACCOUNT_EMAIL_CODE_ALREADY_USED;
-        }
 
         if(!identityService.isIdentityExistsForEmail(oldEmail)) {
             log.info("Unable to update email for the code {}. identity not found for email {}", code, oldEmail);
