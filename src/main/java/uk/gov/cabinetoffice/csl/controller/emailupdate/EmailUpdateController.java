@@ -21,7 +21,6 @@ import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
 
-import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @Slf4j
