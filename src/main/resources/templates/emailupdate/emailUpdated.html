@@ -22,15 +22,6 @@
         </div>
     </div>
 </div>
-<script th:inline="javascript">
-    setInterval(function() {
-        var div = document.querySelector("#signOutTimerInSeconds");
-        var count = div.textContent * 1 - 1;
-        div.textContent = count;
-        if (count <= 0) {
-            window.location.replace(document.querySelector("#signOutLink").textContent);
-        }
-    }, 1000);
-</script>
+<script type="text/javascript" src="/assets/js/auto-logout.js"></script>
 </content>
 </page>
