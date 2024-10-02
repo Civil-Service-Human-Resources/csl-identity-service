@@ -19,14 +19,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("no-redis")
-@WithMockCustomUser
 public class MaintenancePageControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
+    @WithMockCustomUser
+    public void shouldDisplayMaintenancePageForLoggedInUser() throws Exception {
+        String lpgUiUrl = "http://localhost:3001";
+        mockMvc.perform(get("/maintenance")
+                        .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(lpgUiUrl))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldDisplayMaintenancePageForNotLoggedInUser() throws Exception {
         String lpgUiUrl = "http://localhost:3001";
         mockMvc.perform(get("/maintenance")
                         .with(csrf())
