@@ -8,23 +8,15 @@ import java.util.Optional;
 
 public interface ICivilServantRegistryClient {
 
-    boolean isDomainAllowListed(String domain);
-
-    boolean isDomainValid(String domain);
-
     boolean isDomainInAnAgencyToken(String domain);
 
     boolean isDomainInAnAgencyTokenWithOrg(String domain, String orgCode);
 
-    List<String> getAllowListDomainsFromCache();
+    List<String> getAllowListDomains();
 
     void evictAllowListDomainCache();
 
-    List<OrganisationalUnit> getFilteredOrganisations(String domain);
-
     List<OrganisationalUnit> getAllOrganisations();
-
-    List<OrganisationalUnit> getAllOrganisationsFromCache();
 
     void evictOrganisationsCache();
 

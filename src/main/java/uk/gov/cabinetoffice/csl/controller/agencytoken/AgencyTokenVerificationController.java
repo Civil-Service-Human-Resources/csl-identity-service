@@ -16,11 +16,7 @@ import uk.gov.cabinetoffice.csl.dto.VerificationCodeType;
 import uk.gov.cabinetoffice.csl.exception.NotEnoughSpaceAvailableException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.VerificationCodeTypeNotFound;
-import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
-import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
-import uk.gov.cabinetoffice.csl.service.ReactivationService;
-import uk.gov.cabinetoffice.csl.service.VerificationCodeDeterminationService;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.service.*;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import static java.lang.String.format;
@@ -43,8 +39,6 @@ public class AgencyTokenVerificationController {
 
     private final EmailUpdateService emailUpdateService;
 
-    private final ICivilServantRegistryClient civilServantRegistryClient;
-
     private final Utils utils;
 
     private final AgencyTokenCapacityService agencyTokenCapacityService;
@@ -52,6 +46,8 @@ public class AgencyTokenVerificationController {
     private final ReactivationService reactivationService;
 
     private final VerificationCodeDeterminationService verificationCodeDeterminationService;
+
+    private final CsrsService csrsService;
 
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
@@ -92,7 +88,7 @@ public class AgencyTokenVerificationController {
             String domainFromEmailAddress =
                     utils.getDomainFromEmailAddress(verificationCodeDetermination.getEmail());
 
-            AgencyToken agencyToken = civilServantRegistryClient
+            AgencyToken agencyToken = csrsService
                     .getAgencyToken(domainFromEmailAddress, token, organisation)
                     .orElseThrow(() -> new ResourceNotFoundException("Agency Token for DomainTokenOrganisation Not Found"));
 
@@ -144,6 +140,6 @@ public class AgencyTokenVerificationController {
     }
 
     private void addOrganisationsToModel(Model model) {
-        model.addAttribute("organisations", civilServantRegistryClient.getAllOrganisationsFromCache());
+        model.addAttribute("organisations", csrsService.getAllOrganisationalUnits());
     }
 }

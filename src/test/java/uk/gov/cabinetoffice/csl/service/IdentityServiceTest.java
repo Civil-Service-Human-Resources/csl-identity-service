@@ -13,7 +13,6 @@ import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
 import uk.gov.cabinetoffice.csl.repository.CompoundRolesRepository;
 import uk.gov.cabinetoffice.csl.repository.IdentityRepository;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Clock;
@@ -50,7 +49,7 @@ public class IdentityServiceTest {
     private IdentityRepository identityRepository;
 
     @Mock
-    private ICivilServantRegistryClient civilServantRegistryClient;
+    private CsrsService csrsService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -66,7 +65,7 @@ public class IdentityServiceTest {
                 agencyTokenCapacityService,
                 identityRepository,
                 new CompoundRolesRepository(),
-                civilServantRegistryClient,
+                csrsService,
                 passwordEncoder,
                 utils,
                 clock
@@ -125,7 +124,7 @@ public class IdentityServiceTest {
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
         when(passwordEncoder.encode("password")).thenReturn("password");
-        when(civilServantRegistryClient.isDomainAllowListed(domain)).thenReturn(true);
+        when(csrsService.isDomainAllowlisted(domain)).thenReturn(true);
 
         identityService.createIdentityFromInviteCode(code, "password", agencyToken);
 
@@ -167,7 +166,7 @@ public class IdentityServiceTest {
         agencyToken.setToken(tokenToken);
 
         when(inviteService.getInviteForCode(code)).thenReturn(invite);
-        when(civilServantRegistryClient.getAgencyToken(tokenDomain, tokenToken, tokenCode))
+        when(csrsService.getAgencyToken(tokenDomain, tokenToken, tokenCode))
                 .thenReturn(Optional.of(agencyToken));
         when(passwordEncoder.encode("password")).thenReturn("password");
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);

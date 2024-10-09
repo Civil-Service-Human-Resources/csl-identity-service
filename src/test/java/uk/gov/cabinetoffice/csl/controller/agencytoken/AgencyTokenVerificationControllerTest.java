@@ -16,11 +16,7 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.dto.*;
 import uk.gov.cabinetoffice.csl.exception.NotEnoughSpaceAvailableException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
-import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
-import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
-import uk.gov.cabinetoffice.csl.service.ReactivationService;
-import uk.gov.cabinetoffice.csl.service.VerificationCodeDeterminationService;
-import uk.gov.cabinetoffice.csl.service.client.csrs.ICivilServantRegistryClient;
+import uk.gov.cabinetoffice.csl.service.*;
 import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -74,18 +70,18 @@ public class AgencyTokenVerificationControllerTest {
     private ReactivationService reactivationService;
 
     @MockBean
-    private ICivilServantRegistryClient civilServantRegistryClient;
-
-    @MockBean
     private Utils utils;
 
     private List<OrganisationalUnit> organisations;
+
+    @MockBean
+    private CsrsService csrsService;
 
     @BeforeEach
     public void setup() {
         organisations = new ArrayList<>();
         organisations.add(new OrganisationalUnit());
-        when(civilServantRegistryClient.getAllOrganisationsFromCache()).thenReturn(organisations);
+        when(csrsService.getAllOrganisationalUnits()).thenReturn(organisations);
     }
 
     @Test
@@ -133,7 +129,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
@@ -163,7 +159,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         Reactivation reactivation = new Reactivation();
@@ -193,7 +189,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
 
         EmailUpdate emailUpdate = new EmailUpdate();
@@ -219,7 +215,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
@@ -251,7 +247,7 @@ public class AgencyTokenVerificationControllerTest {
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
         when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenThrow(new NotEnoughSpaceAvailableException("No space available"));
@@ -274,7 +270,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
@@ -304,7 +300,7 @@ public class AgencyTokenVerificationControllerTest {
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
-        when(civilServantRegistryClient.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
         when(emailUpdateService.getEmailUpdateRequestForCode(CODE)).thenThrow(new NotEnoughSpaceAvailableException("No space available"));
