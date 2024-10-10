@@ -165,6 +165,7 @@ public class IdentityService {
 
     public void reactivateIdentity(Identity identity, AgencyToken agencyToken) {
         identity.setActive(true);
+        identity.setDeletionNotificationSent(false);
         if (agencyToken != null && agencyToken.getUid() != null) {
             identity.setAgencyTokenUid(agencyToken.getUid());
         }
