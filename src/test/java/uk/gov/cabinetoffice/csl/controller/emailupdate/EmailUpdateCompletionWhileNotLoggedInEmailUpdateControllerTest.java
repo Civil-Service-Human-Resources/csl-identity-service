@@ -10,8 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
+import uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus;
 import uk.gov.cabinetoffice.csl.service.*;
-import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
 
 import java.time.ZoneId;
 
@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.PENDING;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
@@ -50,7 +51,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToErrorOccurredIfNewEmailIsNotAllowListedAndNotAgency() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -62,7 +63,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE))
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE))
                 .andExpect(redirectedUrl("/login"))
                 .andDo(print());
     }
@@ -82,8 +83,25 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
     }
 
     @Test
+    public void givenAValidCode_whenUpdateEmailLinkAlreadyUsed_shouldRedirectToUpdateEmailPageWithCodeAlreadyUsedError() throws Exception {
+        EmailUpdate emailUpdate = createEmailUpdate(UPDATED);
+
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
+        when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
+
+        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
+                        .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/account/email/update/error?codeAlreadyUsed=true"))
+                .andDo(print());
+
+        verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
+    }
+
+    @Test
     public void givenAValidCode_whenUpdateEmailExpired_shouldRedirectToUpdateEmailPageWithCodeExpiredError() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -102,7 +120,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsAllowListedButNotAgency() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -124,7 +142,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsNotAllowListedButIsAgency() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -147,7 +165,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     @Test
     public void givenAValidCodeAndNonExistentIdentity_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnInvalidEmailError() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -167,7 +185,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     @Test
     public void givenAValidCodeAndATechnicalErrorWhenUpdating_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnErrorOccurredError() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -181,7 +199,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE))
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE))
                 .andExpect(redirectedUrl("/login"))
                 .andDo(print());
 
@@ -197,13 +215,13 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
                 .andExpect(view().name(EMAIL_UPDATED_TEMPLATE));
     }
 
-    private EmailUpdate createEmailUpdate() {
+    private EmailUpdate createEmailUpdate(EmailUpdateStatus status) {
         EmailUpdate emailUpdate = new EmailUpdate();
         emailUpdate.setCode(VERIFY_CODE);
         emailUpdate.setPreviousEmail(PREVIOUS_EMAIL);
         emailUpdate.setNewEmail(NEW_EMAIL);
         emailUpdate.setRequestedAt(now(ZoneId.of("Europe/London")));
-        emailUpdate.setEmailUpdateStatus(PENDING);
+        emailUpdate.setEmailUpdateStatus(status);
         return emailUpdate;
     }
 }
