@@ -93,7 +93,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email/update/error?codeAlreadyUsed=true"))
+                .andExpect(redirectedUrl("/account/email/updated"))
                 .andDo(print());
 
         verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
