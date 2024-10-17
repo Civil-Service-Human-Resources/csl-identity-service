@@ -108,7 +108,7 @@ public class EmailUpdateController {
         log.info("Change email requested, sending change email link to {} for verification", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
-            log.warn("Email {} is already in use.", newEmail);
+            log.warn("Email {} is already in use", newEmail);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
