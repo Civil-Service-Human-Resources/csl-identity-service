@@ -186,8 +186,8 @@ public class EmailUpdateController {
                 return REDIRECT_LOGIN;
             }
         } else {
-            log.warn("User trying to verify change email where new email is neither allow listed nor an agency token:"
-                    + " oldEmail = {}, newEmail = {}", oldEmail, newEmail);
+            log.warn("User trying to verify change email where new email is neither allow listed nor an agency token: " +
+                    "oldEmail = {}, newEmail = {}", oldEmail, newEmail);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         }
