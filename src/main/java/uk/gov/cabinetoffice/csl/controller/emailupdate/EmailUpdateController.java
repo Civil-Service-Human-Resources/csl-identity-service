@@ -105,15 +105,15 @@ public class EmailUpdateController {
             return UPDATE_EMAIL_TEMPLATE;
         }
         String newEmail = form.getEmail();
-        log.info("Change email requested, sending email to {} for verification", newEmail);
+        log.info("Change email requested, sending change email link to {} for verification", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
-            log.warn("Email already in use: {}", newEmail);
+            log.warn("Email {} is already in use.", newEmail);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
         if (!identityService.isValidEmailDomain(newEmail)) {
-            log.warn("Email is neither allow listed or for an agency token: {}", newEmail);
+            log.warn("Email {} is neither allow listed nor an agency token", newEmail);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
 
@@ -139,7 +139,7 @@ public class EmailUpdateController {
         }
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
-            log.warn("Email update code does not exist: {}", code);
+            log.warn("Email update code {} does not exist", code);
             return REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE;
         }
 
@@ -148,7 +148,7 @@ public class EmailUpdateController {
         String newEmail = emailUpdate.getNewEmail();
 
         if(UPDATED.equals(emailUpdate.getEmailUpdateStatus())) {
-            log.info("Email update link is already used: {} oldEmail {}, newEmail: {}", code, oldEmail, newEmail);
+            log.info("Email update code {} is already used. oldEmail = {}, newEmail = {}", code, oldEmail, newEmail);
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
             return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
         }
@@ -159,7 +159,7 @@ public class EmailUpdateController {
         }
 
         if(emailUpdateService.isEmailUpdateExpired(emailUpdate)) {
-            log.info("Email update code expired: {} oldEmail {}, newEmail: {}", code, oldEmail, newEmail);
+            log.info("Email update code {} expired. oldEmail = {}, newEmail = {}", code, oldEmail, newEmail);
             return REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE;
         }
 
@@ -176,7 +176,7 @@ public class EmailUpdateController {
                     newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
-                log.debug("Email updated success for: {}", newEmail);
+                log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
@@ -186,8 +186,8 @@ public class EmailUpdateController {
                 return REDIRECT_LOGIN;
             }
         } else {
-            log.warn("User trying to verify change email where new email is not allow listed or agency: " +
-                    "oldEmail = {}, newEmail = {}", oldEmail, newEmail);
+            log.warn("User trying to verify change email where new email is neither allow listed nor an agency token:"
+                    + " oldEmail = {}, newEmail = {}", oldEmail, newEmail);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
         }
