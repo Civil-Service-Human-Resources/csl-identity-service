@@ -176,6 +176,7 @@ public class EmailUpdateController {
                     newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
+                log.debug("Email updated success for: {}", newEmail);
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
@@ -196,12 +197,9 @@ public class EmailUpdateController {
     public String emailUpdated(Model model) {
         Map<String, Object> modelMap = model.asMap();
         String updatedEmail = String.valueOf(modelMap.get(EMAIL_ATTRIBUTE));
-
         model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, updatedEmail);
         model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
         model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
-
-        log.debug("Email updated success for: {}", updatedEmail);
         return EMAIL_UPDATED_TEMPLATE;
     }
 
