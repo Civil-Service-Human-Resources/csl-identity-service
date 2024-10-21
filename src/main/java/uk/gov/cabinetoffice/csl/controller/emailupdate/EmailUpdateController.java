@@ -21,6 +21,7 @@ import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
 
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @Slf4j
@@ -104,15 +105,15 @@ public class EmailUpdateController {
             return UPDATE_EMAIL_TEMPLATE;
         }
         String newEmail = form.getEmail();
-        log.info("Change email requested, sending email to {} for verification", newEmail);
+        log.info("Change email requested, sending change email link to {} for verification", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
-            log.warn("Email already in use: {}", newEmail);
+            log.warn("Email {} is already in use", newEmail);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
         if (!identityService.isValidEmailDomain(newEmail)) {
-            log.warn("Email is neither allow listed or for an agency token: {}", newEmail);
+            log.warn("Email {} is neither allow listed nor an agency token", newEmail);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
 
@@ -138,7 +139,7 @@ public class EmailUpdateController {
         }
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
-            log.warn("Email update code does not exist: {}", code);
+            log.warn("Email update code {} does not exist", code);
             return REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE;
         }
 
@@ -146,13 +147,19 @@ public class EmailUpdateController {
         String oldEmail = emailUpdate.getPreviousEmail();
         String newEmail = emailUpdate.getNewEmail();
 
+        if(UPDATED.equals(emailUpdate.getEmailUpdateStatus())) {
+            log.info("Email update code {} is already used. oldEmail = {}, newEmail = {}", code, oldEmail, newEmail);
+            redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
+            return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
+        }
+
         if(!identityService.isIdentityExistsForEmail(oldEmail)) {
             log.info("Unable to update email for the code {}. identity not found for email {}", code, oldEmail);
             return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
         }
 
         if(emailUpdateService.isEmailUpdateExpired(emailUpdate)) {
-            log.info("Email update code expired: {} oldEmail {}, newEmail: {}", code, oldEmail, newEmail);
+            log.info("Email update code {} expired. oldEmail = {}, newEmail = {}", code, oldEmail, newEmail);
             return REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE;
         }
 
@@ -169,6 +176,7 @@ public class EmailUpdateController {
                     newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
+                log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
@@ -178,7 +186,7 @@ public class EmailUpdateController {
                 return REDIRECT_LOGIN;
             }
         } else {
-            log.warn("User trying to verify change email where new email is not allow listed or agency: " +
+            log.warn("User trying to verify change email where new email is neither allow listed nor an agency token: " +
                     "oldEmail = {}, newEmail = {}", oldEmail, newEmail);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
@@ -189,12 +197,9 @@ public class EmailUpdateController {
     public String emailUpdated(Model model) {
         Map<String, Object> modelMap = model.asMap();
         String updatedEmail = String.valueOf(modelMap.get(EMAIL_ATTRIBUTE));
-
         model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, updatedEmail);
         model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
         model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
-
-        log.debug("Email updated success for: {}", updatedEmail);
         return EMAIL_UPDATED_TEMPLATE;
     }
 
