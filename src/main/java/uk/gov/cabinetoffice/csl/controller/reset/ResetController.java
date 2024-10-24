@@ -14,10 +14,7 @@ import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
-import uk.gov.cabinetoffice.csl.util.Utils;
 import uk.gov.service.notify.NotificationClientException;
-
-import java.time.LocalDateTime;
 
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_EMAIL_ATTRIBUTE;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_NUMBER_ATTRIBUTE;
@@ -36,9 +33,6 @@ public class ResetController {
     @Value("${lpg.uiSignOutUrl}")
     private String lpgUiSignOutUrl;
 
-    @Value("${reset.validityInSeconds}")
-    private long validityInSeconds;
-
     @Value("${lpg.contactEmail}")
     private String contactEmail;
 
@@ -53,16 +47,12 @@ public class ResetController {
 
     private final ResetFormValidator resetFormValidator;
 
-    private final Utils utils;
-
     public ResetController(ResetService resetService, PasswordService passwordService,
-                           IdentityService identityService, ResetFormValidator resetFormValidator,
-                           Utils utils) {
+                           IdentityService identityService, ResetFormValidator resetFormValidator) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
         this.resetFormValidator = resetFormValidator;
-        this.utils = utils;
     }
 
     @GetMapping
@@ -74,36 +64,22 @@ public class ResetController {
     public String requestReset(@RequestParam(value = "email") String email, Model model)
             throws NotificationClientException {
         log.debug("Reset request received for email {}", email);
-
+        model.addAttribute("resetEmailId", email);
         model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
-
         if (identityService.isIdentityExistsForEmail(email)) {
             Reset pendingReset = resetService.getPendingResetForEmail(email);
-            String resetValidityMessage1;
-            String resetValidityMessage2 = "";
             if(pendingReset == null) {
                 resetService.createPendingResetRequestAndAndNotifyUser(email);
                 log.info("Reset request email sent to {}", email);
-                resetValidityMessage1 = "The link will expire in %s."
-                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
-                model.addAttribute("resetValidityMessage1", resetValidityMessage1);
                 return CHECK_EMAIL_TEMPLATE;
             } else {
                 log.info("Pending Reset exists for email {}", email);
-                LocalDateTime requestedAt = pendingReset.getRequestedAt();
-                LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
-                resetValidityMessage1 = "We recently sent you an email to reset your password.";
-                resetValidityMessage2 = "Please check your emails (including the junk/spam folder).";
-                model.addAttribute("resetValidityMessage1", resetValidityMessage1);
-                model.addAttribute("resetValidityMessage2", resetValidityMessage2);
                 return PENDING_RESET_TEMPLATE;
             }
         } else {
             log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
-            model.addAttribute("userMessage", "Invalid email id.\n" +
-                    "Submit the reset request for the valid email id.");
-            return REQUEST_RESET_TEMPLATE;
+            return CHECK_EMAIL_TEMPLATE;
         }
     }
 
