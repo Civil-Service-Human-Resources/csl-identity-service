@@ -15,7 +15,6 @@ import uk.gov.cabinetoffice.csl.domain.Reset;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
-import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.LocalDateTime;
 
@@ -54,8 +53,6 @@ public class ResetControllerTest {
     @MockBean
     private IdentityService identityService;
 
-    private final Utils utils = new Utils();
-
     @Test
     public void shouldLoadRequestResetForm() throws Exception {
         mockMvc.perform(
@@ -82,11 +79,9 @@ public class ResetControllerTest {
                 .andExpect(view().name("reset/checkEmail"))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
-                .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
-                .andExpect(content().string(containsString("The link will expire in 24 hours.")))
-                .andExpect(content().string(containsString("Haven't received the email?")))
-                .andExpect(content().string(containsString("Check your spam folder.")))
-                .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+//                .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
+                .andExpect(model().attributeExists("resetEmailId"))
+                .andExpect(content().string(containsString(EMAIL)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
@@ -96,17 +91,11 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadPendingResetPageIfUserTryToResetAgainWhilePendingResetExistsForTheGivenEmailId() throws Exception {
-        final long validityInSeconds = 86400;
         when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
         Reset reset = createReset();
         LocalDateTime requestedAt = LocalDateTime.now();
         reset.setRequestedAt(requestedAt);
 
-        LocalDateTime resetLinkExpiryDateTime = requestedAt.plusSeconds(validityInSeconds);
-        String setRequestedAtStr = utils.convertDateTimeFormat(requestedAt.toString());
-        String resetLinkExpiryDateTimeStr = utils.convertDateTimeFormat(resetLinkExpiryDateTime.toString());
-        String resetValidityMessage1 = "We recently sent you an email to reset your password.";
-        String resetValidityMessage2 = "Please check your emails (including the junk/spam folder).";
         when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
 
         mockMvc.perform(post("/reset")
@@ -118,8 +107,8 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Password reset pending")))
                 .andExpect(content().string(containsString("What next?")))
                 .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
-                .andExpect(content().string(containsString(resetValidityMessage1)))
-                .andExpect(content().string(containsString(resetValidityMessage2)))
+                .andExpect(content().string(containsString("We recently sent you an email to reset your password.")))
+                .andExpect(content().string(containsString("Please check your emails (including the junk/spam folder).")))
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
@@ -131,19 +120,23 @@ public class ResetControllerTest {
     }
 
     @Test
-    public void shouldLoadRequestResetFormWithErrorMessageIfIdentityDoesNotExistForTheGivenEmailId() throws Exception {
+    public void shouldLoadCheckEmailPageIfIdentityDoesNotExistForTheGivenEmailId() throws Exception {
         when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(false);
         mockMvc.perform(post("/reset")
                         .param("email", EMAIL)
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name("reset/requestReset"))
-                .andExpect(content().string(containsString("Invalid email id.\nSubmit the reset request for the valid email id.")))
-                .andExpect(content().string(containsString("id=\"email\"")))
-                .andExpect(content().string(containsString("Reset your password")))
-                .andExpect(content().string(containsString("Enter your email")))
-                .andExpect(content().string(containsString("Email address")))
+                .andExpect(view().name("reset/checkEmail"))
+                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(content().string(containsString("What next?")))
+//                .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
+                .andExpect(model().attributeExists("resetEmailId"))
+                .andExpect(content().string(containsString(EMAIL)))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
                 .andDo(print());
     }
 

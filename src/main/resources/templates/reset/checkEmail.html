@@ -12,22 +12,14 @@
     <div class="grid-row">
         <div class="column-two-thirds">
             <h2 class="heading-medium">What next?</h2>
-            <p>Check your email for the link to reset your password.</p>
-            <p th:text="${resetValidityMessage1}"></p>
-            <details role="group">
-                <summary role="button" aria-controls="details-content-0" aria-expanded="false">
-                    <span class="summary">Haven't received the email?</span>
-                </summary>
-                <div class="panel panel-border-narrow" id="details-content-0" aria-hidden="true">
-                    <div class="text">
-                        <p>Check your spam folder.</p>
-                        <p>If you don't see the email after 30 minutes, you can contact the Learning Platform
-                            for Government helpdesk on <a th:href="'tel:'+${contactNumber}" th:text="${contactNumber}"></a> or by email on
-                            <a th:href="'mailto:'+${contactEmail}" th:text="${contactEmail}"></a>.
-                        </p>
-                    </div>
-                </div>
-            </details>
+            <p>If <span th:text="${resetEmailId}"></span> belongs to a valid account you will receive an
+                email with a reset link. Please check any spam or junk mail folders if you don’t see the email.
+            </p>
+            <br>
+            <p>If problems persist you can contact the Learning Platform for Government helpdesk on
+                <a th:href="'tel:'+${contactNumber}" th:text="${contactNumber}"></a> or
+                by email on <a th:href="'mailto:'+${contactEmail}" th:text="${contactEmail}"></a>
+            </p>
         </div>
     </div>
 </div>
