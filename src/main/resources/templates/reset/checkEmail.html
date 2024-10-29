@@ -10,10 +10,10 @@
         </div>
     </div>
     <div class="grid-row">
-        <div class="column-two-thirds">
+        <div class="column-full">
             <h2 class="heading-medium">What next?</h2>
-            <p>Check your email for the link to reset your password.</p>
-            <p th:text="${resetValidityMessage1}"></p>
+            <p>If <b><span th:text="${resetEmailId}"></span></b> belongs to a valid account you will receive an email with a reset link.</p>
+            <p>Please check your emails (including the junk/spam folder).</p>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">
                     <span class="summary">Haven't received the email?</span>
