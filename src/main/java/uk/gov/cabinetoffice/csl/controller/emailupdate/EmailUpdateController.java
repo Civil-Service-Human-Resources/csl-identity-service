@@ -105,7 +105,7 @@ public class EmailUpdateController {
             return UPDATE_EMAIL_TEMPLATE;
         }
         String newEmail = form.getEmail();
-        log.info("Change email requested, sending change email link to {} for verification", newEmail);
+        log.info("Email update requested, sending change email link to {} for verification", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
             log.warn("Email {} is already in use", newEmail);
