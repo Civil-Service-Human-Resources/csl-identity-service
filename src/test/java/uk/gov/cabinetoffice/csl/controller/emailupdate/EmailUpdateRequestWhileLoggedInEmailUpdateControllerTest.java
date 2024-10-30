@@ -129,6 +129,7 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Email update requested")))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
