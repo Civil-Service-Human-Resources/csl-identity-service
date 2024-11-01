@@ -114,14 +114,13 @@ public class EmailUpdateController {
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
         emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail);
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
-        model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
         return EMAIL_VERIFICATION_SENT_TEMPLATE;
     }
 
     @GetMapping("/verify/{code}")
     public String verifyEmail(@PathVariable String code, Authentication authentication,
                               HttpServletRequest request, HttpServletResponse response,
-                              RedirectAttributes redirectAttributes, Model model) {
+                              RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
 
         Object principal = authentication != null ? authentication.getPrincipal() : null;
@@ -170,9 +169,8 @@ public class EmailUpdateController {
                 emailUpdateService.updateEmailAddress(emailUpdate);
                 log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
                 frontendService.signoutUser();
-                model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, newEmail);
-                model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
-                return EMAIL_UPDATED_TEMPLATE;
+                redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
+                return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
                 log.error("Unable to update old email = {} to newEmail = {}. Exception: {}", oldEmail, newEmail

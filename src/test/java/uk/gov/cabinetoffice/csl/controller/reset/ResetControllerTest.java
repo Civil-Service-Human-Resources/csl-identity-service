@@ -2,6 +2,7 @@ package uk.gov.cabinetoffice.csl.controller.reset;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
@@ -20,7 +22,7 @@ import java.time.LocalDateTime;
 
 import static java.time.Month.FEBRUARY;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,6 +51,9 @@ public class ResetControllerTest {
 
     @MockBean
     private ResetService resetService;
+
+    @MockBean
+    private FrontendService frontendService;
 
     @MockBean
     private IdentityService identityService;
@@ -431,8 +436,10 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Password reset complete")))
                 .andExpect(content().string(containsString("Your new password has been changed")))
                 .andExpect(content().string(containsString("What happens next?")))
-                .andExpect(model().attributeExists("lpgUiSignOutUrl"))
+                .andExpect(model().attributeExists("lpgUiUrl"))
                 .andDo(print());
+
+        verify(frontendService, atMostOnce()).signoutUser();
     }
 
     private Reset createReset() {
