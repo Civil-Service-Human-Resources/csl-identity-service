@@ -15,6 +15,7 @@ import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.util.LogoutUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
@@ -28,9 +29,6 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @Controller
 @RequestMapping("/account/email")
 public class EmailUpdateController {
-
-    private static final String LPG_UI_SIGNOUT_URL_ATTRIBUTE = "lpgUiSignOutUrl";
-    private static final String LPG_UI_SIGNOUT_TIMER_ATTRIBUTE = "signOutTimerInSeconds";
     private static final String LPG_UI_URL_ATTRIBUTE = "lpgUiUrl";
     private static final String EMAIL_ATTRIBUTE = "email";
     private static final String UPDATED_EMAIL_ATTRIBUTE = "updatedEmail";
@@ -55,12 +53,6 @@ public class EmailUpdateController {
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
-    @Value("${lpg.uiSignOutUrl}")
-    private String lpgUiSignOutUrl;
-
-    @Value("${lpg.signOutTimerInSeconds}")
-    private int signOutTimerInSeconds;
-
     @Value("${lpg.contactEmail}")
     private String contactEmail;
 
@@ -68,16 +60,18 @@ public class EmailUpdateController {
     private String contactNumber;
 
     private final IdentityService identityService;
+    private final FrontendService frontendService;
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
     private final LogoutUtil logoutUtil;
     private final int validityInSeconds;
 
     public EmailUpdateController(IdentityService identityService,
-                                 EmailUpdateService emailUpdateService,
+                                 FrontendService frontendService, EmailUpdateService emailUpdateService,
                                  Utils utils, LogoutUtil logoutUtil,
                                  @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
+        this.frontendService = frontendService;
         this.emailUpdateService = emailUpdateService;
         this.utils = utils;
         this.logoutUtil = logoutUtil;
@@ -119,17 +113,15 @@ public class EmailUpdateController {
 
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
         emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail);
-
+        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
-        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
-        model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
         return EMAIL_VERIFICATION_SENT_TEMPLATE;
     }
 
     @GetMapping("/verify/{code}")
     public String verifyEmail(@PathVariable String code, Authentication authentication,
                               HttpServletRequest request, HttpServletResponse response,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes, Model model) {
         log.debug("Attempting update email verification with code: {}", code);
 
         Object principal = authentication != null ? authentication.getPrincipal() : null;
@@ -177,8 +169,10 @@ public class EmailUpdateController {
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
                 log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
-                redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
-                return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
+                frontendService.signoutUser();
+                model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, newEmail);
+                model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
+                return EMAIL_UPDATED_TEMPLATE;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
                 log.error("Unable to update old email = {} to newEmail = {}. Exception: {}", oldEmail, newEmail
@@ -198,8 +192,7 @@ public class EmailUpdateController {
         Map<String, Object> modelMap = model.asMap();
         String updatedEmail = String.valueOf(modelMap.get(EMAIL_ATTRIBUTE));
         model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, updatedEmail);
-        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
-        model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
+        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         return EMAIL_UPDATED_TEMPLATE;
     }
 

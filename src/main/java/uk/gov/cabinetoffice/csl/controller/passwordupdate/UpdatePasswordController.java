@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 
 @Controller
@@ -19,20 +20,15 @@ public class UpdatePasswordController {
 
     private static final String UPDATE_PASSWORD_TEMPLATE = "passwordupdate/updatePassword";
     private static final String PASSWORD_UPDATED_TEMPLATE = "passwordupdate/passwordUpdated";
-    private static final String REDIRECT_PASSWORD_UPDATED = "redirect:/account/password/passwordUpdated";
-    private static final String LPG_UI_SIGNOUT_TIMER_ATTRIBUTE = "signOutTimerInSeconds";
-    private static final String LPG_UI_SIGNOUT_URL_ATTRIBUTE = "lpgUiSignOutUrl";
-
-    @Value("${lpg.uiSignOutUrl}")
-    private String lpgUiSignOutUrl;
-
-    @Value("${lpg.signOutTimerInSeconds}")
-    private int signOutTimerInSeconds;
-
+    private static final String LPG_UI_URL_ATTRIBUTE = "lpgUiUrl";
+    @Value("${lpg.uiUrl}")
+    private String lpgUiUrl;
     private final PasswordService passwordService;
+    private final FrontendService frontendService;
 
-    public UpdatePasswordController(PasswordService passwordService) {
+    public UpdatePasswordController(PasswordService passwordService, FrontendService frontendService) {
         this.passwordService = passwordService;
+        this.frontendService = frontendService;
     }
 
     @GetMapping
@@ -53,13 +49,8 @@ public class UpdatePasswordController {
         passwordService.updatePasswordAndNotify(
                 ((IdentityDetails) authentication.getPrincipal()).getIdentity(),
                 form.getNewPassword());
-        return REDIRECT_PASSWORD_UPDATED;
-    }
-
-    @GetMapping("/passwordUpdated")
-    public String passwordUpdated(Model model) {
-        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
-        model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
+        frontendService.signoutUser();
+        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         return PASSWORD_UPDATED_TEMPLATE;
     }
 }

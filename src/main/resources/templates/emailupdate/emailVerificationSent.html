@@ -3,20 +3,19 @@
 <content>
 <div class="container">
     <div class="grid-row">
-        <div class="govuk-box-highlight">
-            <h1 class="heading-xlarge">Email update requested</h1>
-            <p class="font-medium">You have requested to change your email</p>
-        </div>
-        <div class="grid-row push-bottom">
-            <div class="column-two-thirds">
-                <h2 class="heading-medium">What happens next?</h2>
-                <p>We have sent you an email with a link to your new email address.</p>
-                <p>Please click on the link in the email to verify changes to your account.</p>
-                <p>The link will expire in <span th:text="${resetValidity}"></span></p>
-                <p>Please click here to <a th:href="${lpgUiSignOutUrl}">sign out</a> and check your email.</p>
+        <div class="column-full">
+            <div class="govuk-box-highlight">
+                <h1 class="heading-xlarge">Email update requested</h1>
+                <p class="font-medium">You have requested to change your email</p>
             </div>
-            <div hidden id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
-            <div hidden id="signOutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
+        </div>
+    </div>
+    <div class="grid-row push-bottom">
+        <div class="column-two-thirds">
+            <h2 class="heading-medium">What happens next?</h2>
+            <p>We have sent you an email with a link to your new email address.</p>
+            <p>Please click on the link in the email to verify changes to your account.</p>
+            <p>The link will expire in <span th:text="${resetValidity}"></span>.</p>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">
                     <span class="summary">Haven't received the email?</span>
@@ -34,6 +33,5 @@
         </div>
     </div>
 </div>
-<script type="text/javascript" src="/assets/js/auto-logout.js"></script>
 </content>
 </page>

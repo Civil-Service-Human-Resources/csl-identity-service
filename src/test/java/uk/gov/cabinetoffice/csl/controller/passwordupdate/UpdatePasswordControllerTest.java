@@ -10,13 +10,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,6 +42,9 @@ public class UpdatePasswordControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private FrontendService frontendService;
 
     @MockBean
     private PasswordService passwordService;
@@ -95,21 +99,13 @@ public class UpdatePasswordControllerTest {
                         .param("confirm", PASSWORD)
                         .with(csrf())
                 )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_PASSWORD_UPDATED))
-                .andDo(print());
-    }
-
-    @Test
-    public void shouldLoadPasswordUpdatedScreen() throws Exception {
-        mockMvc.perform(
-                        get("/account/password/passwordUpdated")
-                                .with(csrf())
-                )
                 .andExpect(status().isOk())
                 .andExpect(view().name(PASSWORD_UPDATED_TEMPLATE))
                 .andExpect(content().string(containsString("Your password has been updated")))
-                .andExpect(model().attributeExists("lpgUiSignOutUrl"))
+                .andExpect(model().attributeExists("lpgUiUrl"))
                 .andDo(print());
+
+        verify(frontendService, times(1)).signoutUser();
     }
+
 }
