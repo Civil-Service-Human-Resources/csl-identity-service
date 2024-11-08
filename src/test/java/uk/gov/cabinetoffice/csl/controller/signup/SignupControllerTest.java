@@ -164,8 +164,6 @@ public class SignupControllerTest {
 
         when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
         when(inviteService.isInviteExpired(invite)).thenReturn(false);
-        when(identityService.isDomainAllowListed(GENERIC_DOMAIN)).thenReturn(true);
-        when(identityService.isDomainInAnAgencyToken(GENERIC_DOMAIN)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -174,12 +172,8 @@ public class SignupControllerTest {
                         .param("email", GENERIC_EMAIL)
                         .param("confirmEmail", GENERIC_EMAIL)
                 )
-                .andExpect(status().isOk())
-                .andExpect(view().name(INVITE_SENT_TEMPLATE))
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
 
         verify(inviteService, times(1)).updateInviteStatus(invite.getCode(), EXPIRED);
     }
@@ -199,7 +193,7 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldRedirectToSignupIfUserHasAlreadyBeenInvited() throws Exception {
+    public void shouldRedirectToSignupIfPreviousInviteHasPassedTheValidityDuration() throws Exception {
 
         Invite invite = generateBasicInvite(true);
         invite.setInvitedAt(now(clock));
@@ -220,9 +214,7 @@ public class SignupControllerTest {
     public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
 
         String email = "user@domain.com";
-        Invite invite = generateBasicInvite(true);
-        invite.setInvitedAt(now(clock));
-        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
+        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(Optional.empty());
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(true);
 
         mockMvc.perform(
@@ -264,7 +256,7 @@ public class SignupControllerTest {
         verify(inviteService).sendSelfSignupInvite(GENERIC_EMAIL, false);
     }
 
-    @Test 
+    @Test
     public void shouldNotSendInviteIfNotAllowListedAndNotAgencyTokenEmail() throws Exception {
         when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.empty());
         when(identityService.isIdentityExistsForEmail(GENERIC_EMAIL)).thenReturn(false);
