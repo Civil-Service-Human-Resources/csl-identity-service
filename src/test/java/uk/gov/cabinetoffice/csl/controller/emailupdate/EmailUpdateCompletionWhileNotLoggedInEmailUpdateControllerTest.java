@@ -2,6 +2,7 @@ package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,6 +46,9 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
     @MockBean
     private IdentityService identityService;
+
+    @MockBean
+    private FrontendService frontendService;
 
     @MockBean
     private EmailUpdateService emailUpdateService;
@@ -138,6 +142,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
                 .andDo(print());
 
         verify(emailUpdateService, times(1)).updateEmailAddress(eq(emailUpdate));
+        verify(frontendService, times(1)).signoutUser();
     }
 
     @Test

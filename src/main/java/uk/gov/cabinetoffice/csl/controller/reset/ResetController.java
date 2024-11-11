@@ -11,6 +11,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
@@ -29,9 +30,10 @@ public class ResetController {
     private static final String PENDING_RESET_TEMPLATE = "reset/pendingReset";
     private static final String PASSWORD_FORM_TEMPLATE = "reset/passwordForm";
     private static final String PASSWORD_RESET_TEMPLATE = "reset/passwordReset";
+    private static final String LPG_UI_URL_ATTRIBUTE = "lpgUiUrl";
 
-    @Value("${lpg.uiSignOutUrl}")
-    private String lpgUiSignOutUrl;
+    @Value("${lpg.uiUrl}")
+    private String lpgUiUrl;
 
     @Value("${lpg.contactEmail}")
     private String contactEmail;
@@ -45,13 +47,16 @@ public class ResetController {
 
     private final IdentityService identityService;
 
+    private final FrontendService frontendService;
+
     private final ResetFormValidator resetFormValidator;
 
     public ResetController(ResetService resetService, PasswordService passwordService,
-                           IdentityService identityService, ResetFormValidator resetFormValidator) {
+                           FrontendService frontendService, IdentityService identityService, ResetFormValidator resetFormValidator) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
+        this.frontendService = frontendService;
         this.resetFormValidator = resetFormValidator;
     }
 
@@ -129,7 +134,8 @@ public class ResetController {
             passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyUserForSuccessfulReset(reset);
             log.info("Reset success sent to {}", reset.getEmail());
-            model.addAttribute("lpgUiSignOutUrl", lpgUiSignOutUrl);
+            frontendService.signoutUser();
+            model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             return PASSWORD_RESET_TEMPLATE;
         }
         return result;
