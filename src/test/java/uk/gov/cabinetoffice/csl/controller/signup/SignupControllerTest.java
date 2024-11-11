@@ -148,10 +148,12 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")));
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
 
         verify(inviteService).sendSelfSignupInvite(email, true);
     }
@@ -238,7 +240,7 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
                 .andExpect(content().string(containsString("020 3640 7985")))
-                .andDo(print());;
+                .andDo(print());
     }
 
     @Test
@@ -279,10 +281,12 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")));
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
 
         verify(inviteService).sendSelfSignupInvite(GENERIC_EMAIL, false);
     }

@@ -25,16 +25,16 @@ public class Utils {
         }
         String result = "";
         if (days != 0) {
-            result = result + String.format("%02d", days) + " days ";
+            result = result + String.format("%d", days) + " days ";
         }
         if (hours != 0) {
-            result = result + String.format("%02d", hours) + " hours ";
+            result = result + String.format("%d", hours) + " hours ";
         }
         if (minutes != 0) {
-            result = result + String.format("%02d", minutes) + " minutes ";
+            result = result + String.format("%d", minutes) + " minutes ";
         }
         if (seconds != 0) {
-            result = result + String.format("%02d", seconds) + " seconds";
+            result = result + String.format("%d", seconds) + " seconds";
         }
         return StringUtils.removeEnd(result, " ");
     }
