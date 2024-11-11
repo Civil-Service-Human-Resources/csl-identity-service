@@ -3,25 +3,24 @@
 <content>
 <div class="container">
     <div class="grid-row">
-        <div class="govuk-box-highlight">
-            <h1 class="heading-xlarge">Email update complete</h1>
-            <p class="font-medium">
-                Your updated email address<br>
-                <strong><span th:text="${updatedEmail}">email</span></strong>
-            </p>
-        </div>
-        <div hidden id="signOutTimerInSeconds"><span th:text="${signOutTimerInSeconds}"></span></div>
-        <div hidden id="signOutLink"><span th:text="${lpgUiSignOutUrl}"></span></div>
-        <div class="grid-row push-bottom">
-            <div class="column-two-thirds">
-                <h2 class="heading-medium">What happens next?</h2>
-                <p>You can now <a th:href="${lpgUiSignOutUrl}">login</a> to the Learning Platform for
-                    Government with your new email.</p>
-                <a href="/reset" class="push-bottom">Forgotten your password?</a>
+        <div class="column-full">
+            <div class="govuk-box-highlight">
+                <h1 class="heading-xlarge">Email update complete</h1>
+                <p class="font-medium">
+                    Your updated email address<br>
+                    <strong><span th:text="${updatedEmail}">email</span></strong>
+                </p>
             </div>
         </div>
     </div>
+    <div class="grid-row push-bottom">
+        <div class="column-two-thirds">
+            <h2 class="heading-medium">What happens next?</h2>
+            <p>You can now <a th:href="${lpgUiUrl}">login</a> to the Learning Platform for
+                Government with your new email.</p>
+            <a href="/reset" class="push-bottom">Forgotten your password?</a>
+        </div>
+    </div>
 </div>
-<script type="text/javascript" src="/assets/js/auto-logout.js"></script>
 </content>
 </page>
