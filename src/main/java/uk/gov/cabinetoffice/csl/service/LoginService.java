@@ -27,8 +27,7 @@ public class LoginService {
     }
 
     public void loginSucceeded(Identity identity) {
-        log.debug("LoginService.loginSucceeded: {}", identity);
-        log.info("LoginService:Login succeeded for: {}", identity.getEmail());
+        log.info("LoginService:Login succeeded for: {}", identity);
         identity.setLastLoggedIn(now(clock));
         identity.setFailedLoginAttempts(0);
         identityRepository.save(identity);
