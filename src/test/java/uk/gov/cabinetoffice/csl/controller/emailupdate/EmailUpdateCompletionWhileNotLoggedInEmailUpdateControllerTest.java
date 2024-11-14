@@ -10,36 +10,29 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
+import uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus;
 import uk.gov.cabinetoffice.csl.service.*;
-import uk.gov.cabinetoffice.csl.util.ApplicationConstants;
-import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
 import java.time.ZoneId;
 
 import static java.time.LocalDateTime.now;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.PENDING;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("no-redis")
-@WithMockCustomUser
-public class EmailUpdateControllerTest {
+public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
-    private static final String UPDATE_EMAIL_FORM_TEMPLATE = "updateEmailForm";
-    private static final String UPDATE_EMAIL_VIEW_NAME_TEMPLATE = "emailupdate/updateEmail";
     private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
-    private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "emailupdate/emailVerificationSent";
-    private static final String EMAIL_PATH = "/account/email";
     private static final String VERIFY_EMAIL_PATH = "/account/email/verify/";
     private static final String VERIFY_EMAIL_AGENCY_PATH = "/account/verify/agency/";
     private static final String VERIFY_CODE = "ZBnX9unEnnOcgMmCJ6rI3H2LUQFs2xsiMNj2Ejou";
@@ -57,102 +50,8 @@ public class EmailUpdateControllerTest {
     private EmailUpdateService emailUpdateService;
 
     @Test
-    public void givenARequestToChangeYourEmail_whenUpdateEmailForm_shouldDisplayForm() throws Exception {
-        mockMvc.perform(get(EMAIL_PATH)
-                    .with(csrf())
-                )
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists(UPDATE_EMAIL_FORM_TEMPLATE))
-                .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE))
-                .andDo(print());
-    }
-
-    @Test
-    public void givenAnEmptyForm_whenSendEmailVerification_shouldDisplayFieldValidationErrors() throws Exception {
-        mockMvc.perform(post(EMAIL_PATH)
-                    .param("email", "")
-                    .param("confirm", "")
-                    .with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(model().errorCount(2))
-                .andExpect(model().attributeHasFieldErrorCode(UPDATE_EMAIL_FORM_TEMPLATE, "email", "NotBlank"))
-                .andExpect(model().attributeHasFieldErrorCode(UPDATE_EMAIL_FORM_TEMPLATE, "confirm", "NotBlank"))
-                .andExpect(model().attributeExists(UPDATE_EMAIL_FORM_TEMPLATE))
-                .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
-    }
-
-    @Test
-    public void givenAnInvalidForm_whenSendEmailVerification_shouldDisplayFieldValidationErrors() throws Exception {
-        mockMvc.perform(post(EMAIL_PATH)
-                    .param("email", "someone")
-                    .param("confirm", "someone")
-                    .with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists(UPDATE_EMAIL_FORM_TEMPLATE))
-                .andExpect(view().name(UPDATE_EMAIL_VIEW_NAME_TEMPLATE));
-    }
-
-    @Test
-    public void givenAValidFormAndAnEmailThatAlreadyExists_whenSendEmailVerification_shouldDisplayEmailAlreadyExistsError() throws Exception {
-        when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(true);
-        mockMvc.perform(post(EMAIL_PATH)
-                    .param("email", NEW_EMAIL)
-                    .param("confirm", NEW_EMAIL)
-                    .with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email/update/error?emailAlreadyTaken=true"));
-
-        verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
-        verify(identityService, never()).isValidEmailDomain(anyString());
-    }
-
-    @Test
-    public void givenAValidFormAndAnEmailThatIsNotValid_whenSendEmailVerification_shouldDisplayUnableToUseThisServiceError() throws Exception {
-        when(identityService.isValidEmailDomain(anyString())).thenReturn(false);
-        mockMvc.perform(post(EMAIL_PATH)
-                    .param("email", NEW_EMAIL)
-                    .param("confirm", NEW_EMAIL)
-                    .with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/email/update/error?notValidEmailDomain=true"));
-
-        verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
-        verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
-    }
-
-    @Test
-    public void givenAValidFormAndEmailDoesNotAlreadyExistAndIsAValidEmail_whenSendEmailVerification_shouldDisplayEmailVerificationSentScreen() throws Exception {
-        when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(false);
-        when(identityService.isValidEmailDomain(anyString())).thenReturn(true);
-        mockMvc.perform(post(EMAIL_PATH)
-                    .param("email", NEW_EMAIL)
-                    .param("confirm", NEW_EMAIL)
-                    .with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")))
-                .andExpect(view().name(EMAIL_VERIFICATION_SENT_TEMPLATE));
-
-        verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
-        verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
-    }
-
-    @Test
     public void shouldRedirectToErrorOccurredIfNewEmailIsNotAllowListedAndNotAgency() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -164,7 +63,7 @@ public class EmailUpdateControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE))
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE))
                 .andExpect(redirectedUrl("/login"))
                 .andDo(print());
     }
@@ -184,8 +83,25 @@ public class EmailUpdateControllerTest {
     }
 
     @Test
+    public void givenAValidCode_whenUpdateEmailLinkAlreadyUsed_shouldRedirectToUpdateEmailPageWithCodeAlreadyUsedError() throws Exception {
+        EmailUpdate emailUpdate = createEmailUpdate(UPDATED);
+
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
+        when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
+
+        mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
+                        .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/account/email/updated"))
+                .andDo(print());
+
+        verify(emailUpdateService, never()).updateEmailAddress(any(EmailUpdate.class));
+    }
+
+    @Test
     public void givenAValidCode_whenUpdateEmailExpired_shouldRedirectToUpdateEmailPageWithCodeExpiredError() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -204,7 +120,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsAllowListedButNotAgency() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -226,7 +142,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void shouldRedirectToEmailUpdateIfNewEmailIsNotAllowListedButIsAgency() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -249,7 +165,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void givenAValidCodeAndNonExistentIdentity_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnInvalidEmailError() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -269,7 +185,7 @@ public class EmailUpdateControllerTest {
 
     @Test
     public void givenAValidCodeAndATechnicalErrorWhenUpdating_whenUpdateEmail_shouldRedirectToUpdateEmailPageWithAnErrorOccurredError() throws Exception {
-        EmailUpdate emailUpdate = createEmailUpdate();
+        EmailUpdate emailUpdate = createEmailUpdate(PENDING);
 
         when(emailUpdateService.isEmailUpdateRequestExistsForCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateRequestForCode(VERIFY_CODE)).thenReturn(emailUpdate);
@@ -283,7 +199,7 @@ public class EmailUpdateControllerTest {
                     .with(csrf())
                 )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute(STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE))
+                .andExpect(flash().attribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE))
                 .andExpect(redirectedUrl("/login"))
                 .andDo(print());
 
@@ -299,13 +215,13 @@ public class EmailUpdateControllerTest {
                 .andExpect(view().name(EMAIL_UPDATED_TEMPLATE));
     }
 
-    private EmailUpdate createEmailUpdate() {
+    private EmailUpdate createEmailUpdate(EmailUpdateStatus status) {
         EmailUpdate emailUpdate = new EmailUpdate();
         emailUpdate.setCode(VERIFY_CODE);
         emailUpdate.setPreviousEmail(PREVIOUS_EMAIL);
         emailUpdate.setNewEmail(NEW_EMAIL);
         emailUpdate.setRequestedAt(now(ZoneId.of("Europe/London")));
-        emailUpdate.setEmailUpdateStatus(PENDING);
+        emailUpdate.setEmailUpdateStatus(status);
         return emailUpdate;
     }
 }

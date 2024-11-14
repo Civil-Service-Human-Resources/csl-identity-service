@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS client;
+DROP TABLE IF EXISTS duplicates_history;
+DROP TABLE IF EXISTS oauth_code;
+DROP TABLE IF EXISTS token;

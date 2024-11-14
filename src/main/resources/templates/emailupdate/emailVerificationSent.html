@@ -4,7 +4,7 @@
 <div class="container">
     <div class="grid-row">
         <div class="govuk-box-highlight">
-            <h1 class="heading-xlarge">Change email requested</h1>
+            <h1 class="heading-xlarge">Email update requested</h1>
             <p class="font-medium">You have requested to change your email</p>
         </div>
         <div class="grid-row push-bottom">
@@ -34,15 +34,6 @@
         </div>
     </div>
 </div>
-<script th:inline="javascript">
-    setInterval(function() {
-        var div = document.querySelector("#signOutTimerInSeconds");
-        var count = div.textContent * 1 - 1;
-        div.textContent = count;
-        if (count <= 0) {
-            window.location.replace(document.querySelector("#signOutLink").textContent);
-        }
-    }, 1000);
-</script>
+<script type="text/javascript" src="/assets/js/auto-logout.js"></script>
 </content>
 </page>

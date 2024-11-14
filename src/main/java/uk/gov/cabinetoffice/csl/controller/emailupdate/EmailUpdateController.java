@@ -1,5 +1,7 @@
 package uk.gov.cabinetoffice.csl.controller.emailupdate;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,13 +12,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
+import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
+import uk.gov.cabinetoffice.csl.util.LogoutUtil;
 import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.util.Map;
 
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.UPDATED;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 
 @Slf4j
@@ -65,15 +70,17 @@ public class EmailUpdateController {
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final Utils utils;
+    private final LogoutUtil logoutUtil;
     private final int validityInSeconds;
 
     public EmailUpdateController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
-                                 Utils utils,
+                                 Utils utils, LogoutUtil logoutUtil,
                                  @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
         this.utils = utils;
+        this.logoutUtil = logoutUtil;
         this.validityInSeconds = validityInSeconds;
     }
 
@@ -98,20 +105,20 @@ public class EmailUpdateController {
             return UPDATE_EMAIL_TEMPLATE;
         }
         String newEmail = form.getEmail();
-        log.info("Change email requested, sending email to {} for verification", newEmail);
+        log.info("Email update requested, sending change email link to {} for verification", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
-            log.warn("Email already in use: {}", newEmail);
+            log.warn("Email {} is already in use", newEmail);
             return REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE;
         }
 
         if (!identityService.isValidEmailDomain(newEmail)) {
-            log.warn("Email is neither allow listed or for an agency token: {}", newEmail);
+            log.warn("Email {} is neither allow listed nor an agency token", newEmail);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
 
-        emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(),
-                newEmail);
+        Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
+        emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail);
 
         model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
         model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
@@ -120,12 +127,19 @@ public class EmailUpdateController {
     }
 
     @GetMapping("/verify/{code}")
-    public String verifyEmail(@PathVariable String code,
+    public String verifyEmail(@PathVariable String code, Authentication authentication,
+                              HttpServletRequest request, HttpServletResponse response,
                               RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
 
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+        if(principal != null ) {
+            logoutUtil.logout(request, response);
+            log.debug("verifyEmail: logoutUtil.logout is invoked.");
+        }
+
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
-            log.warn("Email update code does not exist: {}", code);
+            log.warn("Email update code {} does not exist", code);
             return REDIRECT_ACCOUNT_EMAIL_INVALID_CODE_TRUE;
         }
 
@@ -133,13 +147,19 @@ public class EmailUpdateController {
         String oldEmail = emailUpdate.getPreviousEmail();
         String newEmail = emailUpdate.getNewEmail();
 
+        if(UPDATED.equals(emailUpdate.getEmailUpdateStatus())) {
+            log.info("Email update code {} is already used. oldEmail = {}, newEmail = {}", code, oldEmail, newEmail);
+            redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
+            return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
+        }
+
         if(!identityService.isIdentityExistsForEmail(oldEmail)) {
             log.info("Unable to update email for the code {}. identity not found for email {}", code, oldEmail);
             return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
         }
 
         if(emailUpdateService.isEmailUpdateExpired(emailUpdate)) {
-            log.info("Email update code expired: {} oldEmail {}, newEmail: {}", code, oldEmail, newEmail);
+            log.info("Email update code {} expired. oldEmail = {}, newEmail = {}", code, oldEmail, newEmail);
             return REDIRECT_ACCOUNT_EMAIL_CODE_EXPIRED_TRUE;
         }
 
@@ -156,6 +176,7 @@ public class EmailUpdateController {
                     newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
+                log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
@@ -165,7 +186,7 @@ public class EmailUpdateController {
                 return REDIRECT_LOGIN;
             }
         } else {
-            log.warn("User trying to verify change email where new email is not allow listed or agency: " +
+            log.warn("User trying to verify change email where new email is neither allow listed nor an agency token: " +
                     "oldEmail = {}, newEmail = {}", oldEmail, newEmail);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, CHANGE_EMAIL_ERROR_MESSAGE);
             return REDIRECT_LOGIN;
@@ -176,11 +197,9 @@ public class EmailUpdateController {
     public String emailUpdated(Model model) {
         Map<String, Object> modelMap = model.asMap();
         String updatedEmail = String.valueOf(modelMap.get(EMAIL_ATTRIBUTE));
-
         model.addAttribute(UPDATED_EMAIL_ATTRIBUTE, updatedEmail);
-        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
-
-        log.debug("Email updated success for: {}", updatedEmail);
+        model.addAttribute(LPG_UI_SIGNOUT_URL_ATTRIBUTE, lpgUiSignOutUrl);
+        model.addAttribute(LPG_UI_SIGNOUT_TIMER_ATTRIBUTE, signOutTimerInSeconds);
         return EMAIL_UPDATED_TEMPLATE;
     }
 
