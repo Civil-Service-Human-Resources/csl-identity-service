@@ -105,6 +105,7 @@ public class ReactivationController {
 
         try {
             String email = getDecryptedText(code, encryptionKey);
+            log.info("Reactivation request received for {}", email);
             String resultIdentityActive = checkIdentityActive(email, redirectAttributes);
             if(isNotBlank(resultIdentityActive)) {
                 return resultIdentityActive;
@@ -123,10 +124,12 @@ public class ReactivationController {
                     pendingReactivation.setRequestedAt(now(clock));
                     reactivationService.saveReactivation(pendingReactivation);
                     notifyUserByEmail(pendingReactivation);
+                    log.info("Pending Reactivation updated and email sent to {}", email);
                 }
             } else {
                 Reactivation reactivation = reactivationService.createPendingReactivation(email);
                 notifyUserByEmail(reactivation);
+                log.info("Reactivation request created and email sent to {}", email);
             }
             String reactivationEmailMessage = "We've sent you an email with a link to reactivate your account.";
             model.addAttribute("reactivationEmailMessage", reactivationEmailMessage);
@@ -155,7 +158,7 @@ public class ReactivationController {
             }
 
             if(reactivationService.isReactivationExpired(reactivation)) {
-                log.debug("Reactivation with code {} has expired.", reactivation.getCode());
+                log.info("Reactivation with code {} has expired.", reactivation.getCode());
                 return "redirect:/login?error=reactivation-expired&username="
                         + encode(getEncryptedText(email, encryptionKey), UTF_8);
             }
@@ -169,6 +172,7 @@ public class ReactivationController {
             } else {
                 log.info("Account reactivation is not a agency domain and can reactivate without further validation"
                         + " for Reactivation: {}", reactivation);
+                log.info("Account reactivation completed for {}", reactivation.getEmail());
                 reactivationService.reactivateIdentity(reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }
@@ -186,7 +190,6 @@ public class ReactivationController {
 
     @GetMapping("/updated")
     public String accountActivated(Model model) {
-        log.info("Account reactivation complete.");
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl + "/login");
         return ACCOUNT_REACTIVATED_TEMPLATE;
     }
