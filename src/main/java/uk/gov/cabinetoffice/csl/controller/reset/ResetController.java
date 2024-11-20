@@ -17,6 +17,11 @@ import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_EMAIL_ATTRIBUTE;
 import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.CONTACT_NUMBER_ATTRIBUTE;
 
@@ -35,6 +40,9 @@ public class ResetController {
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
+    @Value("${reset.durationAfterResetAllowedInSeconds}")
+    private long durationAfterResetAllowedInSeconds;
+
     @Value("${lpg.contactEmail}")
     private String contactEmail;
 
@@ -51,13 +59,17 @@ public class ResetController {
 
     private final ResetFormValidator resetFormValidator;
 
+    private final Clock clock;
+
     public ResetController(ResetService resetService, PasswordService passwordService,
-                           FrontendService frontendService, IdentityService identityService, ResetFormValidator resetFormValidator) {
+                           FrontendService frontendService, IdentityService identityService,
+                           ResetFormValidator resetFormValidator, Clock clock) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
         this.frontendService = frontendService;
         this.resetFormValidator = resetFormValidator;
+        this.clock = clock;
     }
 
     @GetMapping
@@ -72,20 +84,29 @@ public class ResetController {
         model.addAttribute("resetEmailId", email);
         model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
-        if (identityService.isIdentityExistsForEmail(email)) {
-            Reset pendingReset = resetService.getPendingResetForEmail(email);
-            if(pendingReset == null) {
-                resetService.createPendingResetRequestAndAndNotifyUser(email);
-                log.info("Reset request email sent to {}", email);
-                return CHECK_EMAIL_TEMPLATE;
-            } else {
-                log.info("Pending Reset exists for email {}", email);
-                return PENDING_RESET_TEMPLATE;
-            }
-        } else {
-            log.info("Identity does not exist for {} therefore Reset request is not sent.", email);
+
+        if (!identityService.isIdentityExistsForEmail(email)) {
+            log.info("Identity does not exist for {} therefore reset request email is not sent.", email);
             return CHECK_EMAIL_TEMPLATE;
         }
+
+        Reset pendingReset = resetService.getPendingResetForEmail(email);
+        if(pendingReset == null) {
+            resetService.createPendingResetRequestAndAndNotifyUser(email);
+            log.info("A new pending reset is created and reset request email sent to {}", email);
+        } else {
+            LocalDateTime requestedAt = pendingReset.getRequestedAt();
+            long durationInSecondsSinceResetRequested = SECONDS.between(requestedAt, now(clock));
+            if (durationInSecondsSinceResetRequested < durationAfterResetAllowedInSeconds) {
+                log.info("Valid pending reset exists for email {}. No action is taken.", email);
+                return PENDING_RESET_TEMPLATE;
+            } else {
+                resetService.updatePendingResetRequestAndAndNotifyUser(pendingReset);
+                log.info("Existing pending reset is updated and reset request email sent to {}", email);
+            }
+        }
+
+        return CHECK_EMAIL_TEMPLATE;
     }
 
     @GetMapping("/{code}")

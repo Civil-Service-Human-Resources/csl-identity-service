@@ -2,7 +2,6 @@ package uk.gov.cabinetoffice.csl.controller.reset;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -112,8 +111,7 @@ public class ResetControllerTest {
                 .andExpect(view().name("reset/pendingReset"))
                 .andExpect(content().string(containsString("Password reset pending")))
                 .andExpect(content().string(containsString("What next?")))
-                .andExpect(content().string(containsString("Check your email for the link to reset your password.")))
-                .andExpect(content().string(containsString("We recently sent you an email to reset your password.")))
+                .andExpect(content().string(containsString("We recently sent you an email with the link to reset your password.")))
                 .andExpect(content().string(containsString("Please check your emails (including the junk/spam folder).")))
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
