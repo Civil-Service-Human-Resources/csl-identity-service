@@ -80,7 +80,7 @@ public class ResetController {
     @PostMapping
     public String requestReset(@RequestParam(value = "email") String email, Model model)
             throws NotificationClientException {
-        log.debug("Reset request received for email {}", email);
+        log.info("Reset request received for email {}", email);
         model.addAttribute("resetEmailId", email);
         model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
@@ -154,7 +154,7 @@ public class ResetController {
 
             passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyUserForSuccessfulReset(reset);
-            log.info("Reset success sent to {}", reset.getEmail());
+            log.info("Reset successfully done for email {}", reset.getEmail());
             frontendService.signoutUser();
             model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             return PASSWORD_RESET_TEMPLATE;
