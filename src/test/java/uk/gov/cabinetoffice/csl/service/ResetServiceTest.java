@@ -1,6 +1,5 @@
 package uk.gov.cabinetoffice.csl.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +20,8 @@ import static java.time.Month.FEBRUARY;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
@@ -56,6 +57,25 @@ public class ResetServiceTest {
         assertThat(reset.getCode(), not(equalTo(CODE)));
         assertThat(reset.getEmail(), equalTo(EMAIL));
         assertThat(reset.getResetStatus(), equalTo(PENDING));
+        assertNotNull(reset.getRequestedAt());
+    }
+
+    @Test
+    public void updatePendingResetShouldNotUpdateEmailStatusAndCode() throws NotificationClientException {
+        Reset reset = createReset();
+
+        doNothing().when(notifyService).notify(reset.getEmail(), reset.getCode(), TEMPLATE_ID, URL);
+        resetService.updatePendingResetRequestAndAndNotifyUser(reset);
+
+        ArgumentCaptor<Reset> resetArgumentCaptor = ArgumentCaptor.forClass(Reset.class);
+
+        verify(resetRepository, times(1)).save(resetArgumentCaptor.capture());
+
+        Reset reset1 = resetArgumentCaptor.getValue();
+        assertThat(reset1.getCode(), equalTo(reset.getCode()));
+        assertThat(reset1.getEmail(), equalTo(reset.getEmail()));
+        assertThat(reset1.getResetStatus(), equalTo(PENDING));
+        assertNotNull(reset1.getRequestedAt());
     }
 
     @Test
@@ -71,7 +91,7 @@ public class ResetServiceTest {
         when(resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING)).thenReturn(existingPendingResets);
 
         Reset reset = resetService.getPendingResetForEmail(EMAIL);
-        Assertions.assertNull(reset);
+        assertNull(reset);
 
         verify(resetRepository, times(1)).saveAll(existingPendingResets);
         ResetStatus resetStatus1 = existingPendingResets.get(0).getResetStatus();
@@ -92,7 +112,7 @@ public class ResetServiceTest {
         when(resetRepository.findByEmailIgnoreCaseAndResetStatus(EMAIL, PENDING)).thenReturn(existingPendingResets);
 
         Reset reset1 = resetService.getPendingResetForEmail(EMAIL);
-        Assertions.assertNull(reset1);
+        assertNull(reset1);
         ResetStatus resetStatus1 = existingPendingResets.get(0).getResetStatus();
         assertThat(resetStatus1, equalTo(EXPIRED));
 

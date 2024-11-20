@@ -17,9 +17,9 @@ import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
 
-import java.time.LocalDateTime;
+import java.time.Clock;
 
-import static java.time.Month.FEBRUARY;
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -44,6 +44,7 @@ public class ResetControllerTest {
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "Password123";
     private static final String CODE = "abc123";
+    private final int durationAfterResetAllowedInSeconds = 3600;
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,6 +57,8 @@ public class ResetControllerTest {
 
     @MockBean
     private IdentityService identityService;
+
+    private final Clock clock = Clock.systemUTC();
 
     @Test
     public void shouldLoadRequestResetForm() throws Exception {
@@ -95,11 +98,9 @@ public class ResetControllerTest {
     }
 
     @Test
-    public void shouldLoadPendingResetPageIfUserTryToResetAgainWhilePendingResetExistsForTheGivenEmailId() throws Exception {
+    public void shouldLoadPendingResetPageIfUserTryToResetAgainWithinResetAllowedDuration() throws Exception {
         when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
         Reset reset = createReset();
-        LocalDateTime requestedAt = LocalDateTime.now();
-        reset.setRequestedAt(requestedAt);
 
         when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
 
@@ -116,6 +117,33 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
                 .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
+    }
+
+    @Test
+    public void shouldLoadCheckEmailPageIfUserTryToResetAgainAfterResetAllowedDuration() throws Exception {
+        when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
+        Reset reset = createReset();
+        reset.setRequestedAt(now(clock).minusSeconds(durationAfterResetAllowedInSeconds));
+
+        when(resetService.getPendingResetForEmail(EMAIL)).thenReturn(reset);
+
+        mockMvc.perform(post("/reset")
+                        .param("email", EMAIL)
+                        .with(csrf())
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("reset/checkEmail"))
+                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("If <b><span>" + EMAIL + "</span></b> belongs to a valid account you will receive an email with a reset link.")))
+                .andExpect(content().string(containsString("Please check your emails (including the junk/spam folder).")))
+                .andExpect(model().attributeExists("resetEmailId"))
+                .andExpect(content().string(containsString(EMAIL)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
@@ -165,8 +193,7 @@ public class ResetControllerTest {
     @Test
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsExpired() throws Exception {
         Reset reset = createReset();
-        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
-        reset.setRequestedAt(requestDateTime);
+        reset.setRequestedAt(now(clock).minusDays(3));
 
         when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(true);
@@ -189,8 +216,6 @@ public class ResetControllerTest {
     public void shouldLoadRequestResetFormWithErrorMessageIfResetCodeIsAlreadyUsed() throws Exception {
         Reset reset = createReset();
         reset.setResetStatus(RESET);
-        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
-        reset.setRequestedAt(requestDateTime);
 
         when(resetService.getResetForCode(CODE)).thenReturn(reset);
         when(resetService.isResetExpired(reset)).thenReturn(false);
@@ -445,8 +470,7 @@ public class ResetControllerTest {
         reset.setCode(CODE);
         reset.setEmail(EMAIL);
         reset.setResetStatus(PENDING);
-        LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
-        reset.setRequestedAt(requestDateTime);
+        reset.setRequestedAt(now(clock));
         return reset;
     }
 }
