@@ -172,8 +172,8 @@ public class ReactivationController {
             } else {
                 log.info("Account reactivation is not a agency domain and can reactivate without further validation"
                         + " for Reactivation: {}", reactivation);
-                log.info("Account reactivation completed for {}", reactivation.getEmail());
                 reactivationService.reactivateIdentity(reactivation);
+                log.info("Account reactivated successfully for {}", reactivation.getEmail());
                 return REDIRECT_ACCOUNT_REACTIVATED;
             }
         } catch (ResourceNotFoundException e) {

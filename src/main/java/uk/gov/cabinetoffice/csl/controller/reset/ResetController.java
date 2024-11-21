@@ -154,7 +154,7 @@ public class ResetController {
 
             passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyUserForSuccessfulReset(reset);
-            log.info("Reset successfully done for email {}", reset.getEmail());
+            log.info("Account is reset successfully for {}", reset.getEmail());
             frontendService.signoutUser();
             model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             return PASSWORD_RESET_TEMPLATE;
