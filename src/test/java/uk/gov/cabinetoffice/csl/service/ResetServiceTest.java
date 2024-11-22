@@ -17,11 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.Month.FEBRUARY;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.*;
 import static uk.gov.cabinetoffice.csl.domain.ResetStatus.PENDING;
@@ -54,9 +50,9 @@ public class ResetServiceTest {
         verify(resetRepository, times(1)).save(resetArgumentCaptor.capture());
 
         Reset reset = resetArgumentCaptor.getValue();
-        assertThat(reset.getCode(), not(equalTo(CODE)));
-        assertThat(reset.getEmail(), equalTo(EMAIL));
-        assertThat(reset.getResetStatus(), equalTo(PENDING));
+        assertNotEquals(reset.getCode(), CODE);
+        assertEquals(reset.getEmail(), EMAIL);
+        assertEquals(reset.getResetStatus(), PENDING);
         assertNotNull(reset.getRequestedAt());
     }
 
@@ -72,10 +68,11 @@ public class ResetServiceTest {
         verify(resetRepository, times(1)).save(resetArgumentCaptor.capture());
 
         Reset reset1 = resetArgumentCaptor.getValue();
-        assertThat(reset1.getCode(), equalTo(reset.getCode()));
-        assertThat(reset1.getEmail(), equalTo(reset.getEmail()));
-        assertThat(reset1.getResetStatus(), equalTo(PENDING));
+        assertEquals(reset1.getCode(), CODE);
+        assertEquals(reset1.getEmail(), EMAIL);
+        assertEquals(reset1.getResetStatus(), PENDING);
         assertNotNull(reset1.getRequestedAt());
+
     }
 
     @Test
@@ -95,9 +92,9 @@ public class ResetServiceTest {
 
         verify(resetRepository, times(1)).saveAll(existingPendingResets);
         ResetStatus resetStatus1 = existingPendingResets.get(0).getResetStatus();
-        assertThat(resetStatus1, equalTo(EXPIRED));
+        assertEquals(resetStatus1, EXPIRED);
         ResetStatus resetStatus2 = existingPendingResets.get(0).getResetStatus();
-        assertThat(resetStatus2, equalTo(EXPIRED));
+        assertEquals(resetStatus2, EXPIRED);
     }
 
     @Test
@@ -114,14 +111,14 @@ public class ResetServiceTest {
         Reset reset1 = resetService.getPendingResetForEmail(EMAIL);
         assertNull(reset1);
         ResetStatus resetStatus1 = existingPendingResets.get(0).getResetStatus();
-        assertThat(resetStatus1, equalTo(EXPIRED));
+        assertEquals(resetStatus1, EXPIRED);
 
         ArgumentCaptor<Reset> resetArgumentCaptor = ArgumentCaptor.forClass(Reset.class);
         verify(resetRepository).save(resetArgumentCaptor.capture());
 
         Reset actualReset = resetArgumentCaptor.getValue();
 
-        assertThat(actualReset.getResetStatus(), equalTo(EXPIRED));
+        assertEquals(actualReset.getResetStatus(), EXPIRED);
 
         verify(resetRepository, times(1)).save(reset);
     }
@@ -140,10 +137,10 @@ public class ResetServiceTest {
 
         Reset reset1 = resetService.getPendingResetForEmail(EMAIL);
         ResetStatus resetStatus1 = reset1.getResetStatus();
-        assertThat(resetStatus1, equalTo(PENDING));
-        assertThat(reset1.getCode(), equalTo(reset.getCode()));
-        assertThat(reset1.getEmail(), equalTo(reset.getEmail()));
-        assertThat(reset1.getRequestedAt(), equalTo(reset.getRequestedAt()));
+        assertEquals(resetStatus1, PENDING);
+        assertEquals(reset1.getCode(), reset.getCode());
+        assertEquals(reset1.getEmail(), reset.getEmail());
+        assertEquals(reset1.getRequestedAt(), reset.getRequestedAt());
 
         verify(resetRepository, times(0)).saveAll(existingPendingResets);
     }
@@ -161,9 +158,9 @@ public class ResetServiceTest {
         verify(resetRepository).save(resetArgumentCaptor.capture());
 
         Reset actualReset = resetArgumentCaptor.getValue();
-        assertThat(actualReset.getCode(), equalTo(CODE));
-        assertThat(actualReset.getEmail(), equalTo(EMAIL));
-        assertThat(actualReset.getResetStatus(), equalTo(RESET));
+        assertEquals(actualReset.getCode(), CODE);
+        assertEquals(actualReset.getEmail(), EMAIL);
+        assertEquals(actualReset.getResetStatus(), RESET);
     }
 
     @Test
@@ -173,15 +170,15 @@ public class ResetServiceTest {
         LocalDateTime requestDateTime = LocalDateTime.of(2024, FEBRUARY, 1, 11, 30);
         reset.setRequestedAt(requestDateTime);
 
-        assertThat(resetService.isResetExpired(reset), equalTo(true));
+        assertTrue(resetService.isResetExpired(reset));
 
         ArgumentCaptor<Reset> resetArgumentCaptor = ArgumentCaptor.forClass(Reset.class);
         verify(resetRepository).save(resetArgumentCaptor.capture());
 
         Reset actualReset = resetArgumentCaptor.getValue();
-        assertThat(actualReset.getCode(), equalTo(CODE));
-        assertThat(actualReset.getEmail(), equalTo(EMAIL));
-        assertThat(actualReset.getResetStatus(), equalTo(EXPIRED));
+        assertEquals(actualReset.getCode(), CODE);
+        assertEquals(actualReset.getEmail(), EMAIL);
+        assertEquals(actualReset.getResetStatus(), EXPIRED);
     }
 
     private Reset createReset() {
