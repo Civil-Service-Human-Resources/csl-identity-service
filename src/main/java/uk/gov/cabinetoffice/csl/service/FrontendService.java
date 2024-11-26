@@ -1,8 +1,7 @@
 package uk.gov.cabinetoffice.csl.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.cabinetoffice.csl.domain.Identity;
-import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.auth2.IUserAuthService;
 import uk.gov.cabinetoffice.csl.service.client.frontend.IFrontendClient;
 
@@ -17,8 +16,9 @@ public class FrontendService {
     }
 
     public void signoutUser() {
-        IdentityDetails identity = (IdentityDetails) userAuthService.getAuthentication().getPrincipal();
-        frontendClient.signOutUser(identity.getIdentity().getUid());
+        String uid = userAuthService.getUid();
+        if(StringUtils.isNotBlank(uid)) {
+            frontendClient.signOutUser(uid);
+        }
     }
-
 }

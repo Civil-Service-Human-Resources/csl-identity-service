@@ -123,6 +123,7 @@ public class SignupController {
         }
 
         final String email = form.getEmail();
+        log.info("Registration request received for {}", email);
         Optional<Invite> pendingInvite = inviteService.getInviteForEmailAndStatus(email, PENDING);
 
         if(pendingInvite.isPresent()) {
