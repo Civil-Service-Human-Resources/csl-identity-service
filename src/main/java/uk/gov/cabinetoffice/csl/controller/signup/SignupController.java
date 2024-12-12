@@ -42,6 +42,7 @@ public class SignupController {
     private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
     private static final String SIGNUP_TEMPLATE = "signup/signup";
     private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
+    private static final String PENDING_SIGNUP_TEMPLATE = "signup/pendingSignup";
 
     private static final String INVITE_MODEL = "invite";
     private static final String ORGANISATIONS_ATTRIBUTE = "organisations";
@@ -131,18 +132,12 @@ public class SignupController {
                 log.info("User with email {} is trying to re-register before re-registration allowed time." +
                         " No action is taken. Current pending invite will remain valid until re-registration allowed" +
                         " or until it expires.", email);
-                long durationInSecondsBeforeReInvite = durationAfterReRegAllowedInSeconds - durationInSecondsSinceInvited;
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                "You have been sent an email with a link to register your account.\n" +
-                        "Please check your spam or junk mail folders.\n" +
-                        "If you have not received the email, please wait %s"
-                        .formatted(utils.convertSecondsIntoDaysHoursMinutesSeconds(durationInSecondsBeforeReInvite)) +
-                        " before creating an account.");
-                return REDIRECT_SIGNUP_REQUEST;
+                return PENDING_SIGNUP_TEMPLATE;
             } else {
                 log.info("User with email {} trying to re-register after re-registration allowed time therefore " +
                         "setting the current pending invite to expired.", email);
                 inviteService.updateInviteStatus(invite.getCode(), EXPIRED);
+                return REDIRECT_SIGNUP_REQUEST;
             }
         }
 

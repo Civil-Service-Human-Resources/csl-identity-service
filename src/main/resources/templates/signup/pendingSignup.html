@@ -1,21 +1,20 @@
 <page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
-<title>We've sent you an email - Civil Service Learning</title>
+<title>Check your email - Civil Service Learning</title>
 <content>
 <div class="container">
     <div class="grid-row">
         <div class="column-full">
             <div class="govuk-box-highlight">
-                <h1 class="heading-xlarge">Email update requested</h1>
-                <p class="font-medium">You have requested to change your email</p>
+                <h1 class="heading-large">Create account pending</h1>
             </div>
         </div>
     </div>
-    <div class="grid-row push-bottom">
+    <div class="grid-row">
         <div class="column-two-thirds">
-            <h2 class="heading-medium">What happens next?</h2>
-            <p>We have sent you an email with a link to your new email address.</p>
-            <p>Please click on the link in the email to verify changes to your account.</p>
-            <p>The link will expire in <span th:text="${resetValidity}"></span>.</p>
+            <h2 class="heading-medium">What next?</h2>
+            <p>Check your email for the link to register your account.</p>
+            <p>You have been sent an email with a link to register your account.</p>
+            <p>Please check your emails (including the junk/spam folder).</p>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">
                     <span class="summary">Haven't received the email?</span>

@@ -23,8 +23,6 @@ import uk.gov.cabinetoffice.csl.service.AgencyTokenCapacityService;
 import uk.gov.cabinetoffice.csl.service.InviteService;
 
 import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
 
 import static java.time.LocalDateTime.now;
@@ -35,6 +33,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static uk.gov.cabinetoffice.csl.domain.InviteStatus.EXPIRED;
@@ -57,6 +56,7 @@ public class SignupControllerTest {
     private static final String INVITE_SENT_TEMPLATE = "signup/inviteSent";
     private static final String SIGNUP_TEMPLATE = "signup/signup";
     private static final String SIGNUP_SUCCESS_TEMPLATE = "signup/signupSuccess";
+    private static final String PENDING_SIGNUP_TEMPLATE = "signup/pendingSignup";
 
     private static final String REDIRECT_SIGNUP = "/signup/";
     private static final String REDIRECT_SIGNUP_REQUEST = "/signup/request";
@@ -79,8 +79,7 @@ public class SignupControllerTest {
     @MockBean
     private CsrsService csrsService;
 
-    private final Clock clock = Clock.fixed(Instant.parse("2024-01-01T10:00:00.000Z"),
-            ZoneId.of("Europe/London"));
+    private final Clock clock = Clock.systemUTC();
 
     private final String GENERIC_EMAIL = "email@domain.com";
     private final String GENERIC_DOMAIN = "domain.com";
@@ -149,10 +148,12 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")));
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
 
         verify(inviteService).sendSelfSignupInvite(email, true);
     }
@@ -164,8 +165,6 @@ public class SignupControllerTest {
 
         when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
         when(inviteService.isInviteExpired(invite)).thenReturn(false);
-        when(identityService.isDomainAllowListed(GENERIC_DOMAIN)).thenReturn(true);
-        when(identityService.isDomainInAnAgencyToken(GENERIC_DOMAIN)).thenReturn(false);
 
         mockMvc.perform(
                 post("/signup/request")
@@ -174,12 +173,8 @@ public class SignupControllerTest {
                         .param("email", GENERIC_EMAIL)
                         .param("confirmEmail", GENERIC_EMAIL)
                 )
-                .andExpect(status().isOk())
-                .andExpect(view().name(INVITE_SENT_TEMPLATE))
-                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
-                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
-                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
 
         verify(inviteService, times(1)).updateInviteStatus(invite.getCode(), EXPIRED);
     }
@@ -199,10 +194,10 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldRedirectToSignupIfUserHasAlreadyBeenInvited() throws Exception {
+    public void shouldRedirectToSignupIfPreviousInviteHasPassedTheValidityDuration() throws Exception {
 
         Invite invite = generateBasicInvite(true);
-        invite.setInvitedAt(now(clock));
+        invite.setInvitedAt(now(clock).minusDays(7));
         when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
 
         mockMvc.perform(
@@ -214,15 +209,45 @@ public class SignupControllerTest {
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
+
+        verify(inviteService, times(1)).updateInviteStatus(invite.getCode(), EXPIRED);
+    }
+
+    @Test
+    public void shouldRedirectToPendingSignupIfPreviousInviteIsValid() throws Exception {
+
+        Invite invite = generateBasicInvite(true);
+        invite.setInvitedAt(now(clock));
+        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
+
+        mockMvc.perform(
+                        post("/signup/request")
+                                .with(csrf())
+                                .contentType(APPLICATION_FORM_URLENCODED_VALUE)
+                                .param("email", GENERIC_EMAIL)
+                                .param("confirmEmail", GENERIC_EMAIL)
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name(PENDING_SIGNUP_TEMPLATE))
+                .andExpect(content().string(containsString("Create account pending")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("Check your email for the link to register your account.")))
+                .andExpect(content().string(containsString("You have been sent an email with a link to register your account.")))
+                .andExpect(content().string(containsString("Please check your emails (including the junk/spam folder).")))
+                .andExpect(content().string(containsString("Haven't received the email?")))
+                .andExpect(content().string(containsString("Check your spam folder.")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
     }
 
     @Test
     public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
 
         String email = "user@domain.com";
-        Invite invite = generateBasicInvite(true);
-        invite.setInvitedAt(now(clock));
-        when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.of(invite));
+        when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(Optional.empty());
         when(identityService.isIdentityExistsForEmail(email)).thenReturn(true);
 
         mockMvc.perform(
@@ -256,15 +281,17 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString("Check your email for the link to create the account.")))
                 .andExpect(content().string(containsString(
                         "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
-                .andExpect(content().string(containsString("020 3640 7985")));
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
 
         verify(inviteService).sendSelfSignupInvite(GENERIC_EMAIL, false);
     }
 
-    @Test 
+    @Test
     public void shouldNotSendInviteIfNotAllowListedAndNotAgencyTokenEmail() throws Exception {
         when(inviteService.getInviteForEmailAndStatus(GENERIC_EMAIL, PENDING)).thenReturn(Optional.empty());
         when(identityService.isIdentityExistsForEmail(GENERIC_EMAIL)).thenReturn(false);

@@ -27,14 +27,14 @@ public class LoginService {
     }
 
     public void loginSucceeded(Identity identity) {
-        log.debug("LoginService.loginSucceeded: {}", identity);
+        log.info("LoginService:Login succeeded for: {}", identity);
         identity.setLastLoggedIn(now(clock));
         identity.setFailedLoginAttempts(0);
         identityRepository.save(identity);
     }
 
     public void loginFailed(String email) {
-        log.debug("LoginService:loginFailed: {}", email);
+        log.info("LoginService:Login failed for: {}", email);
         Identity identity = identityRepository.findFirstByEmailEqualsIgnoreCase(email);
         if(identity != null && email.equalsIgnoreCase(identity.getEmail())) {
             incrementFailedLoginAttempt(identity);
