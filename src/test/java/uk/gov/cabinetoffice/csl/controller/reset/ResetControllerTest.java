@@ -439,7 +439,7 @@ public class ResetControllerTest {
                 .andExpect(model().attributeExists("lpgUiUrl"))
                 .andDo(print());
 
-        verify(frontendService, atMostOnce()).signoutUser();
+        verify(frontendService, atMostOnce()).signoutUser(UID);
     }
 
     private Reset createReset() {
