@@ -105,7 +105,7 @@ public class UpdatePasswordControllerTest {
                 .andExpect(model().attributeExists("lpgUiUrl"))
                 .andDo(print());
 
-        verify(frontendService, times(1)).signoutUser();
+        verify(frontendService, times(1)).signoutUser(UID);
     }
 
 }
