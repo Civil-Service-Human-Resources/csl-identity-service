@@ -10,15 +10,12 @@ import uk.gov.cabinetoffice.csl.service.client.frontend.IFrontendClient;
 public class FrontendService {
 
     private final IFrontendClient frontendClient;
-    private final IUserAuthService userAuthService;
-    public FrontendService(IFrontendClient frontendClient, IUserAuthService userAuthService) {
+    public FrontendService(IFrontendClient frontendClient) {
         this.frontendClient = frontendClient;
-        this.userAuthService = userAuthService;
     }
 
-    public void signoutUser() {
-        IdentityDetails identity = (IdentityDetails) userAuthService.getAuthentication().getPrincipal();
-        frontendClient.signOutUser(identity.getIdentity().getUid());
+    public void signoutUser(String uid) {
+        frontendClient.signOutUser(uid);
     }
 
 }

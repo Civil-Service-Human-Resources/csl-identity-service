@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus;
+import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.*;
 
 import java.time.ZoneId;
@@ -33,6 +34,7 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @ActiveProfiles("no-redis")
 public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
 
+    private static final String UID = "UID";
     private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
     private static final String VERIFY_EMAIL_PATH = "/account/email/verify/";
     private static final String VERIFY_EMAIL_AGENCY_PATH = "/account/verify/agency/";
@@ -142,7 +144,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
                 .andDo(print());
 
         verify(emailUpdateService, times(1)).updateEmailAddress(eq(emailUpdate));
-        verify(frontendService, times(1)).signoutUser();
+        verify(frontendService, times(1)).signoutUser(UID);
     }
 
     @Test
@@ -221,12 +223,15 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
     }
 
     private EmailUpdate createEmailUpdate(EmailUpdateStatus status) {
+        Identity identity = new Identity();
+        identity.setUid(UID);
         EmailUpdate emailUpdate = new EmailUpdate();
         emailUpdate.setCode(VERIFY_CODE);
         emailUpdate.setPreviousEmail(PREVIOUS_EMAIL);
         emailUpdate.setNewEmail(NEW_EMAIL);
         emailUpdate.setRequestedAt(now(ZoneId.of("Europe/London")));
         emailUpdate.setEmailUpdateStatus(status);
+        emailUpdate.setIdentity(identity);
         return emailUpdate;
     }
 }

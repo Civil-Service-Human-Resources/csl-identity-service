@@ -169,7 +169,7 @@ public class EmailUpdateController {
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
                 log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
-                frontendService.signoutUser();
+                frontendService.signoutUser(emailUpdate.getIdentity().getUid());
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
             } catch (Exception e) {
