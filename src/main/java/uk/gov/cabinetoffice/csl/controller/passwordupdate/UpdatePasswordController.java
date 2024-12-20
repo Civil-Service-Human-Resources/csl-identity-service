@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cabinetoffice.csl.domain.Identity;
+import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
@@ -52,7 +53,7 @@ public class UpdatePasswordController {
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
         passwordService.updatePasswordAndNotify(identity, form.getNewPassword());
         log.info("Password updated for {}", identity.getEmail());
-        frontendService.signoutUser();
+        frontendService.signoutUser(identity.getUid());
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         return PASSWORD_UPDATED_TEMPLATE;
     }
