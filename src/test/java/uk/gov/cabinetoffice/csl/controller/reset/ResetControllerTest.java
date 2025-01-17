@@ -12,7 +12,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
 import uk.gov.cabinetoffice.csl.util.TestUtil;
@@ -44,16 +43,12 @@ public class ResetControllerTest {
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "Password123";
     private static final String CODE = "abc123";
-    private final int durationAfterResetAllowedInSeconds = 3600;
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private ResetService resetService;
-
-    @MockBean
-    private FrontendService frontendService;
 
     @MockBean
     private IdentityService identityService;
@@ -126,6 +121,8 @@ public class ResetControllerTest {
 
     @Test
     public void shouldLoadCheckEmailPageIfUserTryToResetAgainAfterResetAllowedDuration() throws Exception {
+        final int durationAfterResetAllowedInSeconds = 3600;
+
         when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(true);
         Reset reset = createReset();
         reset.setRequestedAt(now(clock).minusSeconds(durationAfterResetAllowedInSeconds));
@@ -461,8 +458,6 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("What happens next?")))
                 .andExpect(model().attributeExists("lpgUiUrl"))
                 .andDo(print());
-
-        verify(frontendService, atMostOnce()).signoutUser(UID);
     }
 
     private Reset createReset() {

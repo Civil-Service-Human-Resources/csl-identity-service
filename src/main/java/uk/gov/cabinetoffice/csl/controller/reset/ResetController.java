@@ -11,7 +11,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.domain.Reset;
-import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.service.PasswordService;
 import uk.gov.cabinetoffice.csl.service.ResetService;
@@ -55,19 +54,15 @@ public class ResetController {
 
     private final IdentityService identityService;
 
-    private final FrontendService frontendService;
-
     private final ResetFormValidator resetFormValidator;
 
     private final Clock clock;
 
     public ResetController(ResetService resetService, PasswordService passwordService,
-                           FrontendService frontendService, IdentityService identityService,
-                           ResetFormValidator resetFormValidator, Clock clock) {
+                           IdentityService identityService, ResetFormValidator resetFormValidator, Clock clock) {
         this.resetService = resetService;
         this.passwordService = passwordService;
         this.identityService = identityService;
-        this.frontendService = frontendService;
         this.resetFormValidator = resetFormValidator;
         this.clock = clock;
     }
@@ -155,7 +150,6 @@ public class ResetController {
             passwordService.updatePasswordAndActivateAndUnlock(identity, resetForm.getPassword());
             resetService.notifyUserForSuccessfulReset(reset);
             log.info("Account is reset successfully for {}", reset.getEmail());
-            frontendService.signoutUser(identity.getUid());
             model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             return PASSWORD_RESET_TEMPLATE;
         }
