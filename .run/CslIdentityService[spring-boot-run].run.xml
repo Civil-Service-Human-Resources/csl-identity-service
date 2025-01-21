@@ -61,7 +61,7 @@
       <env name="REDIS_PASSWORD" value="password" />
       <env name="REDIS_PORT" value="6379" />
       <env name="REDIS_USE_KEY_PREFIX" value="true" />
-      <env name="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="0" />
+      <env name="REFRESH_SERVICE_TOKEN_CACHE_SECONDS_BEFORE_TO_EXPIRE" value="5" />
       <env name="REFRESH_TOKEN_TTL_SECONDS" value="86400" />
       <env name="RESET_VALIDITY_SECONDS" value="86400" />
       <env name="ROOT_LOGGING_LEVEL" value="INFO" />
