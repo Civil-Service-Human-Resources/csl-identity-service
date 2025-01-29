@@ -38,6 +38,7 @@ public class EmailUpdateController {
     private static final String UPDATE_EMAIL_ERROR_TEMPLATE = "emailupdate/updateEmailError";
     private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
     private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "emailupdate/emailVerificationSent";
+    private static final String PENDING_EMAIL_UPDATE_TEMPLATE = "emailupdate/pendingEmailUpdate";
 
     private static final String REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE = "redirect:/account/email/update/error?invalidEmail=true";
     private static final String REDIRECT_ACCOUNT_EMAIL_ALREADY_TAKEN_TRUE = "redirect:/account/email/update/error?emailAlreadyTaken=true";
@@ -112,11 +113,15 @@ public class EmailUpdateController {
         }
 
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
-        emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail);
-        log.info("Email update link sent to {} for verification", newEmail);
-        model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
-        model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
-        return EMAIL_VERIFICATION_SENT_TEMPLATE;
+        if(emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail)) {
+            log.info("Email update link sent to {} for verification", newEmail);
+            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+            model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
+            return EMAIL_VERIFICATION_SENT_TEMPLATE;
+        }
+
+        log.info("Pending email update exists for {}", newEmail);
+        return PENDING_EMAIL_UPDATE_TEMPLATE;
     }
 
     @GetMapping("/verify/{code}")

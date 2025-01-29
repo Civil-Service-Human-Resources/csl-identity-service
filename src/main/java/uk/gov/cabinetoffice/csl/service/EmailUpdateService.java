@@ -34,6 +34,7 @@ public class EmailUpdateService {
     private final Clock clock;
     private final int validityInSeconds;
     private final CsrsService csrsService;
+    private final long durationAfterEmailUpdateAllowedInSeconds;
 
     @Value("${govNotify.template.emailUpdate}")
     private String updateEmailTemplateId;
@@ -46,7 +47,9 @@ public class EmailUpdateService {
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
                               IdentityService identityService,
                               Clock clock,
-                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds, CsrsService csrsService) {
+                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds,
+                              CsrsService csrsService,
+                              @Value("${emailUpdate.durationAfterEmailUpdateAllowedInSeconds}") long durationAfterEmailUpdateAllowedInSeconds) {
         this.emailUpdateRepository = emailUpdateRepository;
         this.emailUpdateFactory = emailUpdateFactory;
         this.notifyService = notifyService;
@@ -54,6 +57,7 @@ public class EmailUpdateService {
         this.clock = clock;
         this.validityInSeconds = validityInSeconds;
         this.csrsService = csrsService;
+        this.durationAfterEmailUpdateAllowedInSeconds = durationAfterEmailUpdateAllowedInSeconds;
     }
 
     public boolean isEmailUpdateExpired(EmailUpdate emailUpdate) {
@@ -73,7 +77,7 @@ public class EmailUpdateService {
         return false;
     }
 
-    public void saveEmailUpdateAndNotify(Identity identity, String newEmail) {
+    public boolean saveEmailUpdateAndNotify(Identity identity, String newEmail) {
         EmailUpdate emailUpdate = null;
 
         List<EmailUpdate> pendingEmailUpdates = emailUpdateRepository
@@ -90,7 +94,12 @@ public class EmailUpdateService {
             if(isEmailUpdateExpired(emailUpdate)) {
                 emailUpdate = emailUpdateFactory.create(identity, newEmail);
             } else {
-                emailUpdate.setRequestedAt(now(clock));
+                long diffInMs = MILLIS.between(emailUpdate.getRequestedAt(), LocalDateTime.now(clock));
+                if(diffInMs < durationAfterEmailUpdateAllowedInSeconds * 1000L) {
+                    return false;
+                } else {
+                    emailUpdate.setRequestedAt(now(clock));
+                }
             }
         }
 
@@ -103,6 +112,7 @@ public class EmailUpdateService {
         Map<String, String> personalisation = new HashMap<>();
         personalisation.put("activationUrl", activationUrl);
         notifyService.notifyWithPersonalisation(newEmail, updateEmailTemplateId, personalisation);
+        return true;
     }
 
     public boolean isEmailUpdateRequestExistsForCode(String code) {

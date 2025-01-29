@@ -21,7 +21,10 @@
       <env name="DATASOURCE_PASSWORD" value="password" />
       <env name="DATASOURCE_URL" value="${database.host}/${database.name}?useSSL=${database.use-ssl}&amp;requireSSL=false" />
       <env name="DATASOURCE_USERNAME" value="root" />
+      <env name="DURATION_AFTER_EMAIL_UPDATE_ALLOWED_SECONDS" value="3600" />
+      <env name="DURATION_AFTER_REACTIVATION_ALLOWED_SECONDS" value="3600" />
       <env name="DURATION_AFTER_REREG_ALLOWED_SECONDS" value="86400" />
+      <env name="DURATION_AFTER_RESET_ALLOWED_SECONDS" value="3600" />
       <env name="EMAIL_UPDATE_VALIDITY_SECONDS" value="86400" />
       <env name="ENCRYPTION_KEY" value="0123456789abcdef0123456789abcdef" />
       <env name="GOV_NOTIFY_API_KEY" value="test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7" />
