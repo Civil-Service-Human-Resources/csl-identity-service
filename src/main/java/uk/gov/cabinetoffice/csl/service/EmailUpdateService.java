@@ -68,7 +68,7 @@ public class EmailUpdateService {
 
         if(emailUpdate.getEmailUpdateStatus().equals(PENDING)) {
             long diffInMs = MILLIS.between(emailUpdate.getRequestedAt(), LocalDateTime.now(clock));
-            if(diffInMs > validityInSeconds * 1000L) {
+            if(diffInMs >= validityInSeconds * 1000L) {
                 emailUpdate.setEmailUpdateStatus(EXPIRED);
                 emailUpdateRepository.save(emailUpdate);
                 return true;

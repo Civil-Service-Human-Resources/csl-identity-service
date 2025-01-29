@@ -14,17 +14,18 @@ import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.*;
 
 @SpringBootTest
 @ActiveProfiles("no-redis")
@@ -38,7 +39,7 @@ public class EmailUpdateServiceTest {
     private static final String PASSWORD = "password";
     private static final Set<Role> ROLES = new HashSet<>();
     private static final Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, true, false, ROLES,
-            LocalDateTime.now(), false, 0);
+            now(), false, 0);
 
     @MockBean
     private EmailUpdateRepository emailUpdateRepository;
@@ -54,6 +55,33 @@ public class EmailUpdateServiceTest {
 
     @Autowired
     private EmailUpdateService emailUpdateService;
+
+    @Test
+    public void givenAValidPendingEmailUpdate_thenReturnFalse(){
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        assertFalse(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void givenAExpiredEmailUpdate_thenReturnTrue(){
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setEmailUpdateStatus(EXPIRED);
+        assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void givenAUpdatedEmailUpdate_thenReturnTrue(){
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setEmailUpdateStatus(UPDATED);
+        assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void givenAEmailUpdateOlderThanValidityDuration_thenReturnTrue(){
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(86400));
+        assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
 
     @Test
     public void givenAValidCodeForIdentity_whenVerifyCode_thenReturnsTrue() {
@@ -73,15 +101,9 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void givenAValidIdentity_whenNewDomainAllowListedAndNotAgency_shouldReturnSuccessfully() {
-        Identity identity = new Identity();
-        identity.setEmail(EMAIL);
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
 
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setId(100L);
-        emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
-        emailUpdate.setIdentity(identity);
-
-        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), isNull());
 
         emailUpdateService.updateEmailAddress(emailUpdate);
@@ -96,18 +118,13 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void givenAValidIdentity_whenNewDomainIsAgency_shouldReturnSuccessfully() {
-        Identity identity = new Identity();
-        identity.setEmail(EMAIL);
 
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setId(100L);
-        emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
-        emailUpdate.setIdentity(identity);
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
 
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
 
-        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), eq(agencyToken));
 
         emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
@@ -122,8 +139,20 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void shouldGetEmailUpdate() {
-        EmailUpdate emailUpdate = new EmailUpdate();
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
         when(emailUpdateRepository.findByCode(anyString())).thenReturn(Optional.of(emailUpdate));
         assertEquals(emailUpdateService.getEmailUpdateRequestForCode(CODE), emailUpdate);
+    }
+
+    private EmailUpdate createPendingEmailUpdate() {
+        EmailUpdate emailUpdate = new EmailUpdate();
+        emailUpdate.setId(100L);
+        emailUpdate.setCode(CODE);
+        emailUpdate.setPreviousEmail(EMAIL);
+        emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
+        emailUpdate.setIdentity(IDENTITY);
+        emailUpdate.setEmailUpdateStatus(PENDING);
+        emailUpdate.setRequestedAt(now());
+        return emailUpdate;
     }
 }
