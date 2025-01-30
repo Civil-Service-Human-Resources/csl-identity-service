@@ -58,7 +58,7 @@ public class EmailUpdateServiceTest {
     private EmailUpdateService emailUpdateService;
 
     @Test
-    public void givenAValidPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
+    public void givenAPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
         EmailUpdate emailUpdate = createPendingEmailUpdate();
         assertFalse(emailUpdateService.isEmailUpdateExpired(emailUpdate));
     }
@@ -99,6 +99,65 @@ public class EmailUpdateServiceTest {
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(emailUpdateRepository, times(1)).saveAll(pendingEmailUpdates);
+        verify(emailUpdateRepository, times(1)).save(any());
+        verify(notifyService, times(1)).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+    }
+
+    @Test
+    public void giveOneExpiredEmailUpdateExists_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(86400));
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(emailUpdate);
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
+        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate1);
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(emailUpdateRepository, times(2)).save(any());
+        verify(notifyService, times(1)).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+    }
+
+    @Test
+    public void givenAPendingEmailUpdateOlderThanValidityDurationExists_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(3600));
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(emailUpdate);
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
+        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate1);
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(emailUpdateRepository, times(1)).save(any());
+        verify(notifyService, times(1)).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+    }
+
+    @Test
+    public void giveOnePendingEmailUpdateExists_thenSaveEmailUpdateAndNotifyShouldReturnFalse() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(emailUpdate);
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
+        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate1);
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertFalse(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
     }
 
     @Test
