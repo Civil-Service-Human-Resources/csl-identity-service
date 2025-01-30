@@ -59,8 +59,7 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void givenAPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
-        EmailUpdate emailUpdate = createPendingEmailUpdate();
-        assertFalse(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+        assertFalse(emailUpdateService.isEmailUpdateExpired(createPendingEmailUpdate()));
     }
 
     @Test
@@ -86,16 +85,13 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void giveMultiplePendingEmailUpdateExist_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
-        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
-        EmailUpdate emailUpdate2 = createPendingEmailUpdate();
         List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
-        pendingEmailUpdates.add(emailUpdate1);
-        pendingEmailUpdates.add(emailUpdate2);
+        pendingEmailUpdates.add(createPendingEmailUpdate());
+        pendingEmailUpdates.add(createPendingEmailUpdate());
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
         when(emailUpdateRepository.saveAll(pendingEmailUpdates)).thenReturn(pendingEmailUpdates);
-        EmailUpdate emailUpdate3 = createPendingEmailUpdate();
-        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate3);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -114,8 +110,7 @@ public class EmailUpdateServiceTest {
         pendingEmailUpdates.add(emailUpdate);
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
-        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
-        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate1);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -133,8 +128,7 @@ public class EmailUpdateServiceTest {
         pendingEmailUpdates.add(emailUpdate);
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
-        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
-        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate1);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -146,13 +140,11 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void giveOnePendingEmailUpdateExists_thenSaveEmailUpdateAndNotifyShouldReturnFalse() {
-        EmailUpdate emailUpdate = createPendingEmailUpdate();
         List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
-        pendingEmailUpdates.add(emailUpdate);
+        pendingEmailUpdates.add(createPendingEmailUpdate());
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
-        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
-        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate1);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertFalse(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -163,31 +155,27 @@ public class EmailUpdateServiceTest {
     @Test
     public void givenAValidCodeForIdentity_whenVerifyCode_thenReturnsTrue() {
         when(emailUpdateRepository.existsByCode(anyString())).thenReturn(true);
-        boolean actual = emailUpdateService.isEmailUpdateRequestExistsForCode("co");
-        assertTrue(actual);
+        assertTrue(emailUpdateService.isEmailUpdateRequestExistsForCode("co"));
         verify(emailUpdateRepository, times(1)).existsByCode(eq("co"));
     }
 
     @Test
     public void givenAInvalidCodeForIdentity_whenVerifyCode_thenReturnsFalse() {
         when(emailUpdateRepository.existsByCode(anyString())).thenReturn(false);
-        boolean actual = emailUpdateService.isEmailUpdateRequestExistsForCode("co");
-        assertFalse(actual);
+        assertFalse(emailUpdateService.isEmailUpdateRequestExistsForCode("co"));
         verify(emailUpdateRepository, times(1)).existsByCode(eq("co"));
     }
 
     @Test
     public void givenAValidIdentity_whenNewDomainAllowListedAndNotAgency_shouldReturnSuccessfully() {
-        EmailUpdate emailUpdate = createPendingEmailUpdate();
-
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
-        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), isNull());
+        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), isNull());
 
-        emailUpdateService.updateEmailAddress(emailUpdate);
+        emailUpdateService.updateEmailAddress(createPendingEmailUpdate());
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
-                eq(emailUpdate.getNewEmail()), isNull());
+                eq(NEW_EMAIL_ADDRESS), isNull());
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
@@ -195,20 +183,17 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void givenAValidIdentity_whenNewDomainIsAgency_shouldReturnSuccessfully() {
-
-        EmailUpdate emailUpdate = createPendingEmailUpdate();
-
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
 
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
-        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), eq(agencyToken));
+        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
 
-        emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
+        emailUpdateService.updateEmailAddress(createPendingEmailUpdate(), agencyToken);
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
-                eq(emailUpdate.getNewEmail()), eq(agencyToken));
+                eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
