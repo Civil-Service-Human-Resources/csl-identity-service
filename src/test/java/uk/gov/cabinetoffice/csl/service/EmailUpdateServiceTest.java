@@ -14,9 +14,7 @@ import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -50,6 +48,9 @@ public class EmailUpdateServiceTest {
     @MockBean
     private CsrsService csrsService;
 
+    @MockBean
+    private NotifyService notifyService;
+
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
 
@@ -57,30 +58,47 @@ public class EmailUpdateServiceTest {
     private EmailUpdateService emailUpdateService;
 
     @Test
-    public void givenAValidPendingEmailUpdate_thenReturnFalse(){
+    public void givenAValidPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
         EmailUpdate emailUpdate = createPendingEmailUpdate();
         assertFalse(emailUpdateService.isEmailUpdateExpired(emailUpdate));
     }
 
     @Test
-    public void givenAExpiredEmailUpdate_thenReturnTrue(){
+    public void givenAExpiredEmailUpdate_thenIsEmailUpdateExpiredShouldReturnTrue() {
         EmailUpdate emailUpdate = createPendingEmailUpdate();
         emailUpdate.setEmailUpdateStatus(EXPIRED);
         assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
     }
 
     @Test
-    public void givenAUpdatedEmailUpdate_thenReturnTrue(){
+    public void givenAUpdatedEmailUpdate_thenIsEmailUpdateExpiredShouldReturnTrue() {
         EmailUpdate emailUpdate = createPendingEmailUpdate();
         emailUpdate.setEmailUpdateStatus(UPDATED);
         assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
     }
 
     @Test
-    public void givenAEmailUpdateOlderThanValidityDuration_thenReturnTrue(){
+    public void givenAPendingEmailUpdateOlderThanValidityDuration_thenIsEmailUpdateExpiredShouldReturnTrue() {
         EmailUpdate emailUpdate = createPendingEmailUpdate();
         emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(86400));
         assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void giveMultiplePendingEmailUpdateExist_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
+        EmailUpdate emailUpdate1 = createPendingEmailUpdate();
+        EmailUpdate emailUpdate2 = createPendingEmailUpdate();
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(emailUpdate1);
+        pendingEmailUpdates.add(emailUpdate2);
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        when(emailUpdateRepository.saveAll(pendingEmailUpdates)).thenReturn(pendingEmailUpdates);
+        EmailUpdate emailUpdate3 = createPendingEmailUpdate();
+        when(emailUpdateRepository.save(any())).thenReturn(emailUpdate3);
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
     }
 
     @Test
