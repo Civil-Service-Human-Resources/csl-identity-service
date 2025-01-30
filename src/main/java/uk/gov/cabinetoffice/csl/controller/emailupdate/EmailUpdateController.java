@@ -90,7 +90,6 @@ public class EmailUpdateController {
     @PostMapping
     public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form,
                                         BindingResult bindingResult, Authentication authentication) {
-
         model.addAttribute(CONTACT_EMAIL_ATTRIBUTE, contactEmail);
         model.addAttribute(CONTACT_NUMBER_ATTRIBUTE, contactNumber);
 
@@ -128,12 +127,12 @@ public class EmailUpdateController {
     public String verifyEmail(@PathVariable String code, Authentication authentication,
                               HttpServletRequest request, HttpServletResponse response,
                               RedirectAttributes redirectAttributes) {
-        log.debug("Attempting update email verification with code: {}", code);
+        log.info("Attempting update email verification with code: {}", code);
 
         Object principal = authentication != null ? authentication.getPrincipal() : null;
         if(principal != null ) {
+            log.info("verifyEmail: logoutUtil.logout is invoked.");
             logoutUtil.logout(request, response);
-            log.debug("verifyEmail: logoutUtil.logout is invoked.");
         }
 
         if (!emailUpdateService.isEmailUpdateRequestExistsForCode(code)) {
@@ -162,19 +161,19 @@ public class EmailUpdateController {
         }
 
         String newDomain = utils.getDomainFromEmailAddress(newEmail);
-        log.debug("Attempting update email verification with domain: {}", newDomain);
+        log.info("Attempting update email verification with domain: {}", newDomain);
 
         if (identityService.isDomainInAnAgencyToken(newDomain)) {
-            log.debug("New email domain is in agency. oldEmail = {}, newEmail = {}", oldEmail,
+            log.info("New email domain is in agency. oldEmail = {}, newEmail = {}", oldEmail,
                     newEmail);
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
         } else if (identityService.isDomainAllowListed(newDomain)) {
-            log.debug("New email domain is allow listed. oldEmail = {}, newEmail = {}", oldEmail,
+            log.info("New email domain is allow listed. oldEmail = {}, newEmail = {}", oldEmail,
                     newEmail);
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
-                log.debug("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
+                log.info("Email updated successfully from old email = {} to newEmail = {}", oldEmail, newEmail);
                 frontendService.signoutUser(emailUpdate.getIdentity().getUid());
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, newEmail);
                 return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;

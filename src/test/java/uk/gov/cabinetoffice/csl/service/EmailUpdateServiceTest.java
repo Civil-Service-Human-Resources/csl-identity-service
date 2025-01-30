@@ -95,11 +95,13 @@ public class EmailUpdateServiceTest {
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
-        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
         verify(emailUpdateRepository, times(1)).saveAll(pendingEmailUpdates);
         verify(emailUpdateRepository, times(1)).save(any());
-        verify(notifyService, times(1)).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+        verify(notifyService, times(1))
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
 
     @Test
@@ -114,10 +116,12 @@ public class EmailUpdateServiceTest {
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
-        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
         verify(emailUpdateRepository, times(2)).save(any());
-        verify(notifyService, times(1)).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+        verify(notifyService, times(1))
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
 
     @Test
@@ -132,10 +136,12 @@ public class EmailUpdateServiceTest {
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
-        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
         verify(emailUpdateRepository, times(1)).save(any());
-        verify(notifyService, times(1)).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+        verify(notifyService, times(1))
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
 
     @Test
@@ -148,7 +154,8 @@ public class EmailUpdateServiceTest {
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertFalse(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
-        verify(emailUpdateRepository, times(1)).findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
     }
 

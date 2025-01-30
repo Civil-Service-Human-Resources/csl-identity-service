@@ -29,11 +29,11 @@ public class EmailUpdateService {
 
     private final EmailUpdateRepository emailUpdateRepository;
     private final EmailUpdateFactory emailUpdateFactory;
-    private final NotifyService notifyService;
     private final IdentityService identityService;
-    private final Clock clock;
-    private final int validityInSeconds;
     private final CsrsService csrsService;
+    private final Clock clock;
+    private final NotifyService notifyService;
+    private final int validityInSeconds;
     private final long durationAfterEmailUpdateAllowedInSeconds;
 
     @Value("${govNotify.template.emailUpdate}")
@@ -44,19 +44,22 @@ public class EmailUpdateService {
 
     public EmailUpdateService(EmailUpdateRepository emailUpdateRepository,
                               EmailUpdateFactory emailUpdateFactory,
-                              @Qualifier("notifyServiceImpl") NotifyService notifyService,
                               IdentityService identityService,
-                              Clock clock,
-                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds,
                               CsrsService csrsService,
-                              @Value("${emailUpdate.durationAfterEmailUpdateAllowedInSeconds}") long durationAfterEmailUpdateAllowedInSeconds) {
+                              Clock clock,
+                              @Qualifier("notifyServiceImpl")
+                              NotifyService notifyService,
+                              @Value("${emailUpdate.validityInSeconds}")
+                              int validityInSeconds,
+                              @Value("${emailUpdate.durationAfterEmailUpdateAllowedInSeconds}")
+                              long durationAfterEmailUpdateAllowedInSeconds) {
         this.emailUpdateRepository = emailUpdateRepository;
         this.emailUpdateFactory = emailUpdateFactory;
-        this.notifyService = notifyService;
         this.identityService = identityService;
-        this.clock = clock;
-        this.validityInSeconds = validityInSeconds;
         this.csrsService = csrsService;
+        this.clock = clock;
+        this.notifyService = notifyService;
+        this.validityInSeconds = validityInSeconds;
         this.durationAfterEmailUpdateAllowedInSeconds = durationAfterEmailUpdateAllowedInSeconds;
     }
 
@@ -143,7 +146,7 @@ public class EmailUpdateService {
 
         emailUpdate.setUpdatedAt(now(clock));
         emailUpdate.setEmailUpdateStatus(UPDATED);
-        log.info("Saving the emailUpdate in DB: {}", emailUpdate);
+        log.debug("Saving the emailUpdate in DB: {}", emailUpdate);
         emailUpdateRepository.save(emailUpdate);
 
         log.info("Email address {} has been updated to {} successfully", existingEmail, newEmail);
