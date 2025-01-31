@@ -42,15 +42,10 @@ public class EmailUpdateService {
     @Value("${emailUpdate.urlFormat}")
     private String inviteUrlFormat;
 
-    public EmailUpdateService(EmailUpdateRepository emailUpdateRepository,
-                              EmailUpdateFactory emailUpdateFactory,
-                              IdentityService identityService,
-                              CsrsService csrsService,
-                              Clock clock,
-                              @Qualifier("notifyServiceImpl")
-                              NotifyService notifyService,
-                              @Value("${emailUpdate.validityInSeconds}")
-                              int validityInSeconds,
+    public EmailUpdateService(EmailUpdateRepository emailUpdateRepository, EmailUpdateFactory emailUpdateFactory,
+                              IdentityService identityService, CsrsService csrsService, Clock clock,
+                              @Qualifier("notifyServiceImpl") NotifyService notifyService,
+                              @Value("${emailUpdate.validityInSeconds}") int validityInSeconds,
                               @Value("${emailUpdate.durationAfterEmailUpdateAllowedInSeconds}")
                               long durationAfterEmailUpdateAllowedInSeconds) {
         this.emailUpdateRepository = emailUpdateRepository;
