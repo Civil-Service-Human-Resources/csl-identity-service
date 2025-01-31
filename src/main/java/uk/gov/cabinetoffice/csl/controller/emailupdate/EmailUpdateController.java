@@ -63,9 +63,8 @@ public class EmailUpdateController {
     private final Utils utils;
     private final int validityInSeconds;
 
-    public EmailUpdateController(IdentityService identityService,
-                                 FrontendService frontendService, EmailUpdateService emailUpdateService,
-                                 Utils utils,
+    public EmailUpdateController(IdentityService identityService, FrontendService frontendService,
+                                 EmailUpdateService emailUpdateService, Utils utils,
                                  @Value("${emailUpdate.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
         this.frontendService = frontendService;
