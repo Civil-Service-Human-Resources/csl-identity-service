@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -34,6 +35,7 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
     private static final String PENDING_EMAIL_UPDATE_TEMPLATE = "emailupdate/pendingEmailUpdate";
     private static final String EMAIL_PATH = "/account/email";
     private static final String NEW_EMAIL = "newEmail@example.com";
+    private static final String UID = "uid123";
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,6 +45,9 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
 
     @MockBean
     private EmailUpdateService emailUpdateService;
+
+    @MockBean
+    private FrontendService frontendService;
 
     @Test
     public void givenARequestToChangeYourEmail_whenUpdateEmailForm_shouldDisplayForm() throws Exception {
@@ -140,6 +145,7 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
         verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
         verify(emailUpdateService, times(1)).saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class));
+        verify(frontendService, times(1)).signoutUser(UID);
     }
 
     @Test
@@ -165,5 +171,6 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
         verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
         verify(emailUpdateService, times(1)).saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class));
+        verify(frontendService, times(1)).signoutUser(UID);
     }
 }
