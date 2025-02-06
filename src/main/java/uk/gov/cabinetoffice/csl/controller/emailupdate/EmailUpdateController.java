@@ -99,7 +99,7 @@ public class EmailUpdateController {
             return UPDATE_EMAIL_TEMPLATE;
         }
         String newEmail = form.getEmail();
-        log.info("Email update requested, sending change email link to {} for verification", newEmail);
+        log.info("Email update request received for email {}", newEmail);
 
         if (identityService.isIdentityExistsForEmail(newEmail)) {
             log.warn("Email {} is already in use", newEmail);
@@ -113,6 +113,7 @@ public class EmailUpdateController {
 
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
         emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail);
+        log.info("Email update link sent to {} for verification", newEmail);
         model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         return EMAIL_VERIFICATION_SENT_TEMPLATE;

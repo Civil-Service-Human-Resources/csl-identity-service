@@ -100,6 +100,12 @@ public class ResetService {
         notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
     }
 
+    public void updatePendingResetRequestAndAndNotifyUser(Reset pendingReset) throws NotificationClientException {
+        pendingReset.setRequestedAt(now(clock));
+        resetRepository.save(pendingReset);
+        notifyService.notify(pendingReset.getEmail(), pendingReset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
+    }
+
     public void notifyUserForSuccessfulReset(Reset reset) throws NotificationClientException {
         reset.setResetAt(now(clock));
         reset.setResetStatus(RESET);
