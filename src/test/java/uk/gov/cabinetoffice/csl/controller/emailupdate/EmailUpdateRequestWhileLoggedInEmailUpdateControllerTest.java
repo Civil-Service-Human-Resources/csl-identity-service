@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cabinetoffice.csl.domain.Identity;
 import uk.gov.cabinetoffice.csl.service.EmailUpdateService;
+import uk.gov.cabinetoffice.csl.service.FrontendService;
 import uk.gov.cabinetoffice.csl.service.IdentityService;
 import uk.gov.cabinetoffice.csl.util.WithMockCustomUser;
 
@@ -31,8 +32,10 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
     private static final String UPDATE_EMAIL_FORM_TEMPLATE = "updateEmailForm";
     private static final String UPDATE_EMAIL_VIEW_NAME_TEMPLATE = "emailupdate/updateEmail";
     private static final String EMAIL_VERIFICATION_SENT_TEMPLATE = "emailupdate/emailVerificationSent";
+    private static final String PENDING_EMAIL_UPDATE_TEMPLATE = "emailupdate/pendingEmailUpdate";
     private static final String EMAIL_PATH = "/account/email";
     private static final String NEW_EMAIL = "newEmail@example.com";
+    private static final String UID = "uid123";
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,6 +45,9 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
 
     @MockBean
     private EmailUpdateService emailUpdateService;
+
+    @MockBean
+    private FrontendService frontendService;
 
     @Test
     public void givenARequestToChangeYourEmail_whenUpdateEmailForm_shouldDisplayForm() throws Exception {
@@ -120,7 +126,7 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
     public void givenAValidFormAndEmailDoesNotAlreadyExistAndIsAValidEmail_whenSendEmailVerification_shouldDisplayEmailVerificationSentScreen() throws Exception {
         when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(false);
         when(identityService.isValidEmailDomain(anyString())).thenReturn(true);
-        doNothing().when(emailUpdateService).saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class));
+        when(emailUpdateService.saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class))).thenReturn(true);
 
         mockMvc.perform(post(EMAIL_PATH)
                     .param("email", NEW_EMAIL)
@@ -139,5 +145,32 @@ public class EmailUpdateRequestWhileLoggedInEmailUpdateControllerTest {
         verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
         verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
         verify(emailUpdateService, times(1)).saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class));
+        verify(frontendService, times(1)).signoutUser(UID);
+    }
+
+    @Test
+    public void givenAValidPendingEmailVerificationExist_shouldDisplayPendingEmailUpdateScreen() throws Exception {
+        when(identityService.isIdentityExistsForEmail(anyString())).thenReturn(false);
+        when(identityService.isValidEmailDomain(anyString())).thenReturn(true);
+        when(emailUpdateService.saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class))).thenReturn(false);
+
+        mockMvc.perform(post(EMAIL_PATH)
+                        .param("email", NEW_EMAIL)
+                        .param("confirm", NEW_EMAIL)
+                        .with(csrf())
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Email update pending")))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andExpect(view().name(PENDING_EMAIL_UPDATE_TEMPLATE));
+
+        verify(identityService, times(1)).isIdentityExistsForEmail(eq(NEW_EMAIL));
+        verify(identityService, times(1)).isValidEmailDomain(eq(NEW_EMAIL));
+        verify(emailUpdateService, times(1)).saveEmailUpdateAndNotify(isA(Identity.class), isA(String.class));
+        verify(frontendService, times(1)).signoutUser(UID);
     }
 }

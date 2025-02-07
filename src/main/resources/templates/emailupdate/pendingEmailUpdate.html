@@ -1,0 +1,35 @@
+<page th:replace="~{fragments/user-layout :: page(~{::title},~{::content})}">
+<title>Check your email - Civil Service Learning</title>
+<content>
+<div class="container">
+    <div class="grid-row">
+        <div class="column-full">
+            <div class="govuk-box-highlight">
+                <h1 class="heading-large">Email update pending</h1>
+            </div>
+        </div>
+    </div>
+    <div class="grid-row">
+        <div class="column-two-thirds">
+            <h2 class="heading-medium">What next?</h2>
+            <p>We recently sent you an email with the link to update your email.</p>
+            <p>Please check your emails (including the junk/spam folder).</p>
+            <details role="group">
+                <summary role="button" aria-controls="details-content-0" aria-expanded="false">
+                    <span class="summary">Haven't received the email?</span>
+                </summary>
+                <div class="panel panel-border-narrow" id="details-content-0" aria-hidden="true">
+                    <div class="text">
+                        <p>Check your spam folder.</p>
+                        <p>If you don't see the email after 30 minutes, you can contact the Learning Platform
+                            for Government helpdesk on <a th:href="'tel:'+${contactNumber}" th:text="${contactNumber}"></a> or by email on
+                            <a th:href="'mailto:'+${contactEmail}" th:text="${contactEmail}"></a>.
+                        </p>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>
+</content>
+</page>
