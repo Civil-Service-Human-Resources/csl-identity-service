@@ -111,7 +111,7 @@ public class ResetControllerTest {
                 .andExpect(content().string(containsString("Please check your emails (including the junk/spam folder).")))
                 .andExpect(content().string(containsString("Haven't received the email?")))
                 .andExpect(content().string(containsString("Check your spam folder.")))
-                .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Learning Platform")))
+                .andExpect(content().string(containsString("If you don't see the email after 30 minutes, you can contact the Civil Service Learning")))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
