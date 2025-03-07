@@ -145,7 +145,7 @@ public class SignupController {
         if (identityService.isIdentityExistsForEmail(email)) {
             log.info("User is trying to sign-up with an email {} which is already in use.", email);
             model.addAttribute("emailId", email);
-            model.addAttribute("resetValidity",
+            model.addAttribute("validityDuration",
                     utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
@@ -155,7 +155,7 @@ public class SignupController {
             log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
             model.addAttribute("emailId", email);
-            model.addAttribute("resetValidity",
+            model.addAttribute("validityDuration",
                     utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
@@ -164,7 +164,7 @@ public class SignupController {
             log.info("Sending invite to allowListed user with email {}", email);
             inviteService.sendSelfSignupInvite(email, true);
             model.addAttribute("emailId", email);
-            model.addAttribute("resetValidity",
+            model.addAttribute("validityDuration",
                     utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
         }
