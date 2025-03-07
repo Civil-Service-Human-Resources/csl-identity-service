@@ -145,10 +145,15 @@ public class SignupControllerTest {
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
-                .andExpect(content().string(containsString("Check your email for the link to create the account.")))
+                .andExpect(content().string(containsString("If an account with the email address")))
+                .andExpect(content().string(containsString("does not already exist then you will receive " +
+                        "an email with the link to create the account.")))
                 .andExpect(content().string(containsString(
-                        "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                        "Please check your emails (including the junk/spam folder) for a link to " +
+                                "<strong>continue creating your account</strong>.")))
                 .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
+                .andExpect(model().attributeExists("emailId"))
+                .andExpect(content().string(containsString(email)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
@@ -244,7 +249,7 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldRedirectToSignupIfUserAlreadyExists() throws Exception {
+    public void shouldShowInviteSentScreenIfUserAlreadyExists() throws Exception {
 
         String email = "user@domain.com";
         when(inviteService.getInviteForEmailAndStatus(email, PENDING)).thenReturn(Optional.empty());
@@ -257,8 +262,24 @@ public class SignupControllerTest {
                         .param("email", email)
                         .param("confirmEmail", email)
                 )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(REDIRECT_SIGNUP_REQUEST));
+                .andExpect(status().isOk())
+                .andExpect(view().name(INVITE_SENT_TEMPLATE))
+                .andExpect(content().string(containsString("Check your email")))
+                .andExpect(content().string(containsString("What next?")))
+                .andExpect(content().string(containsString("If an account with the email address")))
+                .andExpect(content().string(containsString("does not already exist then you will receive " +
+                        "an email with the link to create the account.")))
+                .andExpect(content().string(containsString(
+                        "Please check your emails (including the junk/spam folder) for a link to " +
+                                "<strong>continue creating your account</strong>.")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
+                .andExpect(model().attributeExists("emailId"))
+                .andExpect(content().string(containsString(email)))
+                .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
+                .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
+                .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))
+                .andExpect(content().string(containsString("020 3640 7985")))
+                .andDo(print());
     }
 
     @Test
@@ -278,10 +299,15 @@ public class SignupControllerTest {
                 .andExpect(view().name(INVITE_SENT_TEMPLATE))
                 .andExpect(content().string(containsString("Check your email")))
                 .andExpect(content().string(containsString("What next?")))
-                .andExpect(content().string(containsString("Check your email for the link to create the account.")))
+                .andExpect(content().string(containsString("If an account with the email address")))
+                .andExpect(content().string(containsString("does not already exist then you will receive " +
+                        "an email with the link to create the account.")))
                 .andExpect(content().string(containsString(
-                        "We have sent you an email with a link to <strong>continue creating your account</strong>.")))
+                        "Please check your emails (including the junk/spam folder) for a link to " +
+                                "<strong>continue creating your account</strong>.")))
                 .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
+                .andExpect(model().attributeExists("emailId"))
+                .andExpect(content().string(containsString(GENERIC_EMAIL)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
                 .andExpect(content().string(containsString("support@governmentcampus.co.uk")))
                 .andExpect(model().attributeExists(CONTACT_NUMBER_ATTRIBUTE))

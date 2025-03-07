@@ -12,8 +12,8 @@
     <div class="grid-row">
         <div class="column-two-thirds">
             <h2 class="heading-medium">What next?</h2>
-            <p>Check your email for the link to create the account.</p>
-            <p>We have sent you an email with a link to <strong>continue creating your account</strong>.</p>
+            <p>If an account with the email address <b><span th:text="${emailId}"></span></b> does not already exist then you will receive an email with the link to create the account.</p>
+            <p>Please check your emails (including the junk/spam folder) for a link to <strong>continue creating your account</strong>.</p>
             <p>The link will expire in <span th:text="${resetValidity}"></span></p>
             <details role="group">
                 <summary role="button" aria-controls="details-content-0" aria-expanded="false">

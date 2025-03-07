@@ -144,15 +144,17 @@ public class SignupController {
 
         if (identityService.isIdentityExistsForEmail(email)) {
             log.info("User is trying to sign-up with an email {} which is already in use.", email);
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE,
-                    "User already exists for email address " + email);
-            return REDIRECT_SIGNUP_REQUEST;
+            model.addAttribute("emailId", email);
+            model.addAttribute("resetValidity",
+                    utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+            return INVITE_SENT_TEMPLATE;
         }
 
         final String domain = utils.getDomainFromEmailAddress(email);
         if (identityService.isDomainInAnAgencyToken(domain)) {
             log.info("Sending invite to agency user with email {}", email);
             inviteService.sendSelfSignupInvite(email, false);
+            model.addAttribute("emailId", email);
             model.addAttribute("resetValidity",
                     utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
@@ -161,6 +163,7 @@ public class SignupController {
         if (identityService.isDomainAllowListed(domain)) {
             log.info("Sending invite to allowListed user with email {}", email);
             inviteService.sendSelfSignupInvite(email, true);
+            model.addAttribute("emailId", email);
             model.addAttribute("resetValidity",
                     utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             return INVITE_SENT_TEMPLATE;
