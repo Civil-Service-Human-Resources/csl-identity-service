@@ -151,7 +151,7 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString(
                         "Please check your emails (including the junk/spam folder) for a link to " +
                                 "<strong>continue creating your account</strong>.")))
-                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>.")))
                 .andExpect(model().attributeExists("emailId"))
                 .andExpect(content().string(containsString(email)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
@@ -272,7 +272,7 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString(
                         "Please check your emails (including the junk/spam folder) for a link to " +
                                 "<strong>continue creating your account</strong>.")))
-                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>.")))
                 .andExpect(model().attributeExists("emailId"))
                 .andExpect(content().string(containsString(email)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
@@ -305,7 +305,7 @@ public class SignupControllerTest {
                 .andExpect(content().string(containsString(
                         "Please check your emails (including the junk/spam folder) for a link to " +
                                 "<strong>continue creating your account</strong>.")))
-                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>")))
+                .andExpect(content().string(containsString("The link will expire in <span>3 days</span>.")))
                 .andExpect(model().attributeExists("emailId"))
                 .andExpect(content().string(containsString(GENERIC_EMAIL)))
                 .andExpect(model().attributeExists(CONTACT_EMAIL_ATTRIBUTE))
