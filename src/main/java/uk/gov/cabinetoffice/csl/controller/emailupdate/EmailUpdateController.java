@@ -108,7 +108,7 @@ public class EmailUpdateController {
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
         if(emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail)) {
             log.info("Email update link sent to {} for verification", newEmail);
-            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+            model.addAttribute("validityDuration", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             frontendService.signoutUser(identity.getUid());
             return EMAIL_VERIFICATION_SENT_TEMPLATE;
