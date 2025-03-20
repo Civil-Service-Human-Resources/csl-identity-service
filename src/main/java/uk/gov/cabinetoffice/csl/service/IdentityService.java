@@ -192,4 +192,18 @@ public class IdentityService {
     public boolean isAgencyTokenUidValidForDomain(String agencyTokenUid, String domain) {
         return csrsService.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
     }
+
+    public void assignAgencyToken(Identity identity, AgencyToken agencyToken) {
+        if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
+            log.info("Agency token uid {} has no spaces available. Identity is not created", agencyToken.getUid());
+            throw new UnableToAllocateAgencyTokenException("Agency token uid " + agencyToken.getUid()
+                    + " has no spaces available. Identity is not created");
+        }
+        identity.setActive(true);
+        identity.setLocked(false);
+        identity.setFailedLoginAttempts(0);
+        identity.setLastLoggedIn(now(clock));
+        identity.setAgencyTokenUid(agencyToken.getUid());
+        identityRepository.save(identity);
+    }
 }
