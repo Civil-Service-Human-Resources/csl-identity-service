@@ -14,17 +14,16 @@ import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus.*;
 
 @SpringBootTest
 @ActiveProfiles("no-redis")
@@ -38,7 +37,7 @@ public class EmailUpdateServiceTest {
     private static final String PASSWORD = "password";
     private static final Set<Role> ROLES = new HashSet<>();
     private static final Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, true, false, ROLES,
-            LocalDateTime.now(), false, 0);
+            now(), false, 0);
 
     @MockBean
     private EmailUpdateRepository emailUpdateRepository;
@@ -49,6 +48,9 @@ public class EmailUpdateServiceTest {
     @MockBean
     private CsrsService csrsService;
 
+    @MockBean
+    private NotifyService notifyService;
+
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
 
@@ -56,39 +58,131 @@ public class EmailUpdateServiceTest {
     private EmailUpdateService emailUpdateService;
 
     @Test
+    public void givenAPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
+        assertFalse(emailUpdateService.isEmailUpdateExpired(createPendingEmailUpdate()));
+    }
+
+    @Test
+    public void givenAExpiredEmailUpdate_thenIsEmailUpdateExpiredShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setEmailUpdateStatus(EXPIRED);
+        assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void givenAUpdatedEmailUpdate_thenIsEmailUpdateExpiredShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setEmailUpdateStatus(UPDATED);
+        assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void givenAPendingEmailUpdateOlderThanValidityDuration_thenIsEmailUpdateExpiredShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(86400));
+        assertTrue(emailUpdateService.isEmailUpdateExpired(emailUpdate));
+    }
+
+    @Test
+    public void giveMultiplePendingEmailUpdateExist_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(createPendingEmailUpdate());
+        pendingEmailUpdates.add(createPendingEmailUpdate());
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        when(emailUpdateRepository.saveAll(pendingEmailUpdates)).thenReturn(pendingEmailUpdates);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(emailUpdateRepository, times(1)).saveAll(pendingEmailUpdates);
+        verify(emailUpdateRepository, times(1)).save(any());
+        verify(notifyService, times(1))
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+    }
+
+    @Test
+    public void giveOneExpiredEmailUpdateExists_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(86400));
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(emailUpdate);
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(emailUpdateRepository, times(2)).save(any());
+        verify(notifyService, times(1))
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+    }
+
+    @Test
+    public void givenAPendingEmailUpdateOlderThanValidityDurationExists_thenSaveEmailUpdateAndNotifyShouldReturnTrue() {
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
+        emailUpdate.setRequestedAt(emailUpdate.getRequestedAt().minusSeconds(3600));
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(emailUpdate);
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(emailUpdateRepository, times(1)).save(any());
+        verify(notifyService, times(1))
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+    }
+
+    @Test
+    public void giveOnePendingEmailUpdateExists_thenSaveEmailUpdateAndNotifyShouldReturnFalse() {
+        List<EmailUpdate> pendingEmailUpdates = new ArrayList<>();
+        pendingEmailUpdates.add(createPendingEmailUpdate());
+        when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
+        when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
+        doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
+
+        assertFalse(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
+        verify(emailUpdateRepository, times(1))
+                .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
+                NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+    }
+
+    @Test
     public void givenAValidCodeForIdentity_whenVerifyCode_thenReturnsTrue() {
         when(emailUpdateRepository.existsByCode(anyString())).thenReturn(true);
-        boolean actual = emailUpdateService.isEmailUpdateRequestExistsForCode("co");
-        assertTrue(actual);
+        assertTrue(emailUpdateService.isEmailUpdateRequestExistsForCode("co"));
         verify(emailUpdateRepository, times(1)).existsByCode(eq("co"));
     }
 
     @Test
     public void givenAInvalidCodeForIdentity_whenVerifyCode_thenReturnsFalse() {
         when(emailUpdateRepository.existsByCode(anyString())).thenReturn(false);
-        boolean actual = emailUpdateService.isEmailUpdateRequestExistsForCode("co");
-        assertFalse(actual);
+        assertFalse(emailUpdateService.isEmailUpdateRequestExistsForCode("co"));
         verify(emailUpdateRepository, times(1)).existsByCode(eq("co"));
     }
 
     @Test
     public void givenAValidIdentity_whenNewDomainAllowListedAndNotAgency_shouldReturnSuccessfully() {
-        Identity identity = new Identity();
-        identity.setEmail(EMAIL);
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
+        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), isNull());
 
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setId(100L);
-        emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
-        emailUpdate.setIdentity(identity);
-
-        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
-        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), isNull());
-
-        emailUpdateService.updateEmailAddress(emailUpdate);
+        emailUpdateService.updateEmailAddress(createPendingEmailUpdate());
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
-                eq(emailUpdate.getNewEmail()), isNull());
+                eq(NEW_EMAIL_ADDRESS), isNull());
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
@@ -96,25 +190,17 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void givenAValidIdentity_whenNewDomainIsAgency_shouldReturnSuccessfully() {
-        Identity identity = new Identity();
-        identity.setEmail(EMAIL);
-
-        EmailUpdate emailUpdate = new EmailUpdate();
-        emailUpdate.setId(100L);
-        emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
-        emailUpdate.setIdentity(identity);
-
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
 
-        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(identity);
-        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(emailUpdate.getNewEmail()), eq(agencyToken));
+        when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
+        doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
 
-        emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
+        emailUpdateService.updateEmailAddress(createPendingEmailUpdate(), agencyToken);
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
-                eq(emailUpdate.getNewEmail()), eq(agencyToken));
+                eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
@@ -122,8 +208,20 @@ public class EmailUpdateServiceTest {
 
     @Test
     public void shouldGetEmailUpdate() {
-        EmailUpdate emailUpdate = new EmailUpdate();
+        EmailUpdate emailUpdate = createPendingEmailUpdate();
         when(emailUpdateRepository.findByCode(anyString())).thenReturn(Optional.of(emailUpdate));
         assertEquals(emailUpdateService.getEmailUpdateRequestForCode(CODE), emailUpdate);
+    }
+
+    private EmailUpdate createPendingEmailUpdate() {
+        EmailUpdate emailUpdate = new EmailUpdate();
+        emailUpdate.setId(100L);
+        emailUpdate.setCode(CODE);
+        emailUpdate.setPreviousEmail(EMAIL);
+        emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
+        emailUpdate.setIdentity(IDENTITY);
+        emailUpdate.setEmailUpdateStatus(PENDING);
+        emailUpdate.setRequestedAt(now());
+        return emailUpdate;
     }
 }
