@@ -32,6 +32,7 @@ public class AgencyTokenVerificationController {
     private static final String CODE_ATTRIBUTE = "code";
     private static final String VERIFY_TOKEN_FORM_TEMPLATE = "verifyTokenForm";
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
+    private static final String REDIRECT_ASSIGN_AGENCY_TOKEN_SUCCESS = "agencytoken/agencyTokenAssigned";
     private static final String REDIRECT_VERIFY_TOKEN = "redirect:/account/verify/agency/";
     private static final String REDIRECT_REACTIVATED_SUCCESS = "redirect:/account/reactivate/updated";
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
@@ -48,6 +49,8 @@ public class AgencyTokenVerificationController {
     private final VerificationCodeDeterminationService verificationCodeDeterminationService;
 
     private final CsrsService csrsService;
+
+    private final IdentityService identityService;
 
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
@@ -108,6 +111,11 @@ public class AgencyTokenVerificationController {
                     Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
                     reactivationService.reactivateIdentity(reactivation, agencyToken);
                     return REDIRECT_REACTIVATED_SUCCESS;
+                }
+                case ASSIGN_AGENCY_TOKEN -> {
+                    log.info("ASSIGN_AGENCY_TOKEN agency verification for {}", verificationCodeDetermination);
+                    identityService.assignAgencyToken(verificationCodeDetermination.getEmail(), agencyToken);
+                    return REDIRECT_ASSIGN_AGENCY_TOKEN_SUCCESS;
                 }
                 default -> throw new VerificationCodeTypeNotFound(format("Invalid verification code type: %s",
                         verificationCodeType));
