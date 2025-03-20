@@ -52,18 +52,13 @@ public class AgencyTokenVerificationController {
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
         log.info("User accessing token-based verification screen");
-
-        if (model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
-            addOrganisationsToModel(model);
-            model.addAttribute(CODE_ATTRIBUTE, code);
-            return VERIFY_TOKEN_TEMPLATE;
-        } else {
-            addOrganisationsToModel(model);
+        if (!model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
             VerifyTokenForm form = new VerifyTokenForm();
             model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
-            model.addAttribute(CODE_ATTRIBUTE, code);
-            return VERIFY_TOKEN_TEMPLATE;
         }
+        addOrganisationsToModel(model);
+        model.addAttribute(CODE_ATTRIBUTE, code);
+        return VERIFY_TOKEN_TEMPLATE;
     }
 
     @PostMapping(path = "/{code}")
