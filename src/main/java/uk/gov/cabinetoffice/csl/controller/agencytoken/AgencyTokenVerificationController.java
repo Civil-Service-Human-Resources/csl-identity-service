@@ -79,32 +79,33 @@ public class AgencyTokenVerificationController {
                                    @ModelAttribute @Valid VerifyTokenForm form,
                                    BindingResult bindingResult,
                                    RedirectAttributes redirectAttributes) {
-        return processOrgAndToken(model, form, bindingResult, redirectAttributes);
+        return processOrgAndToken(code, model, form, bindingResult, redirectAttributes);
     }
 
     @PostMapping(path = "/{code}")
-    public String checkToken(Model model,
+    public String checkToken(@PathVariable(value = "code") String code,
+                             Model model,
                              @ModelAttribute @Valid VerifyTokenForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
-        return processOrgAndToken(model, form, bindingResult, redirectAttributes);
+        return processOrgAndToken(code, model, form, bindingResult, redirectAttributes);
     }
 
-    public String processOrgAndToken(Model model,
+    public String processOrgAndToken(String code,
+                                     Model model,
                                      VerifyTokenForm form,
                                      BindingResult bindingResult,
                                      RedirectAttributes redirectAttributes) {
         log.info("Token validation with values: {}", form.toString());
 
         if (bindingResult.hasErrors()) {
-            buildGenericErrorModel(model, form);
+            buildGenericErrorModel(model, form, code);
             return VERIFY_TOKEN_TEMPLATE;
         }
 
         try {
             String organisation = form.getOrganisation();
             String token = form.getToken();
-            String code = form.getCode();
 
             VerificationCodeDetermination verificationCodeDetermination =
                     verificationCodeDeterminationService.getCodeType(code);
@@ -148,11 +149,11 @@ public class AgencyTokenVerificationController {
         } catch (ResourceNotFoundException e) {
             log.warn("ResourceNotFoundException during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
-            return REDIRECT_VERIFY_TOKEN + form.getCode();
+            return REDIRECT_VERIFY_TOKEN + code;
         } catch (NotEnoughSpaceAvailableException e) {
             log.warn("NotEnoughSpaceAvailableException during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-            return REDIRECT_VERIFY_TOKEN + form.getCode();
+            return REDIRECT_VERIFY_TOKEN + code;
         } catch (Exception e) {
             log.error("Exception during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, VERIFY_AGENCY_TOKEN_ERROR_MESSAGE);
@@ -160,10 +161,10 @@ public class AgencyTokenVerificationController {
         }
     }
 
-    private void buildGenericErrorModel(Model model, VerifyTokenForm form) {
+    private void buildGenericErrorModel(Model model, VerifyTokenForm form, String code) {
         model.addAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
         model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
-        model.addAttribute(CODE_ATTRIBUTE, form.getCode());
+        model.addAttribute(CODE_ATTRIBUTE, code);
         addOrganisationsToModel(model);
     }
 

@@ -1,5 +1,6 @@
 package uk.gov.cabinetoffice.csl.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.cabinetoffice.csl.domain.EmailUpdate;
@@ -12,6 +13,7 @@ import static uk.gov.cabinetoffice.csl.dto.VerificationCodeType.*;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getDecryptedText;
 
 @Service
+@Slf4j
 public class VerificationCodeDeterminationService {
 
     @Value("${textEncryption.encryptionKey}")
@@ -32,6 +34,7 @@ public class VerificationCodeDeterminationService {
     }
 
     public VerificationCodeDetermination getCodeType(String code) {
+        log.info("VerificationCodeDetermination: code: {}", code);
         if(reactivationService.isPendingReactivationExistsForCode(code)) {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             return new VerificationCodeDetermination(reactivation.getEmail(), REACTIVATION);
@@ -39,8 +42,6 @@ public class VerificationCodeDeterminationService {
             EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
             return new VerificationCodeDetermination(emailUpdate.getNewEmail(), EMAIL_UPDATE);
         } else {
-//            String encryptedEmail = decode(code, UTF_8);
-//            String email = getDecryptedText(encryptedEmail, encryptionKey);
             String email = getDecryptedText(code, encryptionKey);
             if(identityService.isIdentityExistsForEmail(email)) {
                 return new VerificationCodeDetermination(email, ASSIGN_AGENCY_TOKEN);
