@@ -73,19 +73,35 @@ public class AgencyTokenVerificationController {
         return VERIFY_TOKEN_TEMPLATE;
     }
 
+    @PostMapping
+    public String checkOrgAndToken(@RequestParam String code,
+                                   Model model,
+                                   @ModelAttribute @Valid VerifyTokenForm form,
+                                   BindingResult bindingResult,
+                                   RedirectAttributes redirectAttributes) {
+        return processOrgAndToken(model, form, bindingResult, redirectAttributes);
+    }
+
     @PostMapping(path = "/{code}")
     public String checkToken(Model model,
                              @ModelAttribute @Valid VerifyTokenForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
+        return processOrgAndToken(model, form, bindingResult, redirectAttributes);
+    }
+
+    public String processOrgAndToken(Model model,
+                                     VerifyTokenForm form,
+                                     BindingResult bindingResult,
+                                     RedirectAttributes redirectAttributes) {
+        log.info("Token validation with values: {}", form.toString());
+
         if (bindingResult.hasErrors()) {
             buildGenericErrorModel(model, form);
             return VERIFY_TOKEN_TEMPLATE;
         }
 
         try {
-            log.info("Token validation with values: {}", form.toString());
-
             String organisation = form.getOrganisation();
             String token = form.getToken();
             String code = form.getCode();
@@ -138,7 +154,7 @@ public class AgencyTokenVerificationController {
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
             return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (Exception e) {
-            log.error("Exception during agency verification for form: {}", form.toString());
+            log.error("Exception during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, VERIFY_AGENCY_TOKEN_ERROR_MESSAGE);
             return "redirect:/login";
         }
