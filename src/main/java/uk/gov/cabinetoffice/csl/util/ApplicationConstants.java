@@ -16,15 +16,15 @@ public class ApplicationConstants {
 
     public static final String NO_SPACES_AVAILABLE_ERROR_MESSAGE = "No spaces available for this token. Please contact your line manager";
 
-    public static final String CHANGE_EMAIL_ERROR_MESSAGE = "There was a problem with changing your email, please try again later";
+    public static final String CHANGE_EMAIL_ERROR_MESSAGE = "There was a problem with changing your email, please try again";
 
-    public static final String VERIFY_AGENCY_TOKEN_ERROR_MESSAGE = "There was a problem with this agency token, please try again later";
+    public static final String VERIFY_AGENCY_TOKEN_ERROR_MESSAGE = "There was a problem with this agency token, please try again";
 
     public static final String SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE = "Cannot complete signup as there was a problem with the token provided. Please contact your line manager";
 
     public static final String SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE = "Cannot complete signup as there are no spaces available for this token. Please contact your line manager";
 
-    public static final String ACCOUNT_REACTIVATION_ERROR_MESSAGE = "There was an error processing account reactivation. Please try again later";
+    public static final String ACCOUNT_REACTIVATION_ERROR_MESSAGE = "There was an error processing account reactivation. Please try again";
 
     public static final String REACTIVATION_CODE_IS_NOT_VALID_ERROR_MESSAGE = "Reactivation link is not valid";
 
