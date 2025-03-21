@@ -313,7 +313,6 @@ public class AgencyTokenVerificationControllerTest {
         )
                 .andExpect(model().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
 }
