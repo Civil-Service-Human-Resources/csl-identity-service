@@ -7,8 +7,6 @@ import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.dto.VerificationCodeDetermination;
 import uk.gov.cabinetoffice.csl.exception.VerificationCodeTypeNotFound;
 
-import static java.net.URLDecoder.decode;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.PENDING;
 import static uk.gov.cabinetoffice.csl.dto.VerificationCodeType.*;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getDecryptedText;
@@ -41,8 +39,9 @@ public class VerificationCodeDeterminationService {
             EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
             return new VerificationCodeDetermination(emailUpdate.getNewEmail(), EMAIL_UPDATE);
         } else {
-            String encryptedEmail = decode(code, UTF_8);
-            String email = getDecryptedText(encryptedEmail, encryptionKey);
+//            String encryptedEmail = decode(code, UTF_8);
+//            String email = getDecryptedText(encryptedEmail, encryptionKey);
+            String email = getDecryptedText(code, encryptionKey);
             if(identityService.isIdentityExistsForEmail(email)) {
                 return new VerificationCodeDetermination(email, ASSIGN_AGENCY_TOKEN);
             }
