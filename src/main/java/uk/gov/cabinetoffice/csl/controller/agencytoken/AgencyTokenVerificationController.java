@@ -54,17 +54,16 @@ public class AgencyTokenVerificationController {
 
     @GetMapping
     public String enterOrgAndToken(@RequestParam String code, Model model) {
-        log.info("enterOrgAndToken: code: {}", code);
         return displayOrgAndTokenInputForm(code, model);
     }
 
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
-        log.info("enterToken: code: {}", code);
         return displayOrgAndTokenInputForm(code, model);
     }
 
     private String displayOrgAndTokenInputForm(String code, Model model) {
+        log.info("User accessing token-based verification screen: code: {}", code);
         if (!model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
             VerifyTokenForm form = new VerifyTokenForm();
             form.setCode(code);
@@ -90,7 +89,6 @@ public class AgencyTokenVerificationController {
                              @ModelAttribute @Valid VerifyTokenForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
-        log.info("checkToken: code from form: {}", form.getCode());
         return processOrgAndToken(model, form, bindingResult, redirectAttributes);
     }
 
@@ -107,7 +105,6 @@ public class AgencyTokenVerificationController {
         String organisation = form.getOrganisation();
         String token = form.getToken();
         String code = form.getCode();
-        log.info("processOrgAndToken: code from form: {}", code);
 
         try {
             VerificationCodeDetermination verificationCodeDetermination =
