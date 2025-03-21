@@ -311,7 +311,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
         )
-                .andExpect(model().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
+                .andExpect(model().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
                 .andExpect(model().attribute("code", CODE))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
