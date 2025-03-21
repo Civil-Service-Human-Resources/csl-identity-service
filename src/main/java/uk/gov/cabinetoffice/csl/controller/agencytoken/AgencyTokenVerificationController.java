@@ -52,8 +52,17 @@ public class AgencyTokenVerificationController {
 
     private final IdentityService identityService;
 
+    @GetMapping
+    public String enterOrgAndToken(@RequestParam String code, Model model) {
+        return displayOrgAndTokenInputForm(code, model);
+    }
+
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
+        return displayOrgAndTokenInputForm(code, model);
+    }
+
+    private String displayOrgAndTokenInputForm(String code, Model model) {
         log.info("User accessing token-based verification screen");
         if (!model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
             VerifyTokenForm form = new VerifyTokenForm();
