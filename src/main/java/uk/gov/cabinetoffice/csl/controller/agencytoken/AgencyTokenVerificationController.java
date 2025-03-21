@@ -162,7 +162,7 @@ public class AgencyTokenVerificationController {
     }
 
     private void buildGenericErrorModel(Model model, VerifyTokenForm form, String code) {
-        model.addAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+        model.addAttribute(STATUS_ATTRIBUTE, ENTER_ORG_TOKEN_ERROR_MESSAGE);
         model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
         model.addAttribute(CODE_ATTRIBUTE, code);
         addOrganisationsToModel(model);
