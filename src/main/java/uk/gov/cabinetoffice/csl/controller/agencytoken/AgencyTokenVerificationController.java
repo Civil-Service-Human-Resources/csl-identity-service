@@ -149,7 +149,7 @@ public class AgencyTokenVerificationController {
             }
         } catch (ResourceNotFoundException e) {
             log.warn("ResourceNotFoundException during agency verification for form: {}", form);
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_ORG_TOKEN_ERROR_MESSAGE);
             return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (NotEnoughSpaceAvailableException e) {
             log.warn("NotEnoughSpaceAvailableException during agency verification for form: {}", form);

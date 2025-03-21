@@ -236,7 +236,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("uid", IDENTITY_UID)
         )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
+                .andExpect(flash().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
     }
 
