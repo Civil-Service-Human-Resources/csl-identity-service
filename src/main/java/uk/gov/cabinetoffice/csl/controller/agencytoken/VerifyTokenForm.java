@@ -12,4 +12,5 @@ public class VerifyTokenForm {
     @NotBlank(message = "{validation.emailUpdatedEnterToken.token.NotBlank}")
     private String token;
     private String uid;
+    private String code;
 }

@@ -54,20 +54,21 @@ public class AgencyTokenVerificationController {
 
     @GetMapping
     public String enterOrgAndToken(@RequestParam String code, Model model) {
-        log.info("AgencyTokenVerificationController.enterOrgAndToken: code: {}", code);
+        log.info("enterOrgAndToken: code: {}", code);
         return displayOrgAndTokenInputForm(code, model);
     }
 
     @GetMapping(path = "/{code}")
     public String enterToken(Model model, @PathVariable String code) {
-        log.info("AgencyTokenVerificationController.enterToken: code: {}", code);
+        log.info("enterToken: code: {}", code);
         return displayOrgAndTokenInputForm(code, model);
     }
 
     private String displayOrgAndTokenInputForm(String code, Model model) {
-        log.info("User accessing token-based verification screen: code: {}", code);
+        log.info("displayOrgAndTokenInputForm: code: {}", code);
         if (!model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
             VerifyTokenForm form = new VerifyTokenForm();
+            form.setCode(code);
             model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
         }
         addOrganisationsToModel(model);
@@ -81,7 +82,7 @@ public class AgencyTokenVerificationController {
                                    @ModelAttribute @Valid VerifyTokenForm form,
                                    BindingResult bindingResult,
                                    RedirectAttributes redirectAttributes) {
-        log.info("AgencyTokenVerificationController.checkOrgAndToken: code: {}", code);
+        log.info("checkOrgAndToken: code: {}", code);
         return processOrgAndToken(code, model, form, bindingResult, redirectAttributes);
     }
 
@@ -91,7 +92,7 @@ public class AgencyTokenVerificationController {
                              @ModelAttribute @Valid VerifyTokenForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
-        log.info("AgencyTokenVerificationController.checkToken: code: {}", code);
+        log.info("checkToken: code: {}", code);
         return processOrgAndToken(code, model, form, bindingResult, redirectAttributes);
     }
 
@@ -100,8 +101,8 @@ public class AgencyTokenVerificationController {
                                      VerifyTokenForm form,
                                      BindingResult bindingResult,
                                      RedirectAttributes redirectAttributes) {
-        log.info("Token validation with values: {}", form.toString());
-        log.info("AgencyTokenVerificationController.processOrgAndToken: code: {}", code);
+        log.info("processOrgAndToken: Token validation with values: {}", form.toString());
+        log.info("processOrgAndToken: code from request: {}", code);
 
         if (bindingResult.hasErrors()) {
             buildGenericErrorModel(model, form, code);
@@ -111,6 +112,7 @@ public class AgencyTokenVerificationController {
         try {
             String organisation = form.getOrganisation();
             String token = form.getToken();
+            log.info("processOrgAndToken: code from form: {}", form.getCode());
 
             VerificationCodeDetermination verificationCodeDetermination =
                     verificationCodeDeterminationService.getCodeType(code);

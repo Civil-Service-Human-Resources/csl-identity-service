@@ -34,7 +34,7 @@ public class VerificationCodeDeterminationService {
     }
 
     public VerificationCodeDetermination getCodeType(String code) {
-        log.info("VerificationCodeDetermination: code: {}", code);
+        log.info("getCodeType: code: {}", code);
         if(reactivationService.isPendingReactivationExistsForCode(code)) {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             return new VerificationCodeDetermination(reactivation.getEmail(), REACTIVATION);
