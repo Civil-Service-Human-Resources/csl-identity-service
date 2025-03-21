@@ -61,10 +61,11 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case ("System error") -> redirect = "/error";
             case ("User account is locked") -> redirect = "/login?error=locked&maxLoginAttempts=" + maxLoginAttempts;
             case ("User account is blocked") -> redirect = "/login?error=blocked";
-            case ("User account is blocked due to missing token") -> redirect = "/login?error=blocked-missing-token&username=" + encodedUsername;
+            case ("User account is blocked due to missing token") ->
+                    redirect = "/login?error=blocked-missing-token&username=" + encodedUsername;
             case ("User account is deactivated") -> redirect = "/login?error=deactivated&username=" + encodedUsername;
-            case ("Reactivation request has expired") -> redirect = "/login?error=reactivation-expired&username="
-                    + encodedUsername;
+            case ("Reactivation request has expired") ->
+                    redirect = "/login?error=reactivation-expired&username=" + encodedUsername;
             case ("Pending reactivation exists for user") -> {
                 try {
                     Reactivation pendingReactivation = reactivationService.getPendingReactivationForEmail(username);

@@ -96,17 +96,18 @@ public class AgencyTokenVerificationController {
                                      VerifyTokenForm form,
                                      BindingResult bindingResult,
                                      RedirectAttributes redirectAttributes) {
-        log.info("processOrgAndToken: Token validation form with values: {}", form.toString());
         if (bindingResult.hasErrors()) {
             buildGenericErrorModel(model, form);
             return VERIFY_TOKEN_TEMPLATE;
         }
 
-        String organisation = form.getOrganisation();
-        String token = form.getToken();
-        String code = form.getCode();
-
         try {
+            log.info("processOrgAndToken: Token validation form with values: {}", form.toString());
+
+            String organisation = form.getOrganisation();
+            String token = form.getToken();
+            String code = form.getCode();
+
             VerificationCodeDetermination verificationCodeDetermination =
                     verificationCodeDeterminationService.getCodeType(code);
             String domainFromEmailAddress =
@@ -149,11 +150,11 @@ public class AgencyTokenVerificationController {
         } catch (ResourceNotFoundException e) {
             log.warn("ResourceNotFoundException during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
-            return REDIRECT_VERIFY_TOKEN + code;
+            return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (NotEnoughSpaceAvailableException e) {
             log.warn("NotEnoughSpaceAvailableException during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-            return REDIRECT_VERIFY_TOKEN + code;
+            return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (Exception e) {
             log.error("Exception during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, VERIFY_AGENCY_TOKEN_ERROR_MESSAGE);
