@@ -90,7 +90,7 @@ public class AgencyTokenVerificationController {
                     .orElseThrow(() -> new ResourceNotFoundException("Agency Token for DomainTokenOrganisation Not Found"));
 
             if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                log.warn("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup",
+                log.warn("Agency token uid = {}, capacity = {}, has no spaces available. Unable to allocate agency token to user {} ",
                         agencyToken.getUid(), agencyToken.getCapacity(), verificationCodeDetermination.getEmail());
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
                 return REDIRECT_VERIFY_TOKEN + code;
