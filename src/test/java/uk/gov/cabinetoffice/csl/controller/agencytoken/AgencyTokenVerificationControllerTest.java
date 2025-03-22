@@ -43,7 +43,7 @@ public class AgencyTokenVerificationControllerTest {
     private static final String ACCOUNT_REACTIVATE_UPDATED = "/account/reactivate/updated";
     private static final String VERIFY_TOKEN_FORM = "verifyTokenForm";
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
-    private static final String VERIFY_TOKEN_URL = "/account/verify/agency/";
+    private static final String VERIFY_TOKEN_URL = "/account/verify/agency?code=";
     private static final String REDIRECT_EMAIL_UPDATED = "/account/email/updated";
     private static final String LOGIN_URL = "/login";
     private static final String CODE = "7haQOIeV5n0CYk7yrfEmxzxHQtbuV5PPPN8BgCTM";
@@ -236,7 +236,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("uid", IDENTITY_UID)
         )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
+                .andExpect(flash().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
     }
 
@@ -311,9 +311,8 @@ public class AgencyTokenVerificationControllerTest {
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
         )
-                .andExpect(model().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
+                .andExpect(model().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
 }

@@ -32,7 +32,8 @@ public class AgencyTokenVerificationController {
     private static final String CODE_ATTRIBUTE = "code";
     private static final String VERIFY_TOKEN_FORM_TEMPLATE = "verifyTokenForm";
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
-    private static final String REDIRECT_VERIFY_TOKEN = "redirect:/account/verify/agency/";
+    private static final String REDIRECT_ASSIGN_AGENCY_TOKEN_SUCCESS = "agencytoken/agencyTokenAssigned";
+    private static final String REDIRECT_VERIFY_TOKEN = "redirect:/account/verify/agency?code=";
     private static final String REDIRECT_REACTIVATED_SUCCESS = "redirect:/account/reactivate/updated";
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
     private static final String EMAIL_ATTRIBUTE = "email";
@@ -49,21 +50,38 @@ public class AgencyTokenVerificationController {
 
     private final CsrsService csrsService;
 
-    @GetMapping(path = "/{code}")
-    public String enterToken(Model model, @PathVariable String code) {
-        log.info("User accessing token-based verification screen");
+    private final IdentityService identityService;
 
-        if (model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
-            addOrganisationsToModel(model);
-            model.addAttribute(CODE_ATTRIBUTE, code);
-            return VERIFY_TOKEN_TEMPLATE;
-        } else {
-            addOrganisationsToModel(model);
+    @GetMapping
+    public String enterOrgAndToken(@RequestParam String code, Model model) {
+        return displayOrgAndTokenInputForm(code, model);
+    }
+
+    @GetMapping(path = "/{code}")
+    public String enterToken(@PathVariable String code, Model model) {
+        return displayOrgAndTokenInputForm(code, model);
+    }
+
+    private String displayOrgAndTokenInputForm(String code, Model model) {
+        log.info("User accessing token-based verification screen: code: {}", code);
+        if (!model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
             VerifyTokenForm form = new VerifyTokenForm();
+            form.setCode(code);
             model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
-            model.addAttribute(CODE_ATTRIBUTE, code);
-            return VERIFY_TOKEN_TEMPLATE;
         }
+        addOrganisationsToModel(model);
+        model.addAttribute(CODE_ATTRIBUTE, code);
+        return VERIFY_TOKEN_TEMPLATE;
+    }
+
+    @PostMapping
+    public String checkOrgAndToken(@RequestParam String code,
+                                   Model model,
+                                   @ModelAttribute @Valid VerifyTokenForm form,
+                                   BindingResult bindingResult,
+                                   RedirectAttributes redirectAttributes) {
+        log.info("checkOrgAndToken: code from request: {}", code);
+        return processOrgAndToken(model, form, bindingResult, redirectAttributes);
     }
 
     @PostMapping(path = "/{code}")
@@ -71,13 +89,20 @@ public class AgencyTokenVerificationController {
                              @ModelAttribute @Valid VerifyTokenForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
+        return processOrgAndToken(model, form, bindingResult, redirectAttributes);
+    }
+
+    public String processOrgAndToken(Model model,
+                                     VerifyTokenForm form,
+                                     BindingResult bindingResult,
+                                     RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             buildGenericErrorModel(model, form);
             return VERIFY_TOKEN_TEMPLATE;
         }
 
         try {
-            log.info("Token validation with values: {}", form.toString());
+            log.info("processOrgAndToken: Token validation form with values: {}", form.toString());
 
             String organisation = form.getOrganisation();
             String token = form.getToken();
@@ -96,7 +121,6 @@ public class AgencyTokenVerificationController {
                 log.warn("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup",
                         agencyToken.getUid(), agencyToken.getCapacity(), verificationCodeDetermination.getEmail());
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-
                 return REDIRECT_VERIFY_TOKEN + code;
             }
             VerificationCodeType verificationCodeType = verificationCodeDetermination.getVerificationCodeType();
@@ -114,28 +138,32 @@ public class AgencyTokenVerificationController {
                     reactivationService.reactivateIdentity(reactivation, agencyToken);
                     return REDIRECT_REACTIVATED_SUCCESS;
                 }
+                case ASSIGN_AGENCY_TOKEN -> {
+                    log.info("ASSIGN_AGENCY_TOKEN agency verification for {}", verificationCodeDetermination);
+                    identityService.assignAgencyToken(verificationCodeDetermination.getEmail(), agencyToken);
+                    return REDIRECT_ASSIGN_AGENCY_TOKEN_SUCCESS;
+                }
                 default -> throw new VerificationCodeTypeNotFound(format("Invalid verification code type: %s",
                         verificationCodeType));
             }
         } catch (ResourceNotFoundException e) {
             log.warn("ResourceNotFoundException during agency verification for form: {}", form);
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, ENTER_ORG_TOKEN_ERROR_MESSAGE);
             return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (NotEnoughSpaceAvailableException e) {
             log.warn("NotEnoughSpaceAvailableException during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
             return REDIRECT_VERIFY_TOKEN + form.getCode();
         } catch (Exception e) {
-            log.error("Exception during agency verification for form: {}", form.toString());
+            log.error("Exception during agency verification for form: {}", form);
             redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, VERIFY_AGENCY_TOKEN_ERROR_MESSAGE);
             return "redirect:/login";
         }
     }
 
     private void buildGenericErrorModel(Model model, VerifyTokenForm form) {
-        model.addAttribute(STATUS_ATTRIBUTE, ENTER_TOKEN_ERROR_MESSAGE);
+        model.addAttribute(STATUS_ATTRIBUTE, ENTER_ORG_TOKEN_ERROR_MESSAGE);
         model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
-        model.addAttribute(CODE_ATTRIBUTE, form.getCode());
         addOrganisationsToModel(model);
     }
 
