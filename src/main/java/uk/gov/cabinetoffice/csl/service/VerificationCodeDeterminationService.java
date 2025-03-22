@@ -13,7 +13,6 @@ import static uk.gov.cabinetoffice.csl.dto.VerificationCodeType.*;
 import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getDecryptedText;
 
 @Service
-@Slf4j
 public class VerificationCodeDeterminationService {
 
     @Value("${textEncryption.encryptionKey}")
@@ -34,7 +33,6 @@ public class VerificationCodeDeterminationService {
     }
 
     public VerificationCodeDetermination getCodeType(String code) {
-        log.info("getCodeType: code: {}", code);
         if(reactivationService.isPendingReactivationExistsForCode(code)) {
             Reactivation reactivation = reactivationService.getReactivationForCodeAndStatus(code, PENDING);
             return new VerificationCodeDetermination(reactivation.getEmail(), REACTIVATION);
