@@ -67,9 +67,9 @@ public class AgencyTokenVerificationController {
 
     @PostMapping
     public String checkToken(Model model,
-                                   @ModelAttribute @Valid VerifyTokenForm form,
-                                   BindingResult bindingResult,
-                                   RedirectAttributes redirectAttributes) {
+                             @ModelAttribute @Valid VerifyTokenForm form,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes) {
         try {
             log.info("checkToken: Token validation form with values: {}", form);
             if (bindingResult.hasErrors()) {
