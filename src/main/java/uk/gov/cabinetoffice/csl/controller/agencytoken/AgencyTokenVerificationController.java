@@ -58,7 +58,7 @@ public class AgencyTokenVerificationController {
     }
 
     @GetMapping(path = "/{code}")
-    public String enterToken(Model model, @PathVariable String code) {
+    public String enterToken(@PathVariable String code, Model model) {
         return displayOrgAndTokenInputForm(code, model);
     }
 
@@ -121,7 +121,6 @@ public class AgencyTokenVerificationController {
                 log.warn("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup",
                         agencyToken.getUid(), agencyToken.getCapacity(), verificationCodeDetermination.getEmail());
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-
                 return REDIRECT_VERIFY_TOKEN + code;
             }
             VerificationCodeType verificationCodeType = verificationCodeDetermination.getVerificationCodeType();

@@ -11,6 +11,7 @@ import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.dto.BatchProcessResponse;
 import uk.gov.cabinetoffice.csl.dto.IdentityDto;
 import uk.gov.cabinetoffice.csl.exception.IdentityNotFoundException;
+import uk.gov.cabinetoffice.csl.exception.NotEnoughSpaceAvailableException;
 import uk.gov.cabinetoffice.csl.exception.ResourceNotFoundException;
 import uk.gov.cabinetoffice.csl.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cabinetoffice.csl.repository.CompoundRoles;
@@ -195,9 +196,9 @@ public class IdentityService {
 
     public void assignAgencyToken(String email, AgencyToken agencyToken) {
         if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-            log.info("Agency token uid {} has no spaces available. Identity is not created", agencyToken.getUid());
-            throw new UnableToAllocateAgencyTokenException("Agency token uid " + agencyToken.getUid()
-                    + " has no spaces available. Identity is not created");
+            log.info("Agency token uid {} has no spaces available. Unable to assign agency token.", agencyToken.getUid());
+            throw new NotEnoughSpaceAvailableException("Agency token uid " + agencyToken.getUid()
+                    + " has no spaces available. Unable to assign agency token.");
         }
         Identity identity = getIdentityForEmail(email);
         identity.setActive(true);
