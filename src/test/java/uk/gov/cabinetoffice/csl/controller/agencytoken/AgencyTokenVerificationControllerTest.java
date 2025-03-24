@@ -79,13 +79,17 @@ public class AgencyTokenVerificationControllerTest {
 
     @BeforeEach
     public void setup() {
+        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         organisations = new ArrayList<>();
         organisations.add(new OrganisationalUnit());
-        when(csrsService.getAllOrganisationalUnits()).thenReturn(organisations);
+        when(csrsService.getOrganisationalUnitsByDomain(DOMAIN)).thenReturn(organisations);
     }
 
     @Test
     public void givenARequestToDisplayVerifyTokenPage_whenVerifyToken_thenShouldDisplayVerifyTokenPageWithAllPossibleOrganisations() throws Exception {
+        VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
+        when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
+
         mockMvc.perform(
                 get(VERIFY_TOKEN_URL + CODE)
                         .with(csrf())
@@ -93,10 +97,9 @@ public class AgencyTokenVerificationControllerTest {
                         .flashAttr("email", EMAIL)
                         .flashAttr("domain", DOMAIN))
                 .andExpect(status().isOk())
-                .andExpect(model().size(6))
+                .andExpect(model().size(5))
                 .andExpect(model().attribute("organisations", organisations))
                 .andExpect(model().attribute("uid", IDENTITY_UID))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
@@ -107,6 +110,10 @@ public class AgencyTokenVerificationControllerTest {
         existingForm.setUid(IDENTITY_UID);
         existingForm.setOrganisation(ORGANISATION);
         existingForm.setToken(TOKEN);
+        existingForm.setEmail(EMAIL);
+
+        VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
+        when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
 
         mockMvc.perform(
                 get(VERIFY_TOKEN_URL + CODE)
@@ -115,10 +122,9 @@ public class AgencyTokenVerificationControllerTest {
                         .flashAttr("uid", IDENTITY_UID)
                         .flashAttr("domain", DOMAIN))
                 .andExpect(status().isOk())
-                .andExpect(model().size(5))
+                .andExpect(model().size(4))
                 .andExpect(model().attribute("organisations", organisations))
                 .andExpect(model().attribute("uid", IDENTITY_UID))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
@@ -128,7 +134,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -158,7 +163,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -188,7 +192,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
 
@@ -214,7 +217,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -246,7 +248,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
+
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
@@ -269,7 +271,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -299,7 +300,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
+
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);

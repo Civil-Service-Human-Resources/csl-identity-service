@@ -29,7 +29,6 @@ import static uk.gov.cabinetoffice.csl.util.ApplicationConstants.*;
 @RequestMapping("/account/verify/agency")
 public class AgencyTokenVerificationController {
 
-    private static final String CODE_ATTRIBUTE = "code";
     private static final String VERIFY_TOKEN_FORM_TEMPLATE = "verifyTokenForm";
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
     private static final String REDIRECT_VERIFY_TOKEN = "redirect:/account/verify/agency?code=";
@@ -58,10 +57,10 @@ public class AgencyTokenVerificationController {
         if (!model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
             VerifyTokenForm form = new VerifyTokenForm();
             form.setCode(code);
+            form.setEmail(verificationCodeDeterminationService.getCodeType(code).getEmail());
             model.addAttribute(VERIFY_TOKEN_FORM_TEMPLATE, form);
         }
         addOrganisationsToModel(model);
-        model.addAttribute(CODE_ATTRIBUTE, code);
         return VERIFY_TOKEN_TEMPLATE;
     }
 
@@ -140,6 +139,9 @@ public class AgencyTokenVerificationController {
     }
 
     private void addOrganisationsToModel(Model model) {
-        model.addAttribute("organisations", csrsService.getAllOrganisationalUnits());
+        VerifyTokenForm verifyTokenForm = (VerifyTokenForm)model.getAttribute(VERIFY_TOKEN_FORM_TEMPLATE);
+        assert verifyTokenForm != null;
+        String domain = utils.getDomainFromEmailAddress(verifyTokenForm.getEmail());
+        model.addAttribute("organisations", csrsService.getOrganisationalUnitsByDomain(domain));
     }
 }
