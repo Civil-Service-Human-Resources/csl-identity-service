@@ -14,8 +14,7 @@ import static uk.gov.cabinetoffice.csl.util.TextEncryptionUtils.getDecryptedText
 @Service
 public class VerificationCodeDeterminationService {
 
-    @Value("${textEncryption.encryptionKey}")
-    private String encryptionKey;
+    private final String encryptionKey;
 
     private final EmailUpdateService emailUpdateService;
 
@@ -23,9 +22,11 @@ public class VerificationCodeDeterminationService {
 
     private final IdentityService identityService;
 
-    public VerificationCodeDeterminationService(EmailUpdateService emailUpdateService,
+    public VerificationCodeDeterminationService(@Value("${textEncryption.encryptionKey}") String encryptionKey,
+                                                EmailUpdateService emailUpdateService,
                                                 ReactivationService reactivationService,
                                                 IdentityService identityService) {
+        this.encryptionKey = encryptionKey;
         this.emailUpdateService = emailUpdateService;
         this.reactivationService = reactivationService;
         this.identityService = identityService;
