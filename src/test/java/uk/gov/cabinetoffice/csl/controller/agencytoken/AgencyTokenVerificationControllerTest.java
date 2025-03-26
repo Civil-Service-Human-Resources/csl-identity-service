@@ -77,6 +77,9 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private CsrsService csrsService;
 
+    @MockBean
+    private FrontendService frontendService;
+
     @BeforeEach
     public void setup() {
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -140,7 +143,9 @@ public class AgencyTokenVerificationControllerTest {
         EmailUpdate emailUpdate = new EmailUpdate();
         emailUpdate.setNewEmail(EMAIL);
         Identity identity = new Identity();
+        identity.setUid(IDENTITY_UID);
         identity.setEmail(EMAIL);
+        emailUpdate.setIdentity(identity);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
@@ -153,9 +158,11 @@ public class AgencyTokenVerificationControllerTest {
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_EMAIL_UPDATED));
+
+        verify(frontendService, times(1)).signoutUser(IDENTITY_UID);
     }
 
     @Test
@@ -182,7 +189,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(ACCOUNT_REACTIVATE_UPDATED));
     }
@@ -206,7 +213,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
@@ -236,7 +243,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
@@ -260,7 +267,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
@@ -288,7 +295,7 @@ public class AgencyTokenVerificationControllerTest {
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", VERIFY_AGENCY_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(LOGIN_URL));
@@ -311,7 +318,7 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("token", TOKEN)
                         .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(model().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));

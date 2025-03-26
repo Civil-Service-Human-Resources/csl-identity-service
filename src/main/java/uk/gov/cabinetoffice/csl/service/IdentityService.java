@@ -194,7 +194,7 @@ public class IdentityService {
         return csrsService.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
     }
 
-    public void assignAgencyToken(String email, AgencyToken agencyToken) {
+    public Identity assignAgencyToken(String email, AgencyToken agencyToken) {
         if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
             log.info("Agency token uid {} has no spaces available. Unable to assign agency token.", agencyToken.getUid());
             throw new NotEnoughSpaceAvailableException("Agency token uid " + agencyToken.getUid()
@@ -207,5 +207,7 @@ public class IdentityService {
         identity.setLastLoggedIn(now(clock));
         identity.setAgencyTokenUid(agencyToken.getUid());
         identityRepository.save(identity);
+        csrsService.removeOrganisationalUnitFromCivilServant(identity.getUid());
+        return identity;
     }
 }

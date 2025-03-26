@@ -269,16 +269,14 @@ public class IdentityServiceTest {
         agencyToken.setToken(tokenToken);
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
-        identityService.assignAgencyToken(email, agencyToken);
-
-        ArgumentCaptor<Identity> inviteArgumentCaptor = ArgumentCaptor.forClass(Identity.class);
-
-        verify(identityRepository).save(inviteArgumentCaptor.capture());
-
-        Identity updatedIdentity = inviteArgumentCaptor.getValue();
+        Identity updatedIdentity = identityService.assignAgencyToken(email, agencyToken);
         assertTrue(updatedIdentity.isActive());
         assertFalse(updatedIdentity.isLocked());
         assertEquals(0, updatedIdentity.getFailedLoginAttempts());
         assertThat(updatedIdentity.getAgencyTokenUid(), equalTo(uid));
+
+        ArgumentCaptor<Identity> identityArgumentCaptor = ArgumentCaptor.forClass(Identity.class);
+        verify(identityRepository).save(identityArgumentCaptor.capture());
+        verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
     }
 }

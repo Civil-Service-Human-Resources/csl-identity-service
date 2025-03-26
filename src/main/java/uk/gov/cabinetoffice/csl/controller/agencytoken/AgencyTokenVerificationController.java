@@ -51,6 +51,8 @@ public class AgencyTokenVerificationController {
 
     private final IdentityService identityService;
 
+    private final FrontendService frontendService;
+
     @GetMapping
     public String enterToken(@RequestParam String code, Model model) {
         log.info("enterToken: User accessing token-based verification screen: code: {}", code);
@@ -100,6 +102,7 @@ public class AgencyTokenVerificationController {
                     log.info("EMAIL_UPDATE agency verification for {}", verificationCodeDetermination);
                     EmailUpdate emailUpdate = emailUpdateService.getEmailUpdateRequestForCode(code);
                     emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
+                    frontendService.signoutUser(emailUpdate.getIdentity().getUid());
                     redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getNewEmail());
                     return REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS;
                 }
