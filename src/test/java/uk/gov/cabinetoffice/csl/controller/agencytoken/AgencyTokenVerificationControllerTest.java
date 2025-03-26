@@ -45,6 +45,7 @@ public class AgencyTokenVerificationControllerTest {
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
     private static final String VERIFY_TOKEN_URL = "/account/verify/agency?code=";
     private static final String REDIRECT_EMAIL_UPDATED = "/account/email/updated";
+    private static final String ASSIGN_AGENCY_TOKEN_TEMPLATE = "agencytoken/agencyTokenAssigned";
     private static final String LOGIN_URL = "/login";
     private static final String CODE = "7haQOIeV5n0CYk7yrfEmxzxHQtbuV5PPPN8BgCTM";
     private static final String DOMAIN = "example.com";
@@ -80,6 +81,9 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private FrontendService frontendService;
 
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
     public void setup() {
         when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -95,14 +99,10 @@ public class AgencyTokenVerificationControllerTest {
 
         mockMvc.perform(
                 get(VERIFY_TOKEN_URL + CODE)
-                        .with(csrf())
-                        .flashAttr("uid", IDENTITY_UID)
-                        .flashAttr("email", EMAIL)
-                        .flashAttr("domain", DOMAIN))
+                        .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(model().size(5))
+                .andExpect(model().size(2))
                 .andExpect(model().attribute("organisations", organisations))
-                .andExpect(model().attribute("uid", IDENTITY_UID))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
@@ -121,13 +121,10 @@ public class AgencyTokenVerificationControllerTest {
         mockMvc.perform(
                 get(VERIFY_TOKEN_URL + CODE)
                         .with(csrf())
-                        .flashAttr(VERIFY_TOKEN_FORM, existingForm)
-                        .flashAttr("uid", IDENTITY_UID)
-                        .flashAttr("domain", DOMAIN))
+                        .flashAttr(VERIFY_TOKEN_FORM, existingForm))
                 .andExpect(status().isOk())
-                .andExpect(model().size(4))
+                .andExpect(model().size(2))
                 .andExpect(model().attribute("organisations", organisations))
-                .andExpect(model().attribute("uid", IDENTITY_UID))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
@@ -157,7 +154,6 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_EMAIL_UPDATED));
@@ -188,10 +184,34 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(ACCOUNT_REACTIVATE_UPDATED));
+    }
+
+    @Test
+    public void shouldAssignAgencyToken() throws Exception {
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setUid(AGENCY_TOKEN_UID);
+
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
+
+        VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, ASSIGN_AGENCY_TOKEN);
+        when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
+
+        Identity identity = new Identity();
+        identity.setEmail(EMAIL);
+        when(identityService.assignAgencyToken(EMAIL, agencyToken)).thenReturn(identity);
+
+        mockMvc.perform(
+                        post(VERIFY_TOKEN_URL + CODE)
+                                .with(csrf())
+                                .param("organisation", ORGANISATION)
+                                .param("token", TOKEN)
+                )
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name(ASSIGN_AGENCY_TOKEN_TEMPLATE));
     }
 
     @Test
@@ -212,7 +232,6 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
@@ -242,7 +261,6 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
@@ -266,7 +284,6 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
@@ -294,7 +311,6 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", VERIFY_AGENCY_TOKEN_ERROR_MESSAGE))
@@ -317,7 +333,6 @@ public class AgencyTokenVerificationControllerTest {
                 post(VERIFY_TOKEN_URL + CODE)
                         .with(csrf())
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
                 )
                 .andExpect(model().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
