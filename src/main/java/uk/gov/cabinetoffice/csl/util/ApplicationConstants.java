@@ -21,7 +21,7 @@ public class ApplicationConstants {
             "There was a problem with changing your email, please try again";
 
     public static final String VERIFY_AGENCY_TOKEN_ERROR_MESSAGE =
-            "There was a problem with this agency token, please try again";
+            "There was a problem with this token, please try again";
 
     public static final String SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE =
             "Cannot complete signup as there was a problem with the token provided. Please contact your line manager";

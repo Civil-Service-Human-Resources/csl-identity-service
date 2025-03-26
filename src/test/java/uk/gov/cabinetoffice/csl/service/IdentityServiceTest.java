@@ -105,7 +105,7 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void createIdentityFromInviteCodeWithoutAgencyButIsAllowListed() {
+    public void shouldCreateIdentityFromInviteCodeWithoutAgencyButIsAllowListed() {
         final String code = "123abc";
         final String email = "test@example.com";
         final String domain = "example.com";
@@ -140,7 +140,7 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void createIdentityFromInviteCodeWithAgency() {
+    public void shouldCreateIdentityFromInviteCodeWithAgency() {
         final String code = "123abc";
         final String email = "test@example.com";
         Role role = new Role();
@@ -230,5 +230,46 @@ public class IdentityServiceTest {
         assertEquals(2, successfulIds.size());
         assertEquals("uid123", successfulIds.get(0));
         assertEquals("uid456", successfulIds.get(1));
+    }
+
+    @Test
+    public void shouldAssignAgencyToken() {
+        final String code = "123abc";
+        final String email = "test@example.com";
+        Role role = new Role();
+        role.setName("USER");
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+
+        String uid = "UID";
+        String tokenDomain = "example.com";
+        String tokenCode = "co";
+        String tokenToken = "token123";
+
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setUid(uid);
+        agencyToken.setDomain(tokenDomain);
+        agencyToken.setOrg(tokenCode);
+        agencyToken.setToken(tokenToken);
+
+        Identity identity = new Identity(uid, email, "password", false, true,
+                roles, LocalDateTime.now(), false, null);
+
+        when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
+        when(identityRepository.findFirstByEmailEqualsIgnoreCase(email))
+                .thenReturn(identity);
+
+        identityService.assignAgencyToken(email, agencyToken);
+
+        ArgumentCaptor<Identity> inviteArgumentCaptor = ArgumentCaptor.forClass(Identity.class);
+
+        verify(identityRepository).save(inviteArgumentCaptor.capture());
+
+        Identity updatedIdentity = inviteArgumentCaptor.getValue();
+        assertTrue(updatedIdentity.isActive());
+        assertFalse(updatedIdentity.isLocked());
+        assertEquals(0, updatedIdentity.getFailedLoginAttempts());
+        assertThat(updatedIdentity.getAgencyTokenUid(), equalTo(uid));
     }
 }

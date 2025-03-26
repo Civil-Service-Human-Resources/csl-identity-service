@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
         } else {
             if (!isUserValid(identity)) {
                 if(identityService.isDomainInAnAgencyToken(utils.getDomainFromEmailAddress(username))) {
-                    throw new AccountBlockedException("User account is blocked due to missing token");
+                    throw new AccountBlockedException("User account is blocked due to a missing token");
                 }
                 throw new AccountBlockedException("User account is blocked");
             }

@@ -65,6 +65,13 @@ public class CustomAuthenticationFailureHandlerTest {
     }
 
     @Test
+    public void shouldSetErrorToBlockedDueToMissingTokenOnAccountBlockedDueToMissingToken() throws IOException {
+        HttpServletResponse response = executeHandler("User account is blocked due to a missing token");
+        verify(response).sendRedirect("/login?error=blocked-missing-token&username="
+                + encode(encryptedEmail, UTF_8));
+    }
+
+    @Test
     public void shouldSetErrorToDeactivatedOnAccountDeactivation() throws IOException {
         HttpServletResponse response = executeHandler("User account is deactivated");
         verify(response).sendRedirect("/login?error=deactivated&username="
