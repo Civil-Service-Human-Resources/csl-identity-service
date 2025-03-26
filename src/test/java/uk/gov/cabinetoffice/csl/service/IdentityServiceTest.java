@@ -17,10 +17,10 @@ import uk.gov.cabinetoffice.csl.util.Utils;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -56,7 +56,8 @@ public class IdentityServiceTest {
 
     private final Utils utils = new Utils();
 
-    private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"), ZoneId.of("Europe/London"));
+    private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"),
+            ZoneId.of("Europe/London"));
 
     @BeforeEach
     public void setUp() {
@@ -78,7 +79,7 @@ public class IdentityServiceTest {
         final String emailAddress = "test@example.org";
         final String uid = "uid";
         final Identity identity = new Identity(uid, emailAddress, "password", true, false,
-                emptySet(), LocalDateTime.now(), false, null);
+                emptySet(), now(), false, null);
 
         when(identityRepository.findFirstByEmailEqualsIgnoreCase(emailAddress))
                 .thenReturn(identity);
@@ -190,7 +191,8 @@ public class IdentityServiceTest {
         when(identity.getUid()).thenReturn(UID);
         when(identity.isActive()).thenReturn(false);
 
-        when(identityRepository.findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL)).thenReturn(Optional.of(identity));
+        when(identityRepository.findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL))
+                .thenReturn(Optional.of(identity));
 
         Identity actualIdentity = identityService.getInactiveIdentityForEmail(EMAIL);
 
@@ -200,7 +202,8 @@ public class IdentityServiceTest {
 
     @Test
     public void shouldThrowExceptionIfIdentityNotFound() {
-        doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL);
+        doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository)
+                .findFirstByActiveFalseAndEmailEqualsIgnoreCase(EMAIL);
 
         IdentityNotFoundException thrown = assertThrows(
                 IdentityNotFoundException.class, () -> identityService.getInactiveIdentityForEmail(EMAIL));
@@ -234,31 +237,37 @@ public class IdentityServiceTest {
 
     @Test
     public void shouldAssignAgencyToken() {
-        final String code = "123abc";
-        final String email = "test@example.com";
+        String uid = "UID";
+        String email = "test@example.com";
         Role role = new Role();
         role.setName("USER");
-
         Set<Role> roles = new HashSet<>();
         roles.add(role);
 
-        String uid = "UID";
+        Identity identity = new Identity();
+        identity.setUid(uid);
+        identity.setEmail(email);
+        identity.setPassword("password");
+        identity.setRoles(roles);
+        identity.setLastLoggedIn(now());
+        identity.setDeletionNotificationSent(false);
+
+        identity.setActive(false);
+        identity.setLocked(true);
+        identity.setFailedLoginAttempts(5);
+        identity.setAgencyTokenUid(null);
+        when(identityRepository.findFirstByEmailEqualsIgnoreCase(email))
+                .thenReturn(identity);
+
         String tokenDomain = "example.com";
         String tokenCode = "co";
         String tokenToken = "token123";
-
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(uid);
         agencyToken.setDomain(tokenDomain);
         agencyToken.setOrg(tokenCode);
         agencyToken.setToken(tokenToken);
-
-        Identity identity = new Identity(uid, email, "password", false, true,
-                roles, LocalDateTime.now(), false, null);
-
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
-        when(identityRepository.findFirstByEmailEqualsIgnoreCase(email))
-                .thenReturn(identity);
 
         identityService.assignAgencyToken(email, agencyToken);
 
