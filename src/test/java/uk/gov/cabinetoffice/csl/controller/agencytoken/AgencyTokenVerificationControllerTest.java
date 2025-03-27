@@ -45,7 +45,7 @@ public class AgencyTokenVerificationControllerTest {
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
     private static final String VERIFY_TOKEN_URL = "/account/verify/agency?code=";
     private static final String REDIRECT_EMAIL_UPDATED = "/account/email/updated";
-    private static final String ASSIGN_AGENCY_TOKEN_TEMPLATE = "agencytoken/agencyTokenAssigned";
+    private static final String AGENCY_TOKEN_ASSIGNED_TEMPLATE = "agencytoken/agencyTokenAssigned";
     private static final String LOGIN_URL = "/login";
     private static final String CODE = "7haQOIeV5n0CYk7yrfEmxzxHQtbuV5PPPN8BgCTM";
     private static final String DOMAIN = "example.com";
@@ -211,7 +211,7 @@ public class AgencyTokenVerificationControllerTest {
                                 .param("token", TOKEN)
                 )
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(view().name(ASSIGN_AGENCY_TOKEN_TEMPLATE));
+                .andExpect(view().name(AGENCY_TOKEN_ASSIGNED_TEMPLATE));
     }
 
     @Test

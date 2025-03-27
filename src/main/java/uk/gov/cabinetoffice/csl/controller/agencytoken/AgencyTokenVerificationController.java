@@ -32,7 +32,7 @@ public class AgencyTokenVerificationController {
     private static final String VERIFY_TOKEN_FORM_TEMPLATE = "verifyTokenForm";
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
     private static final String REDIRECT_VERIFY_TOKEN = "redirect:/account/verify/agency?code=";
-    private static final String ASSIGN_AGENCY_TOKEN_TEMPLATE = "agencytoken/agencyTokenAssigned";
+    private static final String AGENCY_TOKEN_ASSIGNED_TEMPLATE = "agencytoken/agencyTokenAssigned";
     private static final String REDIRECT_REACTIVATED_SUCCESS = "redirect:/account/reactivate/updated";
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
     private static final String EMAIL_ATTRIBUTE = "email";
@@ -115,7 +115,7 @@ public class AgencyTokenVerificationController {
                 case ASSIGN_AGENCY_TOKEN -> {
                     log.info("ASSIGN_AGENCY_TOKEN agency verification for {}", verificationCodeDetermination);
                     identityService.assignAgencyToken(verificationCodeDetermination.getEmail(), agencyToken);
-                    return ASSIGN_AGENCY_TOKEN_TEMPLATE;
+                    return AGENCY_TOKEN_ASSIGNED_TEMPLATE;
                 }
                 default -> throw new VerificationCodeTypeNotFound(format("Invalid verification code type: %s",
                         verificationCodeType));
