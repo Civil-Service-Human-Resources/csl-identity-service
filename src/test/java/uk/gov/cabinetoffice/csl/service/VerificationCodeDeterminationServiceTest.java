@@ -10,6 +10,7 @@ import uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.domain.ReactivationStatus;
 import uk.gov.cabinetoffice.csl.dto.VerificationCodeDetermination;
+import uk.gov.cabinetoffice.csl.exception.GenericServerException;
 import uk.gov.cabinetoffice.csl.exception.VerificationCodeTypeNotFound;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -95,5 +96,16 @@ public class VerificationCodeDeterminationServiceTest {
         VerificationCodeTypeNotFound thrown = assertThrows(
                 VerificationCodeTypeNotFound.class, () -> verificationCodeDeterminationService.getCodeType(CODE));
         assertEquals(String.format("Verification code type not found for code: %s", CODE), thrown.getMessage());
+    }
+
+    @Test
+    public void shouldThrowGenericServerExceptionDueToInvalidCodeValue() {
+        String code = "invalid_code_value_jFwK/MPj+mHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4=";
+        when(reactivationService.isPendingReactivationExistsForCode(code)).thenReturn(false);
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(code)).thenReturn(false);
+
+        GenericServerException thrown = assertThrows(
+                GenericServerException.class, () -> verificationCodeDeterminationService.getCodeType(code));
+        assertEquals("System error", thrown.getMessage());
     }
 }
