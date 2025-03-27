@@ -38,7 +38,11 @@
 <script type="text/javascript" src="/assets/js/accessible-autocomplete.min.js"></script>
 <script th:inline="javascript">
     accessibleAutocomplete.enhanceSelectElement({
-        selectElement: document.querySelector('#organisation')
+        autoselect: false,
+        defaultValue: '',
+        minLength: 1,
+        selectElement: document.querySelector('#organisation'),
+        showAllValues: true,
     });
 </script>
 </content>
