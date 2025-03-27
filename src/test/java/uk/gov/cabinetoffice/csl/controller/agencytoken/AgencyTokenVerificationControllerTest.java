@@ -43,8 +43,9 @@ public class AgencyTokenVerificationControllerTest {
     private static final String ACCOUNT_REACTIVATE_UPDATED = "/account/reactivate/updated";
     private static final String VERIFY_TOKEN_FORM = "verifyTokenForm";
     private static final String VERIFY_TOKEN_TEMPLATE = "agencytoken/verifyToken";
-    private static final String VERIFY_TOKEN_URL = "/account/verify/agency/";
+    private static final String VERIFY_TOKEN_URL = "/account/verify/agency?code=";
     private static final String REDIRECT_EMAIL_UPDATED = "/account/email/updated";
+    private static final String AGENCY_TOKEN_ASSIGNED_TEMPLATE = "agencytoken/agencyTokenAssigned";
     private static final String LOGIN_URL = "/login";
     private static final String CODE = "7haQOIeV5n0CYk7yrfEmxzxHQtbuV5PPPN8BgCTM";
     private static final String DOMAIN = "example.com";
@@ -77,26 +78,31 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private CsrsService csrsService;
 
+    @MockBean
+    private FrontendService frontendService;
+
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
     public void setup() {
+        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         organisations = new ArrayList<>();
         organisations.add(new OrganisationalUnit());
-        when(csrsService.getAllOrganisationalUnits()).thenReturn(organisations);
+        when(csrsService.getOrganisationalUnitsByDomain(DOMAIN)).thenReturn(organisations);
     }
 
     @Test
     public void givenARequestToDisplayVerifyTokenPage_whenVerifyToken_thenShouldDisplayVerifyTokenPageWithAllPossibleOrganisations() throws Exception {
+        VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
+        when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
+
         mockMvc.perform(
                 get(VERIFY_TOKEN_URL + CODE)
-                        .with(csrf())
-                        .flashAttr("uid", IDENTITY_UID)
-                        .flashAttr("email", EMAIL)
-                        .flashAttr("domain", DOMAIN))
+                        .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(model().size(6))
+                .andExpect(model().size(2))
                 .andExpect(model().attribute("organisations", organisations))
-                .andExpect(model().attribute("uid", IDENTITY_UID))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
@@ -107,18 +113,18 @@ public class AgencyTokenVerificationControllerTest {
         existingForm.setUid(IDENTITY_UID);
         existingForm.setOrganisation(ORGANISATION);
         existingForm.setToken(TOKEN);
+        existingForm.setEmail(EMAIL);
+
+        VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
+        when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
 
         mockMvc.perform(
                 get(VERIFY_TOKEN_URL + CODE)
                         .with(csrf())
-                        .flashAttr(VERIFY_TOKEN_FORM, existingForm)
-                        .flashAttr("uid", IDENTITY_UID)
-                        .flashAttr("domain", DOMAIN))
+                        .flashAttr(VERIFY_TOKEN_FORM, existingForm))
                 .andExpect(status().isOk())
-                .andExpect(model().size(5))
+                .andExpect(model().size(2))
                 .andExpect(model().attribute("organisations", organisations))
-                .andExpect(model().attribute("uid", IDENTITY_UID))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
@@ -128,14 +134,15 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
         EmailUpdate emailUpdate = new EmailUpdate();
         emailUpdate.setNewEmail(EMAIL);
         Identity identity = new Identity();
+        identity.setUid(IDENTITY_UID);
         identity.setEmail(EMAIL);
+        emailUpdate.setIdentity(identity);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
@@ -147,10 +154,11 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(REDIRECT_EMAIL_UPDATED));
+
+        verify(frontendService, times(1)).signoutUser(IDENTITY_UID);
     }
 
     @Test
@@ -158,7 +166,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -177,10 +184,34 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(ACCOUNT_REACTIVATE_UPDATED));
+    }
+
+    @Test
+    public void shouldAssignAgencyToken() throws Exception {
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setUid(AGENCY_TOKEN_UID);
+
+        when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
+        when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
+
+        VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, ASSIGN_AGENCY_TOKEN);
+        when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
+
+        Identity identity = new Identity();
+        identity.setEmail(EMAIL);
+        when(identityService.assignAgencyToken(EMAIL, agencyToken)).thenReturn(identity);
+
+        mockMvc.perform(
+                        post(VERIFY_TOKEN_URL + CODE)
+                                .with(csrf())
+                                .param("organisation", ORGANISATION)
+                                .param("token", TOKEN)
+                )
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name(AGENCY_TOKEN_ASSIGNED_TEMPLATE));
     }
 
     @Test
@@ -188,7 +219,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
 
@@ -202,8 +232,7 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
@@ -214,7 +243,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -233,10 +261,9 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
+                .andExpect(flash().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
     }
 
@@ -246,7 +273,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
+
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
@@ -257,8 +284,7 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", NO_SPACES_AVAILABLE_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(VERIFY_TOKEN_URL + CODE));
@@ -269,7 +295,6 @@ public class AgencyTokenVerificationControllerTest {
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(true);
 
@@ -286,8 +311,7 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .param("organisation", ORGANISATION)
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("status", VERIFY_AGENCY_TOKEN_ERROR_MESSAGE))
                 .andExpect(redirectedUrl(LOGIN_URL));
@@ -299,7 +323,7 @@ public class AgencyTokenVerificationControllerTest {
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, EMAIL_UPDATE);
-        when(utils.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
+
         when(csrsService.getAgencyToken(DOMAIN, TOKEN, ORGANISATION)).thenReturn(Optional.of(agencyToken));
         when(agencyTokenCapacityService.hasSpaceAvailable(agencyToken)).thenReturn(false);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
@@ -309,11 +333,9 @@ public class AgencyTokenVerificationControllerTest {
                 post(VERIFY_TOKEN_URL + CODE)
                         .with(csrf())
                         .param("token", TOKEN)
-                        .param("uid", IDENTITY_UID)
-        )
-                .andExpect(model().attribute("status", ENTER_TOKEN_ERROR_MESSAGE))
+                )
+                .andExpect(model().attribute("status", ENTER_ORG_TOKEN_ERROR_MESSAGE))
                 .andExpect(model().attributeExists("verifyTokenForm"))
-                .andExpect(model().attribute("code", CODE))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
 }

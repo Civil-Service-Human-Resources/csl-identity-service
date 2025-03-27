@@ -28,7 +28,6 @@
                     <label th:for="token" class="govuk-label">Token</label>
                     <span id="token-hint" class="form-hint">Enter your 10-character organisation token</span>
                     <input class="form-control form-control-2-3 width-10" id="token" type="text" th:field="*{token}">
-                    <input type="hidden" th:name="code" th:value="${code}"/>
                 </div>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <input type="submit" class="button" value="Continue">
@@ -39,7 +38,11 @@
 <script type="text/javascript" src="/assets/js/accessible-autocomplete.min.js"></script>
 <script th:inline="javascript">
     accessibleAutocomplete.enhanceSelectElement({
-        selectElement: document.querySelector('#organisation')
+        autoselect: false,
+        defaultValue: '',
+        minLength: 1,
+        selectElement: document.querySelector('#organisation'),
+        showAllValues: true,
     });
 </script>
 </content>

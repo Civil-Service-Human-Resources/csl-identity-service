@@ -45,7 +45,7 @@ public class ReactivationController {
 
     private static final String REDIRECT_ACCOUNT_REACTIVATED = "redirect:/account/reactivate/updated";
 
-    private static final String REDIRECT_ACCOUNT_REACTIVATE_AGENCY = "redirect:/account/verify/agency/";
+    private static final String REDIRECT_ACCOUNT_REACTIVATE_AGENCY = "redirect:/account/verify/agency?code=";
 
     private static final String REDIRECT_LOGIN = "redirect:/login";
 

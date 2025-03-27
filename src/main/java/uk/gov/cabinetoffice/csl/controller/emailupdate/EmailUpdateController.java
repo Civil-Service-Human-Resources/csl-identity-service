@@ -46,7 +46,7 @@ public class EmailUpdateController {
     private static final String REDIRECT_LOGIN = "redirect:/login";
 
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
-    private static final String REDIRECT_ACCOUNT_ENTER_TOKEN = "redirect:/account/verify/agency/";
+    private static final String REDIRECT_ACCOUNT_ENTER_TOKEN = "redirect:/account/verify/agency?code=";
 
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;

@@ -30,6 +30,9 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else {
             if (!isUserValid(identity)) {
+                if(identityService.isDomainInAnAgencyToken(utils.getDomainFromEmailAddress(username))) {
+                    throw new AccountBlockedException("User account is blocked due to a missing token");
+                }
                 throw new AccountBlockedException("User account is blocked");
             }
             if (!identity.isActive()) {
