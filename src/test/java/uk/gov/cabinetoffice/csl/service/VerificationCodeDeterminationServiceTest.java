@@ -10,10 +10,12 @@ import uk.gov.cabinetoffice.csl.domain.EmailUpdateStatus;
 import uk.gov.cabinetoffice.csl.domain.Reactivation;
 import uk.gov.cabinetoffice.csl.domain.ReactivationStatus;
 import uk.gov.cabinetoffice.csl.dto.VerificationCodeDetermination;
+import uk.gov.cabinetoffice.csl.exception.VerificationCodeTypeNotFound;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.cabinetoffice.csl.dto.VerificationCodeType.*;
 
@@ -82,5 +84,16 @@ public class VerificationCodeDeterminationServiceTest {
         VerificationCodeDetermination codeType = verificationCodeDeterminationService.getCodeType(CODE);
         assertEquals(codeType.getVerificationCodeType(), ASSIGN_AGENCY_TOKEN);
         assertThat(codeType.getEmail(), equalTo(EMAIL));
+    }
+
+    @Test
+    public void shouldThrowVerificationCodeTypeNotFoundException() {
+        when(reactivationService.isPendingReactivationExistsForCode(CODE)).thenReturn(false);
+        when(emailUpdateService.isEmailUpdateRequestExistsForCode(CODE)).thenReturn(false);
+        when(identityService.isIdentityExistsForEmail(EMAIL)).thenReturn(false);
+
+        VerificationCodeTypeNotFound thrown = assertThrows(
+                VerificationCodeTypeNotFound.class, () -> verificationCodeDeterminationService.getCodeType(CODE));
+        assertEquals(String.format("Verification code type not found for code: %s", CODE), thrown.getMessage());
     }
 }
