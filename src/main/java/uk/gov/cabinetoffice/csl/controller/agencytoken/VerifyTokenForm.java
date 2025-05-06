@@ -13,4 +13,5 @@ public class VerifyTokenForm {
     private String token;
     private String uid;
     private String code;
+    private String email;
 }

@@ -119,7 +119,7 @@ public class ReactivationControllerTest {
                 get("/account/reactivate/" + CODE)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/verify/agency/" + CODE));
+                .andExpect(redirectedUrl("/account/verify/agency?code=" + CODE));
     }
 
     @Test

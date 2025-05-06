@@ -46,7 +46,7 @@ public class EmailUpdateController {
     private static final String REDIRECT_LOGIN = "redirect:/login";
 
     private static final String REDIRECT_ACCOUNT_EMAIL_UPDATED_SUCCESS = "redirect:/account/email/updated";
-    private static final String REDIRECT_ACCOUNT_ENTER_TOKEN = "redirect:/account/verify/agency/";
+    private static final String REDIRECT_ACCOUNT_ENTER_TOKEN = "redirect:/account/verify/agency?code=";
 
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
@@ -108,7 +108,7 @@ public class EmailUpdateController {
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
         if(emailUpdateService.saveEmailUpdateAndNotify(identity, newEmail)) {
             log.info("Email update link sent to {} for verification", newEmail);
-            model.addAttribute("resetValidity", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
+            model.addAttribute("validityDuration", utils.convertSecondsIntoDaysHoursMinutesSeconds(validityInSeconds));
             model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
             frontendService.signoutUser(identity.getUid());
             return EMAIL_VERIFICATION_SENT_TEMPLATE;

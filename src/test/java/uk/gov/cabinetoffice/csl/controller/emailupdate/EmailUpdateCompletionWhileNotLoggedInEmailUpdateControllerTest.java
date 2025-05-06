@@ -37,7 +37,7 @@ public class EmailUpdateCompletionWhileNotLoggedInEmailUpdateControllerTest {
     private static final String UID = "UID";
     private static final String EMAIL_UPDATED_TEMPLATE = "emailupdate/emailUpdated";
     private static final String VERIFY_EMAIL_PATH = "/account/email/verify/";
-    private static final String VERIFY_EMAIL_AGENCY_PATH = "/account/verify/agency/";
+    private static final String VERIFY_EMAIL_AGENCY_PATH = "/account/verify/agency?code=";
     private static final String VERIFY_CODE = "ZBnX9unEnnOcgMmCJ6rI3H2LUQFs2xsiMNj2Ejou";
     private static final String DOMAIN = "example.com";
     private static final String PREVIOUS_EMAIL = "previousEmail@example.com";
