@@ -18,7 +18,7 @@ public class LoginController {
   private String lpgUiBaseUrl;
 
   @Value("${lpg.Signout}")
-  private String logoutSignout;
+  private String lpgSignout;
 
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -29,8 +29,8 @@ public class LoginController {
     if (dsr != null && dsr.getQueryString() == null) {
       log.debug("LoginController.login: dsr: {} ", dsr);
       log.debug("LoginController.login: setting response.sendRedirect: authenticationSuccessTargetUrl: {} ",
-              lpgUiBaseUrl + logoutSignout);
-      response.sendRedirect(lpgUiBaseUrl + logoutSignout);
+              lpgUiBaseUrl + lpgSignout);
+      response.sendRedirect(lpgUiBaseUrl + lpgSignout);
     }
     log.debug("LoginController.login: returning login");
     return "login";
