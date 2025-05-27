@@ -28,7 +28,7 @@ public class LoginController {
     log.debug("LoginController.login: dsr: {} ", dsr);
     if (dsr != null && dsr.getQueryString() == null) {
       log.debug("LoginController.login: dsr: {} ", dsr);
-      log.debug("LoginController.login: setting response.sendRedirect: authenticationSuccessTargetUrl: {} ",
+      log.debug("LoginController.login: setting response.sendRedirect to: {}",
               lpgUiBaseUrl + lpgSignout);
       response.sendRedirect(lpgUiBaseUrl + lpgSignout);
     }
