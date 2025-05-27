@@ -14,8 +14,11 @@ import java.io.IOException;
 @Controller
 public class LoginController {
 
-  @Value("${authenticationSuccess.targetUrl}")
-  private String authenticationSuccessTargetUrl;
+  @Value("${lpg.uiUrl}")
+  private String lpgUiBaseUrl;
+
+  @Value("${lpg.Signout}")
+  private String logoutSignout;
 
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -26,8 +29,8 @@ public class LoginController {
     if (dsr != null && dsr.getQueryString() == null) {
       log.debug("LoginController.login: dsr: {} ", dsr);
       log.debug("LoginController.login: setting response.sendRedirect: authenticationSuccessTargetUrl: {} ",
-              authenticationSuccessTargetUrl);
-      response.sendRedirect(authenticationSuccessTargetUrl);
+              lpgUiBaseUrl + logoutSignout);
+      response.sendRedirect(lpgUiBaseUrl + logoutSignout);
     }
     log.debug("LoginController.login: returning login");
     return "login";

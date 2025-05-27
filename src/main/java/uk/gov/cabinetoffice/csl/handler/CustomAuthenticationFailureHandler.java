@@ -54,6 +54,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
         String username = request.getParameter("username");
+        log.info("Authentication failed for {}", username);
         String encryptedUsername = getEncryptedText(username, encryptionKey);
         String encodedUsername = encode(encryptedUsername, UTF_8);
         String redirect = "/login?error=failed&maxLoginAttempts=" + maxLoginAttempts;
