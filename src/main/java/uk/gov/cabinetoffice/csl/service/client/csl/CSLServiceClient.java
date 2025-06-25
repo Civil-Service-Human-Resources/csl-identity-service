@@ -12,8 +12,8 @@ import uk.gov.cabinetoffice.csl.service.client.IHttpClient;
 @Component
 public class CSLServiceClient implements ICSLServiceClient {
 
-    @Value("${cslService.identityActivated}")
-    private String identityActivatedUrl;
+    @Value("${cslService.identityActivate}")
+    private String identityActivateUrl;
 
     private final IHttpClient httpClient;
 
@@ -22,10 +22,10 @@ public class CSLServiceClient implements ICSLServiceClient {
     }
 
     @Override
-    public void identityActivated(String uid) {
+    public void identityActivate(String uid) {
         try {
             log.info("Identity activated for user {}", uid);
-            String url = String.format(identityActivatedUrl, uid);
+            String url = String.format(identityActivateUrl, uid);
             RequestEntity<Void> request = RequestEntity.post(url).build();
             httpClient.executeRequest(request, Void.class);
         } catch (Exception e) {

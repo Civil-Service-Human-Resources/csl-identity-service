@@ -50,11 +50,12 @@ public class ReactivationServiceTest {
 
         when(identityService.getInactiveIdentityForEmail(EMAIL)).thenReturn(identity);
         doNothing().when(identityService).reactivateIdentity(identity, agencyToken);
-        doNothing().when(cslService).identityActivated(identity.getUid());
+        doNothing().when(cslService).identityActivate(identity.getUid());
 
         reactivationService.reactivateIdentity(reactivation, agencyToken);
 
         verify(reactivationRepository).save(reactivationArgumentCaptor.capture());
+        verify(cslService, times(1)).identityActivate(identity.getUid());
 
         Reactivation reactivationArgumentCaptorValue = reactivationArgumentCaptor.getValue();
         assertEquals(REACTIVATED, reactivationArgumentCaptorValue.getReactivationStatus());
