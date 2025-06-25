@@ -14,6 +14,7 @@ import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 
+import java.time.Clock;
 import java.util.*;
 
 import static java.time.LocalDateTime.now;
@@ -56,6 +57,9 @@ public class EmailUpdateServiceTest {
 
     @Autowired
     private EmailUpdateService emailUpdateService;
+
+    @Autowired
+    private Clock clock;
 
     @Test
     public void givenAPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
@@ -221,7 +225,7 @@ public class EmailUpdateServiceTest {
         emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
         emailUpdate.setIdentity(IDENTITY);
         emailUpdate.setEmailUpdateStatus(PENDING);
-        emailUpdate.setRequestedAt(now());
+        emailUpdate.setRequestedAt(now(clock));
         return emailUpdate;
     }
 }

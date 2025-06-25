@@ -28,13 +28,14 @@ public class ReactivationServiceTest {
     private static final String CODE = "code";
     private static final String UID = "UID";
 
-    private final IdentityService identityService = mock (IdentityService.class);
+    private final IdentityService identityService = mock(IdentityService.class);
+    private final CSLService cslService = mock(CSLService.class);
     private final ReactivationRepository reactivationRepository = mock(ReactivationRepository.class);
     private final int validityInSeconds = 86400;
     private final Clock clock = Clock.fixed(Instant.parse("2024-03-01T00:00:00Z"), ZoneId.of("Europe/London"));
 
     private final ReactivationService reactivationService =
-            new ReactivationService(identityService, reactivationRepository, clock, validityInSeconds);
+            new ReactivationService(identityService, cslService, reactivationRepository, clock, validityInSeconds);
 
     @Test
     public void shouldReactivateIdentity() {
@@ -43,11 +44,13 @@ public class ReactivationServiceTest {
         AgencyToken agencyToken = createAgencyToken();
 
         Identity identity = new Identity();
+        identity.setUid(UID);
 
         ArgumentCaptor<Reactivation> reactivationArgumentCaptor = ArgumentCaptor.forClass(Reactivation.class);
 
         when(identityService.getInactiveIdentityForEmail(EMAIL)).thenReturn(identity);
         doNothing().when(identityService).reactivateIdentity(identity, agencyToken);
+        doNothing().when(cslService).identityActivated(identity.getUid());
 
         reactivationService.reactivateIdentity(reactivation, agencyToken);
 
