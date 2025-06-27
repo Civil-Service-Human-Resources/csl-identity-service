@@ -11,7 +11,7 @@ public class CSLService {
         this.cslServiceClient = cslServiceClient;
     }
 
-    public void identityActivate(String uid){
-        cslServiceClient.identityActivate(uid);
+    public void activateUser(String uid){
+        cslServiceClient.activateUser(uid);
     }
 }

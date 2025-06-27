@@ -62,7 +62,7 @@ public class ReactivationService {
         reactivation.setReactivatedAt(now(clock));
         saveReactivation(reactivation);
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
-        cslService.identityActivate(identity.getUid());
+        cslService.activateUser(identity.getUid());
         log.info("Reactivation status updated in reporting for identity uid: {}", identity.getUid());
     }
 
