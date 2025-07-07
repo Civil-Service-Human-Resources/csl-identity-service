@@ -31,6 +31,7 @@ public class EmailUpdateService {
     private final EmailUpdateFactory emailUpdateFactory;
     private final IdentityService identityService;
     private final CsrsService csrsService;
+    private final CSLService cslService;
     private final Clock clock;
     private final NotifyService notifyService;
     private final int validityInSeconds;
@@ -43,7 +44,7 @@ public class EmailUpdateService {
     private String inviteUrlFormat;
 
     public EmailUpdateService(EmailUpdateRepository emailUpdateRepository, EmailUpdateFactory emailUpdateFactory,
-                              IdentityService identityService, CsrsService csrsService, Clock clock,
+                              IdentityService identityService, CsrsService csrsService, CSLService cslService, Clock clock,
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
                               @Value("${emailUpdate.validityInSeconds}") int validityInSeconds,
                               @Value("${emailUpdate.durationAfterEmailUpdateAllowedInSeconds}")
@@ -52,6 +53,7 @@ public class EmailUpdateService {
         this.emailUpdateFactory = emailUpdateFactory;
         this.identityService = identityService;
         this.csrsService = csrsService;
+        this.cslService = cslService;
         this.clock = clock;
         this.notifyService = notifyService;
         this.validityInSeconds = validityInSeconds;
@@ -106,6 +108,13 @@ public class EmailUpdateService {
         }
 
         emailUpdateRepository.save(emailUpdate);
+
+        String uid = identity.getUid();
+        log.info("Email Id {} updated for user {}", newEmail, uid);
+        log.info("Updating Email Id {} in reporting database for user {}", newEmail, uid);
+        cslService.updateEmail(uid, newEmail);
+        log.info("Email Id {} updated in reporting database for user {}", newEmail, uid);
+
         String activationUrl = String.format(inviteUrlFormat, emailUpdate.getCode());
         Map<String, String> personalisation = new HashMap<>();
         personalisation.put("activationUrl", activationUrl);

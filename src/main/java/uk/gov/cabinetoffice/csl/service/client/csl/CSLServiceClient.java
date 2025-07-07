@@ -15,6 +15,9 @@ public class CSLServiceClient implements ICSLServiceClient {
     @Value("${cslService.activateUser}")
     private String activateUserUrl;
 
+    @Value("${cslService.updateEmail}")
+    private String updateEmail;
+
     private final IHttpClient httpClient;
 
     public CSLServiceClient(@Qualifier("cslServiceHttpClient") IHttpClient httpClient) {
@@ -24,12 +27,27 @@ public class CSLServiceClient implements ICSLServiceClient {
     @Override
     public void activateUser(String uid) {
         try {
-            log.info("Identity activated for user {}", uid);
+            log.info("Activating Identity in reporting database for user {}", uid);
             String url = String.format(activateUserUrl, uid);
             RequestEntity<Void> request = RequestEntity.post(url).build();
             httpClient.executeRequest(request, Void.class);
+            log.info("Identity activated in reporting database for user {}", uid);
         } catch (Exception e) {
-            log.error("An error has occurred while identity activated for user {}", uid, e);
+            log.error("An error has occurred while activating identity for user {} in reporting database", uid, e);
+            throw new GenericServerException("System error");
+        }
+    }
+
+    @Override
+    public void updateEmail(String uid, String emailId) {
+        try {
+            log.info("Updating Email Id {} in reporting database for user {}", emailId, uid);
+            String url = String.format(updateEmail, uid, emailId);
+            RequestEntity<Void> request = RequestEntity.post(url).build();
+            httpClient.executeRequest(request, Void.class);
+            log.info("Email Id {} updated in reporting database for user {}", emailId, uid);
+        } catch (Exception e) {
+            log.error("An error has occurred while updating email id {} for user {} in reporting database", emailId, uid, e);
             throw new GenericServerException("System error");
         }
     }
