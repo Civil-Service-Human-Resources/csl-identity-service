@@ -39,15 +39,15 @@ public class CSLServiceClient implements ICSLServiceClient {
     }
 
     @Override
-    public void updateEmail(String uid, String emailId) {
+    public void updateEmail(String uid, String email) {
         try {
-            log.info("Updating Email Id {} in reporting database for user {}", emailId, uid);
-            String url = String.format(updateEmail, uid, emailId);
+            log.info("Updating Email {} in reporting database for user {}", email, uid);
+            String url = String.format(updateEmail, uid, email);
             RequestEntity<Void> request = RequestEntity.post(url).build();
             httpClient.executeRequest(request, Void.class);
-            log.info("Email Id {} updated in reporting database for user {}", emailId, uid);
+            log.info("Email {} updated in reporting database for user {}", email, uid);
         } catch (Exception e) {
-            log.error("An error has occurred while updating email id {} for user {} in reporting database", emailId, uid, e);
+            log.error("An error has occurred while updating email {} for user {} in reporting database", email, uid, e);
             throw new GenericServerException("System error");
         }
     }

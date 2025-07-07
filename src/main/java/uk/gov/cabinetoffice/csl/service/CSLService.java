@@ -15,7 +15,7 @@ public class CSLService {
         cslServiceClient.activateUser(uid);
     }
 
-    public void updateEmail(String uid, String emailId) {
-        cslServiceClient.updateEmail(uid, emailId);
+    public void updateEmail(String uid, String email) {
+        cslServiceClient.updateEmail(uid, email);
     }
 }

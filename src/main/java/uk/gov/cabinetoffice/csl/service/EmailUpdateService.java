@@ -110,10 +110,10 @@ public class EmailUpdateService {
         emailUpdateRepository.save(emailUpdate);
 
         String uid = identity.getUid();
-        log.info("Email Id {} updated for user {}", newEmail, uid);
-        log.info("Updating Email Id {} in reporting database for user {}", newEmail, uid);
+        log.info("Email {} updated for user {}", newEmail, uid);
+        log.info("Updating Email {} in reporting database for user {}", newEmail, uid);
         cslService.updateEmail(uid, newEmail);
-        log.info("Email Id {} updated in reporting database for user {}", newEmail, uid);
+        log.info("Email {} updated in reporting database for user {}", newEmail, uid);
 
         String activationUrl = String.format(inviteUrlFormat, emailUpdate.getCode());
         Map<String, String> personalisation = new HashMap<>();
