@@ -25,15 +25,18 @@ import static uk.gov.cabinetoffice.csl.domain.ReactivationStatus.*;
 public class ReactivationService {
 
     private final IdentityService identityService;
+    private final CSLService cslService;
     private final ReactivationRepository reactivationRepository;
     private final Clock clock;
     private final int validityInSeconds;
 
     public ReactivationService(IdentityService identityService,
+                               CSLService cslService,
                                ReactivationRepository reactivationRepository,
                                Clock clock,
                                @Value("${reactivation.validityInSeconds}") int validityInSeconds) {
         this.identityService = identityService;
+        this.cslService = cslService;
         this.reactivationRepository = reactivationRepository;
         this.clock = clock;
         this.validityInSeconds = validityInSeconds;
@@ -59,6 +62,8 @@ public class ReactivationService {
         reactivation.setReactivatedAt(now(clock));
         saveReactivation(reactivation);
         log.info("Reactivation status updated to {} for email: {}", REACTIVATED, email);
+        cslService.activateUser(identity.getUid());
+        log.info("Reactivation status updated in reporting for identity uid: {}", identity.getUid());
     }
 
     public Reactivation getPendingReactivationForEmail(String email) {
