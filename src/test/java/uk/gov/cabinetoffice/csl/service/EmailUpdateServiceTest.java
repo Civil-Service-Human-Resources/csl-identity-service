@@ -99,7 +99,6 @@ public class EmailUpdateServiceTest {
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
         when(emailUpdateRepository.saveAll(pendingEmailUpdates)).thenReturn(pendingEmailUpdates);
         when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
-        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -108,7 +107,6 @@ public class EmailUpdateServiceTest {
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
         verify(emailUpdateRepository, times(1)).saveAll(pendingEmailUpdates);
         verify(emailUpdateRepository, times(1)).save(any());
-        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
         verify(notifyService, times(1))
                 .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
@@ -122,7 +120,6 @@ public class EmailUpdateServiceTest {
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
         when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
-        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -130,7 +127,6 @@ public class EmailUpdateServiceTest {
                 .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
         verify(emailUpdateRepository, times(2)).save(any());
-        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
         verify(notifyService, times(1))
                 .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
@@ -144,7 +140,6 @@ public class EmailUpdateServiceTest {
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
         when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
-        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertTrue(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
@@ -152,7 +147,6 @@ public class EmailUpdateServiceTest {
                 .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
         verify(emailUpdateRepository, times(1)).save(any());
-        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
         verify(notifyService, times(1))
                 .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
@@ -164,14 +158,12 @@ public class EmailUpdateServiceTest {
         when(emailUpdateRepository.findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING)).thenReturn(pendingEmailUpdates);
         when(emailUpdateRepository.save(any())).thenReturn(createPendingEmailUpdate());
-        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
         doNothing().when(notifyService).notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
 
         assertFalse(emailUpdateService.saveEmailUpdateAndNotify(IDENTITY, NEW_EMAIL_ADDRESS));
         verify(emailUpdateRepository, times(1))
                 .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
-        verify(cslService, never()).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
         verify(notifyService, never())
                 .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
@@ -194,12 +186,14 @@ public class EmailUpdateServiceTest {
     public void givenAValidIdentity_whenNewDomainAllowListedAndNotAgency_shouldReturnSuccessfully() {
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), isNull());
+        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
 
         emailUpdateService.updateEmailAddress(createPendingEmailUpdate());
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
                 eq(NEW_EMAIL_ADDRESS), isNull());
+        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
@@ -212,12 +206,14 @@ public class EmailUpdateServiceTest {
 
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
+        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
 
         emailUpdateService.updateEmailAddress(createPendingEmailUpdate(), agencyToken);
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
                 eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
+        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));

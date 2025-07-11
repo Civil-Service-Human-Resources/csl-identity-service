@@ -108,13 +108,6 @@ public class EmailUpdateService {
         }
 
         emailUpdateRepository.save(emailUpdate);
-
-        String uid = identity.getUid();
-        log.info("Email {} updated for user {}", newEmail, uid);
-        log.info("Updating Email {} in reporting database for user {}", newEmail, uid);
-        cslService.updateEmail(uid, newEmail);
-        log.info("Email {} updated in reporting database for user {}", newEmail, uid);
-
         String activationUrl = String.format(inviteUrlFormat, emailUpdate.getCode());
         Map<String, String> personalisation = new HashMap<>();
         personalisation.put("activationUrl", activationUrl);
@@ -147,11 +140,18 @@ public class EmailUpdateService {
         log.debug("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
         csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
+        log.debug("Updated email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
 
         emailUpdate.setUpdatedAt(now(clock));
         emailUpdate.setEmailUpdateStatus(UPDATED);
         log.debug("Saving the emailUpdate in DB: {}", emailUpdate);
         emailUpdateRepository.save(emailUpdate);
+        log.debug("emailUpdate is saved in DB: {}", emailUpdate);
+
+        String uid = existingIdentity.getUid();
+        log.info("Updating Email {} in reporting database for user {}", newEmail, uid);
+        cslService.updateEmail(uid, newEmail);
+        log.info("Email {} updated in reporting database for user {}", newEmail, uid);
 
         log.info("Email address {} has been updated to {} successfully", existingEmail, newEmail);
     }
