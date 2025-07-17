@@ -7,11 +7,15 @@ import uk.gov.cabinetoffice.csl.service.client.csl.ICSLServiceClient;
 public class CSLService {
     private final ICSLServiceClient cslServiceClient;
 
-    public CSLService(ICSLServiceClient cslServiceClient){
+    public CSLService(ICSLServiceClient cslServiceClient) {
         this.cslServiceClient = cslServiceClient;
     }
 
-    public void activateUser(String uid){
+    public void activateUser(String uid) {
         cslServiceClient.activateUser(uid);
+    }
+
+    public void updateEmail(String uid, String email) {
+        cslServiceClient.updateEmail(uid, email);
     }
 }
