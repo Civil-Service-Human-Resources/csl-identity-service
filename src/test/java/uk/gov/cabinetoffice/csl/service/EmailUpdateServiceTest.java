@@ -14,6 +14,7 @@ import uk.gov.cabinetoffice.csl.domain.Role;
 import uk.gov.cabinetoffice.csl.dto.AgencyToken;
 import uk.gov.cabinetoffice.csl.repository.EmailUpdateRepository;
 
+import java.time.Clock;
 import java.util.*;
 
 import static java.time.LocalDateTime.now;
@@ -49,6 +50,9 @@ public class EmailUpdateServiceTest {
     private CsrsService csrsService;
 
     @MockBean
+    private CSLService cslService;
+
+    @MockBean
     private NotifyService notifyService;
 
     @Captor
@@ -56,6 +60,9 @@ public class EmailUpdateServiceTest {
 
     @Autowired
     private EmailUpdateService emailUpdateService;
+
+    @Autowired
+    private Clock clock;
 
     @Test
     public void givenAPendingEmailUpdate_thenIsEmailUpdateExpiredShouldReturnFalse() {
@@ -157,6 +164,8 @@ public class EmailUpdateServiceTest {
         verify(emailUpdateRepository, times(1))
                 .findByNewEmailIgnoreCaseAndPreviousEmailIgnoreCaseAndEmailUpdateStatus(
                 NEW_EMAIL_ADDRESS, IDENTITY.getEmail(), PENDING);
+        verify(notifyService, never())
+                .notifyWithPersonalisation(eq(NEW_EMAIL_ADDRESS), any(), any());
     }
 
     @Test
@@ -177,12 +186,14 @@ public class EmailUpdateServiceTest {
     public void givenAValidIdentity_whenNewDomainAllowListedAndNotAgency_shouldReturnSuccessfully() {
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), isNull());
+        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
 
         emailUpdateService.updateEmailAddress(createPendingEmailUpdate());
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
                 eq(NEW_EMAIL_ADDRESS), isNull());
+        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
@@ -195,12 +206,14 @@ public class EmailUpdateServiceTest {
 
         when(identityService.getIdentityForEmail(EMAIL)).thenReturn(IDENTITY);
         doNothing().when(identityService).updateEmailAddress(eq(IDENTITY), eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
+        doNothing().when(cslService).updateEmail(eq(IDENTITY.getUid()), eq(NEW_EMAIL_ADDRESS));
 
         emailUpdateService.updateEmailAddress(createPendingEmailUpdate(), agencyToken);
 
         verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(),
                 eq(NEW_EMAIL_ADDRESS), eq(agencyToken));
+        verify(cslService, times(1)).updateEmail(IDENTITY.getUid(), NEW_EMAIL_ADDRESS);
 
         Identity identityArgumentCaptorValue = identityArgumentCaptor.getValue();
         assertThat(identityArgumentCaptorValue.getEmail(), equalTo(EMAIL));
@@ -221,7 +234,7 @@ public class EmailUpdateServiceTest {
         emailUpdate.setNewEmail(NEW_EMAIL_ADDRESS);
         emailUpdate.setIdentity(IDENTITY);
         emailUpdate.setEmailUpdateStatus(PENDING);
-        emailUpdate.setRequestedAt(now());
+        emailUpdate.setRequestedAt(now(clock));
         return emailUpdate;
     }
 }

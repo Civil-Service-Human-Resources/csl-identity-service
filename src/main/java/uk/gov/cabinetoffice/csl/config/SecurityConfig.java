@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
@@ -40,9 +41,6 @@ public class SecurityConfig {
 
 	@Value("${management.endpoints.web.base-path}")
 	private String actuatorBasePath;
-
-	@Value("${oauth2.scope}")
-	private String accessTokenScope;
 
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
@@ -145,12 +143,10 @@ public class SecurityConfig {
 			if(ACCESS_TOKEN.equals(context.getTokenType())) {
 				context.getJwsHeader().algorithm(HS256);
 				context.getJwsHeader().type("JWT");
-				String clientId = context.getRegisteredClient().getClientId();
-				context.getClaims().claim("client_id", clientId);
+				RegisteredClient client = context.getRegisteredClient();
+				context.getClaims().claim("client_id", client.getClientId());
 				context.getClaims().claim(JwtClaimNames.JTI, UUID.randomUUID().toString());
-				Set<String> scopes = new HashSet<>(Arrays.asList(accessTokenScope.split("\\s*,\\s*")));
-				context.getClaims().claim("scope", scopes);
-				context.getClaims().claim("scopes", scopes);
+				context.getClaims().claim("scopes", client.getScopes());
 				Authentication principal = context.getPrincipal();
 				Set<String> authorities = new HashSet<>();
 				if (principal instanceof UsernamePasswordAuthenticationToken) {

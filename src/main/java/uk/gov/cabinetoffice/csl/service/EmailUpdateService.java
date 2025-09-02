@@ -31,6 +31,7 @@ public class EmailUpdateService {
     private final EmailUpdateFactory emailUpdateFactory;
     private final IdentityService identityService;
     private final CsrsService csrsService;
+    private final CSLService cslService;
     private final Clock clock;
     private final NotifyService notifyService;
     private final int validityInSeconds;
@@ -43,7 +44,7 @@ public class EmailUpdateService {
     private String inviteUrlFormat;
 
     public EmailUpdateService(EmailUpdateRepository emailUpdateRepository, EmailUpdateFactory emailUpdateFactory,
-                              IdentityService identityService, CsrsService csrsService, Clock clock,
+                              IdentityService identityService, CsrsService csrsService, CSLService cslService, Clock clock,
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
                               @Value("${emailUpdate.validityInSeconds}") int validityInSeconds,
                               @Value("${emailUpdate.durationAfterEmailUpdateAllowedInSeconds}")
@@ -52,6 +53,7 @@ public class EmailUpdateService {
         this.emailUpdateFactory = emailUpdateFactory;
         this.identityService = identityService;
         this.csrsService = csrsService;
+        this.cslService = cslService;
         this.clock = clock;
         this.notifyService = notifyService;
         this.validityInSeconds = validityInSeconds;
@@ -138,11 +140,18 @@ public class EmailUpdateService {
         log.debug("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
         csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
+        log.debug("Updated email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
 
         emailUpdate.setUpdatedAt(now(clock));
         emailUpdate.setEmailUpdateStatus(UPDATED);
         log.debug("Saving the emailUpdate in DB: {}", emailUpdate);
         emailUpdateRepository.save(emailUpdate);
+        log.debug("emailUpdate is saved in DB: {}", emailUpdate);
+
+        String uid = existingIdentity.getUid();
+        log.info("Updating Email {} in reporting database for user {}", newEmail, uid);
+        cslService.updateEmail(uid, newEmail);
+        log.info("Email {} updated in reporting database for user {}", newEmail, uid);
 
         log.info("Email address {} has been updated to {} successfully", existingEmail, newEmail);
     }
