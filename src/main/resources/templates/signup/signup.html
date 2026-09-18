@@ -46,8 +46,8 @@
                     <input type="hidden" th:name="token" th:value="*{token}"/>
                     <input type="hidden" th:name="org" th:value="*{org}"/>
                 </div>
-                <input type="submit" class="button" value="Continue">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="submit" class="button" value="Continue">
             </form>
         </div>
     </div>
