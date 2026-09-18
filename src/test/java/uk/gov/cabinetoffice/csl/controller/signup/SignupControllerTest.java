@@ -410,7 +410,9 @@ public class SignupControllerTest {
                         .with(csrf())
                 )
                 .andExpect(status().isOk())
-                .andExpect(view().name(SIGNUP_TEMPLATE));
+                .andExpect(view().name(SIGNUP_TEMPLATE))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andExpect(content().string(containsString("type=\"hidden\"")));
     }
 
     @Test

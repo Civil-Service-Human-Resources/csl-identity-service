@@ -24,12 +24,15 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import uk.gov.cabinetoffice.csl.dto.IdentityDetails;
 import uk.gov.cabinetoffice.csl.handler.*;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.TEXT_HTML;
@@ -46,6 +49,16 @@ public class SecurityConfig {
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 	private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 	private final CustomCookieAndAuth2TokenClearingLogoutHandler customCookieAndAuth2TokenClearingLogoutHandler;
+
+	private final CsrfTokenRequestAttributeHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler() {
+		@Override
+		public void handle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Supplier<CsrfToken> deferredCsrfToken) {
+			request.setAttribute(jakarta.servlet.http.HttpServletResponse.class.getName(), response);
+			CsrfToken csrfToken = deferredCsrfToken.get();
+			request.setAttribute(CsrfToken.class.getName(), csrfToken);
+			request.setAttribute("_csrf", csrfToken);
+		}
+	};
 
 	public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
 						  CustomAuthenticationFailureHandler customAuthenticationFailureHandler,
@@ -64,7 +77,7 @@ public class SecurityConfig {
 		httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
 		httpSecurity
 			.cors(Customizer.withDefaults())
-			.csrf(Customizer.withDefaults())
+			.csrf(csrf -> csrf.csrfTokenRequestHandler(csrfTokenRequestHandler))
 			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
@@ -78,7 +91,7 @@ public class SecurityConfig {
 	public SecurityFilterChain appSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
 			.cors(Customizer.withDefaults())
-			.csrf(Customizer.withDefaults())
+			.csrf(csrf -> csrf.csrfTokenRequestHandler(csrfTokenRequestHandler))
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 					"/webjars/**", "/assets/**", "/css/**", "/img/**", "/favicon.ico",
