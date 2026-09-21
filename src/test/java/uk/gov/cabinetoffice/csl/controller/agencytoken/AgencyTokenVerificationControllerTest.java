@@ -101,9 +101,10 @@ public class AgencyTokenVerificationControllerTest {
                 get(VERIFY_TOKEN_URL + CODE)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(model().size(2))
+                .andExpect(model().size(3))
                 .andExpect(model().attribute("organisations", organisations))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
+                .andExpect(model().attributeExists("nsgFlag"))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
 
@@ -123,9 +124,10 @@ public class AgencyTokenVerificationControllerTest {
                         .with(csrf())
                         .flashAttr(VERIFY_TOKEN_FORM, existingForm))
                 .andExpect(status().isOk())
-                .andExpect(model().size(2))
+                .andExpect(model().size(3))
                 .andExpect(model().attribute("organisations", organisations))
                 .andExpect(model().attributeExists(VERIFY_TOKEN_FORM))
+                .andExpect(model().attributeExists("nsgFlag"))
                 .andExpect(view().name(VERIFY_TOKEN_TEMPLATE));
     }
 
