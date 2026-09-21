@@ -3712,11 +3712,8 @@ hr.clear {
 }
 
 #global-header #logo img {
-  width: 36px;
-  height: 32px;
   margin: 2px 1px 0 0;
   vertical-align: bottom;
-  visibility: hidden;
 }
 #global-header #logo:hover {
   text-decoration: none;
